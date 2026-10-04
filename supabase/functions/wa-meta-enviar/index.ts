@@ -1,0 +1,124 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+
+const URL_SB = Deno.env.get("SUPABASE_URL")!;
+const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
+const sb = createClient(URL_SB, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const json = (b: unknown, status = 200) =>
+  new Response(JSON.stringify(b), { status, headers: { ...CORS, "Content-Type": "application/json" } });
+
+let cache: { token?: string; base?: string; ate: number } = { ate: 0 };
+
+// segredo
+async function credenciais() {
+  if (cache.token && cache.base && cache.ate > Date.now()) return cache as { token: string; base: string };
+  const [t, c] = await Promise.all([
+    sb.rpc("fiscal_meta_segredo", { p_slot: "token" }),
+    sb.rpc("fiscal_meta_config"),
+  ]);
+  if (t.error) throw new Error(`token: ${t.error.message}`);
+  if (c.error) throw new Error(`config: ${c.error.message}`);
+  const raiz = (c.data.base_url || "https://graph.facebook.com").replace(/\/+$/, "");
+  const base = /\/v\d+(\.\d+)?$/.test(raiz) ? raiz : `${raiz}/${c.data.versao}`;
+  cache = { token: t.data as string, base, ate: Date.now() + 5 * 60 * 1000 };
+  return cache as { token: string; base: string };
+}
+
+const TIPO_META: Record<string, string> = { imagem: "image", audio: "audio", video: "video", documento: "document" };
+
+type Pedido = {
+  conversa_id: string;
+  id_local: string;
+  tipo: "texto" | "template" | "imagem" | "audio" | "video" | "documento";
+  texto?: string;
+  legenda?: string;
+  responder_a?: string;
+  arquivo?: { caminho: string; nome: string; mime: string; tamanho: number };
+  template?: { nome: string; idioma: string; componentes?: unknown[]; previa?: string };
+};
+
+// envio
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method !== "POST") return json({ ok: false, erro: "metodo" }, 405);
+
+  const auth = req.headers.get("Authorization") ?? "";
+  const usuario = createClient(URL_SB, ANON, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
+
+  let p: Pedido;
+  try { p = await req.json(); } catch { return json({ ok: false, erro: "corpo invalido" }, 400); }
+  if (p.tipo === "template" && !p.template?.nome) return json({ ok: false, erro: "falta o modelo" }, 400);
+
+  const prep = await usuario.rpc("wa_meta_preparar_envio", {
+    p_conversa_id: p.conversa_id,
+    p_id_local: p.id_local,
+    p_tipo: p.tipo,
+    p_texto: p.tipo === "template" ? (p.template?.previa ?? `[modelo ${p.template?.nome}]`) : (p.texto ?? null),
+    p_legenda: p.legenda ?? null,
+    p_arquivo: p.arquivo ?? null,
+    p_responder_a: p.responder_a ?? null,
+  });
+  if (prep.error) return json({ ok: false, erro: prep.error.message }, 400);
+  if (prep.data?.ok !== true) return json(prep.data ?? { ok: false, erro: "sem resposta" }, 422);
+  if (prep.data.repetida) return json(prep.data);
+
+  const msgId: string = prep.data.mensagem_id;
+  const corpo: Record<string, unknown> = {
+    messaging_product: "whatsapp",
+    recipient_type: "individual",
+    to: prep.data.telefone,
+  };
+  if (p.responder_a) corpo.context = { message_id: p.responder_a };
+
+  try {
+    if (p.tipo === "texto") {
+      corpo.type = "text";
+      corpo.text = { body: p.texto, preview_url: false };
+    } else if (p.tipo === "template") {
+      corpo.type = "template";
+      corpo.template = {
+        name: p.template!.nome,
+        language: { code: p.template!.idioma || "pt_BR" },
+        ...(p.template!.componentes?.length ? { components: p.template!.componentes } : {}),
+      };
+    } else {
+      const assinado = await sb.storage.from("wa-midia").createSignedUrl(p.arquivo!.caminho, 600);
+      if (assinado.error) throw new Error(`arquivo: ${assinado.error.message}`);
+      const tm = TIPO_META[p.tipo];
+      const midia: Record<string, unknown> = { link: assinado.data.signedUrl };
+      if (p.legenda && tm !== "audio") midia.caption = p.legenda;
+      if (tm === "document") midia.filename = p.arquivo!.nome;
+      corpo.type = tm;
+      corpo[tm] = midia;
+    }
+
+    const { token, base } = await credenciais();
+    const r = await fetch(`${base}/${prep.data.phone_number_id}/messages`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(corpo),
+    });
+    const resp = await r.json().catch(() => ({}));
+    const wamid: string | undefined = resp?.messages?.[0]?.id;
+    const erro = resp?.error;
+
+    const fim = await sb.rpc("wa_meta_resultado_envio", {
+      p_mensagem_id: msgId,
+      p_wamid: wamid ?? null,
+      p_erro_codigo: wamid ? null : (erro?.code ?? r.status),
+      p_erro: wamid ? null : (erro?.error_data?.details ?? erro?.message ?? `http ${r.status}`),
+    });
+    if (fim.error || fim.data !== true) return json({ ok: false, mensagem_id: msgId, erro: "nao gravou o resultado" }, 500);
+    if (!wamid) return json({ ok: false, mensagem_id: msgId, codigo: erro?.code, erro: erro?.error_data?.details ?? erro?.message }, 422);
+    return json({ ok: true, mensagem_id: msgId, wamid });
+  } catch (e) {
+    await sb.rpc("wa_meta_resultado_envio", { p_mensagem_id: msgId, p_wamid: null, p_erro: String((e as Error).message) });
+    return json({ ok: false, mensagem_id: msgId, erro: String((e as Error).message) }, 502);
+  }
+});
