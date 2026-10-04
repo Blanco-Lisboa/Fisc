@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
   const corpo: Record<string, unknown> = {
     messaging_product: "whatsapp",
     recipient_type: "individual",
-    to: prep.data.telefone,
+    ...(prep.data.telefone ? { to: prep.data.telefone } : { recipient: prep.data.bsuid }),
   };
   if (p.responder_a) corpo.context = { message_id: p.responder_a };
 
