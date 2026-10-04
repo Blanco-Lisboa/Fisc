@@ -39,7 +39,7 @@ type Pedido = {
   texto?: string;
   legenda?: string;
   responder_a?: string;
-  arquivo?: { caminho: string; nome: string; mime: string; tamanho: number };
+  arquivo?: { caminho: string; nome: string };
   template?: { nome: string; idioma: string; componentes?: unknown[]; previa?: string };
 };
 
@@ -63,8 +63,12 @@ Deno.serve(async (req) => {
     p_legenda: p.legenda ?? null,
     p_arquivo: p.arquivo ?? null,
     p_responder_a: p.responder_a ?? null,
+    p_modelo: p.tipo === "template" ? { nome: p.template!.nome, idioma: p.template!.idioma || "pt_BR" } : null,
   });
-  if (prep.error) return json({ ok: false, erro: prep.error.message }, 400);
+  if (prep.error) {
+    console.error("preparar_envio", prep.error.message);
+    return json({ ok: false, erro: "nao foi possivel preparar o envio" }, 400);
+  }
   if (prep.data?.ok !== true) return json(prep.data ?? { ok: false, erro: "sem resposta" }, 422);
   if (prep.data.repetida) return json(prep.data);
 
@@ -83,12 +87,12 @@ Deno.serve(async (req) => {
     } else if (p.tipo === "template") {
       corpo.type = "template";
       corpo.template = {
-        name: p.template!.nome,
-        language: { code: p.template!.idioma || "pt_BR" },
+        name: prep.data.modelo_nome,
+        language: { code: prep.data.modelo_idioma },
         ...(p.template!.componentes?.length ? { components: p.template!.componentes } : {}),
       };
     } else {
-      const assinado = await sb.storage.from("wa-midia").createSignedUrl(p.arquivo!.caminho, 600);
+      const assinado = await sb.storage.from("wa-midia").createSignedUrl(prep.data.arquivo_caminho, 600);
       if (assinado.error) throw new Error(`arquivo: ${assinado.error.message}`);
       const tm = TIPO_META[p.tipo];
       const midia: Record<string, unknown> = { link: assinado.data.signedUrl };
@@ -114,11 +118,18 @@ Deno.serve(async (req) => {
       p_erro_codigo: wamid ? null : (erro?.code ?? r.status),
       p_erro: wamid ? null : (erro?.error_data?.details ?? erro?.message ?? `http ${r.status}`),
     });
-    if (fim.error || fim.data !== true) return json({ ok: false, mensagem_id: msgId, erro: "nao gravou o resultado" }, 500);
-    if (!wamid) return json({ ok: false, mensagem_id: msgId, codigo: erro?.code, erro: erro?.error_data?.details ?? erro?.message }, 422);
+    if (fim.error || fim.data !== true) {
+      console.error("resultado_envio", fim.error?.message);
+      return json({ ok: false, mensagem_id: msgId, erro: "nao gravou o resultado" }, 500);
+    }
+    if (!wamid) {
+      console.error("meta", erro?.code, erro?.message);
+      return json({ ok: false, mensagem_id: msgId, codigo: erro?.code, erro: erro?.code === 131047 ? "fora da janela de 24h" : "a Meta recusou a mensagem" }, 422);
+    }
     return json({ ok: true, mensagem_id: msgId, wamid });
   } catch (e) {
+    console.error("envio", (e as Error).message);
     await sb.rpc("wa_meta_resultado_envio", { p_mensagem_id: msgId, p_wamid: null, p_erro: String((e as Error).message) });
-    return json({ ok: false, mensagem_id: msgId, erro: String((e as Error).message) }, 502);
+    return json({ ok: false, mensagem_id: msgId, erro: "falha ao enviar" }, 502);
   }
 });
