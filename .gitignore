@@ -1,0 +1,6 @@
+target/
+app/target/
+app/cp.txt
+*.log
+.idea/
+*.iml

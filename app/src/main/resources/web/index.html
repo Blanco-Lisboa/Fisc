@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fiscal · Colaborador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+:root{
+  --laranja:#FE4901;--laranjaAc:#FF9200;--laranjaTx:#D43D00;--laranjaSv:#FFF1EA;--laranjaCl:#FFD0B5;
+  --ink:#111114;--ink2:#1C1C1F;--grafite:#3F3F46;--apoio:#52525B;--apagado:#6B6B72;--nevoa:#A1A1AA;
+  --pagina:#FFFFFF;--superf:#FAFAFA;--superf2:#F4F4F5;--borda:#E4E4E7;--bordaF:#D4D4D8;
+  --verde:#1B7A44;--verdeSv:#DCF0E4;--vermelho:#C0392B;--vermelhoSv:#F8DAD6;--ambar:#B25E09;--ambarSv:#F6E2C8;--azul:#3A5A8C;--azulSv:#E5EAF2;--roxo:#6D4AA0;--roxoSv:#F0EAF8;
+  --grad:linear-gradient(135deg,var(--laranja),var(--laranjaAc));
+  --disp:'Space Grotesk',sans-serif;--corpo:'Geist',system-ui,-apple-system,Segoe UI,sans-serif;
+  --sm:0 1px 2px rgba(17,17,20,.06);--md:0 8px 24px rgba(17,17,20,.08);--r:14px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--superf2);color:var(--ink);font-family:var(--corpo);font-size:13px;line-height:1.5;display:flex;flex-direction:row;overflow:hidden}
+button{font-family:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:2px solid var(--laranjaTx);outline-offset:2px}
+.disp{font-family:var(--disp)}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* ===== MENU LATERAL (padrão dos módulos) ===== */
+.side{width:246px;flex:none;background:#0b0b0d;color:#c9c9cf;height:100vh;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:2px}
+.brand2{display:flex;align-items:center;gap:10px;padding:6px 8px 12px}
+.brand2 .lg{width:34px;height:34px;border-radius:9px;background:var(--grad);display:grid;place-items:center;color:#fff;font-family:var(--disp);font-weight:700;font-size:12px}
+.brand2 b{font-family:var(--disp);font-size:18px;color:#fff}
+.brand2 .rl{font-size:9.5px;color:#7a7a82;display:block;margin-top:-2px}
+.lab{font-size:10px;font-weight:700;letter-spacing:.11em;color:#63636b;margin:15px 8px 6px}
+.it{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:9px;color:#c7c7cd;font-size:13.5px;cursor:pointer;flex:none}
+.it:hover{background:rgba(255,255,255,.05)}
+.it .ic{width:18px;height:18px;display:grid;place-items:center;flex:none}
+.it .ic svg{width:18px;height:18px;fill:none;stroke:#c7c7cd;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.it.on{background:rgba(254,73,1,.15);color:#fff;box-shadow:inset 2px 0 0 var(--laranja)}
+.it.on .ic svg{stroke:var(--laranja)}
+.it .bd{margin-left:auto;font-size:10px;font-weight:700;border-radius:999px;padding:1px 8px;background:var(--vermelho);color:#fff}
+.sub{margin-left:18px;padding-left:14px;border-left:1px dashed #33333b;display:flex;flex-direction:column;gap:8px;margin:4px 0 2px}
+.sub .it{position:relative;border-width:1px;border-style:solid}
+.sub .it::before{content:"";position:absolute;left:-14px;top:50%;width:13px;border-top:1px dashed #33333b}
+.swa{background:#0e3d2c;border-color:#1f7a52;color:#dff5ea}
+.swa .bd{background:#1f8f5a;color:#fff}
+.it.swa.on{background:#12513a;color:#fff;box-shadow:inset 2px 0 0 #2fae6e}
+.it.swa.on .ic svg{stroke:#dff5ea}
+.side .foot{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 6px 4px;border-top:1px solid #1c1c22}
+.side .foot .av{width:32px;height:32px;border-radius:999px;background:var(--grad);display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex:none}
+.side .foot b{font-size:13px;color:#fff;display:block;line-height:1.15}.side .foot span{font-size:11px;color:#7a7a82}
+
+/* ===== ÁREA PRINCIPAL ===== */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topo{display:flex;align-items:center;gap:12px;padding:11px 18px;background:var(--pagina);border-bottom:1px solid var(--borda);flex:none}
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--apoio)}
+.crumb b{color:var(--ink);font-weight:600}.crumb .sep{color:var(--apagado)}
+.proto{font-size:10px;font-weight:700;color:#111;background:var(--laranjaAc);padding:3px 8px;border-radius:999px}
+.iaon{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--roxo);background:var(--roxoSv);padding:5px 10px;border-radius:999px}
+.iaon .pt{width:7px;height:7px;border-radius:999px;background:var(--roxo)}
+.cresce{flex:1}
+.seg{display:flex;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--apoio);font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:999px}
+.seg button.on{background:var(--ink);color:#fff}
+.comp{display:flex;align-items:center;gap:8px;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:4px 6px}
+.comp button{width:24px;height:24px;border:1px solid var(--borda);border-radius:999px;background:var(--pagina);color:var(--laranjaTx);display:grid;place-items:center}
+.comp .v{font-family:var(--disp);font-weight:600;font-size:12.5px;min-width:104px;text-align:center}
+.conteudo{flex:1;min-width:0;overflow:hidden;display:flex;flex-direction:column;background:var(--superf2)}
+
+/* apuração: clientes | workspace | ia */
+.subhdr{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--pagina);border-bottom:1px solid var(--borda);font-size:11px;color:var(--apagado)}
+.cols{display:grid;grid-template-columns:296px minmax(0,1fr) 330px;grid-template-rows:minmax(0,1fr);gap:14px;flex:1;min-height:0;padding:14px}
+.pane{background:var(--pagina);border:1px solid var(--borda);border-radius:var(--r);box-shadow:var(--sm);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.paneH{padding:11px 14px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:8px;flex:none}
+.paneH .t{font-family:var(--disp);font-weight:700;font-size:13px}
+.rolar{overflow-y:auto;flex:1;min-height:0}
+
+.busca{display:flex;align-items:center;gap:7px;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:7px 11px;margin:10px}
+.busca input{border:0;background:transparent;outline:0;flex:1;font-size:12px}
+.cli{padding:10px 12px;border-bottom:1px solid var(--superf2);cursor:pointer;display:flex;gap:10px;align-items:center}
+.cli:hover{background:var(--superf)}
+.cli.sel{background:var(--laranjaSv)}
+.av{border-radius:10px;display:grid;place-items:center;font-weight:700;color:#fff;background:var(--grad);flex:none}
+.cli .av{width:36px;height:36px;font-size:12px}
+.cli .nm{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cli .mt{font-size:10px;color:var(--apagado);margin-top:2px;display:flex;gap:5px;flex-wrap:wrap}
+.pf{font-size:9px;font-weight:600;padding:1px 6px;border-radius:999px;background:var(--superf2);color:var(--apoio)}
+.anel{margin-left:auto;position:relative;width:34px;height:34px;flex:none}
+.anel svg{transform:rotate(-90deg)}
+.anel .p{position:absolute;inset:0;display:grid;place-items:center;font-size:9px;font-weight:700;font-family:var(--disp)}
+
+.ws{overflow-y:auto}
+.wsCab{padding:14px;border-bottom:1px solid var(--borda);display:flex;gap:12px;align-items:center;flex:none}
+.wsCab .av{width:48px;height:48px;border-radius:13px;font-size:16px}
+.wsCab .nm{font-family:var(--disp);font-size:17px;font-weight:700}
+.wsCab .sb{font-size:11.5px;color:var(--apagado)}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px}
+.b-ok{background:var(--verdeSv);color:var(--verde)}.b-fim{background:var(--vermelhoSv);color:var(--vermelho)}.b-pend{background:var(--ambarSv);color:var(--ambar)}
+.secTit{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin:0 0 8px;flex:none}
+.wsGrid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr);gap:16px;padding:14px;flex:1;min-height:0}
+@media(max-width:900px){.wsGrid{grid-template-columns:1fr;overflow-y:auto}}
+.wsCol{min-width:0;display:flex;flex-direction:column;min-height:0}
+.pipeV{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;overflow-y:auto;padding-right:2px}
+.lockTag{margin-left:auto;font-size:11px;color:var(--apagado)}
+.lockEd{margin-top:6px;width:100%;border:1px dashed var(--bordaF);background:transparent;border-radius:8px;padding:4px;font-size:10px;color:var(--apagado);display:flex;gap:5px;align-items:center;justify-content:center}
+.lockEd:hover{border-color:var(--laranja);color:var(--laranjaTx)}
+.stage{min-width:0;background:var(--superf);border:1px solid var(--borda);border-radius:12px;padding:11px;position:relative}
+.stage.cur{border-color:var(--laranja);box-shadow:0 0 0 3px var(--laranjaSv)}
+.stage.done{background:var(--verdeSv);border-color:#bfe0cb}
+.stage .si{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.stage .ic{width:26px;height:26px;border-radius:8px;background:var(--pagina);border:1px solid var(--borda);display:grid;place-items:center;font-size:13px}
+.stage.done .ic{background:var(--verde);color:#fff;border-color:var(--verde)}
+.stage .nm{font-weight:700;font-size:12px}
+.stage .st{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px;display:inline-block}
+.st-af{background:var(--superf2);color:var(--apoio)}.st-an{background:var(--laranjaSv);color:var(--laranjaTx)}.st-agu{background:var(--ambarSv);color:var(--ambar)}.st-cc{background:var(--verdeSv);color:var(--verde)}
+.stage .ai{font-size:10.5px;color:var(--roxo);background:var(--roxoSv);border-radius:7px;padding:5px 7px;margin-top:7px;line-height:1.35}
+.docpack{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.dchip{font-size:9.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--superf2);color:var(--apoio);border:1px solid var(--borda)}
+.dchip.ok{background:var(--verdeSv);color:var(--verde);border-color:#bfe0cb}
+.stage .act{margin-top:7px;width:100%;border:0;border-radius:8px;padding:6px;font-size:11px;font-weight:700;display:flex;gap:5px;align-items:center;justify-content:center}
+.act-wpp{background:var(--grad);color:#fff}
+.act-done{background:transparent;border:1px solid var(--verde);color:var(--verde)}
+.act-flow{background:var(--ambarSv);color:var(--ambar)}
+
+.wpp{margin:0;border:1px solid var(--borda);border-radius:12px;overflow:hidden;background:var(--superf);display:flex;flex-direction:column;flex:1;min-height:0;box-shadow:var(--sm)}
+.wppH{background:var(--pagina);border-bottom:1px solid var(--borda);padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
+.wppMs{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;overflow-y:auto;background:#efe7de;background-image:radial-gradient(rgba(17,17,20,.03) 1px,transparent 0);background-size:15px 15px}
+.bo{max-width:82%;padding:7px 10px;border-radius:11px;font-size:12px;box-shadow:var(--sm)}
+.be{align-self:flex-start;background:#fff;border-top-left-radius:3px}
+.bs{align-self:flex-end;background:#e7ffdb;border:1px solid #cdeeba;border-top-right-radius:3px}
+.bt{align-self:flex-end;background:#eafce0;border:1px dashed #2fae6e;border-top-right-radius:3px}
+.bt .sl{font-size:9px;font-weight:700;color:var(--verde);display:block;margin-bottom:2px}
+.bo .doc{display:flex;gap:6px;align-items:center;background:var(--superf2);border-radius:6px;padding:4px 6px;margin-bottom:4px;font-size:10.5px}
+.bo .doc .ic{background:var(--vermelhoSv);color:var(--vermelho);font-weight:700;font-size:8.5px;padding:3px 5px;border-radius:4px}
+.bo .meta{font-size:9px;color:var(--apagado);text-align:right;margin-top:3px}
+.btns{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.btns span{background:var(--pagina);border:1px solid var(--laranjaCl);color:var(--laranjaTx);border-radius:6px;padding:3px 8px;font-size:10.5px;font-weight:600}
+.flowc{background:var(--pagina);border:1px solid var(--borda);border-radius:8px;margin-top:5px;overflow:hidden}
+.flowc .fh{background:var(--ambarSv);color:var(--ambar);font-size:10px;font-weight:700;padding:4px 8px}
+.flowc .fi{font-size:11px;padding:5px 8px;border-top:1px solid var(--superf2)}
+.wppQa{display:flex;gap:6px;padding:8px;border-top:1px solid var(--borda);flex-wrap:wrap;background:var(--pagina)}
+.wppQa button{border:1px solid var(--borda);background:var(--pagina);border-radius:999px;padding:5px 10px;font-size:10.5px;font-weight:600;color:var(--apoio)}
+.wppQa button:hover{border-color:var(--laranja);color:var(--laranjaTx)}
+.wppCp{display:flex;gap:7px;padding:8px;border-top:1px solid var(--borda);background:var(--pagina);align-items:center}
+.wppCp input{flex:1;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:7px 12px;outline:0;font-size:12px}
+.wppCp .snd{width:34px;height:34px;border-radius:999px;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;flex:none}
+.wppLock{padding:8px;text-align:center;color:var(--apagado);font-size:11px;border-top:1px solid var(--borda);background:var(--pagina)}
+
+.ia{overflow-y:auto;padding:0}
+.iaBloco{padding:12px 14px;border-bottom:1px solid var(--superf2)}
+.iaBloco .rt{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--roxo);font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.iaCard{background:var(--roxoSv);border:1px solid #e2d5f2;border-radius:10px;padding:10px}
+.iaCard .tt{font-weight:700;font-size:12px}
+.iaCard .tx{font-size:11.5px;color:var(--grafite);margin-top:3px}
+.iaCard .b{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.miniB{border:1px solid var(--bordaF);background:var(--pagina);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600}
+.miniB.rx{border-color:var(--roxo);color:var(--roxo)}
+.rascunho{background:var(--pagina);border:1px solid var(--borda);border-radius:10px;padding:9px;font-size:11.5px;color:var(--grafite)}
+.demCli{background:var(--pagina);border:1px solid var(--borda);border-left:3px solid var(--roxo);border-radius:10px;padding:9px}
+.mcpNota{font-size:10.5px;color:var(--apagado);padding:12px 14px;background:var(--superf);line-height:1.55}
+.mcpNota b{color:var(--ink);font-weight:600}
+
+.tela{padding:20px 24px;overflow-y:auto;flex:1}
+.tela h1{font-family:var(--disp);font-size:23px;margin:0 0 3px}
+.tela .intro{color:var(--apoio);margin:0 0 16px;font-size:13.5px;max-width:82ch}
+.subtabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.subtabs button{border:1px solid var(--borda);background:var(--pagina);color:var(--apoio);border-radius:999px;padding:6px 13px;font-size:12px;font-weight:600;display:flex;gap:6px;align-items:center}
+.subtabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.subtabs .c{background:var(--vermelho);color:#fff;border-radius:999px;font-size:9px;padding:0 5px;font-weight:700}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.cardP{background:var(--pagina);border:1px solid var(--borda);border-radius:var(--r);padding:14px;box-shadow:var(--sm)}
+.cardP .top{display:flex;gap:8px;align-items:center;margin-bottom:9px}
+.cardP .av{width:30px;height:30px;font-size:11px}
+.cardP .nm{font-weight:600;font-size:12.5px}
+.cardP .corpo{background:var(--superf);border:1px solid var(--borda);border-radius:9px;padding:10px;font-size:12px;color:var(--grafite)}
+.cardP .foot{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.var{background:var(--laranjaSv);color:var(--laranjaTx);border-radius:5px;padding:0 4px;font-weight:600}
+.tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+.t-util{background:var(--verdeSv);color:var(--verde)}.t-flow{background:var(--ambarSv);color:var(--ambar)}.t-ia{background:var(--roxoSv);color:var(--roxo)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbwrap{overflow-x:auto;border:1px solid var(--borda);border-radius:var(--r);background:var(--pagina)}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--superf2);white-space:nowrap}
+th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado)}
+.pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px}
+.pill.ok{background:var(--verdeSv);color:var(--verde)}.pill.pend{background:var(--ambarSv);color:var(--ambar)}.pill.falta{background:var(--vermelhoSv);color:var(--vermelho)}
+.kanban{display:grid;grid-template-columns:repeat(4,minmax(215px,1fr));gap:12px}
+.kcol{background:var(--pagina);border:1px solid var(--borda);border-radius:var(--r);padding:10px;min-height:220px}
+.kh{font-family:var(--disp);font-weight:700;font-size:12.5px;margin-bottom:10px;display:flex;gap:7px;align-items:center}
+.kcard{background:var(--superf);border:1px solid var(--borda);border-radius:10px;padding:10px;margin-bottom:8px;cursor:grab}
+.kt{font-weight:600;font-size:12px}.km{font-size:10.5px;color:var(--apagado);margin-top:3px}
+.kf{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+.selo{font-size:9px;font-weight:700;padding:2px 7px;border-radius:999px}
+.selo.ceo{background:var(--roxoSv);color:var(--roxo)}.selo.cupula{background:var(--azulSv);color:var(--azul)}.selo.crit{background:var(--vermelhoSv);color:var(--vermelho)}
+.flowGrande{background:var(--pagina);border:1px solid var(--borda);border-radius:var(--r);padding:14px;box-shadow:var(--sm)}
+.flowGrande .campos{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.flowGrande .cc{background:var(--superf);border:1px solid var(--borda);border-radius:8px;padding:6px 11px;font-size:12px}
+.passo{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--superf2)}
+.passo .n{width:24px;height:24px;border-radius:999px;background:var(--verde);color:#fff;font-weight:700;display:grid;place-items:center;flex:none;font-size:11px}
+.passo .n.pend{background:var(--ambar)}
+.logIA{background:var(--pagina);border:1px solid var(--borda);border-radius:10px;padding:9px 12px;margin-bottom:7px;display:flex;gap:9px;align-items:flex-start;font-size:12px}
+.logIA .ic{width:26px;height:26px;border-radius:7px;background:var(--roxoSv);color:var(--roxo);display:grid;place-items:center;flex:none}
+
+/* WhatsApp Web (janela geral) */
+.waweb{display:grid;grid-template-columns:340px minmax(0,1fr);flex:1;min-height:0}
+.walist{border-right:1px solid var(--borda);display:flex;flex-direction:column;min-height:0;background:var(--pagina)}
+.watabs{display:flex;gap:6px;padding:10px 10px 8px;border-bottom:1px solid var(--borda);flex:none}
+.watabs button{flex:1;border:1px solid var(--borda);background:var(--pagina);color:var(--apoio);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;display:flex;gap:6px;align-items:center;justify-content:center}
+.watabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.watabs .c{background:var(--verde);color:#fff;border-radius:999px;font-size:9px;padding:0 5px;font-weight:700}
+.watabs button.on .c{background:#fff;color:var(--ink)}
+.bt-assumir{background:var(--grad);color:#fff;border:0;border-radius:9px;padding:7px 13px;font-size:12px;font-weight:700}
+.walist .srch{padding:10px;border-bottom:1px solid var(--borda);flex:none}
+.walist .srch input{width:100%;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:8px 13px;font-size:12px;outline:0;font-family:inherit}
+.walist .rl{overflow-y:auto;flex:1;min-height:0}
+.waconv{display:flex;gap:11px;padding:11px 13px;border-bottom:1px solid var(--superf2);cursor:pointer;align-items:center}
+.waconv:hover{background:var(--superf)}.waconv.sel{background:var(--laranjaSv)}
+.waconv .av{width:42px;height:42px;font-size:13px}
+.waconv .nm{font-weight:600;font-size:13px;display:flex;justify-content:space-between;gap:6px;align-items:center}
+.waconv .hr{font-size:9.5px;color:var(--apagado);font-weight:500;flex:none}
+.waconv .last{font-size:11px;color:var(--apagado);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.waconv .un{background:var(--verde);color:#fff;border-radius:999px;font-size:9px;font-weight:700;padding:1px 6px;flex:none}
+.wachat{display:flex;flex-direction:column;min-height:0;background:#efe7de}
+.wachat .ch{background:var(--pagina);border-bottom:1px solid var(--borda);padding:9px 15px;display:flex;align-items:center;gap:11px;flex:none}
+.wachat .ms{flex:1;min-height:0;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:7px;background-image:radial-gradient(rgba(17,17,20,.03) 1px,transparent 0);background-size:15px 15px}
+.wachat .cp{display:flex;gap:8px;padding:10px 12px;background:var(--pagina);border-top:1px solid var(--borda);align-items:center;flex:none}
+.wachat .cp input{flex:1;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:9px 14px;outline:0;font-size:12.5px;font-family:inherit}
+.wachat .cp .snd{width:38px;height:38px;border-radius:999px;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;flex:none}
+/* ===== Componente WhatsApp (mesmo do Societário) — fundo bege mantido ===== */
+.wa-wrap{border:1px solid var(--borda);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;flex:1;min-height:0;box-shadow:var(--sm)}
+.wa-head{background:#0B3D2E;color:#fff;display:flex;align-items:center;gap:9px;padding:9px 12px;flex:none}
+.wa-head .wapp{width:28px;height:28px;border-radius:999px;background:#25D366;display:grid;place-items:center;flex:none}
+.wa-head .wapp svg{width:16px;height:16px;fill:#fff}
+.wa-head .avc{width:30px;height:30px;border-radius:999px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:10.5px;font-weight:700;flex:none}
+.wa-head .nm{flex:1;min-width:0}.wa-head .nm b{font-size:13px;display:block;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wa-head .nm span{font-size:10.5px;opacity:.82}
+.wa-head .wstat2{font-size:10.5px;font-weight:700;padding:5px 11px;border-radius:999px;background:#fff;flex:none;white-space:nowrap;color:var(--robo)}
+.wa-head .wstat2.ped{color:var(--laranjaTx)}
+.wa-msgs{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:2px;background:#efe7de;background-image:radial-gradient(rgba(17,17,20,.03) 1px,transparent 0);background-size:15px 15px}
+.wa-b{max-width:84%;padding:9px 11px;border-radius:13px;font-size:12.5px;line-height:1.5;white-space:pre-line;box-shadow:var(--sm)}
+.wa-b.ag{align-self:flex-end;background:#1c1c1e;color:#fff;border-bottom-right-radius:4px}
+.wa-b.cl{align-self:flex-start;background:#fff;border:1px solid var(--borda);color:var(--ink);border-bottom-left-radius:4px}
+.wa-t{font-size:10px;color:var(--apagado);margin:2px 3px 9px}
+.wa-t.ag{align-self:flex-end}.wa-t.cl{align-self:flex-start}
+.wa-tpl{font-size:9px;font-weight:700;opacity:.7;margin-bottom:3px}
+.wa-doc{display:flex;gap:6px;align-items:center;background:rgba(255,255,255,.14);border-radius:7px;padding:5px 7px;margin-bottom:4px;font-size:10.5px}
+.wa-b.cl .wa-doc{background:var(--superf2)}
+.wa-doc .fi{background:var(--vermelhoSv);color:var(--vermelho);font-weight:700;font-size:8.5px;padding:3px 5px;border-radius:4px}
+.wa-btns{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.wa-btns span{background:rgba(255,255,255,.14);border-radius:7px;padding:3px 8px;font-size:10.5px;font-weight:600}
+.wa-b.cl .wa-btns span{background:var(--superf2);color:var(--laranjaTx)}
+.wa-flow{background:rgba(255,255,255,.1);border-radius:7px;padding:6px 8px;margin-top:6px;font-size:10.5px}
+.wa-quick{display:flex;gap:6px;padding:8px;flex-wrap:wrap;background:#fff;border-top:1px solid var(--borda);flex:none}
+.wa-quick button{border:1px solid var(--borda);background:#fff;border-radius:999px;padding:5px 11px;font-size:10.5px;font-weight:600;color:var(--apoio)}
+.wa-quick button:hover{border-color:var(--laranja);color:var(--laranjaTx)}
+.wa-comp{display:flex;align-items:center;gap:9px;padding:11px 12px;border-top:1px solid var(--borda);background:#fff;flex:none}
+.wa-comp .pl{width:38px;height:38px;border-radius:999px;border:1px solid var(--bordaF);background:#fff;display:grid;place-items:center;color:var(--apoio);flex:none;cursor:pointer;font-size:20px}
+.wa-comp .pl svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.wa-comp input{flex:1;border:1px solid var(--bordaF);border-radius:999px;padding:11px 15px;font-size:12.5px;font-family:inherit;outline:0;background:var(--superf2)}
+.wa-comp .snd{width:40px;height:40px;border-radius:999px;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;font-size:15px;flex:none;cursor:pointer}
+.wa-lock{padding:12px;text-align:center;color:var(--apagado);font-size:11px;border-top:1px solid var(--borda);background:#fff;flex:none}
+.toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:60}
+.toast{background:var(--ink);color:#fff;padding:9px 15px;border-radius:999px;font-size:12.5px;box-shadow:var(--md)}
+.modal{position:fixed;inset:0;background:rgba(17,17,20,.45);display:grid;place-items:center;z-index:50;padding:16px}
+.mcx{background:var(--pagina);border-radius:16px;width:min(460px,96vw);max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--md)}
+.mcab{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--borda)}
+.mcab b{flex:1;font-family:var(--disp)}.mcab .x{width:28px;height:28px;border-radius:8px;background:var(--superf2);border:0}
+.mbody{padding:14px 16px;overflow-y:auto}
+.arq{display:flex;align-items:center;gap:10px;border:1px solid var(--borda);border-radius:10px;padding:9px 11px;margin-bottom:7px;cursor:pointer}
+.arq.sel{border-color:var(--laranja);background:var(--laranjaSv)}
+.arq .ck{width:17px;height:17px;border-radius:5px;border:1.5px solid var(--bordaF);display:grid;place-items:center;flex:none;font-size:10px;color:transparent}
+.arq.sel .ck{background:var(--laranja);color:#fff;border-color:var(--laranja)}
+.arq .nm{flex:1;font-size:12px;font-weight:600}.arq .tam{font-size:10px;color:var(--apagado)}
+.arq select{margin-top:6px;width:100%;border:1px solid var(--borda);border-radius:7px;padding:4px 7px;font-size:11px}
+.mrod{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-top:1px solid var(--borda)}
+.bwpp{background:var(--verde);color:#fff;border:0;border-radius:9px;padding:8px 15px;font-size:12px;font-weight:700;display:inline-flex;gap:6px;align-items:center}
+.bwpp:disabled{opacity:.5;cursor:not-allowed}
+
+/* abas + botões dentro de Apuração */
+.aputabs{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:8px 14px 0;background:var(--pagina);border-bottom:1px solid var(--borda);flex:none}
+.aputabs-l{display:flex;gap:4px}
+.aputabs-r{display:flex;gap:8px;padding-bottom:7px}
+.aputabs-l button{position:relative;border:1px solid var(--borda);border-bottom:0;background:var(--superf);color:var(--apoio);border-radius:10px 10px 0 0;padding:8px 15px;font-size:12.5px;font-weight:600;display:flex;gap:7px;align-items:center;top:1px}
+.aputabs-l button.on{background:var(--pagina);color:var(--ink);box-shadow:inset 0 2px 0 var(--laranja)}
+.apubtn{border:1px solid var(--bordaF);background:var(--pagina);color:var(--grafite);border-radius:9px;padding:7px 13px;font-size:12px;font-weight:700;display:flex;gap:6px;align-items:center}
+.apubtn:hover{border-color:var(--laranja);color:var(--laranjaTx)}
+.apubtn2{border:1px solid var(--borda);background:var(--superf);color:var(--apoio);border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600}
+.apubtn2.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.palrow{display:flex;gap:6px;align-items:center}
+.palrow .cor{width:18px;height:18px;border-radius:999px;cursor:pointer;border:2px solid transparent}
+.palrow .cor.on{border-color:var(--ink)}
+.aputabs .nb{background:var(--laranja);color:#fff;border-radius:999px;font-size:9.5px;font-weight:800;padding:1px 6px;min-width:16px;text-align:center}
+.aputabs .c2{background:var(--superf2);color:var(--apoio);border-radius:999px;font-size:9.5px;font-weight:700;padding:0 6px}
+.aputabs button.on .c2{background:var(--laranjaSv);color:var(--laranjaTx)}
+.apuBody{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+
+/* radar: linha nova */
+tr.rnovo{background:var(--laranjaSv)}
+tr.rnovo:hover{background:#ffe6d6}
+.ndot{width:9px;height:9px;border-radius:999px;background:var(--laranja);display:inline-block;box-shadow:0 0 0 3px var(--laranjaSv)}
+
+/* demanda em lote */
+.loteBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--pagina);border:1px solid var(--borda);border-radius:var(--r);padding:11px 13px;margin-bottom:14px;box-shadow:var(--sm)}
+.loteBar label{font-size:11px;font-weight:700;color:var(--apagado);text-transform:uppercase;letter-spacing:.05em}
+.loteBar select{border:1px solid var(--borda);border-radius:9px;padding:8px 11px;font-size:12.5px;background:var(--pagina);font-family:inherit;min-width:230px}
+.loteBar .bwpp{margin-left:auto}
+.loteCard{cursor:pointer;transition:border-color .12s,box-shadow .12s}
+.loteCard:hover{border-color:var(--laranjaCl)}
+.loteCard.sel{border-color:var(--laranja);box-shadow:0 0 0 3px var(--laranjaSv)}
+.ckq{width:20px;height:20px;border-radius:6px;border:1.6px solid var(--bordaF);display:grid;place-items:center;flex:none;font-size:11px;color:#fff;font-weight:800}
+.loteCard.sel .ckq{background:var(--laranja);border-color:var(--laranja)}
+
+/* meu espaço */
+.lista2{display:flex;flex-direction:column;gap:8px;max-width:720px}
+.itemE{display:flex;align-items:center;gap:11px;background:var(--pagina);border:1px solid var(--borda);border-radius:11px;padding:11px 13px;box-shadow:var(--sm);font-size:12.5px}
+.itemE .ckq{cursor:pointer}
+.itemE.ok .ckq{background:var(--verde);border-color:var(--verde)}
+.itemE .xdel{margin-left:auto;width:26px;height:26px;border-radius:8px;background:var(--superf2);border:0;color:var(--apagado);font-size:12px}
+.itemE .xdel:hover{background:var(--vermelhoSv);color:var(--vermelho)}
+
+/* tarefa exclusiva do cliente */
+.addTarefa{margin-top:8px;flex:none;width:100%;border:1px dashed var(--laranjaCl);background:var(--laranjaSv);color:var(--laranjaTx);border-radius:10px;padding:9px;font-size:12px;font-weight:700}
+.addTarefa:hover{border-color:var(--laranja)}
+.stage.cust{border-left:3px solid var(--laranja)}
+.escTag{margin-left:auto;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:999px;background:var(--laranjaSv);color:var(--laranjaTx)}
+
+/* escopo da IA */
+.iaEscopo{display:flex;gap:5px}
+.iaEscopo button{flex:1;border:1px solid var(--borda);background:var(--pagina);color:var(--apoio);border-radius:8px;padding:7px 4px;font-size:11px;font-weight:700}
+.iaEscopo button.on{background:var(--roxo);color:#fff;border-color:var(--roxo)}
+.iaLim{width:100%;margin-top:7px;border:1px solid var(--borda);border-radius:8px;padding:7px 9px;font-size:11.5px;font-family:inherit;background:var(--pagina)}
+.iaEscopoTxt{font-size:11px;color:var(--apoio);margin-top:7px;line-height:1.4}
+.iaOff{font-size:12px;color:var(--apoio);background:var(--superf);border:1px dashed var(--bordaF);border-radius:10px;padding:11px;line-height:1.45}
+
+/* campos de modal */
+.mbody .fl{display:block;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin:10px 0 5px}
+.mbody .fl:first-child{margin-top:0}
+.mbody .fi{width:100%;border:1px solid var(--borda);border-radius:9px;padding:9px 11px;font-size:12.5px;font-family:inherit;outline:0}
+.mbody .fi:focus{border-color:var(--laranja)}
+</style>
+</head>
+<body>
+<nav class="side">
+  <div class="brand2"><span class="lg">IT</span><div><b>IT.FC</b><span class="rl">Fiscal · e-commerce</span></div></div>
+  <div class="lab">OPERAÇÃO</div>
+  <div class="it" data-view="apuracao" onclick="irView('apuracao')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 5h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM9.5 11l1.8 1.8L14.8 9.5M10 16h4"/></svg></span> Apuração</div>
+  <div class="sub">
+    <div class="it swa" data-view="whatsweb" onclick="irView('whatsweb')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.38 8.38 0 0 1-4-1L3 20l1-5.5a8.38 8.38 0 0 1-1-4A8.5 8.5 0 0 1 21 11.5z"/></svg></span> WhatsApp <span class="bd" id="waBadge">0</span></div>
+  </div>
+  <div class="it" data-view="pendencias" onclick="irView('pendencias')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 4a6 6 0 0 1 6 6v3l1.5 3h-15L6 13v-3a6 6 0 0 1 6-6zM10 19a2 2 0 0 0 4 0"/></svg></span> Pendências <span class="bd">7</span></div>
+  <div class="lab">FLUXO</div>
+  <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd">2</span></div>
+  <div class="lab">APOIO</div>
+  <div class="it" data-view="templates" onclick="irView('templates')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg></span> Templates</div>
+  <div class="it" data-view="ia" onclick="irView('ia')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg></span> IA &amp; Meta</div>
+  <div class="foot"><span class="av">PA</span><div><b>Pedro H. S. Almeida</b><span>analista · Fiscal · 200 clientes</span></div></div>
+</nav>
+
+<div class="main">
+  <div class="topo">
+    <div class="crumb">Início <span class="sep">›</span> <b id="crumbTitulo">Apuração</b></div>
+    <span class="proto">PROTÓTIPO · dados fictícios</span>
+    <span class="iaon"><span class="pt"></span> IT.IA (opcional)</span>
+    <div class="cresce"></div>
+    <div class="comp"><button onclick="mudarComp(-1)">‹</button><span class="v" id="compV">Setembro / 2026</span><button onclick="mudarComp(1)">›</button></div>
+  </div>
+  <div class="conteudo" id="conteudo"></div>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let comp={mes:8,ano:2026};
+function et(id,nome,icone,status,ai,acao,docs){return{id,nome,icone,status,ai,acao,docs};}
+// Esteira REAL do Fiscal (modelos_tarefa "MODELO V2 — XML CLIENTE-PREFEITURA-SIEG-DOMINIO"):
+// Solicitar XML → Prefeitura (SP) → SIEG → Apuração no Domínio → gerar pacote de guias/docs → Enviar Guia → confirmar.
+// Pacote de documentos reais (tickets do modelo "Enviar Guia"):
+function pack(marc){return ['DAS (guia do Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Guia de ISS','DARE ICMS DIFAL','DARE ICMS ST','Recibo de Declaração'].map((n,i)=>({n,ok:i<marc}));}
+const clientes=[
+ {id:'c1',nome:'Mix Imports ME',cnpj:'12.345.678/0001-90',regime:'Simples',plats:['Shopee','TikTok'],erp:'Bling',optin:true,janela:true,janelaLbl:'22h48',
+  etapas:[
+   et('e1','Solicitar XML ao Cliente','📥','aguardando','Vendeu na Shopee e TikTok — pedir os XMLs. Rascunho pronto (Flow).','flow_xml'),
+   et('e2','Prefeitura (SP) — NFS-e','🏛️','a_fazer','Baixo as notas de serviço no portal de SP assim que liberar.',null),
+   et('e3','SIEG — importar XMLs','🗂️','a_fazer','Importo os XMLs no SIEG e concilio com o movimento.',null),
+   et('e4','Apuração no Sistema Domínio','🧮','a_fazer',null,null),
+   et('e5','Gerar guias e documentos','📄','a_fazer',null,null,pack(0)),
+   et('e6','Enviar Guia ao cliente','📤','a_fazer','Monto o pacote e envio pelo template envio_guia.','guia'),
+   et('e7','Confirmar pagamento','✅','a_fazer',null,null),
+  ],
+  wpp:[{d:'sai',t:'Bom dia! Vou precisar dos XMLs de setembro pra fechar a apuração.',h:'09:10'},{d:'ent',t:'Bom dia! Vendi na Shopee e no TikTok esse mês',h:'09:32'}],
+  demCeo:{origem:'ceo',t:'Confirmar faturamento p/ relatório do Adrian',prazo:'21/09'}},
+ {id:'c2',nome:'Jecksson Store',cnpj:'98.765.432/0001-10',regime:'Simples',plats:['Mercado Livre'],erp:'Upseller',optin:true,janela:false,janelaLbl:'fechada',
+  etapas:[
+   et('e1','Solicitar XML ao Cliente','📥','concluido',null,null),
+   et('e2','Prefeitura (SP) — NFS-e','🏛️','concluido',null,null),
+   et('e3','SIEG — importar XMLs','🗂️','concluido',null,null),
+   et('e4','Apuração no Sistema Domínio','🧮','concluido','DAS calculado: R$ 348,20. Relatório de Apuração (RBA) conferido pela IA.',null),
+   et('e5','Gerar guias e documentos','📄','em_andamento','Pacote pronto: DAS + Relatório de Apuração + Guia de ISS. Falta revisar antes de enviar.',null,pack(6)),
+   et('e6','Enviar Guia ao cliente','📤','a_fazer','Guia pronta. Template envio_guia + PDFs já anexados — é só revisar e mandar.','guia'),
+   et('e7','Confirmar pagamento','✅','a_fazer',null,null),
+  ],
+  wpp:[{d:'sai',tpl:'solicitacao_xml',t:'Olá Jecksson, envie os XMLs das vendas de agosto.',flow:true},{d:'ent',t:'Enviei pelo formulário ✅',h:'seg'}],
+  demCeo:null},
+ {id:'c3',nome:'Studio Bela Arte ME',cnpj:'44.555.666/0001-77',regime:'Simples',plats:['Loja física'],erp:'—',optin:true,janela:true,janelaLbl:'5h10',
+  etapas:[
+   et('e1','Solicitar XML ao Cliente','📥','concluido',null,null),
+   et('e2','Prefeitura (SP) — NFS-e','🏛️','concluido',null,null),
+   et('e3','SIEG — importar XMLs','🗂️','concluido',null,null),
+   et('e4','Apuração no Sistema Domínio (zerada)','🧮','concluido','IA detectou "não tive movimento" → sugeriu declarar zerada. Confirmado.',null),
+   et('e5','Gerar guias e documentos','📄','concluido',null,null,pack(2)),
+   et('e6','Avisar cliente (zerada)','📤','concluido',null,null),
+   et('e7','Confirmar','✅','concluido',null,null),
+  ],
+  wpp:[{d:'ent',t:'Não tive movimento esse mês',h:'ontem'},{d:'sai',t:'Tudo certo, apuração zerada. Abraço!',h:'ontem'}],
+  demCeo:null},
+ {id:'c4',nome:'Gamer Zone Periféricos',cnpj:'33.444.555/0001-66',regime:'Simples',plats:['Amazon','Mercado Livre','Shopee'],erp:'Tiny',optin:true,janela:true,janelaLbl:'12h30',
+  etapas:[
+   et('e1','Solicitar XML ao Cliente','📥','concluido',null,null),
+   et('e2','Prefeitura (SP) — NFS-e','🏛️','concluido',null,null),
+   et('e3','SIEG — importar XMLs','🗂️','concluido',null,null),
+   et('e4','Apuração no Sistema Domínio','🧮','em_andamento','⚠ Caiu na malha: diferença de ICMS-ST entre canais. Revisando antes de gerar as guias.',null),
+   et('e5','Gerar guias e documentos','📄','a_fazer',null,null,pack(0)),
+   et('e6','Enviar Guia ao cliente','📤','a_fazer',null,'guia'),
+   et('e7','Confirmar pagamento','✅','a_fazer',null,null),
+  ],
+  wpp:[{d:'ent',t:'Oi, esse mês vendi bastante na Amazon também',h:'10:02'},{d:'sai',t:'Anotado! Estou conferindo o ICMS-ST entre os canais antes de fechar.',h:'10:15'}],
+  demCeo:null},
+ {id:'c5',nome:'TransLog Cargas LTDA',cnpj:'55.666.777/0001-22',regime:'Lucro Presumido',plats:['Site próprio'],erp:'Tiny',optin:false,janela:false,janelaLbl:'fechada',
+  etapas:[
+   et('e1','Solicitar XML ao Cliente','📥','a_fazer','⚠ Cliente sem opt-in — preciso do aceite antes de enviar template.',null),
+   et('e2','Prefeitura (SP) — NFS-e','🏛️','a_fazer',null,null),
+   et('e3','SIEG — importar XMLs','🗂️','a_fazer',null,null),
+   et('e4','Apuração no Sistema Domínio (PIS/COFINS/ISS)','🧮','a_fazer',null,null),
+   et('e5','Gerar guias e documentos','📄','a_fazer',null,null,pack(0)),
+   et('e6','Enviar Guia ao cliente','📤','a_fazer',null,'guia'),
+   et('e7','Confirmar','✅','a_fazer',null,null),
+  ],
+  wpp:[],demCeo:{origem:'cupula',t:'Subir empresa filial no sistema (Legal)',prazo:'19/09'}},
+];
+const docsCliente={
+ c2:[{id:'d1',nome:'DAS-092026.pdf',tam:'82 KB',guia:true},{id:'d2',nome:'Relatório de Apuração 09-2026.pdf',tam:'140 KB',rba:true},{id:'d3',nome:'Guia de ISS 09-2026.pdf',tam:'54 KB',guia:true}],
+ c1:[{id:'d1',nome:'DAS-092026.pdf',tam:'80 KB',guia:true}],
+ c4:[{id:'d1',nome:'DAS-092026.pdf',tam:'88 KB',guia:true},{id:'d2',nome:'DARE ICMS ST 09-2026.pdf',tam:'61 KB',guia:true},{id:'d3',nome:'Demonstrativo ICMS ST.pdf',tam:'70 KB'}],
+ c5:[{id:'d1',nome:'DARF-PIS.pdf',tam:'58 KB',guia:true},{id:'d2',nome:'Guia de ISS.pdf',tam:'60 KB',guia:true}]};
+// carteira: todos os clientes acima são do Pedro; a "Entrada" são contatos sem dono
+clientes.forEach(c=>c.dono='Pedro H. S. Almeida');
+const PASSOS_TPL=[['e1','Solicitar XML ao Cliente','📥','flow_xml'],['e2','Prefeitura (SP) — NFS-e','🏛️'],['e3','SIEG — importar XMLs','🗂️'],['e4','Apuração no Sistema Domínio','🧮'],['e5','Gerar guias e documentos','📄'],['e6','Enviar Guia ao cliente','📤','guia'],['e7','Confirmar pagamento','✅']];
+function makeEtapas(){return PASSOS_TPL.map(p=>et(p[0],p[1],p[2],'a_fazer',null,p[3]||null,p[0]==='e5'?pack(0):null));}
+// contatos que chegaram no WhatsApp e ainda não estão na carteira de ninguém
+const entrada=[
+ {id:'n1',nome:'Ótica Vision Web',plats:['Shopee'],optin:true,janela:true,janelaLbl:'3h20',wpp:[{d:'ent',t:'Oi! Vendo óculos na Shopee e preciso de contador pra e-commerce. Vocês atendem?',h:'08:40'}]},
+ {id:'n2',nome:'Doce Lar Enxovais',plats:['Mercado Livre'],optin:false,janela:true,janelaLbl:'19h10',wpp:[{d:'ent',t:'Bom dia! Vocês fazem apuração de quem vende no Mercado Livre?',h:'ontem'}]},
+ {id:'n3',nome:'+55 11 9 8•••-•••• (novo)',plats:[],optin:false,janela:true,janelaLbl:'1h05',wpp:[{d:'ent',t:'Oi, boa tarde',h:'agora'}]},
+];
+function convById(id){return clientes.find(x=>x.id===id)||entrada.find(x=>x.id===id);}
+function assumir(id){const i=entrada.findIndex(e=>e.id===id);if(i<0)return;const n=entrada.splice(i,1)[0];
+ clientes.push({id:n.id,nome:n.nome,cnpj:'—',regime:'Simples',plats:n.plats,erp:'—',optin:n.optin,janela:n.janela,janelaLbl:n.janelaLbl,dono:'Pedro H. S. Almeida',wpp:n.wpp,demCeo:null,etapas:makeEtapas()});
+ waAba='meus';selWhats=n.id;toast(n.nome+' entrou na sua carteira.');render();}
+const templates=[
+ {cod:'solicitacao_xml',cat:'Utility',flow:true,corpo:'Olá {cliente}, chegou a hora da apuração de {mes}. Envie os XMLs das suas vendas por aqui.',btn:'📎 Enviar XMLs'},
+ {cod:'envio_guia',cat:'Utility',doc:true,corpo:'Olá {cliente}, segue a guia do {tributo} (comp. {mes}), vence {venc}, valor {valor}.',btns:['Já paguei','Falar com o fiscal']},
+ {cod:'lembrete_vencimento',cat:'Utility',corpo:'Olá {cliente}, lembrete: o {doc} vence em {venc}, valor {valor}.',btns:['Já paguei','Enviar comprovante']},
+ {cod:'cobranca_movimento',cat:'Utility',corpo:'Olá {cliente}, ainda faltam os documentos de {mes}. Consegue enviar hoje?',btns:['Vou enviar','Falar com o fiscal']},
+ {cod:'boas_vindas',cat:'Utility',corpo:'Olá {cliente}! Aqui é o Fiscal da You Contabilidade. Podemos te atender por aqui?',btns:['Sim','Agora não']},
+];
+const flows=[
+ {nome:'Enviar XMLs / notas',campos:['Competência (mês/ano)','Plataforma: Shopee/TikTok/ML/Shein','Upload dos XMLs (vários)','Observações']},
+ {nome:'Atualizar acesso / credencial',campos:['Portal/sistema','Login','Senha (protegida)','Certificado (upload)','Validade']},
+];
+const esteira=[
+ {id:'x1',origem:'ceo',titulo:'Planejamento tributário — migrar p/ Lucro Real',cliente:'Heverton E-commerce',prazo:'25/09',prio:'crit',col:'recebidas'},
+ {id:'x2',origem:'cupula',titulo:'Emitir 2ª via + CND p/ licitação',cliente:'Farmácia Vida Leve',prazo:'22/09',prio:'alta',col:'recebidas'},
+ {id:'x3',origem:'ceo',titulo:'Revisar redução de alíquota — todas as lojas',cliente:'Noelma Multi-lojas',prazo:'30/09',prio:'alta',col:'andamento'},
+ {id:'x4',origem:'cupula',titulo:'Subir empresa nova no sistema',cliente:'AXP Importação',prazo:'19/09',prio:'normal',col:'andamento'},
+ {id:'x5',origem:'ceo',titulo:'Confirmar faturamento p/ relatório do CEO',cliente:'Mix Imports ME',prazo:'21/09',prio:'normal',col:'validacao'},
+];
+
+// escopo da IA por cliente (opcional, ponto 4): off = não trata nada · limite = trata até certo ponto · tudo = trata tudo
+clientes.forEach(c=>{if(!c.ia)c.ia={modo:'limite',ate:'rascunho'};});
+(clientes.find(c=>c.id==='c3')||{}).ia={modo:'tudo'};           // zerada automática liberada
+(clientes.find(c=>c.id==='c5')||{}).ia={modo:'off'};            // cliente delicado — IA não age
+(clientes.find(c=>c.id==='c4')||{}).ia={modo:'limite',ate:'apuracao'};
+const IA_LIMITES=[['triagem','Só ler/triar e transcrever'],['rascunho','Até sugerir rascunho (não envia)'],['apuracao','Até conferir a apuração (RBA)']];
+function iaModoTxt(c){if(c.ia.modo==='off')return 'Desativada — você trata tudo manualmente neste cliente.';if(c.ia.modo==='tudo')return 'Liberada — pode executar as ações permitidas (ex.: pedir XML, declarar zerada).';const l=IA_LIMITES.find(x=>x[0]===(c.ia.ate||'rascunho'));return 'Trata até certo ponto: '+(l?l[1].toLowerCase():'sugerir rascunho')+'. O envio é sempre seu.';}
+function setIaModo(m){cli().ia.modo=m;toast('IA neste cliente: '+({off:'não tratar',limite:'até certo ponto',tudo:'tratar tudo'}[m]));renderApuracao();}
+function setIaAte(v){cli().ia.ate=v;renderApuracao();}
+
+// Radar de XML (ponto 1) — com indicador de "novos" que some ao visualizar
+const RADAR=[
+ {c:'Mix Imports ME',cli:'c1',sh:'pend',tk:'pend',ml:'-',s:'Aguardando',quando:'—',novo:false},
+ {c:'Jecksson Store',cli:'c2',sh:'-',tk:'-',ml:'ok',s:'Coletado',quando:'hoje 08:12',novo:true},
+ {c:'Gamer Zone Periféricos',cli:'c4',sh:'ok',tk:'-',ml:'ok',s:'Coletado',quando:'hoje 09:40',novo:true},
+ {c:'Studio Bela Arte ME',cli:'c3',sh:'-',tk:'-',ml:'-',s:'Zerada',quando:'ontem',novo:false},
+ {c:'TransLog Cargas LTDA',cli:'c5',sh:'-',tk:'-',ml:'-',s:'Sem movimento',quando:'—',novo:false},
+ {c:'Ótica Vision Web',cli:'',sh:'ok',tk:'-',ml:'-',s:'Coletado · contato novo',quando:'agora',novo:true},
+];
+function radarNovos(){return RADAR.filter(r=>r.novo).length;}
+function cell(v){return v==='ok'?'<span class="pill ok">recebido</span>':v==='pend'?'<span class="pill falta">pendente</span>':'<span style="color:var(--nevoa)">—</span>';}
+function radarVisto(i){if(RADAR[i]&&RADAR[i].novo){RADAR[i].novo=false;renderApuracao();}}
+function radarVerTudo(){RADAR.forEach(r=>r.novo=false);renderApuracao();}
+
+// Meu espaço (igual ao sistema real): modelos pessoais + tags pessoais do usuário
+let espacoAba='modelos';
+let meusModelos=[
+ {nome:'Fechamento e-commerce (meu jeito)',classe:'rotineira'},
+ {nome:'Conferência rápida de ICMS-ST',classe:'unica'},
+];
+const PALETA_TAG=['#FE4901','#FF6A1F','#2E6B9C','#1E6B4A','#7C3AAD','#B42318','#8A4B12','#5B5F66'];
+let minhasTags=[{nome:'Prioridade alta',cor:'#B42318'},{nome:'Espera cliente',cor:'#8A4B12'}];
+let novaTagCor=PALETA_TAG[0];
+function addModelo(){const i=el('mmNome');const cl=el('mmClasse');if(!i||!i.value.trim())return;meusModelos.unshift({nome:i.value.trim(),classe:cl.value});renderEspacoModal();}
+function delModelo(i){meusModelos.splice(i,1);renderEspacoModal();}
+function aplicarModelo(i){toast('"'+meusModelos[i].nome+'" aplicado em '+cli().nome+' (demo).');}
+function pegarTarefas(){meusModelos.unshift({nome:'Demanda de '+cli().nome+' (copiada)',classe:'rotineira'});toast('Tarefas de '+cli().nome+' salvas como modelo pessoal.');renderEspacoModal();}
+function setNovaTagCor(c){novaTagCor=c;renderEspacoModal();}
+function addTag(){const i=el('tgNome');if(!i||!i.value.trim())return;minhasTags.unshift({nome:i.value.trim(),cor:novaTagCor});renderEspacoModal();}
+function delTag(i){minhasTags.splice(i,1);renderEspacoModal();}
+
+// Demanda em lote (ponto 2) — mesma etapa em vários clientes de uma vez
+let loteTipo='e1',loteSel=new Set();
+function loteAlvo(){return clientes.filter(c=>{const e=c.etapas.find(x=>x.id===loteTipo);return e&&e.status!=='concluido';});}
+function statusEtapaTxt(c,id){const e=c.etapas.find(x=>x.id===id);if(!e)return 'não tem esta etapa';return {a_fazer:'A fazer',em_andamento:'Em andamento',aguardando:'Aguardando cliente',concluido:'Concluído'}[e.status];}
+function loteRefresh(){if(el('loteBody'))renderLoteModal();else renderApuracao();}
+function loteTog(id){if(loteSel.has(id))loteSel.delete(id);else loteSel.add(id);loteRefresh();}
+function loteMarcarTodos(){const a=loteAlvo();const todos=a.every(c=>loteSel.has(c.id));loteSel=new Set(todos?[]:a.map(c=>c.id));loteRefresh();}
+function loteExecutar(){let n=0;loteSel.forEach(id=>{const c=clientes.find(x=>x.id===id);if(!c)return;const e=c.etapas.find(x=>x.id===loteTipo);if(!e||e.status==='concluido')return;
+  if(loteTipo==='e1'){if(c.optin){e.status='aguardando';c.wpp.push({d:'sai',tpl:'solicitacao_xml',t:'Olá '+c.nome.split(' ')[0]+', envie os XMLs de '+mesTxt()+'.',flow:true});c.janela=true;c.janelaLbl='24h00';n++;}}
+  else{e.status='concluido';n++;}});
+ loteSel=new Set();toast(n?('Feito em '+n+' cliente(s).'):'Nada aplicado (veja opt-in/etapas).');loteRefresh();}
+
+// Nova tarefa exclusiva do cliente (ponto 3)
+function modalNovaTarefa(){const c=cli();
+ modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx"><div class="mcab">📌 <b>Nova tarefa — ${c.nome}</b><button class="x" onclick="fecharModal()">✕</button></div>
+  <div class="mbody">
+   <label class="fl">O que precisa ser feito</label><input id="ntNome" class="fi" placeholder="Ex.: Emitir CND para licitação">
+   <label class="fl">Este item é…</label>
+   <select id="ntEsc" class="fi"><option value="exclusiva">Exclusivo deste cliente</option><option value="recorrente">Recorrente (repete todo mês)</option><option value="avulsa">Avulso (só agora)</option></select>
+   <label class="fl">Quem faz</label>
+   <select id="ntQuem" class="fi"><option value="humano">Eu (humano)</option><option value="ia">IA sugere / prepara</option></select>
+   <label class="fl">Observação (opcional)</label><input id="ntObs" class="fi" placeholder="Detalhe rápido">
+  </div>
+  <div class="mrod"><span style="font-size:11px;color:var(--apagado)">Fica só na esteira deste cliente.</span><button class="bwpp" onclick="salvarNovaTarefa()">Adicionar tarefa</button></div></div>`;
+ document.body.appendChild(modal);setTimeout(()=>{const n=el('ntNome');if(n)n.focus();},50);}
+function salvarNovaTarefa(){const c=cli();const nome=(el('ntNome').value||'').trim();if(!nome){toast('Escreva a tarefa.');return;}
+ const nova=et('c'+Date.now(),nome,'📌','a_fazer',el('ntQuem').value==='ia'?(el('ntObs').value||'A IA prepara e você aprova.'):(el('ntObs').value||null),null,null);
+ nova.custom=true;nova.escopo=el('ntEsc').value;c.etapas.push(nova);fecharModal();toast('Tarefa adicionada a este cliente.');render();}
+function delTarefa(id){const c=cli();c.etapas=c.etapas.filter(e=>e.id!==id);toast('Tarefa removida.');render();}
+
+let view='apuracao',selCli='c1',selWhats=null,waAba='entrada',modal=null,pendSub='xml',apuAba='apuracao';
+function setApuAba(a){apuAba=a;renderApuracao();}
+function editarEstrutura(){toast('Editar estrutura do modelo do escritório — demo.');}
+const el=id=>document.getElementById(id);
+function toast(t){const w=el('toasts');const d=document.createElement('div');d.className='toast';d.textContent=t;w.appendChild(d);setTimeout(()=>d.remove(),2600);}
+function cli(){return clientes.find(c=>c.id===selCli);}
+function iniciais(n){return n.split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
+function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
+function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
+function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
+
+const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta'};
+function irView(v){view=v;render();}
+function waPendentes(){return clientes.concat(entrada).filter(c=>c.wpp.length&&c.wpp[c.wpp.length-1].d==='ent').length;}
+function render(){
+  document.querySelectorAll('.side .it[data-view]').forEach(e=>e.classList.toggle('on',e.dataset.view===view));
+  const b=el('waBadge');if(b)b.textContent=waPendentes();
+  el('crumbTitulo').textContent=TITULOS[view]||view;
+  ({apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA}[view])();
+}
+
+/* ---------- APURAÇÃO (com abas: Apuração · Radar XML · Demanda em lote · Meu espaço) ---------- */
+function renderApuracao(){
+ const nv=radarNovos();
+ el('conteudo').innerHTML=`
+  <div class="aputabs">
+    <div class="aputabs-l">
+      <button class="${apuAba==='apuracao'?'on':''}" onclick="setApuAba('apuracao')">Apuração</button>
+      <button class="${apuAba==='radar'?'on':''}" onclick="setApuAba('radar')">Radar XML ${nv?`<span class="nb">${nv}</span>`:''}</button>
+    </div>
+    <div class="aputabs-r">
+      <button class="apubtn" onclick="modalLote()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Em lote</button>
+      <button class="apubtn" onclick="modalEspaco()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg> Meu espaço</button>
+    </div>
+  </div>
+  <div class="apuBody" id="apuBody"></div>`;
+ if(apuAba==='radar')renderRadar(); else renderApuMesa();
+}
+function renderApuMesa(){
+ el('apuBody').innerHTML=`
+  <div class="subhdr">Mesa do Fiscal — carteira de <b style="color:var(--ink);margin:0 3px">Pedro H. S. Almeida</b> · competência <b style="color:var(--ink);margin-left:3px">${mesTxt()}</b>. Clientes à esquerda; no centro o WhatsApp e a esteira (modelo V2 real); à direita a IA.</div>
+  <div class="cols">
+   <div class="pane"><div class="busca">🔎<input placeholder="Buscar cliente, código, CNPJ..."></div><div class="rolar" id="listaCli"></div></div>
+   <div class="pane ws" id="ws"></div>
+   <div class="pane ia" id="iaRail"></div>
+  </div>`;
+ renderLista();renderWs();renderIaRail();
+}
+/* Radar XML como aba */
+function renderRadar(){
+ el('apuBody').innerHTML=`<div class="tela"><div style="display:flex;align-items:center;gap:10px"><h1 style="flex:1">Radar de XML</h1>${radarNovos()?`<button class="miniB" onclick="radarVerTudo()">Marcar novos como vistos</button>`:''}</div>
+  <p class="intro">Chegada dos XMLs por plataforma na competência ${mesTxt()}. O que é <b>novo</b> fica destacado e some quando você abre a linha. Pendente vira pedido (Flow) no WhatsApp.</p>
+  <div class="tbwrap"><table><thead><tr><th style="width:20px"></th><th>Cliente</th><th>Shopee</th><th>TikTok</th><th>Mercado Livre</th><th>Chegou</th><th>Status</th><th></th></tr></thead>
+   <tbody>${RADAR.map((r,i)=>`<tr class="${r.novo?'rnovo':''}" style="cursor:pointer" onclick="radarVisto(${i})">
+     <td>${r.novo?'<span class="ndot" title="novo"></span>':''}</td>
+     <td style="font-weight:600">${r.c}</td><td>${cell(r.sh)}</td><td>${cell(r.tk)}</td><td>${cell(r.ml)}</td>
+     <td style="color:var(--apagado);font-size:11px">${r.quando}</td><td>${r.s}</td>
+     <td>${r.cli?`<button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="event.stopPropagation();selCli='${r.cli}';setApuAba('apuracao')">Abrir na Apuração →</button>`:`<button class="miniB" onclick="event.stopPropagation();toast('Pedir XML (Flow) — demo')">Pedir XML</button>`}</td>
+   </tr>`).join('')}</tbody></table></div></div>`;
+}
+/* Demanda em lote — MODAL (botão), como no sistema real */
+function modalLote(){
+ modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(700px,96vw)"><div class="mcab">🧾 <b>Demanda em lote — ${mesTxt()}</b><button class="x" onclick="fecharModal()">✕</button></div>
+   <div class="mbody" id="loteBody"></div>
+   <div class="mrod"><span style="font-size:11px;color:var(--apagado)">O progresso é por competência — no mês seguinte reabre limpo.</span><button class="bwpp" id="loteBtn" onclick="loteExecutar()">Executar</button></div></div>`;
+ document.body.appendChild(modal);renderLoteModal();
+}
+function renderLoteModal(){
+ if(!el('loteBody'))return;
+ const alvo=loteAlvo();const todos=alvo.length&&alvo.every(c=>loteSel.has(c.id));
+ el('loteBody').innerHTML=`
+  <p style="font-size:12.5px;color:var(--apoio);margin:0 0 12px">Escolha <b>uma etapa</b> e faça de uma vez em vários clientes — do jeito que a apuração mensal acontece (pedir XML de toda a carteira no dia 1; depois apurar no Domínio de todos; no fim, enviar as guias).</p>
+  <div class="loteBar">
+    <label>Etapa</label>
+    <select onchange="loteTipo=this.value;loteSel=new Set();renderLoteModal()">${PASSOS_TPL.map(p=>`<option value="${p[0]}" ${loteTipo===p[0]?'selected':''}>${p[2]} ${p[1]}</option>`).join('')}</select>
+    <button class="miniB" onclick="loteMarcarTodos()">${todos?'Limpar seleção':'Selecionar todos ('+alvo.length+')'}</button>
+  </div>
+  <div class="grade">${alvo.length?alvo.map(c=>`<div class="cardP loteCard ${loteSel.has(c.id)?'sel':''}" onclick="loteTog('${c.id}')">
+    <div class="top"><span class="ckq">${loteSel.has(c.id)?'✓':''}</span><div class="av">${iniciais(c.nome)}</div><div class="nm">${c.nome}</div></div>
+    <div style="font-size:11.5px;color:var(--apoio)">${statusEtapaTxt(c,loteTipo)}${!c.optin&&loteTipo==='e1'?' · <span style="color:var(--vermelho)">sem opt-in</span>':''}</div></div>`).join(''):'<p style="color:var(--apagado)">Ninguém com esta etapa pendente nesta competência. 🎉</p>'}</div>`;
+ const b=el('loteBtn');if(b){b.disabled=!loteSel.size;b.textContent=loteSel.size?('Executar nos '+loteSel.size+' selecionados ›'):'Executar';}
+}
+/* Meu espaço — MODAL (botão): Meus modelos + Minhas tags, como no sistema real */
+function modalEspaco(){
+ modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(620px,96vw)"><div class="mcab">✦ <b>Meu espaço</b><button class="x" onclick="fecharModal()">✕</button></div>
+   <div style="display:flex;gap:8px;padding:12px 16px 0"><button class="apubtn2" id="esM" onclick="espacoAba='modelos';renderEspacoModal()">Meus modelos</button><button class="apubtn2" id="esT" onclick="espacoAba='tags';renderEspacoModal()">Minhas tags</button></div>
+   <div class="mbody" id="espBody"></div></div>`;
+ document.body.appendChild(modal);renderEspacoModal();
+}
+function renderEspacoModal(){
+ if(!el('espBody'))return;
+ el('esM').classList.toggle('on',espacoAba==='modelos');el('esT').classList.toggle('on',espacoAba==='tags');
+ if(espacoAba==='modelos'){
+  el('espBody').innerHTML=`
+   <p style="font-size:12px;color:var(--apoio);margin:0 0 10px">Modelos <b>só seus</b> (o catálogo do escritório é do CEO/gestor). Crie e aplique nos seus clientes; dá pra pegar as tarefas do cliente atual e salvar como modelo.</p>
+   <div class="loteBar"><input id="mmNome" placeholder="Nome do modelo pessoal..." style="flex:1;border:1px solid var(--borda);border-radius:9px;padding:9px 12px;font-size:12.5px;outline:0" onkeydown="if(event.key==='Enter')addModelo()">
+     <select id="mmClasse" style="border:1px solid var(--borda);border-radius:9px;padding:9px;font-size:12.5px"><option value="rotineira">Rotineira</option><option value="unica">Única</option></select>
+     <button class="bwpp" onclick="addModelo()">Criar</button></div>
+   <div style="display:flex;justify-content:flex-end;margin:-6px 0 10px"><button class="miniB" onclick="pegarTarefas()">＋ Pegar tarefas de ${cli().nome}</button></div>
+   <div class="lista2" style="max-width:100%">${meusModelos.length?meusModelos.map((m,i)=>`<div class="itemE"><span style="width:26px;height:26px;border-radius:8px;background:var(--roxoSv);color:var(--roxo);display:grid;place-items:center;flex:none;font-size:12px">▤</span>
+     <div style="flex:1"><div style="font-weight:600">${m.nome}</div><div style="font-size:10.5px;color:var(--apagado)">${m.classe==='rotineira'?'rotineira (repete todo mês)':'única (só quando aplicar)'}</div></div>
+     <button class="miniB" style="border-color:var(--verde);color:var(--verde)" onclick="aplicarModelo(${i})">Aplicar em ${cli().nome.split(' ')[0]}</button>
+     <button class="xdel" onclick="delModelo(${i})">✕</button></div>`).join(''):'<p style="color:var(--apagado)">Nenhum modelo pessoal ainda.</p>'}</div>`;
+ } else {
+  el('espBody').innerHTML=`
+   <p style="font-size:12px;color:var(--apoio);margin:0 0 10px">Tags <b>privadas suas</b> — ninguém mais vê. Use para marcar clientes e filtrar a sua carteira.</p>
+   <div class="loteBar"><input id="tgNome" placeholder="Nome da tag..." style="flex:1;border:1px solid var(--borda);border-radius:9px;padding:9px 12px;font-size:12.5px;outline:0" onkeydown="if(event.key==='Enter')addTag()">
+     <div class="palrow">${PALETA_TAG.map(c=>`<span class="cor ${novaTagCor===c?'on':''}" style="background:${c}" onclick="setNovaTagCor('${c}')"></span>`).join('')}</div>
+     <button class="bwpp" onclick="addTag()">Criar</button></div>
+   <div class="lista2" style="max-width:100%">${minhasTags.length?minhasTags.map((t,i)=>`<div class="itemE"><span style="width:14px;height:14px;border-radius:999px;background:${t.cor};flex:none"></span>
+     <div style="flex:1;font-weight:600">${t.nome}</div><button class="xdel" onclick="delTag(${i})">✕</button></div>`).join(''):'<p style="color:var(--apagado)">Nenhuma tag pessoal ainda.</p>'}</div>`;
+ }
+}
+
+/* ---------- WHATSAPP (janela geral, estilo WhatsApp Web) ---------- */
+function snippet(x){const last=x.wpp[x.wpp.length-1];if(!last)return 'Sem conversa';if(last.doc)return '📄 '+last.doc;if(last.tpl)return '📄 '+(last.t||'template');return (last.d==='sai'?'Você: ':'')+(last.t||'');}
+function renderWhatsWeb(){
+ const source = waAba==='entrada'?entrada:clientes;
+ if(!source.find(x=>x.id===selWhats)) selWhats = source.length?source[0].id:null;
+ const c = selWhats?convById(selWhats):null;
+ const isEntrada = c && entrada.includes(c);
+ el('conteudo').innerHTML=`
+  <div class="waweb">
+    <div class="walist">
+      <div class="watabs">
+        <button class="${waAba==='entrada'?'on':''}" onclick="waAba='entrada';selWhats=null;render()">Entrada <span class="c">${entrada.length}</span></button>
+        <button class="${waAba==='meus'?'on':''}" onclick="waAba='meus';selWhats=null;render()">Meus <span class="c">${clientes.length}</span></button>
+      </div>
+      <div class="srch"><input placeholder="🔎  Buscar ou começar conversa"></div>
+      <div class="rl">${source.length?source.map(x=>{const last=x.wpp[x.wpp.length-1];const un=last&&last.d==='ent';
+        return `<div class="waconv ${x.id===selWhats?'sel':''}" onclick="selWhats='${x.id}';render()">
+          <div class="av">${iniciais(x.nome)}</div>
+          <div style="flex:1;min-width:0"><div class="nm"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.nome}</span><span class="hr">${last?(last.h||'agora'):''}</span></div>
+            <div style="display:flex;align-items:center;gap:6px"><div class="last" style="flex:1">${snippet(x)}</div>${un?'<span class="un">1</span>':''}</div></div>
+        </div>`;}).join(''):`<div style="padding:26px 16px;text-align:center;color:var(--apagado);font-size:12px">${waAba==='entrada'?'Nenhum contato sem carteira. 🎉':'Sua carteira está vazia por aqui.'}</div>`}</div>
+    </div>
+    <div class="wachat">
+     ${c?`
+      ${waHead(c,isEntrada?`<button class="bt-assumir" onclick="assumir('${c.id}')">＋ Assumir p/ minha carteira</button>`:`<span class="wstat2 rob">Robô atendendo</span>`)}
+      <div class="wa-msgs" id="wwms">${c.wpp.map(bolhaWA).join('')||'<div style="margin:auto;color:var(--apagado);font-size:12px;text-align:center">Sem conversa ainda.</div>'}</div>
+      ${isEntrada?`<div class="wa-lock">Contato sem carteira — <b>Assumir</b> para responder e iniciar a apuração.</div>`:(c.janela?`<div class="wa-comp"><span class="pl">+</span><input id="wwin" placeholder="Mensagem" onkeydown="if(event.key==='Enter')enviarWW()"><span class="pl">${MIC}</span><button class="snd" onclick="enviarWW()">➤</button></div>`:`<div class="wa-lock">🔒 Janela de 24h fechada — reabra com um template aprovado${c.optin?'':' · ⚠ cliente sem opt-in'}</div>`)}
+     `:`<div style="margin:auto;color:var(--apagado);font-size:12.5px">Selecione uma conversa</div>`}
+    </div>
+  </div>`;
+ const ms=el('wwms');if(ms)ms.scrollTop=ms.scrollHeight;
+}
+function enviarWW(){const c=convById(selWhats);const i=el('wwin');if(!c||!i||!i.value.trim())return;c.wpp.push({d:'sai',t:i.value.trim(),h:'agora'});render();}
+
+function renderLista(){
+ el('listaCli').innerHTML=clientes.map(c=>{const pct=prog(c);const cor=pct===100?'var(--verde)':pct>0?'var(--laranja)':'var(--nevoa)';const circ=2*Math.PI*14;
+  return `<div class="cli ${c.id===selCli?'sel':''}" onclick="selCli='${c.id}';render()"><div class="av">${iniciais(c.nome)}</div>
+   <div style="flex:1;min-width:0"><div class="nm">${c.nome}</div><div class="mt"><span class="pf">${c.regime}</span>${c.plats.map(p=>`<span class="pf">${p}</span>`).join('')}${c.optin?'':'<span class="pf" style="background:var(--vermelhoSv);color:var(--vermelho)">sem opt-in</span>'}</div></div>
+   <div class="anel"><svg width="34" height="34"><circle cx="17" cy="17" r="14" fill="none" stroke="var(--superf2)" stroke-width="3"/><circle cx="17" cy="17" r="14" fill="none" stroke="${cor}" stroke-width="3" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-pct/100)}" stroke-linecap="round"/></svg><span class="p" style="color:${cor}">${pct}%</span></div></div>`;
+ }).join('');
+}
+function renderWs(){
+ const c=cli();const idxCur=c.etapas.findIndex(e=>e.status!=='concluido');
+ el('ws').innerHTML=`
+  <div class="wsCab"><div class="av" style="width:48px;height:48px;border-radius:13px;font-size:16px">${iniciais(c.nome)}</div>
+    <div style="flex:1"><div class="nm">${c.nome}</div><div class="sb">${c.cnpj} · ${c.regime} · ERP ${c.erp} · ${c.plats.join(', ')}</div></div>
+    <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+      <span class="badge ${c.janela?'b-ok':'b-fim'}">${c.janela?'Janela '+c.janelaLbl:'Janela fechada'}</span>
+      <span class="badge ${c.optin?'b-ok':'b-pend'}">${c.optin?'opt-in ✓':'opt-in pendente'}</span></div>
+  </div>
+  <div class="wsGrid">
+    <div class="wsCol">
+      ${renderWpp(c)}
+    </div>
+    <div class="wsCol">
+      <div class="pipeV">${c.etapas.map((e,i)=>renderStage(e,i,idxCur)).join('')}</div>
+      <button class="addTarefa" onclick="modalNovaTarefa()">＋ Adicionar tarefa deste cliente</button>
+    </div>
+  </div>`;
+}
+function renderStage(e,i,idxCur){
+ const cls=e.status==='concluido'?'done':(i===idxCur?'cur':'');
+ const st={a_fazer:['A fazer','st-af'],em_andamento:['Em andamento','st-an'],aguardando:['Aguardando cliente','st-agu'],concluido:['Concluído','st-cc']}[e.status];
+ let acao='';
+ if(e.status!=='concluido'){
+  if(e.acao==='flow_xml')acao=`<button class="act act-flow" onclick="pedirXml()">📎 Pedir XMLs (Flow)</button>`;
+  else if(e.acao==='guia')acao=`<button class="act act-wpp" onclick="abrirGuia()">📄 Enviar guia</button>`;
+  else if(i===idxCur)acao=`<button class="act act-wpp" onclick="avancarEtapa('${e.id}')">Concluir etapa ✓</button>`;
+ } else acao=`<button class="act act-done" disabled>✓ Feito</button>`;
+ const docsHtml=e.docs&&e.docs.length?`<div class="docpack">${e.docs.map(d=>`<span class="dchip ${d.ok?'ok':''}">${d.ok?'✓':'○'} ${d.n}</span>`).join('')}</div>`:'';
+ const escLbl={exclusiva:'exclusiva do cliente',recorrente:'recorrente',avulsa:'avulsa'}[e.escopo]||'avulsa';
+ const marca=e.custom
+   ?`<span class="escTag" title="Tarefa criada por você para este cliente">${escLbl}</span>`
+   :`<span class="lockTag" title="Modelo do escritório">🔒</span>`;
+ return `<div class="stage ${cls} ${e.custom?'cust':''}"><div class="si"><span class="ic">${e.icone}</span><span class="nm">${e.nome}</span>${marca}</div>
+   <span class="st ${st[1]}">${st[0]}</span>
+   ${e.ai?`<div class="ai">🧠 ${e.ai}</div>`:''}${docsHtml}${acao}
+   ${e.custom?`<button class="lockEd" onclick="delTarefa('${e.id}')">🗑️ Remover tarefa</button>`:`<button class="lockEd" onclick="editarEstrutura()">✏️ Editar estrutura</button>`}</div>`;
+}
+function avancarEtapa(id){const c=cli();const e=c.etapas.find(x=>x.id===id);e.status='concluido';toast('Etapa concluída.');render();}
+const WA_LOGO='<svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.2-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-1.5-.8-2.5-1.4-3.6-3.1-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5 0-.1-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1.1 2.9 1.2 3.1c.2.2 2.1 3.3 5.1 4.5 1.9.7 2.6.8 3.5.7.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3zM12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2z"/></svg>';
+const MIC='<svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM5 10v1a7 7 0 0 0 14 0v-1M12 18v4"/></svg>';
+function waHead(c,extra){return `<div class="wa-head"><span class="wapp">${WA_LOGO}</span><span class="avc">${iniciais(c.nome)}</span><div class="nm"><b>${c.nome}</b><span>${c.regime?c.regime:'sem carteira'}${c.plats&&c.plats.length?' · '+c.plats.join(', '):''}</span></div>${extra}</div>`;}
+function bolhaWA(m){
+ const cls=m.d==='sai'?'ag':'cl';
+ const tag=m.d==='sai'?'na fila · agente':'respondida · whatsapp';
+ let inner='';
+ if(m.tpl)inner+=`<div class="wa-tpl">template · ${m.tpl}</div>`;
+ if(m.doc)inner+=`<div class="wa-doc"><span class="fi">PDF</span>${m.doc}</div>`;
+ if(m.t)inner+=m.t;
+ if(m.flow)inner+=`<div class="wa-flow">Flow · Enviar XMLs — Plataforma ▾ · Upload · Enviar</div>`;
+ if(m.btn)inner+=`<div class="wa-btns"><span>${m.btn}</span></div>`;
+ else if(m.btns)inner+=`<div class="wa-btns">${m.btns.map(b=>`<span>${b}</span>`).join('')}</div>`;
+ return `<div class="wa-b ${cls}">${inner}</div><div class="wa-t ${cls}">15/09 ${m.h||'agora'} · ${tag}</div>`;
+}
+function renderWpp(c){
+ return `<div class="wa-wrap">
+  ${waHead(c,`<span class="wstat2 rob">Robô atendendo</span>`)}
+  <div class="wa-msgs">${c.wpp.map(bolhaWA).join('')||'<div style="margin:auto;color:var(--apagado);text-align:center;font-size:12px">Sem conversa. Inicie por template.</div>'}</div>
+  <div class="wa-quick"><button onclick="qaTpl('solicitacao_xml')">Pedir XMLs</button><button onclick="abrirGuia()">Enviar guia</button><button onclick="qaTpl('lembrete_vencimento')">Lembrete</button><button onclick="qaTpl('cobranca_movimento')">Cobrar</button></div>
+  ${c.janela?`<div class="wa-comp"><span class="pl">+</span><input id="wppin" placeholder="Mensagem"><span class="pl">${MIC}</span><button class="snd" onclick="enviarLivre()">➤</button></div>`:`<div class="wa-lock">🔒 Janela fechada — use um template acima${c.optin?'':' · ⚠ cliente sem opt-in'}</div>`}
+ </div>`;
+}
+function qaTpl(cod){const c=cli();if(!c.optin){toast('Cliente sem opt-in — peça o aceite antes (regra da Meta).');return;}const t=templates.find(x=>x.cod===cod);let corpo=t.corpo.replace('{cliente}',c.nome.split(' ')[0]).replace('{mes}',mesTxt()).replace('{tributo}','Simples Nacional').replace('{venc}','20/'+String(comp.mes+1).padStart(2,'0')).replace('{valor}','R$ 348,20').replace('{doc}','DAS');c.wpp.push({d:'sai',tpl:cod,t:corpo,flow:t.flow,btn:t.btn});c.janela=true;c.janelaLbl='24h00';toast('Template '+cod+' enviado.');render();}
+function pedirXml(){const c=cli();qaTpl('solicitacao_xml');const e=c.etapas.find(x=>x.acao==='flow_xml');if(e)e.status='aguardando';render();}
+function enviarLivre(){const c=cli();const i=el('wppin');if(!i||!i.value.trim())return;c.wpp.push({d:'sai',t:i.value.trim()});render();}
+
+/* IA rail — com escopo por cliente (ponto 4) */
+function renderIaRail(){
+ const c=cli();const prox=c.etapas.find(e=>e.status!=='concluido');const modo=c.ia.modo;
+ const escopo=`<div class="iaBloco"><div class="rt">● IA neste cliente</div>
+   <div class="iaEscopo">
+     <button class="${modo==='off'?'on':''}" onclick="setIaModo('off')">Não tratar</button>
+     <button class="${modo==='limite'?'on':''}" onclick="setIaModo('limite')">Até certo ponto</button>
+     <button class="${modo==='tudo'?'on':''}" onclick="setIaModo('tudo')">Tratar tudo</button>
+   </div>
+   ${modo==='limite'?`<select class="iaLim" onchange="setIaAte(this.value)">${IA_LIMITES.map(l=>`<option value="${l[0]}" ${(c.ia.ate||'rascunho')===l[0]?'selected':''}>${l[1]}</option>`).join('')}</select>`:''}
+   <div class="iaEscopoTxt">${iaModoTxt(c)}</div></div>`;
+ if(modo==='off'){
+   el('iaRail').innerHTML=`<div class="paneH"><span class="t" style="color:var(--roxo)">🧠 Assistente IA</span><span class="tag" style="margin-left:auto;background:var(--superf2);color:var(--apoio)">desativada</span></div>
+    <div style="overflow-y:auto">${escopo}
+     <div class="iaBloco"><div class="iaOff">A IA está <b>desativada</b> para este cliente. Nada é lido, sugerido ou enviado automaticamente — você conduz tudo pela esteira e pelo WhatsApp.</div></div></div>`;
+   return;
+ }
+ const podeExec=modo==='tudo';
+ el('iaRail').innerHTML=`
+  <div class="paneH"><span class="t" style="color:var(--roxo)">🧠 Assistente IA</span><span class="tag t-ia" style="margin-left:auto">IT.IA · ${modo==='tudo'?'tudo':'até certo ponto'}</span></div>
+  <div style="overflow-y:auto">
+   ${escopo}
+   <div class="iaBloco"><div class="rt">● Próxima ação</div>
+     <div class="iaCard"><div class="tt">${prox?prox.nome:'Apuração concluída 🎉'}</div>
+       <div class="tx">${prox?(prox.ai||'A IA acompanha esta etapa e avisa quando puder agir.'):'Nada pendente neste cliente.'}</div>
+       ${prox&&prox.acao?(podeExec?`<div class="b"><button class="miniB rx" onclick="${prox.acao==='guia'?'abrirGuia()':"pedirXml()"}">Executar com 1 clique</button></div>`:`<div class="tx" style="color:var(--apagado);margin-top:6px">🔒 Fora do escopo: a IA só sugere; o envio é seu.</div>`):''}</div>
+   </div>
+   <div class="iaBloco"><div class="rt">● Rascunho da IA</div>
+     <div class="rascunho">“Olá ${c.nome.split(' ')[0]}, para fechar ${mesTxt()} preciso dos XMLs da Shopee e do TikTok. Pode enviar pelo formulário abaixo? 🙂”
+       <div class="b" style="display:flex;gap:6px;margin-top:8px"><button class="miniB rx" onclick="qaTpl('solicitacao_xml')">Usar</button><button class="miniB" onclick="toast('Editar rascunho (demo)')">Editar</button></div></div>
+   </div>
+   <div class="iaBloco"><div class="rt">● Transcrição de áudio</div>
+     <div class="rascunho">🗣️ Último áudio do cliente → <b>"Perguntou se precisa enviar as notas da Shein de julho também."</b></div></div>
+   <div class="iaBloco"><div class="rt">● Triagem automática</div>
+     <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag t-util">apuração</span><span class="tag t-ia">e-commerce</span><span class="tag" style="background:var(--ambarSv);color:var(--ambar)">aguardando XML</span></div></div>
+   ${c.demCeo?`<div class="iaBloco"><div class="rt">● Demanda ${c.demCeo.origem==='ceo'?'do CEO':'da Cúpula'}</div>
+     <div class="demCli"><b style="font-size:12px">${c.demCeo.t}</b><div style="font-size:10.5px;color:var(--apagado);margin-top:3px">vence ${c.demCeo.prazo} · atrelada a este cliente</div>
+       <div class="b" style="margin-top:8px"><button class="miniB" style="border-color:var(--roxo);color:var(--roxo)" onclick="irView('esteiras')">Abrir na esteira →</button></div></div></div>`:''}
+   <div class="mcpNota">⚙️ Templates/número serão <b style="margin:0 4px;color:var(--ink)">montados com o Meta Tools</b> (depois). A IA (IT.IA) é <b style="margin:0 4px;color:var(--ink)">opcional</b> e trabalha só sobre os dados de vocês. Sem Meta AI.</div>
+  </div>`;
+}
+
+/* modal enviar guia */
+let guiaSel=new Set(),guiaVinc={};
+function abrirGuia(){const c=cli();if(!c.optin){toast('Cliente sem opt-in — não é possível enviar template ainda.');return;}const docs=docsCliente[c.id]||[];guiaSel=new Set();guiaVinc={};
+ const pend=c.etapas.filter(e=>e.acao==='guia'&&e.status!=='concluido');window._pend=pend;
+ modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx"><div class="mcab">📁 <b>Arquivos de ${c.nome} — ${mesTxt()}</b><button class="x" onclick="fecharModal()">✕</button></div>
+  <div class="mbody">${docs.length?docs.map(d=>`<div class="arq" id="arq-${d.id}" onclick="toggleArq('${d.id}')"><span class="ck">✓</span><div style="flex:1"><div class="nm">${d.nome}${d.rba?' <span class="tag" style="background:var(--laranjaSv);color:var(--laranjaTx)">RBA</span>':''}</div><div id="vinc-${d.id}"></div></div><span class="tam">${d.tam}</span></div>`).join(''):'<p style="color:var(--apagado);text-align:center;padding:20px">Nenhum arquivo neste mês.</p>'}</div>
+  <div class="mrod"><span id="gc" style="font-size:11.5px;color:var(--apagado)">Nenhum selecionado</span><button class="bwpp" id="ge" disabled onclick="enviarGuia()">Enviar no WhatsApp ›</button></div></div>`;
+ document.body.appendChild(modal);
+}
+function toggleArq(id){if(guiaSel.has(id)){guiaSel.delete(id);el('arq-'+id).classList.remove('sel');el('vinc-'+id).innerHTML='';}else{guiaSel.add(id);el('arq-'+id).classList.add('sel');if(window._pend.length)el('vinc-'+id).innerHTML=`<select onclick="event.stopPropagation()" onchange="guiaVinc['${id}']=this.value"><option value="">É a guia: (não vincular)</option>${window._pend.map(g=>`<option value="${g.id}">${g.nome}</option>`).join('')}</select>`;}
+ const n=guiaSel.size;el('gc').innerHTML=n?`<b style="color:var(--ink)">${n} arquivo${n>1?'s':''}</b> selecionado${n>1?'s':''}`:'Nenhum selecionado';el('ge').disabled=!n;}
+function enviarGuia(){const c=cli();const docs=docsCliente[c.id]||[];let concl=0;
+ guiaSel.forEach(id=>{const d=docs.find(x=>x.id===id);c.wpp.push({d:'sai',tpl:'envio_guia',t:`Olá ${c.nome.split(' ')[0]}, segue a guia (comp. ${mesTxt()}), vence 20/${String(comp.mes+1).padStart(2,'0')}.`,btns:['Já paguei','Falar com o fiscal']});c.wpp.push({d:'sai',doc:d.nome});const v=guiaVinc[id];if(v){const e=c.etapas.find(x=>x.id===v);if(e){e.status='concluido';concl++;}}});
+ c.janela=true;c.janelaLbl='24h00';fecharModal();toast(concl?`Enviado — ${concl} guia(s) concluída(s).`:'Enviado no WhatsApp.');render();}
+function fecharModal(){if(modal){modal.remove();modal=null;}}
+
+/* pendências */
+function renderPend(){const cats=[['xml','XML pendente',2],['guias','Guias a enviar',3],['aguardando','Aguardando cliente',1],['outras','Outras',1]];
+ const dados={xml:[{c:'Mix Imports ME',d:'Faltam XMLs Shopee/TikTok de '+mesTxt(),cli:'c1'},{c:'TransLog Cargas LTDA',d:'Sem movimento + opt-in pendente',cli:'c4'}],guias:[{c:'Jecksson Store',d:'DAS apurado, guia pronta',cli:'c2'},{c:'TransLog Cargas LTDA',d:'2 guias a enviar',cli:'c4'},{c:'Mix Imports ME',d:'Guia após apurar',cli:'c1'}],aguardando:[{c:'Mix Imports ME',d:'Aguardando XMLs há 1h20',cli:'c1'}],outras:[{c:'Studio Bela Arte ME',d:'Confirmar zerada',cli:'c3'}]};
+ el('conteudo').innerHTML=`<div class="tela"><h1>Minhas pendências</h1><p class="intro">O que falta tratar nesta competência (${mesTxt()}).</p>
+  <div class="subtabs">${cats.map(([k,l,n])=>`<button class="${pendSub===k?'on':''}" onclick="pendSub='${k}';render()">${l} <span class="c">${n}</span></button>`).join('')}</div>
+  <div class="grade">${(dados[pendSub]||[]).map(x=>`<div class="cardP"><div class="top"><div class="av">${iniciais(x.c)}</div><div class="nm">${x.c}</div></div><div style="font-size:12.5px;color:var(--apoio)">${x.d}</div><div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="selCli='${x.cli}';irView('apuracao')">Abrir na Apuração →</button></div></div>`).join('')}</div></div>`;
+}
+/* radar xml */
+function renderXml(){const linhas=[{c:'Mix Imports ME',sh:'pend',tk:'pend',ml:'-',s:'Aguardando'},{c:'Jecksson Store',sh:'-',tk:'-',ml:'ok',s:'Coletado'},{c:'Studio Bela Arte ME',sh:'-',tk:'-',ml:'-',s:'Zerada'},{c:'TransLog Cargas LTDA',sh:'-',tk:'-',ml:'-',s:'Sem movimento'}];
+ const cell=v=>v==='ok'?'<span class="pill ok">recebido</span>':v==='pend'?'<span class="pill falta">pendente</span>':'<span style="color:var(--nevoa)">—</span>';
+ el('conteudo').innerHTML=`<div class="tela"><h1>Radar de XML</h1><p class="intro">Chegada dos XMLs por plataforma na competência ${mesTxt()}. Pendente vira pedido (Flow) no WhatsApp.</p>
+  <div class="tbwrap"><table><thead><tr><th>Cliente</th><th>Shopee</th><th>TikTok</th><th>Mercado Livre</th><th>Status</th><th></th></tr></thead><tbody>${linhas.map(l=>`<tr><td style="font-weight:600">${l.c}</td><td>${cell(l.sh)}</td><td>${cell(l.tk)}</td><td>${cell(l.ml)}</td><td>${l.s}</td><td><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="toast('Pedir XML (Flow) — demo')">Pedir XML</button></td></tr>`).join('')}</tbody></table></div></div>`;
+}
+/* esteiras — modelos reais de apuração + demandas CEO/Cúpula */
+const MODELOS_REAIS=[
+ {nome:'MODELO PADRÃO V1',sub:'ERP · Prefeitura · SIEG · Domínio',qt:21,uso:'usado na maioria das lojas',passos:['Demonstrativo de ST','Recibo de Declaração','UPSELLER (ERP)','São Paulo (Prefeitura)','SIEG','Apuração no Sistema Domínio','DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST']},
+ {nome:'MODELO V2',sub:'XML do cliente · Prefeitura · SIEG · Domínio',qt:21,uso:'quando o cliente manda o XML',passos:['Solicitar XML ao Cliente','São Paulo (Prefeitura)','SIEG','Apuração no Sistema Domínio','DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST','Demonstrativo de ST','Recibo de Declaração']},
+ {nome:'Enviar Guia',sub:'pacote enviado ao cliente',qt:17,uso:'só o envio dos documentos',passos:['DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST','Demonstrativo de ST','Recibo de Declaração']},
+ {nome:'Solicitar XML ao Cliente',sub:'tarefa única',qt:0,uso:'cobrar o XML',passos:[]},
+ {nome:'SIEG',sub:'tarefa única',qt:0,uso:'importar XMLs',passos:[]},
+ {nome:'Apuração no Sistema Domínio',sub:'tarefa única',qt:0,uso:'calcular no Domínio',passos:[]},
+ {nome:'ICMS — GERAR DIFAL',sub:'tarefa única',qt:0,uso:'diferencial de alíquota',passos:[]},
+ {nome:'DeSTDA',sub:'tarefa única',qt:0,uso:'obrigação ST mensal',passos:[]},
+ {nome:'RBA',sub:'tarefa única',qt:0,uso:'conferir Relatório de Apuração',passos:[]},
+];
+let estAba='modelos',estOpen=null;
+function renderEst(){
+ el('conteudo').innerHTML=`<div class="tela"><h1>Esteiras do Fiscal</h1><p class="intro">Os <b>modelos reais</b> que a equipe usa na apuração (vindos dos modelos de tarefa do escritório) e as demandas que chegam do CEO/Cúpula.</p>
+  <div class="subtabs"><button class="${estAba==='modelos'?'on':''}" onclick="estAba='modelos';render()">Modelos de apuração <span class="c">${MODELOS_REAIS.length}</span></button><button class="${estAba==='demandas'?'on':''}" onclick="estAba='demandas';render()">Demandas CEO/Cúpula <span class="c">${esteira.length}</span></button></div>
+  <div id="estBody"></div></div>`;
+ el('estBody').innerHTML = estAba==='modelos'? estModelos() : estDemandas();
+}
+function estModelos(){
+ return `<div class="grade">${MODELOS_REAIS.map((m,i)=>`<div class="cardP" style="cursor:pointer" onclick="estOpen=estOpen===${i}?null:${i};render()">
+   <div class="top"><b class="disp" style="flex:1">${m.nome}</b>${m.qt?`<span class="tag t-util">${m.qt} tickets</span>`:'<span class="tag" style="background:var(--superf2);color:var(--apoio)">tarefa única</span>'}</div>
+   <div style="font-size:11.5px;color:var(--apoio)">${m.sub}</div>
+   <div style="font-size:11px;color:var(--apagado);margin-top:4px">${m.uso}</div>
+   ${estOpen===i&&m.passos.length?`<div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">${m.passos.map((p,j)=>`<div style="display:flex;gap:8px;align-items:center;font-size:11.5px"><span style="width:20px;height:20px;border-radius:999px;background:var(--superf2);color:var(--apoio);display:grid;place-items:center;font-size:10px;font-weight:700;flex:none">${j+1}</span>${p}</div>`).join('')}</div>`:''}
+   <div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="event.stopPropagation();estOpen=${estOpen===i?'null':i};render()">${estOpen===i?'Ocultar passos':'Ver passos'}</button>${m.qt?'<button class="miniB" onclick="event.stopPropagation();toast(\'Editar molde — só gestor (demo)\')">Editar molde 🔒</button>':''}</div>
+  </div>`).join('')}</div>`;
+}
+function estDemandas(){const cols=[['recebidas','Recebidas'],['andamento','Em andamento'],['validacao','Aguardando validação'],['concluidas','Concluídas']];
+ return `<p class="intro" style="margin-top:-4px">Demandas dos CEOs (Adrian/Lucas/William) e da Cúpula, atreladas a um cliente. A IA sugere e resume, o humano decide.</p>
+  <div class="kanban">${cols.map(([k,l])=>{const it=esteira.filter(e=>e.col===k);return `<div class="kcol" ondragover="event.preventDefault()" ondrop="dropEst('${k}')"><div class="kh">${l} <span class="pill" style="background:var(--superf2);color:var(--apoio)">${it.length}</span></div>
+   ${it.map(e=>`<div class="kcard" draggable="true" ondragstart="dragEst('${e.id}')"><div class="kt">${e.titulo}</div><div class="km">${e.cliente} · vence ${e.prazo}</div><div class="kf"><span class="selo ${e.origem}">${e.origem==='ceo'?'CEO':'Cúpula'}</span>${e.prio==='crit'?'<span class="selo crit">Crítica</span>':''}${k!=='concluidas'?`<button class="miniB" style="border-color:var(--verde);color:var(--verde);font-size:10px" onclick="avancarEst('${e.id}')">Avançar →</button>`:''}</div></div>`).join('')||'<div style="color:var(--apagado);font-size:11px;text-align:center;padding:16px">—</div>'}</div>`;}).join('')}</div>`;
+}
+let _drag=null;function dragEst(id){_drag=id;}function dropEst(col){if(_drag){esteira.find(e=>e.id===_drag).col=col;_drag=null;renderEst();}}
+function avancarEst(id){const o=['recebidas','andamento','validacao','concluidas'];const e=esteira.find(x=>x.id===id);const i=o.indexOf(e.col);if(i<3){e.col=o[i+1];toast('Avançado.');renderEst();}}
+/* templates & flows */
+function renderTpl(){el('conteudo').innerHTML=`<div class="tela"><h1>Templates &amp; Flows (modelos da Meta)</h1><p class="intro">Modelos Utility (grátis dentro da janela) e Flows (formulário no chat) usados na apuração. Clique pra testar no cliente ${cli().nome}.</p>
+  <div class="grade">${templates.map(t=>`<div class="cardP"><div class="top"><b class="disp" style="flex:1">${t.cod}</b><span class="tag t-util">${t.cat}</span></div><div class="corpo">${t.corpo.replace(/\{(\w+)\}/g,'<span class="var">{$1}</span>')}</div><div class="foot">${(t.btns||[]).map(b=>`<span class="tag" style="background:var(--superf2);color:var(--apoio)">${b}</span>`).join('')}${t.flow?'<span class="tag t-flow">→ Flow</span>':''}${t.doc?'<span class="tag" style="background:var(--superf2);color:var(--apoio)">+ PDF</span>':''}</div><div class="foot"><button class="miniB" style="border-color:var(--verde);color:var(--verde)" onclick="qaTpl('${t.cod}');irView('apuracao')">Testar no WhatsApp →</button></div></div>`).join('')}</div>
+  <h1 style="font-size:18px;margin-top:24px">Flows (formulário no chat)</h1>
+  <div class="grade">${flows.map(f=>`<div class="flowGrande"><b class="disp">${f.nome}</b> <span class="tag t-flow">Flow</span><div class="campos">${f.campos.map(c=>`<span class="cc">${c}</span>`).join('')}</div></div>`).join('')}</div></div>`;
+}
+/* IA & Meta */
+function renderIA(){el('conteudo').innerHTML=`<div class="tela"><h1>Montagem &amp; Automação</h1><p class="intro">Três coisas separadas: <b>1) Meta Tools (MCP)</b> — ferramenta usada <b>depois</b>, só pra <b>montar</b> o WhatsApp oficial (número, templates, webhook), uma vez. <b>2) API oficial</b> — envia e recebe as mensagens no dia a dia. <b>3) Agente IT.IA (opcional)</b> — a IA de vocês, sobre os seus dados. <b>Não usamos o Meta AI</b>.</p>
+  <div class="grade"><div class="cardP"><b class="disp">Montagem com o Meta Tools (MCP)</b><div style="font-size:11.5px;color:var(--apagado);margin-top:2px">Passo de implantação — feito uma vez ao ligar a API.</div><div style="margin-top:8px">
+    <div class="passo"><div class="n">✓</div><div><b style="font-size:12.5px">Número oficial (WABA) verificado</b><div style="font-size:11.5px;color:var(--apoio)">Montado com o Meta Tools</div></div></div>
+    <div class="passo"><div class="n">✓</div><div><b style="font-size:12.5px">Templates Utility aprovados</b><div style="font-size:11.5px;color:var(--apoio)">envio_guia, solicitacao_xml, lembrete_vencimento, cobranca_movimento, boas_vindas</div></div></div>
+    <div class="passo"><div class="n">✓</div><div><b style="font-size:12.5px">Webhook configurado</b><div style="font-size:11.5px;color:var(--apoio)">mensagens + status de entrega</div></div></div>
+    <div class="passo"><div class="n pend">2</div><div><b style="font-size:12.5px">Flows em publicação</b><div style="font-size:11.5px;color:var(--apoio)">Enviar XMLs · Atualizar credencial</div></div></div>
+  </div></div>
+  <div class="cardP"><b class="disp">O que a IA faz (agente IT.IA · opcional)</b><div style="font-size:11.5px;color:var(--apagado);margin-top:2px">Só entra nas partes que valem a pena. Dá pra operar sem IA, só com templates/Flows.</div><div style="margin-top:10px">
+    ${[['🗂️','Triagem','classifica a mensagem que chega e roteia (2ª via, XML, dúvida, cobrança)'],['🗣️','Transcrição','áudios do cliente viram texto'],['✍️','Rascunho','sugere a resposta; humano aprova'],['🧮','Apuração','lê o Relatório e confere o RBA'],['🛡️','Guardião','detecta senha em texto e troca pelo Flow seguro'],['🚩','Prioridade','marca urgência (malha/intimação)']].map(([i,t,d])=>`<div class="logIA"><div class="ic">${i}</div><div><b style="font-size:12.5px">${t}</b><div style="font-size:11.5px;color:var(--apoio)">${d}</div></div></div>`).join('')}
+  </div></div></div>
+  <div class="cardP" style="margin-top:14px;background:var(--roxoSv);border-color:#e2d5f2"><b class="disp">Regra</b><p style="margin:6px 0 0;font-size:13px;color:var(--grafite)">Tudo que é enviado ao cliente passa por <b>revisão humana</b>. A IA acelera, não decide sozinha o sensível. Dados ficam no ambiente de vocês (LGPD).</p></div></div>`;
+}
+render();
+</script>
+</body>
+</html>
+
+</body></html>
