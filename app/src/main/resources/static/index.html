@@ -351,7 +351,7 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="lab">APOIO</div>
   <div class="it" data-view="templates" onclick="irView('templates')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg></span> Templates</div>
   <div class="it" data-view="ia" onclick="irView('ia')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg></span> IA &amp; Meta</div>
-  <div class="foot"><span class="av">PA</span><div><b>Pedro H. S. Almeida</b><span>analista · Fiscal · 200 clientes</span></div></div>
+  <div class="foot"><span class="av" id="euAv"></span><div><b id="euNome"></b><span id="euInfo"></span></div></div>
 </nav>
 
 <div class="main">
@@ -366,6 +366,7 @@ tr.rnovo:hover{background:#ffe6d6}
 </div>
 <div class="toasts" id="toasts"></div>
 
+<script src="vendor/supabase.js"></script>
 <script>
 const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 let comp={mes:8,ano:2026};
@@ -558,7 +559,7 @@ function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;re
 
 const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta'};
 function irView(v){view=v;render();}
-function waPendentes(){return clientes.concat(entrada).filter(c=>c.wpp.length&&c.wpp[c.wpp.length-1].d==='ent').length;}
+function waPendentes(){return waEntrada.concat(waMeus).filter(c=>c.naoLidas>0).length;}
 function render(){
   document.querySelectorAll('.side .it[data-view]').forEach(e=>e.classList.toggle('on',e.dataset.view===view));
   const b=el('waBadge');if(b)b.textContent=waPendentes();
@@ -662,30 +663,31 @@ function renderEspacoModal(){
 }
 
 /* ---------- WHATSAPP (janela geral, estilo WhatsApp Web) ---------- */
-function snippet(x){const last=x.wpp[x.wpp.length-1];if(!last)return 'Sem conversa';if(last.doc)return '📄 '+last.doc;if(last.tpl)return '📄 '+(last.t||'template');return (last.d==='sai'?'Você: ':'')+(last.t||'');}
+function snippet(x){const last=x.wpp[x.wpp.length-1];if(!last)return x.previa||'Sem conversa';if(last.doc)return '📄 '+last.doc;if(last.tpl)return '📄 '+(last.t||'template');return (last.d==='sai'?'Você: ':'')+(last.t||'');}
 function renderWhatsWeb(){
- const source = waAba==='entrada'?entrada:clientes;
+ const source = waAba==='entrada'?waEntrada:waMeus;
  if(!source.find(x=>x.id===selWhats)) selWhats = source.length?source[0].id:null;
- const c = selWhats?convById(selWhats):null;
- const isEntrada = c && entrada.includes(c);
+ const c = selWhats?waConv(selWhats):null;
+ const isEntrada = c && waEntrada.includes(c);
+ if(c&&!c.carregada)carregarMensagens(c.id);
  el('conteudo').innerHTML=`
   <div class="waweb">
     <div class="walist">
       <div class="watabs">
-        <button class="${waAba==='entrada'?'on':''}" onclick="waAba='entrada';selWhats=null;render()">Entrada <span class="c">${entrada.length}</span></button>
-        <button class="${waAba==='meus'?'on':''}" onclick="waAba='meus';selWhats=null;render()">Meus <span class="c">${clientes.length}</span></button>
+        <button class="${waAba==='entrada'?'on':''}" onclick="waAba='entrada';selWhats=null;render()">Entrada <span class="c">${waEntrada.length}</span></button>
+        <button class="${waAba==='meus'?'on':''}" onclick="waAba='meus';selWhats=null;render()">Meus <span class="c">${waMeus.length}</span></button>
       </div>
       <div class="srch"><input placeholder="🔎  Buscar ou começar conversa"></div>
       <div class="rl">${source.length?source.map(x=>{const last=x.wpp[x.wpp.length-1];const un=last&&last.d==='ent';
         return `<div class="waconv ${x.id===selWhats?'sel':''}" onclick="selWhats='${x.id}';render()">
           <div class="av">${iniciais(x.nome)}</div>
-          <div style="flex:1;min-width:0"><div class="nm"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.nome}</span><span class="hr">${last?(last.h||'agora'):''}</span></div>
+          <div style="flex:1;min-width:0"><div class="nm"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.nome}</span><span class="hr">${last?(last.h||'agora'):(x.ultima?hhmm(x.ultima):'')}</span></div>
             <div style="display:flex;align-items:center;gap:6px"><div class="last" style="flex:1">${snippet(x)}</div>${un?'<span class="un">1</span>':''}</div></div>
         </div>`;}).join(''):`<div style="padding:26px 16px;text-align:center;color:var(--apagado);font-size:12px">${waAba==='entrada'?'Nenhum contato sem carteira. 🎉':'Sua carteira está vazia por aqui.'}</div>`}</div>
     </div>
     <div class="wachat">
      ${c?`
-      ${waHead(c,isEntrada?`<button class="bt-assumir" onclick="assumir('${c.id}')">＋ Assumir p/ minha carteira</button>`:`<span class="wstat2 rob">Robô atendendo</span>`)}
+      ${waHead(c,isEntrada?`<button class="bt-assumir" onclick="assumirWA('${c.id}')">＋ Assumir p/ minha carteira</button>`:`<span class="wstat2 rob">${eu?eu.nome.split(' ')[0]:''} atendendo</span>`)}
       <div class="wa-msgs" id="wwms">${c.wpp.map(bolhaWA).join('')||'<div style="margin:auto;color:var(--apagado);font-size:12px;text-align:center">Sem conversa ainda.</div>'}</div>
       ${isEntrada?`<div class="wa-lock">Contato sem carteira — <b>Assumir</b> para responder e iniciar a apuração.</div>`:(c.janela?`<div class="wa-comp"><span class="pl">+</span><input id="wwin" placeholder="Mensagem" onkeydown="if(event.key==='Enter')enviarWW()"><span class="pl">${MIC}</span><button class="snd" onclick="enviarWW()">➤</button></div>`:`<div class="wa-lock">🔒 Janela de 24h fechada — reabra com um template aprovado${c.optin?'':' · ⚠ cliente sem opt-in'}</div>`)}
      `:`<div style="margin:auto;color:var(--apagado);font-size:12.5px">Selecione uma conversa</div>`}
@@ -693,7 +695,7 @@ function renderWhatsWeb(){
   </div>`;
  const ms=el('wwms');if(ms)ms.scrollTop=ms.scrollHeight;
 }
-function enviarWW(){const c=convById(selWhats);const i=el('wwin');if(!c||!i||!i.value.trim())return;c.wpp.push({d:'sai',t:i.value.trim(),h:'agora'});render();}
+function enviarWW(){const c=waConv(selWhats);const i=el('wwin');if(!c||!i||!i.value.trim())return;const t=i.value.trim();i.value='';enviarTextoWA(c,t);}
 
 function renderLista(){
  el('listaCli').innerHTML=clientes.map(c=>{const pct=prog(c);const cor=pct===100?'var(--verde)':pct>0?'var(--laranja)':'var(--nevoa)';const circ=2*Math.PI*14;
@@ -746,7 +748,7 @@ const MIC='<svg viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0
 function waHead(c,extra){return `<div class="wa-head"><span class="wapp">${WA_LOGO}</span><span class="avc">${iniciais(c.nome)}</span><div class="nm"><b>${c.nome}</b><span>${c.regime?c.regime:'sem carteira'}${c.plats&&c.plats.length?' · '+c.plats.join(', '):''}</span></div>${extra}</div>`;}
 function bolhaWA(m){
  const cls=m.d==='sai'?'ag':'cl';
- const tag=m.d==='sai'?'na fila · agente':'respondida · whatsapp';
+ const tag=m.st?(m.d==='sai'?(ST_WA[m.st]||m.st)+(m.autor?' · '+m.autor:''):'whatsapp'):(m.d==='sai'?'na fila · agente':'respondida · whatsapp');
  let inner='';
  if(m.tpl)inner+=`<div class="wa-tpl">template · ${m.tpl}</div>`;
  if(m.doc)inner+=`<div class="wa-doc"><span class="fi">PDF</span>${m.doc}</div>`;
@@ -754,7 +756,7 @@ function bolhaWA(m){
  if(m.flow)inner+=`<div class="wa-flow">Flow · Enviar XMLs — Plataforma ▾ · Upload · Enviar</div>`;
  if(m.btn)inner+=`<div class="wa-btns"><span>${m.btn}</span></div>`;
  else if(m.btns)inner+=`<div class="wa-btns">${m.btns.map(b=>`<span>${b}</span>`).join('')}</div>`;
- return `<div class="wa-b ${cls}">${inner}</div><div class="wa-t ${cls}">15/09 ${m.h||'agora'} · ${tag}</div>`;
+ return `<div class="wa-b ${cls}">${inner}</div><div class="wa-t ${cls}">${m.dt||'15/09'} ${m.h||'agora'} · ${tag}</div>`;
 }
 function renderWpp(c){
  return `<div class="wa-wrap">
@@ -894,7 +896,82 @@ function renderIA(){el('conteudo').innerHTML=`<div class="tela"><h1>Montagem &am
   </div></div></div>
   <div class="cardP" style="margin-top:14px;background:var(--roxoSv);border-color:#e2d5f2"><b class="disp">Regra</b><p style="margin:6px 0 0;font-size:13px;color:var(--grafite)">Tudo que é enviado ao cliente passa por <b>revisão humana</b>. A IA acelera, não decide sozinha o sensível. Dados ficam no ambiente de vocês (LGPD).</p></div></div>`;
 }
-render();
+
+/* ---------- dados reais ---------- */
+const SB_URL='https://vvohwixeokxydmbhqklu.supabase.co',SB_KEY='sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM';
+const BL_URL='https://wfqcoocfastgsfgegpcm.supabase.co',BL_KEY='sb_publishable_88ukR4t1KNTc73DxbF6-Pw_0CKW16Fe';
+const ST_WA={enviando:'enviando',aguardando:'na fila',enviada:'enviada',entregue:'entregue',lida:'lida',falhou:'falhou'};
+let sb=null,eu=null,waEntrada=[],waMeus=[],waMsgs={};
+function waConv(id){return waEntrada.find(x=>x.id===id)||waMeus.find(x=>x.id===id);}
+function hhmm(d){const x=new Date(d);return String(x.getHours()).padStart(2,'0')+':'+String(x.getMinutes()).padStart(2,'0');}
+function ddmm(d){const x=new Date(d);return String(x.getDate()).padStart(2,'0')+'/'+String(x.getMonth()+1).padStart(2,'0');}
+function fmtTel(t){if(!t)return '';const s=String(t);return s.startsWith('55')&&s.length>=12?'+55 '+s.slice(2,4)+' '+s.slice(4,-4)+'-'+s.slice(-4):'+'+s;}
+function msgWA(m){return {id:m.id,id_local:m.id_local,d:m.direcao==='entrada'?'ent':'sai',t:m.legenda||m.texto||('['+m.tipo+']'),h:hhmm(m.ocorrido_em),dt:ddmm(m.ocorrido_em),em:m.ocorrido_em,st:m.status,autor:m.autor_id&&eu&&m.autor_id===eu.id?eu.nome.split(' ')[0]:''};}
+function janelaWA(c){const ult=[...c.wpp].reverse().find(m=>m.d==='ent');if(!ult||!ult.em){c.janela=false;c.janelaLbl='fechada';return;}
+ const rest=24*3600e3-(Date.now()-new Date(ult.em).getTime());c.janela=rest>0;c.optin=true;
+ c.janelaLbl=rest>0?Math.floor(rest/3600e3)+'h'+String(Math.floor(rest%3600e3/60e3)).padStart(2,'0'):'fechada';}
+function convWA(c){return {id:c.id,nome:c.contato_nome||fmtTel(c.contato_telefone)||'Contato',plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
+ dono:c.responsavel_id,wpp:waMsgs[c.id]||[],carregada:!!waMsgs[c.id],previa:c.ultima_previa,ultima:c.ultima_em,naoLidas:c.nao_lidas||0};}
+async function carregarConversas(){
+ const r=await sb.from('wa_conversa').select('id,contato_nome,contato_telefone,responsavel_id,estado,ultima_em,ultima_previa,nao_lidas,wa_numero!inner(provedor)')
+  .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false}).limit(500);
+ if(r.error){toast('Não foi possível carregar as conversas.');return;}
+ waEntrada=r.data.filter(c=>!c.responsavel_id).map(convWA);
+ waMeus=r.data.filter(c=>c.responsavel_id===eu.id).map(convWA);
+ waEntrada.concat(waMeus).forEach(c=>{if(c.carregada)janelaWA(c);});
+}
+async function carregarMensagens(id){
+ const r=await sb.from('wa_mensagem').select('id,id_local,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id').eq('conversa_id',id).order('ocorrido_em',{ascending:true}).limit(1000);
+ if(r.error){toast('Não foi possível carregar as mensagens.');return;}
+ waMsgs[id]=r.data.map(msgWA);const c=waConv(id);if(c){c.wpp=waMsgs[id];c.carregada=true;janelaWA(c);}
+ if(view==='whatsweb')render();
+}
+function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;const lista=waMsgs[m.conversa_id];
+ if(lista){const nova=msgWA(m);const i=lista.findIndex(x=>x.id===m.id||(m.id_local&&x.id_local===m.id_local));if(i>=0)lista[i]=nova;else lista.push(nova);
+  const c=waConv(m.conversa_id);if(c)janelaWA(c);}
+ if(view==='whatsweb')render();}
+async function aoMudarConversa(){await carregarConversas();if(view==='whatsweb')render();else{const b=el('waBadge');if(b)b.textContent=waPendentes();}}
+async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();
+ c.wpp.push({id:'tmp-'+id_local,id_local,d:'sai',t,h:hhmm(new Date()),dt:ddmm(new Date()),st:'enviando',autor:eu.nome.split(' ')[0]});render();
+ const s=(await sb.auth.getSession()).data.session;
+ const r=await fetch(SB_URL+'/functions/v1/wa-meta-enviar',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+(s?s.access_token:'')},
+  body:JSON.stringify({conversa_id:c.id,id_local,tipo:'texto',texto:t})});
+ const j=await r.json().catch(()=>({}));
+ if(!j.ok){const m=c.wpp.find(x=>x.id_local===id_local);if(m)m.st='falhou';toast(j.erro||'Não foi possível enviar.');render();}}
+async function assumirWA(id){const r=await sb.from('wa_conversa').update({responsavel_id:eu.id}).eq('id',id).select('id');
+ if(r.error||!r.data||!r.data.length){toast('Não foi possível assumir esta conversa.');return;}
+ const c=waConv(id);toast((c?c.nome:'Conversa')+' entrou na sua carteira.');await carregarConversas();waAba='meus';selWhats=id;render();}
+
+/* ---------- entrada ---------- */
+function modalEntrar(msg){
+ modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(420px,96vw)"><div class="mcab"><b>Entrar</b></div>
+  <div class="mbody"><label class="fl">E-mail</label><input id="lgEmail" class="fi" type="email" autocomplete="username">
+   <label class="fl">Senha</label><input id="lgSenha" class="fi" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerEntrar()"></div>
+  <div class="mrod"><span id="lgMsg" style="font-size:11.5px;color:var(--vermelho)">${msg||''}</span><button class="bwpp" id="lgBtn" onclick="fazerEntrar()">Entrar ›</button></div></div>`;
+ document.body.appendChild(modal);setTimeout(()=>{const e=el('lgEmail');if(e)e.focus();},50);}
+async function fazerEntrar(){const email=el('lgEmail').value.trim(),senha=el('lgSenha').value;if(!email||!senha)return;
+ const b=el('lgBtn');b.disabled=true;el('lgMsg').textContent='';
+ try{
+  const bl=supabase.createClient(BL_URL,BL_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+  const a=await bl.auth.signInWithPassword({email,password:senha});
+  if(a.error)throw new Error('E-mail ou senha inválidos.');
+  const f=await fetch(SB_URL+'/functions/v1/fiscal-entrar',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({bl_token:a.data.session.access_token})});
+  const j=await f.json().catch(()=>({}));
+  await bl.auth.signOut().catch(()=>{});
+  if(!j.ok)throw new Error(f.status===403?'Sem acesso ao Fiscal.':'Não foi possível entrar.');
+  sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:true}});
+  const s=await sb.auth.setSession({access_token:j.access_token,refresh_token:j.refresh_token});
+  if(s.error)throw new Error('Não foi possível entrar.');
+  eu=j.usuario;fecharModal();await iniciarDados();
+ }catch(e){el('lgMsg').textContent=e.message;b.disabled=false;}}
+async function iniciarDados(){
+ el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';
+ await carregarConversas();
+ sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa).subscribe();
+ view='whatsweb';render();}
+modalEntrar();
 </script>
 </body>
 </html>
