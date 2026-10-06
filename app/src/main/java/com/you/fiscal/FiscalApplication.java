@@ -1,20 +1,49 @@
 package com.you.fiscal;
 
+import me.friwi.jcefmaven.CefAppBuilder;
+import org.cef.CefApp;
+import org.cef.CefClient;
+import org.cef.browser.CefBrowser;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
-/**
- * Ponto de entrada Spring Boot. Não sobe servidor web: quem desenha a tela é
- * o JavaFX (ver {@link JavaFxApplication}). O Spring aqui existe para dar
- * contexto/DI ao restante do app (troca futura: em vez de ler o HTML estático,
- * os dados virão de serviços Spring que já chamam as RPCs/API reais).
- */
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+
 @SpringBootApplication
 public class FiscalApplication {
 
-    public static void main(String[] args) {
-        // Delega para o Application.launch do JavaFX, que por sua vez sobe
-        // o contexto Spring dentro de si (ver JavaFxApplication.init()).
-        JavaFxApplication.main(args);
+    public static void main(String[] args) throws Exception {
+        System.setProperty("java.awt.headless", "false");
+
+        ConfigurableApplicationContext ctx = SpringApplication.run(FiscalApplication.class, args);
+        String porta = ctx.getEnvironment().getProperty("local.server.port");
+        String url = "http://127.0.0.1:" + porta + "/index.html?boot=" + System.currentTimeMillis();
+
+        // janela com Chromium embutido
+        File perfil = new File(System.getProperty("java.io.tmpdir"), "fiscal-jcef-perfil");
+        perfil.mkdirs();
+        CefAppBuilder builder = new CefAppBuilder();
+        builder.setInstallDir(new File(System.getProperty("user.home"), ".fiscal-jcef"));
+        builder.getCefSettings().windowless_rendering_enabled = false;
+        builder.getCefSettings().cache_path = perfil.getAbsolutePath();
+        builder.getCefSettings().persist_session_cookies = true;
+        builder.addJcefArgs("--disable-gpu", "--disable-gpu-compositing", "--disable-http-cache",
+                "--disk-cache-size=1", "--user-data-dir=" + perfil.getAbsolutePath());
+
+        CefApp cefApp = builder.build();
+        CefClient client = cefApp.createClient();
+        CefBrowser browser = client.createBrowser(url, false, false);
+
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Fiscal — You Contabilidade");
+            frame.getContentPane().add(browser.getUIComponent(), BorderLayout.CENTER);
+            frame.setSize(1440, 900);
+            frame.setLocationRelativeTo(null);
+            frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            frame.setVisible(true);
+        });
     }
 }
