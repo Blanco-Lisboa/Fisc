@@ -11,7 +11,10 @@ function fiscalCliente(){
 }
 async function fiscalSessaoAtual(){const r=await fiscalCliente().auth.getSession();return r.data.session;}
 
+function loginBL(v){const s=String(v||'').trim();if(s.includes('@'))return s.toLowerCase();
+  const cpf=s.replace(/\D/g,'');return cpf.length===11?cpf+'@cpf.youcontabilidade.local':s;}
 async function fiscalEntrar(email,senha,manter){
+  email=loginBL(email);
   try{localStorage.setItem(CHAVE_MANTER,manter?'1':'0');}catch(e){}
   _fiscal=null;
   const bl=blCliente();

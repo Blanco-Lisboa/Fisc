@@ -122,7 +122,7 @@
     <form class="fields" onsubmit="event.preventDefault(); entrar();">
       <div class="field">
         <label for="email">E-mail corporativo</label>
-        <input id="email" type="email" placeholder="marina@empresa.com.br" autocomplete="email">
+        <input id="email" type="text" placeholder="marina@empresa.com.br" autocomplete="username">
       </div>
       <div class="field">
         <label for="senha">Senha</label>
@@ -173,7 +173,7 @@
     <form class="fields" onsubmit="event.preventDefault(); recuperar();">
       <div class="field">
         <label for="email-rec">E-mail corporativo</label>
-        <input id="email-rec" type="email" placeholder="marina@empresa.com.br" autocomplete="email">
+        <input id="email-rec" type="text" placeholder="marina@empresa.com.br" autocomplete="email">
         <div class="help" id="ajudaRec">O link vale por 30 minutos.</div>
       </div>
       <button type="submit" class="btn" id="btnRec">Enviar link</button>
@@ -203,7 +203,7 @@
   async function recuperar(){
     const email=document.getElementById('email-rec').value.trim();if(!email)return;
     const b=document.getElementById('btnRec');b.disabled=true;
-    const r=await blCliente().auth.resetPasswordForEmail(email);
+    const r=await blCliente().auth.resetPasswordForEmail(loginBL(email));
     document.getElementById('ajudaRec').textContent=r.error?'Não foi possível enviar o link.':'Link enviado para '+email+'.';
     b.disabled=false;
   }
