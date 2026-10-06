@@ -243,7 +243,7 @@ TELA 2 (Editar modelo)
 - Idioma: Português (BR)
 - Tipo de variável: Número
 - Amostra de mídia: Nenhum
-- Cabeçalho: Simples Nacional Híbrido
+- Cabeçalho: Departamento Fiscal
 - Corpo (copie tudo entre as linhas):
 ```
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Chegou o momento de uma decisão importante relacionada à Reforma Tributária (IBS/CBS) para a empresa {{2}}. É possível optar pelo regime híbrido do Simples Nacional, com possibilidade de cancelamento até {{3}}, já com a alíquota oficial conhecida.
