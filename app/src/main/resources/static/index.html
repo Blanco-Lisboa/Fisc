@@ -367,6 +367,7 @@ tr.rnovo:hover{background:#ffe6d6}
 <div class="toasts" id="toasts"></div>
 
 <script src="vendor/supabase.js"></script>
+<script src="sessao.js"></script>
 <script>
 const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 let comp={mes:8,ano:2026};
@@ -898,8 +899,6 @@ function renderIA(){el('conteudo').innerHTML=`<div class="tela"><h1>Montagem &am
 }
 
 /* ---------- dados reais ---------- */
-const SB_URL='https://vvohwixeokxydmbhqklu.supabase.co',SB_KEY='sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM';
-const BL_URL='https://wfqcoocfastgsfgegpcm.supabase.co',BL_KEY='sb_publishable_88ukR4t1KNTc73DxbF6-Pw_0CKW16Fe';
 const ST_WA={enviando:'enviando',aguardando:'na fila',enviada:'enviada',entregue:'entregue',lida:'lida',falhou:'falhou'};
 let sb=null,eu=null,waEntrada=[],waMeus=[],waMsgs={};
 function waConv(id){return waEntrada.find(x=>x.id===id)||waMeus.find(x=>x.id===id);}
@@ -943,35 +942,16 @@ async function assumirWA(id){const r=await sb.from('wa_conversa').update({respon
  const c=waConv(id);toast((c?c.nome:'Conversa')+' entrou na sua carteira.');await carregarConversas();waAba='meus';selWhats=id;render();}
 
 /* ---------- entrada ---------- */
-function modalEntrar(msg){
- modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(420px,96vw)"><div class="mcab"><b>Entrar</b></div>
-  <div class="mbody"><label class="fl">E-mail</label><input id="lgEmail" class="fi" type="email" autocomplete="username">
-   <label class="fl">Senha</label><input id="lgSenha" class="fi" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')fazerEntrar()"></div>
-  <div class="mrod"><span id="lgMsg" style="font-size:11.5px;color:var(--vermelho)">${msg||''}</span><button class="bwpp" id="lgBtn" onclick="fazerEntrar()">Entrar ›</button></div></div>`;
- document.body.appendChild(modal);setTimeout(()=>{const e=el('lgEmail');if(e)e.focus();},50);}
-async function fazerEntrar(){const email=el('lgEmail').value.trim(),senha=el('lgSenha').value;if(!email||!senha)return;
- const b=el('lgBtn');b.disabled=true;el('lgMsg').textContent='';
- try{
-  const bl=supabase.createClient(BL_URL,BL_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
-  const a=await bl.auth.signInWithPassword({email,password:senha});
-  if(a.error)throw new Error('E-mail ou senha inválidos.');
-  const f=await fetch(SB_URL+'/functions/v1/fiscal-entrar',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},body:JSON.stringify({bl_token:a.data.session.access_token})});
-  const j=await f.json().catch(()=>({}));
-  await bl.auth.signOut().catch(()=>{});
-  if(!j.ok)throw new Error(f.status===403?'Sem acesso ao Fiscal.':'Não foi possível entrar.');
-  sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:true}});
-  const s=await sb.auth.setSession({access_token:j.access_token,refresh_token:j.refresh_token});
-  if(s.error)throw new Error('Não foi possível entrar.');
-  eu=j.usuario;fecharModal();await iniciarDados();
- }catch(e){el('lgMsg').textContent=e.message;b.disabled=false;}}
 async function iniciarDados(){
  el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa).subscribe();
  view='whatsweb';render();}
-modalEntrar();
+(async()=>{const s=await fiscalSessaoAtual();if(!s){location.href='login.html';return;}
+ sb=fiscalCliente();const m=s.user.app_metadata||{};eu={id:s.user.id,nome:m.nome||s.user.email,nivel:m.fiscal_nivel||''};
+ sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')location.href='login.html';});
+ await iniciarDados();})();
 </script>
 </body>
 </html>

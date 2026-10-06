@@ -20,7 +20,7 @@ public class FiscalApplication {
 
         ConfigurableApplicationContext ctx = SpringApplication.run(FiscalApplication.class, args);
         String porta = ctx.getEnvironment().getProperty("local.server.port");
-        String url = "http://127.0.0.1:" + porta + "/index.html?boot=" + System.currentTimeMillis();
+        String url = "http://127.0.0.1:" + porta + "/login.html?boot=" + System.currentTimeMillis();
 
         // janela com Chromium embutido
         File perfil = new File(System.getProperty("java.io.tmpdir"), "fiscal-jcef-perfil");
