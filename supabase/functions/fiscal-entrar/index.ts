@@ -7,11 +7,18 @@ const admin = createClient(URL_SB, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
 const BL_URL = "https://wfqcoocfastgsfgegpcm.supabase.co";
 const BL_CHAVE_PUBLICA = "sb_publishable_88ukR4t1KNTc73DxbF6-Pw_0CKW16Fe";
 
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 const json = (b: unknown, status = 200) =>
-  new Response(JSON.stringify(b), { status, headers: { "Content-Type": "application/json" } });
+  new Response(JSON.stringify(b), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
 // entrada com a conta da BL
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ ok: false, erro: "metodo" }, 405);
   let corpo: { bl_token?: string };
   try { corpo = await req.json(); } catch { return json({ ok: false, erro: "corpo invalido" }, 400); }
