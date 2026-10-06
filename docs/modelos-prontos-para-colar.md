@@ -27,7 +27,7 @@ Para darmos início às apurações, precisamos confirmar três informações: o
 Fico no aguardo do seu retorno.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo Confecções Ltda · {{3}} = 12.345.678/0001-90
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Vou enviar agora | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
@@ -51,7 +51,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Daremos início à apuração de {{2}} referente à empresa {{3}}. Poderia confirmar se houve alguma alteração ou inclusão no ERP, no faturador (emissor de nota) ou em outro dado relevante neste período?
 ```
 - Amostras: {{1}} = Larissa · {{2}} = setembro/2026 · {{3}} = Loja Exemplo
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Sem alterações | Resposta rápida: Tive alteração
 - Período de validade: não mexer
 - Enviar para análise
@@ -72,10 +72,10 @@ TELA 2 (Editar modelo)
 - Cabeçalho: Departamento Fiscal
 - Corpo (copie tudo entre as linhas):
 ```
-Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Gostaríamos de confirmar: houve emissão de notas fiscais pela empresa {{2}} no mês de {{3}}?
+Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Gostaríamos de confirmar: houve emissão de notas fiscais pela empresa {{2}} no mês de {{3}}? Aguardamos seu retorno.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = setembro/2026
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Sim, tive notas | Resposta rápida: Não tive notas
 - Período de validade: não mexer
 - Enviar para análise
@@ -101,7 +101,7 @@ Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Poderia nos en
 Esses arquivos são necessários para darmos continuidade à apuração.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = setembro/2026
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Vou enviar agora | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
@@ -125,7 +125,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Reforçamos a solicitação dos arquivos XML da empresa {{2}}, referentes a {{3}}. O não envio dentro do prazo pode resultar em multa para a empresa. Pedimos a gentileza de encaminhá-los ainda hoje.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = setembro/2026
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Enviarei agora | Resposta rápida: Preciso de mais prazo
 - Período de validade: não mexer
 - Enviar para análise
@@ -149,7 +149,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Informamos que, por não termos recebido os arquivos XML dentro do prazo, a competência de {{2}} da empresa {{3}} foi declarada como zerada perante a Receita Federal. Caso o XML seja enviado posteriormente, o imposto devido será apurado com juros e multa.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = junho/2026 · {{3}} = Loja Exemplo
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Vou enviar o XML | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
@@ -175,7 +175,7 @@ Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Segue a apura�
 Vencimento do DAS: {{6}}. Qualquer dúvida, estamos à disposição.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = agosto/2026 · {{3}} = Loja Exemplo Confecções Ltda · {{4}} = 12.345.678/0001-90 · {{5}} = DAS, Relatório de Apuração, DARE do ICMS DIFAL, Relatório de Entradas, Relatório de Saídas · {{6}} = 21/09/2026
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Recebido, obrigado | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
@@ -201,7 +201,7 @@ Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Na apuração 
 Recomendamos o pagamento para evitar eventuais problemas futuros, mas a decisão final cabe à empresa. Deseja que realizemos a declaração desse valor?
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = R$ 18,32
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Sim, declarar | Resposta rápida: Não, por enquanto
 - Período de validade: não mexer
 - Enviar para análise
@@ -225,7 +225,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Conforme solicitado, realizamos a opção pelo regime híbrido do Simples Nacional para a empresa {{2}}. A partir de novembro, essa decisão poderá ser reavaliada, já com as alíquotas oficiais divulgadas. Segue o recibo para seu controle.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Recebido, obrigado | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
@@ -251,7 +251,7 @@ Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Chegou o momen
 Preparamos um vídeo explicativo sobre o assunto. Após assisti-lo, solicitamos seu retorno com a decisão.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = 30/11/2026
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: [Visitar o site] 'Assistir vídeo' com o LINK DO VÍDEO | Resposta rápida: Quero o híbrido | Resposta rápida: Prefiro o regular
 - Período de validade: não mexer
 - Enviar para análise
@@ -272,10 +272,10 @@ TELA 2 (Editar modelo)
 - Cabeçalho: Departamento Fiscal
 - Corpo (copie tudo entre as linhas):
 ```
-Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Lembramos que o prazo para definição do regime Simples Nacional (regular ou híbrido), referente à Reforma Tributária, encerra em {{2}}. Solicitamos seu retorno o quanto antes para a empresa {{3}}.
+Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Lembramos que o prazo para definição do regime Simples Nacional (regular ou híbrido), referente à Reforma Tributária, encerra em {{2}}. Solicitamos seu retorno o quanto antes para a empresa {{3}}. Aguardamos seu retorno.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = 30/09/2026 · {{3}} = Loja Exemplo
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Quero o híbrido | Resposta rápida: Prefiro o regular
 - Período de validade: não mexer
 - Enviar para análise
@@ -299,7 +299,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Reforçamos a importância de nos comunicar sempre que houver alguma alteração na empresa {{2}}, como novas plataformas de venda, troca de ERP ou novo tipo de emissão de nota fiscal.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Sem alterações | Resposta rápida: Tive alteração
 - Período de validade: não mexer
 - Enviar para análise
@@ -323,7 +323,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Estamos realizando uma atualização cadastral de rotina. Poderia confirmar se a empresa {{2}} continua emitindo notas pelo sistema {{3}}? Caso tenha havido alguma mudança, pedimos a gentileza de nos informar.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = Bling
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Continua o mesmo | Resposta rápida: Mudou
 - Período de validade: não mexer
 - Enviar para análise
@@ -347,7 +347,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. O certificado digital da empresa {{2}} está próximo do vencimento (ou pode já ter vencido). Trata-se de documento obrigatório para darmos continuidade à apuração. A renovação já foi providenciada?
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Já renovei | Resposta rápida: Preciso de ajuda
 - Período de validade: não mexer
 - Enviar para análise
@@ -371,7 +371,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Identificamos uma pendência cadastral na empresa {{2}}: {{3}}. Poderia nos auxiliar na resolução? Assim que possível, retorne para concluirmos a regularização.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = inscrição estadual pendente de atualização
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Vou resolver | Resposta rápida: Preciso de ajuda
 - Período de validade: não mexer
 - Enviar para análise
@@ -395,7 +395,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Concluímos o atendimento da empresa {{2}}. Em uma escala de 0 a 10, o quanto você recomendaria nosso atendimento fiscal?
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: 0 a 6 | Resposta rápida: 7 a 8 | Resposta rápida: 9 a 10 | [Descadastro de marketing] Parar de receber
 - Período de validade: não mexer
 - Enviar para análise
@@ -419,7 +419,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Informamos: {{2}}. Permanecemos à disposição para eventuais dúvidas.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = nosso atendimento fiscal agora é feito por este número oficial
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: [Descadastro de marketing] Parar de receber
 - Período de validade: não mexer
 - Enviar para análise
@@ -443,7 +443,7 @@ TELA 2 (Editar modelo)
 Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Também oferecemos suporte em {{2}} para empresas como a sua. Gostaria de receber mais informações?
 ```
 - Amostras: {{1}} = Larissa · {{2}} = abertura e alteração de empresas
-- Rodapé: Equipe Fiscal.
+- Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Quero saber mais | [Descadastro de marketing] Parar de receber
 - Período de validade: não mexer
 - Enviar para análise
