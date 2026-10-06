@@ -26,3 +26,11 @@ A) Agora: deixar o app na YOU, sem vídeo, e ligar só o Fiscal da YOU rápido. 
 B) Já fazer certo para várias empresas: passar o app para o portfólio da IT, verificar a IT, gravar os 2 vídeos,
    pedir a análise e montar o Cadastro Incorporado. A própria YOU entra como primeira cliente pelo cadastro.
    Mais demorado (análise da Meta leva dias), mas não precisa refazer depois.
+
+## Caso "tudo dentro da YOU" (pergunta do William, 06/10)
+Vários Javas (Fiscal, Societário, Financeiro...) com números diferentes, TODOS da YOU (mesmo CNPJ/portfólio):
+funciona com o app na YOU, sem vídeo (Direct Developer). Um app só, uma chave só; cada número é separado pelo
+"phone_number_id" (o banco do Fiscal já separa por número em wa_numero).
+Limite: empresa verificada pode ter até 20 números (não verificada: 2); acima disso, pedido à Meta (até 50).
+Fonte: https://api.support.vonage.com/hc/en-us/articles/13159743458460-WhatsApp-Platform-Phone-Number-Limits
+Condição: o app fica no portfólio da YOU. Empresas de outro CNPJ (BL, MK, 40%...) → caminho de Provedor de Tecnologia.
