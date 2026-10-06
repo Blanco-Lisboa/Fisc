@@ -1,4 +1,4 @@
-# Modelos do Fiscal — campo por campo, na ordem da tela da Meta (versão 3)
+# Modelos do Fiscal — campo por campo, na ordem da tela da Meta (versão 4 — todos com botão)
 
 Conta: Dep Fiscal You Contabilidade. Em todos: Idioma = Português (BR); Tipo de variável = Número; Período de validade = não mexer.
 {{1}} é sempre o nome do colaborador (o sistema preenche sozinho).
@@ -27,8 +27,8 @@ Para darmos início às apurações, precisamos confirmar três informações: o
 Fico no aguardo do seu retorno.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo Confecções Ltda · {{3}} = 12.345.678/0001-90
-- Rodapé: Equipe Fiscal
-- Botões: (nenhum)
+- Rodapé: Equipe Fiscal.
+- Botões: Resposta rápida: Vou enviar agora | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
 
@@ -102,7 +102,7 @@ Esses arquivos são necessários para darmos continuidade à apuração.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = setembro/2026
 - Rodapé: (deixar vazio)
-- Botões: (nenhum)
+- Botões: Resposta rápida: Vou enviar agora | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
 
@@ -150,7 +150,7 @@ Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Informamos que
 ```
 - Amostras: {{1}} = Larissa · {{2}} = junho/2026 · {{3}} = Loja Exemplo
 - Rodapé: (deixar vazio)
-- Botões: (nenhum)
+- Botões: Resposta rápida: Vou enviar o XML | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
 
@@ -176,7 +176,7 @@ Vencimento do DAS: {{6}}. Qualquer dúvida, estamos à disposição.
 ```
 - Amostras: {{1}} = Larissa · {{2}} = agosto/2026 · {{3}} = Loja Exemplo Confecções Ltda · {{4}} = 12.345.678/0001-90 · {{5}} = DAS, Relatório de Apuração, DARE do ICMS DIFAL, Relatório de Entradas, Relatório de Saídas · {{6}} = 21/09/2026
 - Rodapé: (deixar vazio)
-- Botões: (nenhum)
+- Botões: Resposta rápida: Recebido, obrigado | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
 
@@ -226,7 +226,7 @@ Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Conforme solic
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo
 - Rodapé: (deixar vazio)
-- Botões: (nenhum)
+- Botões: Resposta rápida: Recebido, obrigado | Resposta rápida: Tenho dúvidas
 - Período de validade: não mexer
 - Enviar para análise
 
@@ -300,7 +300,7 @@ Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Reforçamos a 
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo
 - Rodapé: (deixar vazio)
-- Botões: (nenhum)
+- Botões: Resposta rápida: Sem alterações | Resposta rápida: Tive alteração
 - Período de validade: não mexer
 - Enviar para análise
 
@@ -372,7 +372,7 @@ Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Identificamos 
 ```
 - Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = inscrição estadual pendente de atualização
 - Rodapé: (deixar vazio)
-- Botões: (nenhum)
+- Botões: Resposta rápida: Vou resolver | Resposta rápida: Preciso de ajuda
 - Período de validade: não mexer
 - Enviar para análise
 
