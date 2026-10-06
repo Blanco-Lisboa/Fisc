@@ -329,7 +329,7 @@ Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. Estamos realiz
 - Enviar para análise
 
 ---
-## Modelo 14 — fiscal_lembrete_certificado_digital
+## Modelo 14 — fiscal_aviso_vencimento_certificado
 
 TELA 1 (Configurar modelo)
 - Categoria: Utilidade
@@ -337,16 +337,16 @@ TELA 1 (Configurar modelo)
 - Avançar
 
 TELA 2 (Editar modelo)
-- Nome do modelo: fiscal_lembrete_certificado_digital
+- Nome do modelo: fiscal_aviso_vencimento_certificado
 - Idioma: Português (BR)
 - Tipo de variável: Número
 - Amostra de mídia: Nenhum
 - Cabeçalho: Departamento Fiscal
 - Corpo (copie tudo entre as linhas):
 ```
-Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. O certificado digital da empresa {{2}} está próximo do vencimento (ou pode já ter vencido). Trata-se de documento obrigatório para darmos continuidade à apuração. A renovação já foi providenciada?
+Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade. O certificado digital da empresa {{2}}, usado para transmitirmos as obrigações fiscais dela, vence em {{3}}. Sem ele não conseguimos entregar a apuração. Poderia confirmar se a renovação já foi providenciada?
 ```
-- Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo
+- Amostras: {{1}} = Larissa · {{2}} = Loja Exemplo · {{3}} = 15/10/2026
 - Rodapé: Equipe Fiscal
 - Botões: Resposta rápida: Já renovei | Resposta rápida: Preciso de ajuda
 - Período de validade: não mexer
