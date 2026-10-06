@@ -346,6 +346,7 @@ tr.rnovo:hover{background:#ffe6d6}
     <div class="it swa" data-view="whatsweb" onclick="irView('whatsweb')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.38 8.38 0 0 1-4-1L3 20l1-5.5a8.38 8.38 0 0 1-1-4A8.5 8.5 0 0 1 21 11.5z"/></svg></span> WhatsApp <span class="bd" id="waBadge">0</span></div>
   </div>
   <div class="it" data-view="pendencias" onclick="irView('pendencias')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 4a6 6 0 0 1 6 6v3l1.5 3h-15L6 13v-3a6 6 0 0 1 6-6zM10 19a2 2 0 0 0 4 0"/></svg></span> Pendências <span class="bd">7</span></div>
+  <div class="it" data-view="gestor" id="navGestor" style="display:none" onclick="irView('gestor')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span> Painel do Gestor</div>
   <div class="lab">FLUXO</div>
   <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd">2</span></div>
   <div class="lab">APOIO</div>
@@ -558,14 +559,16 @@ function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
 function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
 function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
-const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta'};
-function irView(v){view=v;render();}
+const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',gestor:'Painel do Gestor',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta'};
+function eGestor(){return eu&&['assistente','gerente'].includes(eu.nivel);}
+function irView(v){if(v==='gestor'&&!eGestor())v='whatsweb';view=v;render();}
+function renderGestor(){el('conteudo').innerHTML='';}
 function waPendentes(){return waEntrada.concat(waMeus).filter(c=>c.naoLidas>0).length;}
 function render(){
   document.querySelectorAll('.side .it[data-view]').forEach(e=>e.classList.toggle('on',e.dataset.view===view));
   const b=el('waBadge');if(b)b.textContent=waPendentes();
   el('crumbTitulo').textContent=TITULOS[view]||view;
-  ({apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA}[view])();
+  ({apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,gestor:renderGestor,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA}[view])();
 }
 
 /* ---------- APURAÇÃO (com abas: Apuração · Radar XML · Demanda em lote · Meu espaço) ---------- */
@@ -943,7 +946,7 @@ async function assumirWA(id){const r=await sb.from('wa_conversa').update({respon
 
 /* ---------- entrada ---------- */
 async function iniciarDados(){
- el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';
+ el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';el('navGestor').style.display=eGestor()?'':'none';
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa).subscribe();
