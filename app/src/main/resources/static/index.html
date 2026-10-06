@@ -568,6 +568,7 @@ function render(){
   document.querySelectorAll('.side .it[data-view]').forEach(e=>e.classList.toggle('on',e.dataset.view===view));
   const b=el('waBadge');if(b)b.textContent=waPendentes();
   el('crumbTitulo').textContent=TITULOS[view]||view;
+  document.querySelectorAll('.topo .proto,.topo .iaon,.topo .comp').forEach(e=>e.style.display=view==='gestor'?'none':'');
   ({apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,gestor:renderGestor,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA}[view])();
 }
 
