@@ -22,3 +22,12 @@ Regra (William): todos do Fiscal veem a Entrada; colaborador só envia/assume se
 | servidor | true |
 
 Atenção: fiscal_carteira está vazia (0 linhas) → hoje nenhum colaborador consegue enviar até a carteira ser preenchida.
+
+## Achados da checagem de segurança, corrigidos e testados
+| Caso | Resultado |
+|---|---|
+| anon chama fiscal_empresas_da_you (antes devolvia a lista de ids) | permission denied |
+| colaborador desfaz vínculo | ERRO (recusado) |
+| assistente desfaz em nome de outro | ERRO (recusado) |
+| assistente desfaz em nome próprio | true |
+| colaborador continua lendo fiscal_empresas_da_you | true |
