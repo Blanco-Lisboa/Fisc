@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
   const bl = await r.json();
   if (!bl?.id || !bl?.email) return json({ ok: false, erro: "login da BL invalido" }, 401);
 
-  const acesso = await admin.rpc("fiscal_acesso_bl", { p_usuario: bl.id });
+  const acesso = await admin.rpc("fiscal_usuario_sincronizar", { p_usuario: bl.id });
   if (acesso.error) {
     console.error("acesso", acesso.error.message);
     return json({ ok: false, erro: "nao foi possivel conferir o acesso" }, 500);

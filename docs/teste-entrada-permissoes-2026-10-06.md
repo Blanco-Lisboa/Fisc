@@ -31,3 +31,21 @@ Atenção: fiscal_carteira está vazia (0 linhas) → hoje nenhum colaborador co
 | assistente desfaz em nome de outro | ERRO (recusado) |
 | assistente desfaz em nome próprio | true |
 | colaborador continua lendo fiscal_empresas_da_you | true |
+
+## Nível vem da BL por aviso (não mais só no login)
+- BL: gatilhos em usuarios_internos (nivel/ativo/nome/email) e usuario_setores avisam a função fiscal-usuario-mudou.
+- Fiscal: fiscal-usuario-mudou relê a BL (fiscal_acesso_bl) e grava em fiscal_usuario; fiscal_nivel() lê dessa tabela.
+  A função não precisa de senha: ela só manda reler a fonte (BL), não aceita nível de quem chama.
+- Java: lê o nível de fiscal_usuario ao abrir e escuta mudanças (realtime) — menu muda na hora; desligado = sai.
+
+| Caso | Resultado |
+|---|---|
+| BL muda teste 2 para colaborador | Fiscal gravou colaborador (aviso chegou) |
+| BL volta teste 2 para assistente | Fiscal gravou assistente |
+| chamada com id inválido | 400 |
+| anon lê fiscal_usuario | 0 |
+| anon / logado chama fiscal_usuario_sincronizar | permission denied |
+| logado fora do Fiscal com JWT falso "gerente" | nível null, vê 0 usuários |
+| colaborador com JWT antigo "gerente" | nível real = colaborador; vê só a própria linha |
+| colaborador tenta se promover | 0 linhas |
+| teste 2 (assistente) | nível assistente; vê os 12 |

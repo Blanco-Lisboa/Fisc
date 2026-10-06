@@ -950,10 +950,13 @@ async function iniciarDados(){
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa).subscribe();
+ sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).subscribe();
  view='whatsweb';render();}
+function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}eu.nivel=n.nivel;el('euInfo').textContent=eu.nivel+' · Fiscal';el('navGestor').style.display=eGestor()?'':'none';if(view==='gestor'&&!eGestor())view='whatsweb';render();}
 (async()=>{const s=await fiscalSessaoAtual();if(!s){location.href='login.html';return;}
  sb=fiscalCliente();const m=s.user.app_metadata||{};eu={id:s.user.id,nome:m.nome||s.user.email,nivel:m.fiscal_nivel||''};
  sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')location.href='login.html';});
+ const u=await sb.from('fiscal_usuario').select('nivel,ativo').eq('id',eu.id).maybeSingle();if(!u.data||!u.data.ativo){fiscalSair();return;}eu.nivel=u.data.nivel;
  await iniciarDados();})();
 </script>
 </body>
