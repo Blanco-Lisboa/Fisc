@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IT.FC — Entrar</title>
+<title>Fiscal — Entrar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap">
@@ -110,8 +110,8 @@
 <div class="card">
 
   <div class="brand">
-    <div class="brand-mark">IT</div>
-    <div class="brand-name">IT.FC</div>
+    <div class="brand-mark">YOU</div>
+    <div class="brand-name">Fiscal</div>
   </div>
 
   <!-- ENTRAR -->
@@ -197,7 +197,8 @@
     const erro=document.getElementById('erroEntrar'),b=document.getElementById('btnEntrar');
     if(!email||!senha)return;
     erro.textContent='';b.disabled=true;
-    try{await fiscalEntrar(email,senha,document.getElementById('manter').checked);location.href='index.html';}
+    const manter=document.getElementById('manter').checked;
+    try{await fiscalEntrar(email,senha,manter);try{if(manter)localStorage.setItem('fiscal-ultimo-login',email);else localStorage.removeItem('fiscal-ultimo-login');}catch(e){}location.href='index.html';}
     catch(e){erro.textContent=e.message;b.disabled=false;}
   }
   async function recuperar(){
@@ -207,6 +208,7 @@
     document.getElementById('ajudaRec').textContent=r.error?'Não foi possível enviar o link.':'Link enviado para '+email+'.';
     b.disabled=false;
   }
+  try{const u=localStorage.getItem('fiscal-ultimo-login');if(u){document.getElementById('email').value=u;document.getElementById('manter').checked=true;document.getElementById('senha').focus();}}catch(e){}
   fiscalSessaoAtual().then(s=>{if(s)location.href='index.html';});
 </script>
 
