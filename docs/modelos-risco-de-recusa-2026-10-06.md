@@ -23,3 +23,11 @@ Regras conferidas (relatos de usuários e guias de provedores, 2025-2026):
 ## Se acontecer
 - Virou Marketing: refazer com nome novo e texto amarrado a um fato do cliente (como foi feito no certificado).
 - Recusado: a Meta devolve o motivo; ajustar e reenviar (pode editar o recusado sem trocar o nome).
+
+## Fontes
+- https://www.spurnow.com/en/blogs/why-are-my-whatsapp-templates-getting-rejected
+- https://asisteclick.com/en/blog/plantillas-whatsapp-rechazadas-meta-7-errores/
+- https://learn.turn.io/l/en/article/hih36ejoqy-how-to-get-your-whats-app-template-reclassified-from-marketing-to-utility
+- https://sdcsupport.syniverse.com/hc/en-us/articles/30569685832471-How-to-avoid-too-many-parameters-rejection-in-WhatsApp-Templates
+- https://developers.facebook.com/docs/whatsapp/updates-to-pricing/new-template-guidelines/
+- https://m.aisensy.com/blog/utility-whatsapp-templates-best-examples/
