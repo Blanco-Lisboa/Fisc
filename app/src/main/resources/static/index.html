@@ -412,8 +412,6 @@ tr.rnovo:hover{background:#ffe6d6}
 <div class="main">
   <div class="topo">
     <div class="crumb">Início <span class="sep">›</span> <b id="crumbTitulo">Apuração</b></div>
-    <span class="proto">PROTÓTIPO · dados fictícios</span>
-    <span class="iaon"><span class="pt"></span> IA (opcional)</span>
     <div class="cresce"></div>
     <div class="comp"><button onclick="mudarComp(-1)">‹</button><span class="v" id="compV">Setembro / 2026</span><button onclick="mudarComp(1)">›</button></div>
   </div>
@@ -822,7 +820,7 @@ function render(){
   const b=el('waBadge');if(b)b.textContent=waPendentes();
   el('crumbTitulo').textContent=TITULOS[view]||view;
   document.querySelector('.topo .crumb').style.display='none';
-  document.querySelector('.topo').style.display=(view==='gestor'||view==='central')?'none':'';
+  document.querySelector('.topo').style.display='none';
   ({apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA}[view])();
 }
 
@@ -836,6 +834,7 @@ function renderApuracao(){
       <button class="${apuAba==='radar'?'on':''}" onclick="setApuAba('radar')">Radar XML ${nv?`<span class="nb">${nv}</span>`:''}</button>
     </div>
     <div class="aputabs-r">
+      <div class="comp"><button onclick="mudarComp(-1)">‹</button><span class="v" id="compV">${MESES[comp.mes]+' / '+comp.ano}</span><button onclick="mudarComp(1)">›</button></div>
       <button class="apubtn" onclick="modalLote()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Em lote</button>
       <button class="apubtn" onclick="modalEspaco()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.2l1-5.8L3.5 9.2l5.9-.9z"/></svg> Meu espaço</button>
     </div>
