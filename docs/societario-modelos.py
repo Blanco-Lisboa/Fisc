@@ -20,7 +20,7 @@ M = [
   A+"Para darmos andamento a {{2}} da empresa {{3}}, é necessário o pagamento da guia (DARE) em anexo, referente à Junta Comercial. Poderia nos enviar o comprovante assim que possível?",
   ["Vou pagar e enviar","Tenho dúvidas"],["João","baixa da filial","Loja Exemplo"],None),
  ("societario_pedido_codigo_viabilidade","Utilidade",None,
-  A+"Assim que estiver com o código da consulta de viabilidade da empresa {{2}}, poderia nos encaminhar? Precisamos dele para dar continuidade ao processo.",
+  A+"Assim que a consulta de viabilidade da empresa {{2}} for respondida pela prefeitura, por gentileza nos encaminhe o número do protocolo, para darmos continuidade ao processo.",
   ["Vou enviar agora","Ainda não tenho"],["João","Loja Exemplo"],None),
  ("societario_atualizacao_status_processo","Utilidade",None,
   A+"Atualização sobre o processo da empresa {{2}}: {{3}}.\n\nSeguimos acompanhando e avisaremos sobre os próximos passos.",
