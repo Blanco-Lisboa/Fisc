@@ -32,3 +32,10 @@
 - https://docs.livekit.io/home/self-hosting/benchmark/
 - https://selfhostedworld.com/software/jitsi-meet · https://www.opentechhub.io/jitsi-meet/
 - https://openvidu.io/3.8/docs/self-hosting/production-ready/performance/
+
+## Correção (07/10/2026, depois da pergunta do William)
+- O que é pago é o **LiveKit Cloud** (hospedado por eles). O servidor LiveKit instalado na nossa VPS é gratuito, Apache 2.0, sem limite de pessoas nem recurso bloqueado (fonte: getstream.io/glossary/livekit, docs.livekit.io/intro/cloud).
+- Mesmo assim, como o pedido é um **modelo pronto** do GitHub: **Jitsi Meet — github.com/jitsi/docker-jitsi-meet** (3,6 mil estrelas, Apache 2.0, "100% open source", sem plano pago).
+  Já vem completo: sala de reunião com voz, vídeo, várias pessoas, compartilhar tela, levantar a mão, chat; instala com Docker na VPS.
+  No Team's: os botões Chamar/Vídeo abrem a sala do Jitsi daquela conversa dentro da janela (API de janela embutida do Jitsi), e o aviso de "tocando" continua pelo canal que já existe.
+  Lado ruim: a tela da reunião é a do Jitsi (não a nossa) e ele é mais pesado que o LiveKit.
