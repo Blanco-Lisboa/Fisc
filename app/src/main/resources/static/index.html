@@ -562,7 +562,16 @@ function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;re
 const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',gestor:'Painel do Gestor',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta'};
 function eGestor(){return eu&&['assistente','gerente'].includes(eu.nivel);}
 function irView(v){if(v==='gestor'&&!eGestor())v='whatsweb';view=v;render();}
-function renderGestor(){el('conteudo').innerHTML='';}
+let gestorAba='central';
+function setGestorAba(a){gestorAba=a;renderGestor();}
+function renderGestor(){
+ const ab=[['central','Central'],['mapa','Mapa do Departamento'],['clientes','Clientes']];
+ el('conteudo').innerHTML=`
+  <div class="aputabs">
+    <div class="aputabs-l">${ab.map(([k,t])=>`<button class="${gestorAba===k?'on':''}" onclick="setGestorAba('${k}')">${t}</button>`).join('')}</div>
+  </div>
+  <div class="apuBody" id="gestorBody"></div>`;
+}
 function waPendentes(){return waEntrada.concat(waMeus).filter(c=>c.naoLidas>0).length;}
 function render(){
   document.querySelectorAll('.side .it[data-view]').forEach(e=>e.classList.toggle('on',e.dataset.view===view));
