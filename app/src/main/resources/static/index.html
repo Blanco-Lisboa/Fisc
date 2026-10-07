@@ -257,12 +257,18 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .wa-comp input{flex:1;border:1px solid var(--bordaF);border-radius:999px;padding:11px 15px;font-size:12.5px;font-family:inherit;outline:0;background:var(--superf2)}
 .wa-comp .snd{width:40px;height:40px;border-radius:999px;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;font-size:15px;flex:none;cursor:pointer}
 .wa-lock{padding:12px;text-align:center;color:var(--apagado);font-size:11px;border-top:1px solid var(--borda);background:#fff;flex:none}
-.tm-bol{position:fixed;right:24px;bottom:92px;width:54px;height:54px;border-radius:999px;border:0;background:var(--grad);color:#fff;display:grid;place-items:center;box-shadow:var(--md);z-index:65;cursor:pointer}
-.tm-bol svg{width:24px;height:24px}
+.tm-bol{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:999px;border:0;padding:0;background:#fff;display:grid;place-items:center;box-shadow:var(--md);z-index:65;cursor:pointer;transition:bottom .2s}
+.tm-bol.alto{bottom:92px}.tm-bol img{width:40px;height:40px}
+.tm-srchmais{display:flex;gap:8px;align-items:center}.tm-srchmais input{flex:1}
+.tm-mais{width:34px;height:34px;flex:none;border-radius:999px;border:0;background:var(--grad);color:#fff;font-size:18px;font-weight:700;display:grid;place-items:center;cursor:pointer}
+.tm-novacab{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--borda);flex:none;background:var(--pagina)}
+.tm-novacab button{border:0;background:transparent;font-size:20px;color:var(--apoio);padding:0 4px}.tm-novacab b{font-size:13.5px}
+.tm-filtros{display:flex;gap:8px;padding:0 10px 10px;border-bottom:1px solid var(--borda);flex:none;background:var(--pagina)}
+.tm-filtros select{flex:1;min-width:0;border:1px solid var(--borda);border-radius:999px;padding:6px 10px;font-size:11.5px;font-family:inherit;background:var(--superf2);outline:0}
 .tm-bolb{position:absolute;top:-3px;right:-3px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--vermelho);color:#fff;font-size:10.5px;font-weight:700;display:grid;place-items:center;border:2px solid #fff}
-.tm-flut{position:fixed;right:24px;bottom:158px;width:430px;height:500px;max-height:calc(100vh - 180px);background:#efe7de;border-radius:16px;box-shadow:var(--md);display:flex;flex-direction:column;overflow:hidden;z-index:66;opacity:0;transform:translateY(24px);transition:opacity .16s,transform .18s}
+.tm-flut{position:fixed;right:24px;bottom:92px;width:430px;height:500px;max-height:calc(100vh - 180px);background:#efe7de;border-radius:16px;box-shadow:var(--md);display:flex;flex-direction:column;overflow:hidden;z-index:66;opacity:0;transform:translateY(24px);transition:opacity .16s,transform .18s}
 .tm-flut.on{opacity:1;transform:none}.tm-flut.sai{opacity:0;transform:translateY(24px)}
-.tm-flut .rl{background:var(--pagina)}.tm-flut .wa-head .wa-hbtn{font-size:15px}
+.tm-flut .rl{background:var(--pagina)}.tm-flut .srch{padding:10px;border-bottom:1px solid var(--borda);flex:none;background:var(--pagina)}.tm-flut .srch input{width:100%;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:8px 13px;font-size:12px;outline:0;font-family:inherit}.tm-flut .wa-head .wa-hbtn{font-size:15px}
 .tm-eu{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--borda);flex:none}
 .tm-eu b{font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tm-eu select{margin-top:3px;border:1px solid var(--borda);border-radius:999px;padding:3px 9px;font-size:11px;font-family:inherit;background:var(--superf2);outline:0}
@@ -1149,21 +1155,51 @@ function renderTeams(){
 function tmDesenharTudo(){tmDesenharLista();if(tmAba==='avisos')tmAbrirAvisos();else if(tmAba==='pedidos')tmAbrirPedidos();else if(tmAba==='reunioes')tmAbrirReunioes();else tmDesenharConversa();}
 function tmItem(id,nome,sub,av,n,on,fn){return `<div class="waconv ${on?'sel':''}" onclick="${fn}"><div class="av" style="background:${av.cor};position:relative">${av.html}${av.pres?`<span class="tm-pres" style="background:${av.pres}"></span>`:''}</div><div style="flex:1;min-width:0"><div class="nm"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(nome)}</span><span class="hr">${escH(sub.h||'')}</span></div><div style="display:flex;gap:6px;align-items:center"><div class="last" style="flex:1">${escH(sub.t||'')}</div>${n?`<span class="un">${n}</span>`:''}</div></div></div>`;}
 function tmPrevia(c){const u=c.ultima;if(!u)return {t:'',h:''};const quem=u.autor_id===eu.id?'Você: ':(c.tipo!=='direta'?tmPessoa(u.autor_id).nome.split(' ')[0]+': ':'');return {t:quem+(u.tipo==='audio'?'🎤 Áudio':u.tipo==='arquivo'?'📎 '+(u.corpo||'Arquivo'):u.tipo==='pedido'?'📌 '+(u.corpo||'Pedido'):(u.corpo||'')),h:u.em?hhmm(u.em):''};}
+let tmNova=false,tmNovaBusca='',tmNovaDep='',tmNovaNivel='';
+const TM_NIVEL={ceo:'CEO',diretor:'Diretor',gerente:'Gerente',assistente:'Assistente',colaborador:'Colaborador'};
+function tmNivelNome(n){return TM_NIVEL[n]||(n?n.charAt(0).toUpperCase()+n.slice(1):'');}
+function tmCaixa(){
+ const t=tmBusca.trim().toLowerCase();
+ return tmCanais.filter(c=>!t||tmNomeCanal(c).toLowerCase().includes(t)||String((c.ultima||{}).corpo||'').toLowerCase().includes(t))
+  .sort((a,b)=>new Date((b.ultima||{}).em||0)-new Date((a.ultima||{}).em||0));
+}
+function tmItemCanal(c,on,fn){const nm=tmNomeCanal(c);let av={cor:tmCor(nm),html:escH(tmIni(nm))};
+ if(c.tipo==='grupo')av.html=ICO_GRUPO;
+ if(c.tipo==='direta'){const o=(c.membros||[]).find(x=>x!==eu.id);const pe=tmPessoa(o);if(pe.foto_url)av.html=`<img src="${escH(pe.foto_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;av.pres=(TM_ST[tmPres[o]||'offline']||TM_ST.offline)[1];}
+ return tmItem(c.id,nm,tmPrevia(c),av,c.silenciado?0:c.nao_lidas,on,fn);}
+function tmNovaHtml(flut){
+ const t=tmNovaBusca.trim().toLowerCase();const ps=(tmEquipe&&tmEquipe.pessoas||[]).filter(p=>p.id!==eu.id);
+ const niveis=[...new Set(ps.map(p=>p.nivel).filter(Boolean))].sort((a,b)=>Object.keys(TM_NIVEL).indexOf(a)-Object.keys(TM_NIVEL).indexOf(b));
+ const lista=ps.filter(p=>(!t||p.nome.toLowerCase().includes(t)||(p.setores||[]).some(s=>tmSetorNome(s).toLowerCase().includes(t))||tmNivelNome(p.nivel).toLowerCase().includes(t))
+  &&(!tmNovaDep||(p.setores||[]).includes(tmNovaDep))&&(!tmNovaNivel||p.nivel===tmNovaNivel));
+ const setores=(tmEquipe&&tmEquipe.setores||[]).filter(s=>(!tmNovaDep||s.id===tmNovaDep)&&(!t||s.nome.toLowerCase().includes(t))&&!tmNovaNivel);
+ const pf=flut?'tmFlut':'tm';
+ return `<div class="tm-novacab"><button onclick="tmNova=false;${flut?'tmFlutDesenhar()':'tmDesenharLista()'}">‹</button><b>Nova conversa</b></div>
+  <div class="srch"><input id="${pf}nb" placeholder="🔎  Buscar por nome, departamento ou nível" value="${escH(tmNovaBusca)}" oninput="tmNovaBusca=this.value;tmNovaRedesenhar(${flut})"></div>
+  <div class="tm-filtros"><select onchange="tmNovaDep=this.value;tmNovaRedesenhar(${flut})"><option value="">Todos os departamentos</option>${(tmEquipe&&tmEquipe.setores||[]).map(s=>`<option value="${s.id}" ${s.id===tmNovaDep?'selected':''}>${escH(s.nome)}</option>`).join('')}</select><select onchange="tmNovaNivel=this.value;tmNovaRedesenhar(${flut})"><option value="">Todos os níveis</option>${niveis.map(n=>`<option value="${escH(n)}" ${n===tmNovaNivel?'selected':''}>${escH(tmNivelNome(n))}</option>`).join('')}</select></div>
+  <div class="rl" style="flex:1;overflow-y:auto;background:var(--pagina)">
+   ${!t&&!tmNovaDep&&!tmNovaNivel?`<div class="waconv" onclick="tmNovoGrupo()"><div class="av" style="background:var(--grad)">${ICO_GRUPO}</div><div style="flex:1"><div class="nm"><span>Novo grupo</span></div></div></div>`:''}
+   ${setores.length?`<div class="tm-sec">Departamentos</div>${setores.map(s=>tmItem(s.id,s.nome,{t:(n=>n+(n===1?' pessoa':' pessoas'))((tmEquipe.pessoas||[]).filter(p=>(p.setores||[]).includes(s.id)).length),h:''},{cor:tmCor(s.nome),html:escH(tmIni(s.nome))},0,false,`tmNovaSetor('${s.id}',${flut})`)).join('')}`:''}
+   ${lista.length?`<div class="tm-sec">Contatos</div>${lista.map(p=>tmItem(p.id,p.nome,{t:[tmNivelNome(p.nivel),(p.setores||[]).map(tmSetorNome).join(', ')].filter(Boolean).join(' · '),h:''},{cor:tmCor(p.nome),html:p.foto_url?`<img src="${escH(p.foto_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:escH(tmIni(p.nome)),pres:(TM_ST[tmPres[p.id]||'offline']||TM_ST.offline)[1]},0,false,`tmNovaPessoa('${p.id}',${flut})`)).join('')}`:''}
+  </div>`;
+}
+function tmNovaRedesenhar(flut){const id=(flut?'tmFlut':'tm')+'nb';const i=el(id);const pos=i?i.selectionStart:null;
+ if(flut)tmFlutDesenhar();else tmDesenharLista();
+ const j=el(id);if(j&&pos!=null){j.focus();j.setSelectionRange(pos,pos);}}
+function tmAbrirNova(flut){tmNova=true;tmNovaBusca='';tmNovaDep='';tmNovaNivel='';if(flut)tmFlutDesenhar();else tmDesenharLista();const i=el((flut?'tmFlut':'tm')+'nb');if(i)i.focus();}
+async function tmNovaPessoa(pid,flut){tmNova=false;if(!flut){tmAbrirDireta(pid);return;}
+ const r=await tm.rpc('chat_abrir_direta',{p_outro:pid});if(r.error){toast('Não foi possível abrir a conversa.');return;}await tmCarregarCanais();tmFlutAbrirCanal(r.data);}
+function tmNovaSetor(sid,flut){tmNova=false;if(flut)tmFlutAbrirSetor(sid);else tmAbrirSetor(sid);}
 function tmDesenharLista(){
- const box=el('tmLista');if(!box)return;const t=tmBusca.trim().toLowerCase();const f=n=>!t||String(n).toLowerCase().includes(t);
+ const box=el('tmLista');if(!box)return;
  const meuSt=tmPres[eu.id]||'online';
- const setores=(tmEquipe&&tmEquipe.setores||[]).filter(s=>f(s.nome)).map(s=>{const c=tmCanais.find(x=>x.tipo==='setor'&&x.setor_id===s.id);const n=c&&!c.silenciado?c.nao_lidas:0;
-  return tmItem(s.id,s.nome,c?tmPrevia(c):{t:(n=>n+(n===1?' pessoa':' pessoas'))((tmEquipe.pessoas||[]).filter(p=>(p.setores||[]).includes(s.id)).length),h:''},{cor:tmCor(s.nome),html:escH(tmIni(s.nome))},n,c&&tmSel===c.id&&tmAba==='conversas',`tmAbrirSetor('${s.id}')`);}).join('');
- const diretas=tmCanais.filter(c=>c.tipo==='direta'&&f(tmNomeCanal(c))).sort((a,b)=>new Date((b.ultima||{}).em||0)-new Date((a.ultima||{}).em||0)).map(c=>{const o=(c.membros||[]).find(x=>x!==eu.id);const pe=tmPessoa(o);
-  return tmItem(c.id,pe.nome,tmPrevia(c),{cor:tmCor(pe.nome),html:pe.foto_url?`<img src="${escH(pe.foto_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:escH(tmIni(pe.nome)),pres:(TM_ST[tmPres[o]||'offline']||TM_ST.offline)[1]},c.silenciado?0:c.nao_lidas,tmSel===c.id&&tmAba==='conversas',`tmAbrirCanal('${c.id}')`);}).join('');
- const grupos=tmCanais.filter(c=>c.tipo==='grupo'&&f(c.nome)).map(c=>tmItem(c.id,c.nome,tmPrevia(c),{cor:tmCor(c.nome),html:ICO_GRUPO},c.silenciado?0:c.nao_lidas,tmSel===c.id&&tmAba==='conversas',`tmAbrirCanal('${c.id}')`)).join('');
- const pessoas=t?(tmEquipe&&tmEquipe.pessoas||[]).filter(p=>p.id!==eu.id&&f(p.nome)&&!tmCanais.some(c=>c.tipo==='direta'&&(c.membros||[]).includes(p.id))).map(p=>tmItem(p.id,p.nome,{t:(p.setores||[]).map(tmSetorNome).join(', '),h:''},{cor:tmCor(p.nome),html:escH(tmIni(p.nome)),pres:(TM_ST[tmPres[p.id]||'offline']||TM_ST.offline)[1]},0,false,`tmAbrirDireta('${p.id}')`)).join(''):'';
  const ferr=(id,tit)=>`<button class="${tmAba===id?'on':''}" onclick="tmIrAba('${id}')">${tit}</button>`;
+ const topo=`<div class="tm-eu"><div class="av" style="width:36px;height:36px;font-size:12px;background:${tmCor(eu.nome)}">${escH(tmIni(eu.nome))}</div><div style="flex:1;min-width:0"><b>${escH(eu.nome)}</b><select onchange="tmMudarStatus(this.value)">${Object.keys(TM_ST).filter(k=>k!=='offline').map(k=>`<option value="${k}" ${k===meuSt?'selected':''}>${TM_ST[k][0]}</option>`).join('')}</select></div></div>
+  <div class="watabs">${ferr('conversas','Conversas')}${ferr('avisos','Avisos')}${ferr('pedidos','Pedidos')}${ferr('reunioes','Reuniões')}</div>`;
+ if(tmNova){box.innerHTML=topo+tmNovaHtml(false);return;}
  const busca=el('tmbusca');const foco=busca&&document.activeElement===busca;
- box.innerHTML=`<div class="tm-eu"><div class="av" style="width:36px;height:36px;font-size:12px;background:${tmCor(eu.nome)}">${escH(tmIni(eu.nome))}</div><div style="flex:1;min-width:0"><b>${escH(eu.nome)}</b><select onchange="tmMudarStatus(this.value)">${Object.keys(TM_ST).filter(k=>k!=='offline').map(k=>`<option value="${k}" ${k===meuSt?'selected':''}>${TM_ST[k][0]}</option>`).join('')}</select></div></div>
-  <div class="watabs">${ferr('conversas','Conversas')}${ferr('avisos','Avisos')}${ferr('pedidos','Pedidos')}${ferr('reunioes','Reuniões')}</div>
-  <div class="srch"><input id="tmbusca" placeholder="🔎  Buscar pessoa, setor ou grupo" value="${escH(tmBusca)}" oninput="tmBusca=this.value;tmDesenharLista()"></div>
-  <div class="rl">${pessoas?`<div class="tm-sec">Pessoas</div>${pessoas}`:''}${setores||!t?`<div class="tm-sec">Setores</div>${setores}`:''}${diretas||!t?`<div class="tm-sec">Diretas<button onclick="tmNovaDireta()" title="Nova conversa">＋</button></div>${diretas}`:''}${grupos||!t?`<div class="tm-sec">Grupos<button onclick="tmNovoGrupo()" title="Novo grupo">＋</button></div>${grupos}`:''}</div>`;
+ box.innerHTML=topo+`<div class="srch tm-srchmais"><input id="tmbusca" placeholder="🔎  Buscar conversa" value="${escH(tmBusca)}" oninput="tmBusca=this.value;tmDesenharLista()"><button class="tm-mais" title="Nova conversa" onclick="tmAbrirNova(false)">＋</button></div>
+  <div class="rl">${tmCaixa().map(c=>tmItemCanal(c,tmSel===c.id&&tmAba==='conversas',`tmAbrirCanal('${c.id}')`)).join('')}</div>`;
  if(foco){const b=el('tmbusca');b.focus();b.setSelectionRange(b.value.length,b.value.length);}
 }
 function tmIrAba(a){tmAba=a;tmDesenharTudo();}
@@ -1363,7 +1399,8 @@ async function tmCriarReuniao(){
 let tmFlutAberto=false,tmFlutCanal=null;
 function tmBolinha(){
  let b=el('tmBol');
- if(!b){b=document.createElement('button');b.id='tmBol';b.className='tm-bol';b.title="Team's";b.onclick=tmFlutAlternar;b.innerHTML=`${ICO_GRUPO}<span class="tm-bolb" id="tmBolB"></span>`;document.body.appendChild(b);}
+ if(!b){b=document.createElement('button');b.id='tmBol';b.className='tm-bol';b.title="Team's";b.onclick=tmFlutAlternar;b.innerHTML=`<img src="img/teams-bolinha.png" alt=""><span class="tm-bolb" id="tmBolB"></span>`;document.body.appendChild(b);}
+ b.classList.toggle('alto',view==='whatsweb');
  const mostra=tmPronto&&view!=='teams';b.style.display=mostra?'':'none';
  if(!mostra&&tmFlutAberto)tmFlutFechar();
  const n=tmNaoLidasTotal();const bb=el('tmBolB');if(bb){bb.textContent=n>99?'99+':n;bb.style.display=n?'':'none';}
@@ -1378,12 +1415,9 @@ function tmFlutFechar(){tmFlutAberto=false;const f=el('tmFlut');if(!f)return;f.c
 function tmFlutDesenhar(){
  const f=el('tmFlut');if(!f)return;const c=tmFlutCanal?tmCanais.find(x=>x.id===tmFlutCanal):null;
  const cab=`<div class="wa-head">${c?`<button class="wa-hbtn" onclick="tmFlutCanal=null;tmFlutDesenhar()">‹</button><span class="avc">${c.tipo==='grupo'?ICO_GRUPO:escH(tmIni(tmNomeCanal(c)))}</span>`:`<span class="avc">${ICO_GRUPO}</span>`}<div class="nm"><b>${escH(c?tmNomeCanal(c):"Team's")}</b><span>${c?'':escH(tmNaoLidasTotal()+' não lidas')}</span></div><button class="wa-hbtn" title="Abrir o Team's" onclick="tmFlutExpandir()">⤢</button><button class="wa-hbtn" onclick="tmFlutFechar()">✕</button></div>`;
+ if(!c&&tmNova){f.innerHTML=cab+`<div style="flex:1;min-height:0;display:flex;flex-direction:column;background:var(--pagina)">${tmNovaHtml(true)}</div>`;return;}
  if(!c){
-  const t=(tmBusca||'').trim().toLowerCase();
-  const canais=tmCanais.filter(x=>x.ultima||x.nao_lidas).sort((a,b)=>new Date((b.ultima||{}).em||0)-new Date((a.ultima||{}).em||0));
-  const setores=(tmEquipe&&tmEquipe.setores||[]).filter(s=>!canais.some(x=>x.tipo==='setor'&&x.setor_id===s.id));
-  f.innerHTML=cab+`<div class="rl" style="flex:1;overflow-y:auto">${canais.map(x=>{const nm=tmNomeCanal(x);return tmItem(x.id,nm,tmPrevia(x),{cor:tmCor(nm),html:x.tipo==='grupo'?ICO_GRUPO:escH(tmIni(nm))},x.silenciado?0:x.nao_lidas,false,`tmFlutAbrirCanal('${x.id}')`);}).join('')}
-   ${setores.length?`<div class="tm-sec">Setores</div>${setores.map(s=>tmItem(s.id,s.nome,{t:'',h:''},{cor:tmCor(s.nome),html:escH(tmIni(s.nome))},0,false,`tmFlutAbrirSetor('${s.id}')`)).join('')}`:''}</div>`;
+  f.innerHTML=cab+`<div class="srch tm-srchmais" style="background:var(--pagina)"><input id="tmfbusca" placeholder="🔎  Buscar conversa" value="${escH(tmBusca)}" oninput="tmBusca=this.value;tmFlutDesenhar();const b=el('tmfbusca');b.focus();b.setSelectionRange(b.value.length,b.value.length)"><button class="tm-mais" title="Nova conversa" onclick="tmAbrirNova(true)">＋</button></div><div class="rl" style="flex:1;overflow-y:auto">${tmCaixa().map(x=>tmItemCanal(x,false,`tmFlutAbrirCanal('${x.id}')`)).join('')}</div>`;
   return;}
  f.innerHTML=cab+`<div class="wa-msgs" id="tmfms"></div><div class="wa-comp"><input id="tmfin" placeholder="Mensagem" onkeydown="if(event.key==='Enter')tmFlutEnviar()"><button class="snd" onclick="tmFlutEnviar()">➤</button></div>`;
  if(!tmMsgs[c.id])tmCarregarMsgs(c.id).then(()=>tmDesenharMsgs('tmfms',c.id));else tmDesenharMsgs('tmfms',c.id);
