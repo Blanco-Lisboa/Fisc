@@ -2,9 +2,9 @@ import json, sys
 A = "Olá, aqui é {{1}}, do Departamento de Legalização da YOU Contabilidade.\n\n"
 DOC = "DOC"
 M = [
- ("legal_boas_vindas_cliente","Utilidade",None,
-  A+"Estou à disposição para auxiliar em dúvidas ou necessidades referentes a este departamento, relacionadas à empresa {{2}}.\n\nFico no aguardo do seu retorno.",
-  ["Tenho uma dúvida","Tudo certo, obrigado"],["Bruna","Loja Exemplo Confecções Ltda"]),
+ ("legal_inicio_responsavel_empresa","Utilidade",None,
+  A+"A partir de agora, sou a pessoa responsável pelos processos de legalização da empresa {{2}} (CNPJ {{3}}) junto à prefeitura, à Junta Comercial e à Receita Federal.\n\nFico no aguardo do seu retorno.",
+  ["Tenho uma dúvida","Tudo certo, obrigado"],["Bruna","Loja Exemplo Confecções Ltda","12.345.678/0001-90"]),
  ("legal_entrega_parcela_acordo","Utilidade",DOC,
   A+"Segue em anexo a parcela referente ao parcelamento de {{2}} da empresa {{3}} (CNPJ {{4}}).\n\nValor: {{5}}\nParcela: {{6}}\nVencimento: {{7}}\n\nQualquer dúvida, estamos à disposição.",
   ["Recebido, obrigado","Tenho dúvidas"],["Bruna","Simples Nacional - Dívida Ativa","Loja Exemplo Confecções Ltda","12.345.678/0001-90","R$ 58,63","15/57","30/06/2026"]),
