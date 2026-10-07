@@ -335,6 +335,53 @@ tr.rnovo:hover{background:#ffe6d6}
 .mbody .fl:first-child{margin-top:0}
 .mbody .fi{width:100%;border:1px solid var(--borda);border-radius:9px;padding:9px 11px;font-size:12.5px;font-family:inherit;outline:0}
 .mbody .fi:focus{border-color:var(--laranja)}
+
+.cg{display:flex;flex-direction:column;gap:18px}
+.cg-sec{display:flex;flex-direction:column;gap:10px}
+.cg-cab{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.cg-cab h2{font-family:var(--disp);font-size:15px;margin:0}
+.cg-sub{font-size:11.5px;color:var(--apagado);margin-top:2px}
+.cg-card{background:var(--pagina);border:1px solid var(--borda);border-radius:var(--r);box-shadow:var(--sm);padding:16px;min-width:0}
+.cg-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.cg-kpi .rot{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--apagado);font-weight:600}
+.cg-kpi .val{font-family:var(--disp);font-size:34px;font-weight:700;line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums}
+.cg-kpi .rod{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:11.5px;color:var(--apoio)}
+.cg-delta{font-weight:700;border-radius:999px;padding:1px 8px;font-size:11px}
+.cg-delta.ruim{background:var(--vermelhoSv);color:var(--vermelho)}.cg-delta.bom{background:var(--verdeSv);color:var(--verde)}
+.cg-alertas{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.cg-alerta{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:6px;padding-left:20px}
+.cg-alerta.clic{cursor:pointer}
+.cg-alerta::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--cor)}
+.cg-alerta .cg-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cg-alerta .n{font-family:var(--disp);font-size:28px;font-weight:700;color:var(--cor);font-variant-numeric:tabular-nums}
+.cg-alerta b{font-size:13px}.cg-alerta .d{font-size:11.5px;color:var(--apagado)}
+.cg-alerta .ver{font-size:11.5px;color:var(--laranjaTx);font-weight:600;margin-top:auto}
+.cg-sev{font-size:10px;font-weight:700;border-radius:999px;padding:2px 8px;background:var(--fundo);color:var(--cor);text-transform:uppercase;letter-spacing:.05em}
+.cg-ciclo{display:flex;flex-direction:column;gap:16px}
+.cg-etapa{display:grid;grid-template-columns:190px 1fr 150px;gap:14px;align-items:center}
+.cg-etapa .nm b{font-size:13px;display:block}.cg-etapa .nm span{font-size:11px;color:var(--apagado)}
+.cg-barra{position:relative;height:22px;border-radius:7px;background:var(--superf2);display:flex}
+.cg-barra .s{height:100%}.cg-barra .s:first-child{border-radius:7px 0 0 7px}
+.cg-ok{background:var(--verde)}.cg-and{background:var(--azul)}.cg-atr{background:var(--vermelho)}
+.cg-hoje{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink)}
+.cg-hoje::after{content:"hoje";position:absolute;top:-16px;left:-12px;font-size:10px;color:var(--apagado)}
+.cg-etapa .num{font-size:12px;text-align:right;font-variant-numeric:tabular-nums}.cg-etapa .num b{font-size:15px;font-family:var(--disp)}
+.cg-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--apoio)}
+.cg-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.cg-duas{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
+.cg-colunas{display:flex;align-items:flex-end;gap:16px;height:170px;padding-top:18px;border-bottom:1px solid var(--borda)}
+.cg-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+.cg-col .v{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.cg-col .c{width:100%;max-width:56px;border-radius:6px 6px 0 0;background:var(--nevoa)}
+.cg-col.atual .c{background:var(--laranja)}
+.cg-rotcol{display:flex;gap:16px}.cg-rotcol span{flex:1;text-align:center;font-size:11px;color:var(--apagado)}
+.cg-carga{display:flex;flex-direction:column;gap:7px}
+.cg-lin{display:grid;grid-template-columns:130px 1fr 42px;gap:10px;align-items:center;font-size:12px}
+.cg-lin .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cg-lin .b{height:12px;border-radius:6px;background:var(--superf2);position:relative}
+.cg-lin .b i{position:absolute;top:0;bottom:0;left:0;border-radius:6px}
+.cg-lin .b em{position:absolute;top:-4px;bottom:-4px;width:0;border-left:2px dashed var(--apagado)}
+.cg-lin b{text-align:right;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -586,32 +633,59 @@ function renderGestor(){
 }
 /* ---------- central do gestor ---------- */
 let centralDados=null;
-const ALERTAS_GESTOR=[['ciclo','Tarefa recorrente atravessou o ciclo','ciclo seguinte já começou e a tarefa anterior segue aberta'],['prazo','Prazo apertando sem resposta','XML pendente perto do fechamento (dia 31), sem mensagem há 48h+'],['respondeu','Cliente respondeu, time não andou','conversa de WhatsApp com resposta nova, tarefa ligada ainda "a fazer"'],['zerada','Pico de declaração "zerada"','colaborador acima do próprio histórico de zeradas no mês'],['retificacao','Retificação de zerada parada','pedido de correção esperando revisão há mais de alguns dias'],['fila','Fila de um colaborador crescendo','tarefas "a fazer" subindo semana a semana']];
+const ALERTAS_GESTOR=[['prazo','Prazo apertando sem resposta','XML pendente perto do fechamento (dia 31), sem mensagem há 48h+','crit'],['respondeu','Cliente respondeu, time não andou','conversa de WhatsApp com resposta nova, tarefa ligada ainda "a fazer"','crit'],['fila','Fila de um colaborador crescendo','tarefas "a fazer" subindo semana a semana','aten'],['ciclo','Tarefa recorrente atravessou o ciclo','ciclo seguinte já começou e a tarefa anterior segue aberta','aten'],['zerada','Pico de declaração "zerada"','colaborador acima do próprio histórico de zeradas no mês','aten'],['retificacao','Retificação de zerada parada','pedido de correção esperando revisão há mais de alguns dias','aten']];
+const MES_ABR=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function cgNum(v){return v==null?'—':Number(v).toLocaleString('pt-BR');}
+function cgDelta(v,maiorRuim){if(v==null||v===0)return '';const ruim=maiorRuim?v>0:v<0;return `<span class="cg-delta ${ruim?'ruim':'bom'}">${v>0?'+':'−'}${Math.abs(v)}</span>`;}
 async function carregarCentralGestor(){
  const r=await sb.rpc('fiscal_central_gestor');
  if(r.error){toast('Não foi possível carregar a central.');return;}
  centralDados=r.data||{};if(view==='gestor'&&gestorAba==='central')renderCentralGestor();
 }
-function barras(lista,rot,val){
- const mx=Math.max(1,...lista.map(val));
- return lista.map(x=>`<div style="display:grid;grid-template-columns:120px 1fr 44px;gap:8px;align-items:center;font-size:12px;margin-bottom:6px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escH(rot(x))}">${escH(rot(x))}</span><div style="background:var(--superf2);border-radius:6px;height:12px;overflow:hidden"><div style="width:${Math.round(100*val(x)/mx)}%;height:100%;background:var(--laranja);border-radius:6px"></div></div><b style="text-align:right;font-variant-numeric:tabular-nums">${val(x)}</b></div>`).join('');
-}
 function renderCentralGestor(){
  const b=el('gestorBody');if(!b)return;
  if(!centralDados){b.innerHTML='';carregarCentralGestor();return;}
- const d=centralDados,et=(d.ciclo&&d.ciclo.etapas)||[],cl=(d.ciclo&&d.ciclo.clientes)||[],al=d.alertas||{};
- const tit=(t,s)=>`<div style="margin-bottom:10px"><b class="disp" style="font-size:14px">${t}</b><div style="font-size:11.5px;color:var(--apagado);margin-top:2px">${s}</div></div>`;
- b.innerHTML=`<div class="tela"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px">
-  <div class="cardP">${tit('Tarefa esquecida / atravessando ciclo','Só o pedido de XML, a tarefa que mais se repete no Fiscal — em aberto, por competência.')}
-   ${barras(d.xml_aberto||[],x=>x.competencia,x=>x.qtd)}</div>
-  <div class="cardP">${tit('Clientes ativos por responsável','Desequilíbrio de carga antes de virar atraso.')}
-   ${barras(d.carga||[],x=>x.nome,x=>x.clientes)}</div>
-  <div class="cardP" style="grid-column:1/-1">${tit('Ciclo mensal','Etapas fixas do ciclo mensal, já configuradas no sistema.')}
-   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">${et.map((e,i)=>`${i?'<span style="color:var(--apagado)">→</span>':''}<span class="pill pend" style="font-size:11.5px;padding:5px 11px">${escH(e.nome)} · dia ${escH(e.dia)}</span>`).join('')}</div>
-   <div class="tbwrap"><table style="table-layout:fixed"><thead><tr><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Cliente</th>${et.map(e=>`<th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">${escH(e.nome)}</th>`).join('')}</tr></thead><tbody>${cl.map(c=>`<tr><td style="overflow:hidden;text-overflow:ellipsis" title="${escH(c.cliente)}">${escH(c.cliente)}</td>${et.map(e=>`<td>${escH((c.status||{})[e.chave]||'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
-  <div class="cardP" style="grid-column:1/-1">${tit('Alertas do departamento','Situações que pedem ação do gestor.')}
-   ${ALERTAS_GESTOR.map(([k,t,s])=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--superf2)"><div style="flex:1"><b style="font-size:13px">${t}</b><div style="font-size:11.5px;color:var(--apagado)">${s}</div></div><span class="pill ${al[k]==null?'':(al[k]?'falta':'ok')}" style="font-size:12px;padding:3px 11px;${al[k]==null?'color:var(--apagado)':''}">${al[k]==null?'—':(al[k]||'✓')}</span></div>`).join('')}</div>
+ const d=centralDados,k=d.kpis||{},al=d.alertas||{},tot=k.total_clientes||0;
+ const [ano,mes]=(d.competencia||'').split('-').map(Number);const mesNome=mes?MESES[mes-1]+'/'+ano:'';
+ const pctAp=k.apuracao_concluida==null||!tot?null:Math.round(100*k.apuracao_concluida/tot);
+ const kpi=(rot,val,rod,cor)=>`<div class="cg-card cg-kpi"><div class="rot">${rot}</div><div class="val"${cor?` style="color:${cor}"`:''}>${val}</div><div class="rod">${rod}</div></div>`;
+ const ordem=ALERTAS_GESTOR.slice().sort((a,b2)=>(al[b2[0]]||0)-(al[a[0]]||0));
+ const alerta=([c,t,s,sev])=>{const n=al[c];const cor=n==null?'var(--nevoa)':(n>0?(sev==='crit'?'var(--vermelho)':'var(--ambar)'):'var(--verde)');
+  const fundo=n==null?'var(--superf2)':(n>0?(sev==='crit'?'var(--vermelhoSv)':'var(--ambarSv)'):'var(--verdeSv)');
+  const rot=n==null?'—':(n>0?(sev==='crit'?'crítico':'atenção'):'em dia');
+  return `<div class="cg-card cg-alerta${n>0?' clic':''}" style="--cor:${cor};--fundo:${fundo}"${n>0?` onclick="abrirAlertaGestor('${c}')"`:''}><div class="cg-top"><span class="cg-sev">${rot}</span><span class="n">${cgNum(n)}</span></div><b>${t}</b><div class="d">${s}</div>${n>0?`<div class="ver">Ver lista →</div>`:''}</div>`;};
+ const hoje=new Date();const diasMes=new Date(hoje.getFullYear(),hoje.getMonth()+1,0).getDate();const pHoje=Math.round(100*hoje.getDate()/diasMes);
+ const pc=v=>v==null||!tot?0:Math.round(100*v/tot);
+ const etapa=(e,i)=>`<div class="cg-etapa"><div class="nm"><b>${i+1} · ${escH(e.nome)}</b><span>prazo ${escH(e.prazo)}</span></div><div class="cg-barra"><div class="s cg-ok" style="width:${pc(e.concluido)}%"></div><div class="s cg-and" style="width:${pc(e.andamento)}%"></div><div class="s cg-atr" style="width:${pc(e.atrasado)}%"></div><div class="cg-hoje" style="left:${pHoje}%"></div></div><div class="num">${e.concluido==null?'<b>—</b>':`<b>${pc(e.concluido)}%</b> · ${cgNum(e.concluido)} de ${cgNum(tot)}`}${e.atrasado?` · <span style="color:var(--vermelho);font-weight:700">${cgNum(e.atrasado)} atrasados</span>`:''}</div></div>`;
+ const xm=d.xml_por_mes||[];const mxX=Math.max(1,...xm.map(x=>x.qtd||0));
+ const cg=d.carga||[];const mxC=Math.max(1,...cg.map(x=>x.clientes));const media=cg.length?cg.reduce((s,x)=>s+x.clientes,0)/cg.length:0;
+ b.innerHTML=`<div class="tela"><div class="cg">
+  <section class="cg-sec"><div class="cg-cab"><div><h2>Resumo do ciclo · ${mesNome}</h2><div class="cg-sub">Os 4 números que dizem se o mês está no rumo. Comparação com o mesmo dia do mês anterior.</div></div></div>
+   <div class="cg-kpis">
+    ${kpi('Apuração concluída',pctAp==null?'—':pctAp+'%',`${cgDelta(k.apuracao_delta,false)} ${k.apuracao_concluida==null?'':cgNum(k.apuracao_concluida)+' de '+cgNum(tot)+' clientes · '}prazo dia 5`)}
+    ${kpi('XML em aberto',cgNum(k.xml_aberto),`${cgDelta(k.xml_delta,true)} pedidos ainda sem retorno`)}
+    ${kpi('Clientes sem carteira',cgNum(k.sem_carteira),`${cgDelta(k.sem_carteira_delta,true)} CNPJ ativo sem colaborador`)}
+    ${kpi('Alertas ativos',cgNum(k.alertas),`${ALERTAS_GESTOR.filter(a=>al[a[0]]>0).length} tipos com ocorrência`,k.alertas>0?'var(--vermelho)':'')}
+   </div></section>
+  <section class="cg-sec"><div class="cg-cab"><div><h2>Alertas do departamento</h2><div class="cg-sub">Um cartão por situação. A faixa colorida mostra a gravidade; clicar abre a lista de clientes e colaboradores envolvidos.</div></div></div>
+   <div class="cg-alertas">${ordem.map(alerta).join('')}</div></section>
+  <section class="cg-sec"><div class="cg-cab"><div><h2>Andamento do ciclo por etapa</h2><div class="cg-sub">Quantos clientes já passaram por cada etapa fixa do mês, comparado com o prazo de cada uma. A linha preta é o dia de hoje.</div></div>
+    <div class="cg-leg"><span><i class="cg-ok"></i>concluído</span><span><i class="cg-and"></i>em andamento</span><span><i class="cg-atr"></i>atrasado</span><span><i style="background:var(--superf2);border:1px solid var(--borda)"></i>não iniciado</span></div></div>
+   <div class="cg-card cg-ciclo">${(d.ciclo||[]).map(etapa).join('')}</div></section>
+  <section class="cg-duas">
+   <div class="cg-card cg-sec"><div><h2 class="disp" style="font-size:15px;margin:0">XML em aberto por competência</h2><div class="cg-sub">Pedido de XML ainda sem retorno. O que sobra de meses fechados é tarefa esquecida.</div></div>
+    <div class="cg-colunas">${xm.map(x=>`<div class="cg-col${x.atual?' atual':''}"><span class="v">${cgNum(x.qtd)}</span><div class="c" style="height:${Math.round(100*(x.qtd||0)/mxX)}%"></div></div>`).join('')}</div>
+    <div class="cg-rotcol">${xm.map(x=>{const m=Number(x.mes.split('-')[1]);return `<span>${MES_ABR[m-1]}${x.atual?' · atual':''}</span>`;}).join('')}</div></div>
+   <div class="cg-card cg-sec"><div><h2 class="disp" style="font-size:15px;margin:0">Clientes ativos por responsável</h2><div class="cg-sub">Linha tracejada = média da equipe (${Math.round(media)}). Laranja acima da média, cinza abaixo.</div></div>
+    <div class="cg-carga">${cg.map(x=>`<div class="cg-lin"><span class="t" title="${escH(x.nome)}">${escH(x.nome)}</span><div class="b"><i style="width:${Math.round(100*x.clientes/mxC)}%;background:${x.clientes>media?'var(--laranja)':'var(--nevoa)'}"></i><em style="left:${Math.round(100*media/mxC)}%"></em></div><b>${cgNum(x.clientes)}</b></div>`).join('')}</div></div>
+  </section>
  </div></div>`;
+}
+function abrirAlertaGestor(c){
+ const a=ALERTAS_GESTOR.find(x=>x[0]===c);fecharModal();
+ modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(720px,96vw)"><div class="mcab"><b>${a?a[1]:''}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody"></div></div>`;
+ document.body.appendChild(modal);
 }
 /* ---------- clientes ---------- */
 async function carregarClientes(){
