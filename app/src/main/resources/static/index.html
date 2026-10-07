@@ -571,7 +571,8 @@ function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central',mapaDados=null,cartAberta=new Set();
 function escH(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmtCnpj(c){const d=String(c||'').replace(/\D/g,'');return d.length===14?d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'):d;}
-function setGestorAba(a){gestorAba=a;if(a==='mapa')mapaDados=null;renderGestor();}
+let clientesDados=null;
+function setGestorAba(a){gestorAba=a;if(a==='mapa')mapaDados=null;if(a==='clientes')clientesDados=null;renderGestor();}
 function renderGestor(){
  const ab=[['central','Central'],['mapa','Mapa do Departamento'],['clientes','Clientes']];
  el('conteudo').innerHTML=`
@@ -580,6 +581,18 @@ function renderGestor(){
   </div>
   <div class="apuBody" id="gestorBody"></div>`;
  if(gestorAba==='mapa')renderMapa();
+ if(gestorAba==='clientes')renderClientes();
+}
+/* ---------- clientes ---------- */
+async function carregarClientes(){
+ const r=await sb.rpc('fiscal_clientes_painel');
+ if(r.error){toast('Não foi possível carregar os clientes.');return;}
+ clientesDados=r.data||[];if(view==='gestor'&&gestorAba==='clientes')renderClientes();
+}
+function renderClientes(){
+ const b=el('gestorBody');if(!b)return;
+ if(!clientesDados){b.innerHTML='';carregarClientes();return;}
+ b.innerHTML=`<div class="tela"><div class="tbwrap"><table><thead><tr><th>Responsável</th><th>CNPJ</th><th>Empresa</th><th>Carteira</th><th>Apuração</th></tr></thead><tbody>${clientesDados.map(g=>g.empresas.map((e,i)=>`<tr>${i===0?`<td rowspan="${g.empresas.length}" style="vertical-align:middle;white-space:normal;max-width:280px;font-weight:600;color:var(--ink);border-right:1px solid var(--borda);background:var(--pagina)">${escH(g.responsavel||'—')}</td>`:''}<td>${fmtCnpj(e.cnpj)}</td><td style="white-space:normal">${escH(e.empresa)}</td><td>${escH(e.carteira||'—')}</td><td>${e.apuracao?escH(e.apuracao):'—'}</td></tr>`).join('')).join('')}</tbody></table></div></div>`;
 }
 /* ---------- mapa do departamento ---------- */
 const ICO_CART='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h12v4M3 7v10a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2zM16 14h.01"/></svg>';
@@ -596,7 +609,7 @@ function renderMapa(){
      <div><div class="nm">${escH(u.nome)}</div><div style="font-size:11px;color:var(--apagado)">${escH(u.nivel)}</div></div></div>
    <div class="corpo">Entrada hoje <b style="float:right">${escH(u.entrada_hoje||'--:--')}</b></div>
    <div class="foot">
-     <button class="miniB" onclick="abrirAtencao('${u.id}')">⚠ Precisa de atenção</button>
+     ${u.atencao?`<button class="miniB" style="border-color:var(--vermelho);color:var(--vermelho)" onclick="abrirAtencao('${u.id}')">⚠ Precisa de atenção</button>`:`<span class="pill ok" style="font-size:13px;padding:3px 10px">✓</span>`}
      <button class="miniB" style="display:flex;gap:5px;align-items:center" onclick="abrirCarteira('${u.id}')">${ICO_CART} ${u.carteira} CNPJ</button>
    </div></div>`).join('')}</div></div>`;
 }
