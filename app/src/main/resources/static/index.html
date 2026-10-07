@@ -1766,6 +1766,84 @@ function tmDesenharLigacao(){
  const ev=el('tmEuV');if(ev)ev.srcObject=c.lk?c.local:(c.tela||c.local);
  clearInterval(c.relogio);if(c.estado==='ativa')c.relogio=setInterval(()=>{const t=el('tmLigTempo');if(!t||!tmCall||!tmCall.inicio){clearInterval(c.relogio);return;}const d=Math.round((Date.now()-tmCall.inicio)/1000);t.textContent=String(Math.floor(d/60)).padStart(2,'0')+':'+String(d%60).padStart(2,'0');},1000);
 }
+/* ---------- modelos da Meta (WhatsApp e Apuração) ---------- */
+const MOD_TITULO={fiscal_solicitacao_xml:'Pedir XML do mês',fiscal_lembrete_urgente_xml:'Cobrar XML (urgente)',fiscal_confirmacao_movimento_mes:'Perguntar se teve notas no mês',fiscal_confirmacao_dados_apuracao:'Confirmar dados antes da apuração',fiscal_entrega_apuracao_mensal:'Enviar apuração e guia (DAS)',fiscal_aviso_declaracao_zerada:'Avisar declaração zerada',fiscal_aviso_vencimento_certificado:'Avisar vencimento do certificado',fiscal_boas_vindas_cliente:'Boas-vindas ao cliente novo',fiscal_difal_explicacao_decisao:'Explicar o ICMS DIFAL',fiscal_atualizacao_rotina_erp:'Avisar mudança na rotina do ERP',fiscal_aviso_alteracao_cadastral:'Avisar alteração cadastral',fiscal_pendencia_cadastral:'Cobrar pendência cadastral',fiscal_recibo_opcao_regime:'Enviar recibo da opção de regime',fiscal_reforma_tributaria_lembrete:'Lembrete da Reforma Tributária',fiscal_comunicado_institucional:'Comunicado da YOU',fiscal_divulgacao_servicos_grupo:'Divulgar serviços do grupo',fiscal_pesquisa_satisfacao:'Pesquisa de satisfação'};
+const MOD_CAT={UTILITY:['Utilidade','vd'],MARKETING:['Marketing','cz'],AUTHENTICATION:['Código','am']};
+let modLista=null,modCtx=null,modBusca='',modSel=null,modVals=[],modDoc=null;
+async function modCarregar(){const r=await sb.from('wa_modelo').select('nome,idioma,categoria,estado,componentes').eq('estado','APPROVED').order('nome');
+ if(r.error){toast('Não foi possível carregar os modelos.');return [];}
+ modLista=(r.data||[]).filter(m=>m.nome!=='hello_world'&&m.categoria!=='AUTHENTICATION');return modLista;}
+function modParte(m,t){return (m.componentes||[]).find(c=>c.type===t)||null;}
+function modVars(m){const b=modParte(m,'BODY');const ex=(b&&b.example&&b.example.body_text&&b.example.body_text[0])||[];const n=((b&&b.text)||'').match(/\{\{\d+\}\}/g)||[];
+ return [...new Set(n)].map(x=>+x.replace(/\D/g,'')).sort((a,b)=>a-b).map(i=>({i,ex:ex[i-1]||''}));}
+function modPalpite(v,ctx){const e=String(v.ex);
+ if(v.i===1)return ((eu&&eu.nome)||'').split(' ')[0];
+ if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return ctx.cnpj?fmtCnpj(ctx.cnpj):'';
+ if(/^[a-zç]+\/\d{4}$/i.test(e))return mesTxt();
+ if(/^\d{2}\/\d{2}\/\d{4}$/.test(e)){const m=comp.mes+2>12?1:comp.mes+2,a=comp.mes+2>12?comp.ano+1:comp.ano;return '20/'+String(m).padStart(2,'0')+'/'+a;}
+ if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e)&&ctx.empresa)return ctx.empresa;
+ return '';}
+function modRotulo(v){const e=String(v.ex);if(v.i===1)return 'Seu nome';if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return 'CNPJ';if(/^[a-zç]+\/\d{4}$/i.test(e))return 'Mês';if(/^\d{2}\/\d{2}\/\d{4}$/.test(e))return 'Vencimento';if(/^R\$/.test(e))return 'Valor';if(/DAS|Relat[óo]rio|Guia|DARE/i.test(e))return 'Documentos';if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e))return 'Empresa';return 'Informação '+v.i;}
+function modTexto(m,vals){const b=modParte(m,'BODY');return ((b&&b.text)||'').replace(/\{\{(\d+)\}\}/g,(_,i)=>vals[+i-1]||'{{'+i+'}}');}
+function modBolha(m,vals,doc){const h=modParte(m,'HEADER'),f=modParte(m,'FOOTER'),bt=modParte(m,'BUTTONS');
+ return apBolha({d:'sai',cab:h&&h.format==='TEXT'?h.text:null,doc:h&&h.format==='DOCUMENT'?(doc?doc.name:'Documento.pdf'):null,t:modTexto(m,vals||[]),rod:f?f.text:null,btns:bt?bt.buttons.map(x=>x.text):null,dt:'',h:''});}
+async function modAbrir(ctx,preferido){
+ modCtx=ctx;modBusca='';modSel=null;modDoc=null;fecharModal();
+ modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(660px,96vw)"><div class="mcab">${ICO_TPL}<b>Modelos · ${escH(ctx.nome||'')}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="modCorpo" style="background:var(--superf);display:flex;flex-direction:column;gap:10px"></div></div>`;
+ document.body.appendChild(modal);
+ if(!modLista)await modCarregar();
+ if(preferido){const m=(modLista||[]).find(x=>x.nome===preferido);if(m){modEscolher(m.nome);return;}}
+ modDesenharLista();
+}
+function modDesenharLista(){
+ const box=el('modCorpo');if(!box)return;const t=modBusca.trim().toLowerCase();
+ const lista=(modLista||[]).filter(m=>!t||((MOD_TITULO[m.nome]||m.nome)+' '+modTexto(m,[])).toLowerCase().includes(t));
+ const ex=ctxEx=>modVars(ctxEx).map(v=>modPalpite(v,modCtx)||v.ex);
+ box.innerHTML=`<div class="ap-busca" style="background:var(--pagina)">🔎<input id="modBuscaIn" placeholder="Buscar modelo…" value="${escH(modBusca)}" oninput="modBusca=this.value;modDesenharLista();const i=el('modBuscaIn');i.focus();i.setSelectionRange(i.value.length,i.value.length)"></div><div class="ap-mods">${lista.map(m=>{const c=MOD_CAT[m.categoria]||[m.categoria,'cz'];return `<div class="ap-mod"><div style="min-width:0"><div class="tt"><b>${escH(MOD_TITULO[m.nome]||m.nome.replace(/_/g,' '))}</b><span class="ap-st ${c[1]}">${escH(c[0])}</span></div><div class="ap-prev">${modBolha(m,ex(m),null)}</div></div><button class="ap-envm" onclick="modEscolher('${escH(m.nome)}')">Usar</button></div>`;}).join('')}</div>`;
+}
+function modEscolher(nome){
+ const m=(modLista||[]).find(x=>x.nome===nome);if(!m)return;modSel=m;modDoc=null;
+ modVals=[];modVars(m).forEach(v=>modVals[v.i-1]=modPalpite(v,modCtx));
+ modDesenharForm();
+}
+function modDesenharForm(){
+ const box=el('modCorpo');if(!box||!modSel)return;const m=modSel,vs=modVars(m),h=modParte(m,'HEADER');
+ box.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><button class="miniB" onclick="modSel=null;modDesenharLista()">‹ Modelos</button><b style="font-size:13px">${escH(MOD_TITULO[m.nome]||m.nome)}</b></div>
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start">
+   <div style="display:flex;flex-direction:column;gap:2px">${vs.map(v=>`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">${escH(modRotulo(v))}</span><input class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" placeholder="${escH(v.ex)}" value="${escH(modVals[v.i-1]||'')}" oninput="modVals[${v.i-1}]=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDoc)">`).join('')}
+   ${h&&h.format==='DOCUMENT'?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Documento (PDF)</span><button class="apubtn" onclick="modEscolherDoc()">📎 ${modDoc?escH(modDoc.name):'Anexar PDF'}</button>`:''}</div>
+   <div class="ap-prev" id="modPrev">${modBolha(m,modVals,modDoc)}</div></div>
+  <div style="display:flex;justify-content:flex-end;gap:8px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="modEnv" onclick="modEnviar()">Enviar</button></div>`;
+}
+function modEscolherDoc(){const i=document.createElement('input');i.type='file';i.accept='application/pdf';i.onchange=()=>{const f=i.files[0];if(!f)return;if(f.size>100*1048576){toast('PDF acima de 100 MB.');return;}modDoc=f;modDesenharForm();};i.click();}
+async function modEnviar(){
+ const m=modSel;if(!m)return;const vs=modVars(m),h=modParte(m,'HEADER');
+ if(vs.some(v=>!String(modVals[v.i-1]||'').trim())){toast('Preencha todos os campos.');return;}
+ if(h&&h.format==='DOCUMENT'&&!modDoc){toast('Anexe o PDF.');return;}
+ const b=el('modEnv');if(b)b.disabled=true;
+ const ok=await modCtx.enviar(m,vs.map(v=>String(modVals[v.i-1]).trim()),modDoc,modTexto(m,modVals));
+ if(ok)fecharModal();else if(b)b.disabled=false;
+}
+async function waEnviarModelo(c,m,vals,doc,previa){
+ const id_local=crypto.randomUUID();const comps=[];
+ if(doc){const caminho=`${c.id}/saida/${id_local}.pdf`;const up=await sb.storage.from('wa-midia').upload(caminho,doc,{contentType:'application/pdf'});
+  if(up.error){toast('Não foi possível subir o PDF.');return false;}
+  const sg=await sb.storage.from('wa-midia').createSignedUrl(caminho,1800);if(sg.error){toast('Não foi possível preparar o PDF.');return false;}
+  comps.push({type:'header',parameters:[{type:'document',document:{link:sg.data.signedUrl,filename:doc.name}}]});}
+ if(vals.length)comps.push({type:'body',parameters:vals.map(t=>({type:'text',text:t}))});
+ c.wpp.push({id:'tmp-'+id_local,id_local,tipo:'texto',d:'sai',t:previa,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]});waDesenharMsgs();
+ const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo:'template',template:{nome:m.nome,idioma:m.idioma||'pt_BR',componentes:comps,previa}});
+ if(!j.ok){const x=c.wpp.find(y=>y.id_local===id_local);if(x)x.st='falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar o modelo.');return false;}
+ toast('Modelo enviado.');return true;
+}
+async function waModelos(id){
+ const c=waConv(id);if(!c)return;const ctx={nome:c.nome,empresa:'',cnpj:'',enviar:(m,v,d,p)=>waEnviarModelo(c,m,v,d,p)};
+ if(c.contatoId){const r=await sb.from('wa_pessoa_vinculo').select('wa_vinculo_alcance(empresa_id,escopo,ativo)').eq('contato_id',c.contatoId).eq('ativo',true);
+  const ids=[...new Set((r.data||[]).flatMap(v=>(v.wa_vinculo_alcance||[]).filter(a=>a.ativo&&a.escopo==='empresa'&&a.empresa_id).map(a=>a.empresa_id)))];
+  if(ids.length===1){const e=await sb.rpc('fiscal_empresas',{p_ids:ids});const x=e.data&&e.data[0];if(x){ctx.empresa=x.razao_social||x.nome_fantasia||'';ctx.cnpj=x.cnpj||'';}}}
+ modAbrir(ctx);
+}
 /* ---------- APURAÇÃO (com abas: Apuração · Radar XML · Demanda em lote · Meu espaço) ---------- */
 function renderApuracao(){
  const nv=radarNovos();
@@ -1939,11 +2017,11 @@ function waHeadReal(c,isEntrada){
 function waComposer(c,isEntrada){
  if(isEntrada&&!eGestor())return '';
  if(c.bloqueado)return `<div class="wa-lock">Contato bloqueado — <b style="cursor:pointer" onclick="waAcao('desbloquear','${c.id}')">Desbloquear</b></div>`;
- if(!c.grupo&&!c.janela)return `<div class="wa-lock">🔒 Janela de 24h fechada — reabra com um template aprovado</div>`;
+ if(!c.grupo&&!c.janela)return `<div class="wa-comp"><button class="wa-tplbtn" onclick="waModelos('${c.id}')">${ICO_TPL} Modelos</button></div>`;
  const r=waResp?c.wpp.find(m=>m.id===waResp):null;
  return `${r?`<div class="wa-resp"><div class="q"><b>${r.d==='sai'?'Você':escH(r.autorGrupo||c.nome)}</b><span>${escH(waResumo(r))}</span></div><button onclick="waResp=null;render()">✕</button></div>`:''}
   ${waGrav?`<div class="wa-comp"><span class="wa-rec">● Gravando ${waGrav.seg||0}s</span><span style="flex:1"></span><button class="miniB" onclick="waGravarCancelar()">Cancelar</button><button class="snd" onclick="waGravarParar()">➤</button></div>`
-  :`<div class="wa-comp"><span class="pl" onclick="waMenuAnexo(event,'${c.id}')">${ICO_CLIPE}</span><input id="wwin" placeholder="Mensagem" oninput="waDigitando()" onkeydown="if(event.key==='Enter')enviarWW()"><span class="pl" title="Gravar áudio" onclick="waGravar()">${MIC}</span><button class="snd" onclick="enviarWW()">➤</button></div>`}`;
+  :`<div class="wa-comp"><span class="pl" title="Modelos" onclick="waModelos('${c.id}')">${ICO_TPL}</span><span class="pl" onclick="waMenuAnexo(event,'${c.id}')">${ICO_CLIPE}</span><input id="wwin" placeholder="Mensagem" oninput="waDigitando()" onkeydown="if(event.key==='Enter')enviarWW()"><span class="pl" title="Gravar áudio" onclick="waGravar()">${MIC}</span><button class="snd" onclick="enviarWW()">➤</button></div>`}`;
 }
 function waResumo(m){if(!m)return '';if(m.tipo==='imagem')return '📷 '+(m.t&&!m.t.startsWith('[')?m.t:'Foto');if(m.tipo==='video')return '🎥 Vídeo';if(m.tipo==='audio')return '🎤 Áudio';if(m.tipo==='documento')return '📄 '+(m.nomeArq||'Documento');if(m.tipo==='local')return '📍 '+(m.t||'Localização');if(m.tipo==='contato')return '👤 '+(m.t||'Contato');return m.t||'';}
 function waDesenharMsgs(){
@@ -2351,32 +2429,19 @@ const TPL_FISCAL=[
 function tplPreencher(t,c){const quem=(eu&&eu.nome)||c.dono||'Colaborador';const venc='20/'+String(comp.mes+2>12?1:comp.mes+2).padStart(2,'0');
  return t.corpo.replace(/\{1\}/g,quem.split(' ')[0]).replace(/\{2\}/g,c.nome).replace(/\{3\}/g,mesTxt()).replace(/\{4\}/g,c.cnpj||'—').replace(/\{5\}/g,venc);}
 const TPL_USO={'fiscal_solicitacao_xml':'Usar no começo do mês, para pedir os arquivos das notas.','fiscal_lembrete_urgente_xml':'Usar perto do fim do prazo, quando o cliente ainda não mandou.','fiscal_confirmacao_movimento_mes':'Para saber se a empresa vendeu ou não no mês.','fiscal_confirmacao_dados_apuracao':'Antes de começar a apuração, para confirmar se algo mudou.','fiscal_entrega_apuracao_mensal':'Vai com o PDF da apuração e a guia anexados.','fiscal_aviso_declaracao_zerada':'Quando o XML não chegou e o mês foi declarado sem movimento.','fiscal_aviso_vencimento_certificado':'Quando o certificado digital estiver para vencer.','fiscal_boas_vindas_cliente':'Primeira mensagem para um cliente novo.'};
-let apModBusca='';
-function abrirModelosWA(){
- fecharModal();apModBusca='';
- modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(640px,96vw)"><div class="mcab">${ICO_TPL}<b>Modelos · ${escH(cli().nome)}</b><button class="x" onclick="fecharModal()">✕</button></div>
-  <div class="mbody" style="background:var(--superf);display:flex;flex-direction:column;gap:10px"><div class="ap-busca" style="background:var(--pagina)">🔎<input placeholder="Buscar modelo…" oninput="apModBusca=this.value;desenharModelos()"></div><div class="ap-mods" id="apMods"></div></div></div>`;
- document.body.appendChild(modal);desenharModelos();
-}
-function desenharModelos(){
- const c=cli();const t=apModBusca.trim().toLowerCase();
- el('apMods').innerHTML=TPL_FISCAL.map((m,i)=>[m,i]).filter(([m])=>!t||(m.titulo+' '+(TPL_USO[m.nome]||'')).toLowerCase().includes(t)).map(([m,i])=>`<div class="ap-mod"><div style="min-width:0">
-   <div class="tt"><b>${escH(m.titulo)}</b><span class="ap-st ${m.cat==='Marketing'?'cz':'vd'}">${m.cat}</span></div><div class="q">${escH(TPL_USO[m.nome]||'')}</div>
-   <div class="ap-prev">${apBolha({d:'sai',cab:m.doc?null:'Departamento Fiscal',doc:m.doc,t:tplPreencher(m,c),rod:'Equipe Fiscal',btns:m.btns,dt:'',h:''})}</div></div>
-   <button class="ap-envm" onclick="enviarModeloWA(${i})">Enviar</button></div>`).join('');
-}
-function enviarModeloWA(i){
- const c=cli();const t=TPL_FISCAL[i];fecharModal();
- const h=new Date().toTimeString().slice(0,5);
- c.wpp.push({d:'sai',tpl:t.titulo,cab:t.doc?null:'Departamento Fiscal',doc:t.doc,t:tplPreencher(t,c),rod:'Equipe Fiscal',btns:t.btns,h,st:'sent',autor:(eu&&eu.nome)||''});
- if(t.nome==='fiscal_solicitacao_xml'){const e=c.etapas.find(x=>x.acao==='flow_xml');if(e)e.status='aguardando';}
- toast('Modelo enviado. A conversa abre quando o cliente responder.');render();
- const cid=c.id;
- setTimeout(()=>{const cc=clientes.find(x=>x.id===cid);if(!cc)return;cc.wpp.push({d:'ent',t:t.btns[0],h:new Date().toTimeString().slice(0,5)});cc.janela=true;cc.janelaLbl='24h00';cc.optin=true;render();toast(cc.nome+' respondeu — janela de 24h aberta.');},2500);
+function abrirModelosWA(pref){
+ const c=cli();
+ modAbrir({nome:c.nome,empresa:c.nome,cnpj:c.cnpj,enviar:async(m,vals,doc,previa)=>{
+  const hd=modParte(m,'HEADER'),ft=modParte(m,'FOOTER'),bt=modParte(m,'BUTTONS');const btns=bt?bt.buttons.map(x=>x.text):[];
+  c.wpp.push({d:'sai',tpl:MOD_TITULO[m.nome]||m.nome,cab:hd&&hd.format==='TEXT'?hd.text:null,doc:hd&&hd.format==='DOCUMENT'?(doc?doc.name:'Documento.pdf'):null,t:previa,rod:ft?ft.text:null,btns,h:new Date().toTimeString().slice(0,5),st:'sent',autor:(eu&&eu.nome)||''});
+  if(m.nome==='fiscal_solicitacao_xml'){const e=c.etapas.find(x=>x.acao==='flow_xml');if(e)e.status='aguardando';}
+  toast('Modelo enviado. A conversa abre quando o cliente responder.');render();
+  const cid=c.id;
+  setTimeout(()=>{const cc=clientes.find(x=>x.id===cid);if(!cc)return;cc.wpp.push({d:'ent',t:btns[0]||'Ok',h:new Date().toTimeString().slice(0,5)});cc.janela=true;cc.janelaLbl='24h00';cc.optin=true;render();toast(cc.nome+' respondeu — janela de 24h aberta.');},2500);
+  return true;}},pref);
 }
 function qaTpl(cod){const c=cli();if(!c.optin){toast('Cliente sem opt-in — peça o aceite antes (regra da Meta).');return;}const t=templates.find(x=>x.cod===cod);let corpo=t.corpo.replace('{cliente}',c.nome.split(' ')[0]).replace('{mes}',mesTxt()).replace('{tributo}','Simples Nacional').replace('{venc}','20/'+String(comp.mes+1).padStart(2,'0')).replace('{valor}','R$ 348,20').replace('{doc}','DAS');c.wpp.push({d:'sai',tpl:cod,t:corpo,flow:t.flow,btn:t.btn});c.janela=true;c.janelaLbl='24h00';toast('Template '+cod+' enviado.');render();}
-function pedirXml(){enviarModeloWA(0);}
+function pedirXml(){abrirModelosWA('fiscal_solicitacao_xml');}
 function enviarLivre(){const c=cli();const i=el('wppin');if(!i||!i.value.trim())return;c.wpp.push({d:'sai',t:i.value.trim()});render();}
 
 /* IA rail — com escopo por cliente (ponto 4) */
@@ -2498,13 +2563,13 @@ function janelaWA(c){const ult=[...c.wpp].reverse().find(m=>m.d==='ent');if(!ult
  const rest=24*3600e3-(Date.now()-new Date(ult.em).getTime());c.janela=rest>0;c.optin=true;
  c.janelaLbl=rest>0?Math.floor(rest/3600e3)+'h'+String(Math.floor(rest%3600e3/60e3)).padStart(2,'0'):'fechada';}
 function convWA(c){const ant=waConv(c.id);const ct=Array.isArray(c.wa_contato)?c.wa_contato[0]:c.wa_contato;
- const x={id:c.id,nome:c.contato_nome||fmtTel(c.contato_telefone)||'Contato',telefone:c.contato_telefone,plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
+ const x={id:c.id,contatoId:c.contato_id,nome:c.contato_nome||fmtTel(c.contato_telefone)||'Contato',telefone:c.contato_telefone,plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
  dono:c.responsavel_id,wpp:waMsgs[c.id]||[],carregada:!!waMsgs[c.id],previa:c.ultima_previa,ultima:c.ultima_em,naoLidas:c.nao_lidas||0,
  arquivada:!!c.arquivada,fixada:c.fixada_em,silenciada:!!c.silenciada,marcadaNL:!!c.marcada_nao_lida,grupo:!!c.grupo_meta_id,grupoLink:c.grupo_link,grupoDesc:c.grupo_descricao,
  bloqueado:!!(ct&&ct.bloqueado)};
  if(ant&&ant._lendo)x._lendo=true;return x;}
 async function carregarConversas(){
- const r=await sb.from('wa_conversa').select('id,contato_nome,contato_telefone,responsavel_id,estado,ultima_em,ultima_previa,nao_lidas,arquivada,fixada_em,silenciada,marcada_nao_lida,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado),wa_numero!inner(provedor)')
+ const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,responsavel_id,estado,ultima_em,ultima_previa,nao_lidas,arquivada,fixada_em,silenciada,marcada_nao_lida,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado),wa_numero!inner(provedor)')
   .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false,nullsFirst:false}).limit(500);
  if(r.error){toast('Não foi possível carregar as conversas.');return;}
  const nv=r.data.map(convWA);
