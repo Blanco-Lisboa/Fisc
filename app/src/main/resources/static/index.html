@@ -659,6 +659,7 @@ tr.rnovo:hover{background:#ffe6d6}
 
 <script src="vendor/supabase.js"></script>
 <script src="vendor/xlsx.full.min.js"></script>
+<script src="vendor/livekit-client.umd.js"></script>
 <script src="sessao.js"></script>
 <script>
 const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1630,17 +1631,46 @@ function tmEscutarLigacoes(){
 }
 function tmAlvosDoCanal(c){if(!c)return [];if(c.tipo==='setor')return (tmEquipe.pessoas||[]).filter(p=>(p.setores||[]).includes(c.setor_id)).map(p=>p.id).filter(x=>x!==eu.id);return (c.membros||[]).filter(x=>x!==eu.id);}
 async function tmMidia(video){try{return await navigator.mediaDevices.getUserMedia({audio:true,video:video?{width:640,height:480}:false});}catch(e){if(video){try{return await navigator.mediaDevices.getUserMedia({audio:true});}catch(x){}}toast('Sem acesso ao microfone'+(video?' ou à câmera':'')+'.');return null;}}
+async function tmLkPasse(canal){
+ if(window.tmLkPasseTeste)return window.tmLkPasseTeste(canal);
+ const s=(await tm.auth.getSession()).data.session;if(!s)return null;
+ const r=await fetch(TM_URL+'/functions/v1/teams-ligacao-token',{method:'POST',headers:{'Content-Type':'application/json',apikey:TM_KEY,Authorization:'Bearer '+s.access_token},body:JSON.stringify({canal_id:canal})}).catch(()=>null);
+ if(!r)return null;const j=await r.json().catch(()=>({}));return j.ok?j:null;
+}
+function tmLkLocal(){const L=window.LivekitClient,lp=tmCall.lk.localParticipant,s=new MediaStream();
+ [L.Track.Source.Microphone,L.Track.Source.Camera].forEach(src=>{const pub=lp.getTrackPublication(src);if(pub&&pub.track&&!pub.isMuted)s.addTrack(pub.track.mediaStreamTrack);});return s;}
+async function tmLkEntrar(video){
+ const L=window.LivekitClient;if(!L||!tmCall)return false;
+ const p=await tmLkPasse(tmCall.canal);if(!p||!tmCall)return false;
+ const room=new L.Room({adaptiveStream:true,dynacast:true});
+ const ativar=()=>{if(tmCall&&tmCall.estado!=='ativa'){tmCall.estado='ativa';tmCall.inicio=tmCall.inicio||Date.now();clearTimeout(tmCall.limite);}};
+ room.on(L.RoomEvent.TrackSubscribed,(track,pub,part)=>{if(!tmCall)return;let st=tmCall.remotos[part.identity];if(!st){st=new MediaStream();tmCall.remotos[part.identity]=st;}
+  st.getTracks().filter(t=>t.kind===track.kind).forEach(t=>st.removeTrack(t));st.addTrack(track.mediaStreamTrack);ativar();tmDesenharLigacao();});
+ room.on(L.RoomEvent.TrackUnsubscribed,(track,pub,part)=>{const st=tmCall&&tmCall.remotos[part.identity];if(st)st.removeTrack(track.mediaStreamTrack);tmDesenharLigacao();});
+ room.on(L.RoomEvent.ParticipantConnected,part=>{if(!tmCall)return;tmCall.remotos[part.identity]=tmCall.remotos[part.identity]||new MediaStream();ativar();tmDesenharLigacao();});
+ room.on(L.RoomEvent.ParticipantDisconnected,part=>{if(!tmCall)return;delete tmCall.remotos[part.identity];if(!room.remoteParticipants.size&&tmCall.estado==='ativa')tmEncerrar();else tmDesenharLigacao();});
+ room.on(L.RoomEvent.Disconnected,()=>{if(tmCall&&tmCall.lk===room){tmCall.lk=null;tmEncerrar('A conexão caiu');}});
+ try{await room.connect(p.url,p.token);}catch(e){return false;}
+ if(!tmCall){room.disconnect();return false;}
+ tmCall.lk=room;tmCall.modo='lk';
+ try{await room.localParticipant.setMicrophoneEnabled(true);}catch(e){toast('Sem acesso ao microfone.');}
+ if(video){try{await room.localParticipant.setCameraEnabled(true);}catch(e){toast('Sem acesso à câmera.');}}
+ tmCall.local=tmLkLocal();
+ room.remoteParticipants.forEach(part=>{tmCall.remotos[part.identity]=tmCall.remotos[part.identity]||new MediaStream();ativar();});
+ return true;
+}
 async function tmLigar(tipo){
  if(tmCall){toast('Você já está numa ligação.');return;}
  const canal=tmAlvo();const c=tmCanais.find(x=>x.id===canal);if(!c)return;
  const alvos=tmAlvosDoCanal(c);if(!alvos.length){toast('Ninguém para chamar nesta conversa.');return;}
- const st=await tmMidia(tipo==='video');if(!st)return;
  const r=await tm.from('chat_chamada').insert({canal_id:canal,tipo:tipo==='video'?'video':'voz',iniciada_por:eu.id}).select('id').single();
- if(r.error){st.getTracks().forEach(t=>t.stop());toast('Não foi possível iniciar a ligação.');return;}
+ if(r.error){toast('Não foi possível iniciar a ligação.');return;}
  await tm.from('chat_chamada_participante').insert({chamada_id:r.data.id,usuario_id:eu.id,entrou_em:new Date().toISOString()});
- tmCall={id:r.data.id,canal,tipo,local:st,pcs:{},remotos:{},participantes:[eu.id,...alvos],estado:'chamando',inicio:null,dono:true,nome:tmNomeCanal(c)};
+ tmCall={id:r.data.id,canal,tipo,local:null,pcs:{},remotos:{},participantes:[eu.id,...alvos],estado:'chamando',inicio:null,dono:true,nome:tmNomeCanal(c),modo:'p2p'};
  tmDesenharLigacao();
- alvos.forEach(u=>tmEnviarSinal(u,'ligar',{chamada:r.data.id,canal,tipo,nome:eu.nome,canal_nome:tmNomeCanal(c),participantes:tmCall.participantes}));
+ if(!(await tmLkEntrar(tipo==='video'))){if(!tmCall)return;const st=await tmMidia(tipo==='video');if(!st){tmCall=null;tmDesenharLigacao();return;}tmCall.local=st;}
+ if(!tmCall)return;tmDesenharLigacao();
+ alvos.forEach(u=>tmEnviarSinal(u,'ligar',{chamada:r.data.id,canal,tipo,modo:tmCall.modo,nome:eu.nome,canal_nome:tmNomeCanal(c),participantes:tmCall.participantes}));
  tmCall.limite=setTimeout(()=>{if(tmCall&&tmCall.estado==='chamando'){tmEncerrar('Chamada não atendida');}},45000);
 }
 function tmTocar(liga){
@@ -1650,7 +1680,7 @@ function tmTocar(liga){
 function tmSinalChegou(ev,p){
  if(ev==='ligar'){
   if(tmCall){tmEnviarSinal(p.de,'ocupado',{chamada:p.chamada});return;}
-  tmCall={id:p.chamada,canal:p.canal,tipo:p.tipo,local:null,pcs:{},remotos:{},participantes:p.participantes||[p.de],estado:'tocando',de:p.de,nome:p.canal_nome,dono:false};
+  tmCall={id:p.chamada,canal:p.canal,tipo:p.tipo,modo:p.modo||'p2p',local:null,pcs:{},remotos:{},participantes:p.participantes||[p.de],estado:'tocando',de:p.de,nome:p.canal_nome,dono:false};
   tmTocar(true);tmDesenharLigacao();
   tmCall.limite=setTimeout(()=>{if(tmCall&&tmCall.estado==='tocando'){tmTocar(false);tmCall=null;tmDesenharLigacao();}},45000);
   return;}
@@ -1658,7 +1688,7 @@ function tmSinalChegou(ev,p){
  if(ev==='entrou'){if(tmCall.estado==='tocando'){return;}
   if(!tmCall.participantes.includes(p.de))tmCall.participantes.push(p.de);
   if(tmCall.estado==='chamando'){tmCall.estado='ativa';tmCall.inicio=Date.now();clearTimeout(tmCall.limite);tm.from('chat_chamada').update({atendida_em:new Date().toISOString()}).eq('id',tmCall.id);}
-  tmOfertar(p.de);tmDesenharLigacao();}
+  if(!tmCall.lk)tmOfertar(p.de);tmDesenharLigacao();}
  else if(ev==='sdp')tmRecebeuSdp(p.de,p.sdp);
  else if(ev==='ice'){const pc=tmCall.pcs[p.de];if(pc&&p.cand)pc.addIceCandidate(p.cand).catch(()=>{});}
  else if(ev==='sair'||ev==='recusar'||ev==='ocupado'){
@@ -1684,17 +1714,19 @@ async function tmRecebeuSdp(uid,sdp){
 }
 async function tmAtender(comVideo){
  if(!tmCall||tmCall.estado!=='tocando')return;tmTocar(false);clearTimeout(tmCall.limite);
- const st=await tmMidia(comVideo);if(!st){tmRecusar();return;}
- tmCall.local=st;tmCall.estado='conectando';tmCall.inicio=Date.now();
+ tmCall.estado='conectando';tmDesenharLigacao();
+ if(tmCall.modo==='lk'){if(!(await tmLkEntrar(comVideo))){toast('Não foi possível entrar na ligação.');tmRecusar();return;}}
+ else{const st=await tmMidia(comVideo);if(!st){tmRecusar();return;}tmCall.local=st;}
+ if(!tmCall)return;tmCall.inicio=tmCall.inicio||Date.now();
  tm.from('chat_chamada_participante').insert({chamada_id:tmCall.id,usuario_id:eu.id,entrou_em:new Date().toISOString()});
  tmCall.participantes.filter(u=>u!==eu.id).forEach(u=>tmEnviarSinal(u,'entrou',{}));
  tmDesenharLigacao();
 }
-function tmRecusar(){if(!tmCall)return;tmTocar(false);clearTimeout(tmCall.limite);tmEnviarSinal(tmCall.de,'recusar',{});tmCall=null;tmDesenharLigacao();}
+function tmRecusar(){if(!tmCall)return;if(tmCall.lk){try{tmCall.lk.disconnect();}catch(e){}}tmTocar(false);clearTimeout(tmCall.limite);tmEnviarSinal(tmCall.de,'recusar',{});tmCall=null;tmDesenharLigacao();}
 async function tmEncerrar(motivo){
  if(!tmCall)return;const c=tmCall;tmCall=null;tmTocar(false);clearTimeout(c.limite);clearInterval(c.relogio);
  c.participantes.filter(u=>u!==eu.id).forEach(u=>tmEnviarSinal(u,'sair',{chamada:c.id}));
- Object.values(c.pcs).forEach(pc=>{try{pc.close();}catch(e){}});
+ Object.values(c.pcs).forEach(pc=>{try{pc.close();}catch(e){}});if(c.lk){const r=c.lk;c.lk=null;try{r.disconnect();}catch(e){}}
  if(c.local)c.local.getTracks().forEach(t=>t.stop());if(c.tela)c.tela.getTracks().forEach(t=>t.stop());
  tm.from('chat_chamada_participante').update({saiu_em:new Date().toISOString()}).eq('chamada_id',c.id).eq('usuario_id',eu.id);
  if(c.dono||c.inicio){
@@ -1705,9 +1737,10 @@ async function tmEncerrar(motivo){
  }
  tmDesenharLigacao();
 }
-function tmMudo(){if(!tmCall||!tmCall.local)return;tmCall.mudo=!tmCall.mudo;tmCall.local.getAudioTracks().forEach(t=>t.enabled=!tmCall.mudo);tmDesenharLigacao();}
-function tmCamera(){if(!tmCall||!tmCall.local)return;const v=tmCall.local.getVideoTracks();if(!v.length){toast('Ligação só de voz.');return;}tmCall.semCam=!tmCall.semCam;v.forEach(t=>t.enabled=!tmCall.semCam);tmDesenharLigacao();}
+async function tmMudo(){if(!tmCall)return;tmCall.mudo=!tmCall.mudo;if(tmCall.lk){await tmCall.lk.localParticipant.setMicrophoneEnabled(!tmCall.mudo);}else if(tmCall.local)tmCall.local.getAudioTracks().forEach(t=>t.enabled=!tmCall.mudo);tmDesenharLigacao();}
+async function tmCamera(){if(!tmCall)return;if(tmCall.lk){const on=!tmCall.lk.localParticipant.isCameraEnabled;try{await tmCall.lk.localParticipant.setCameraEnabled(on);}catch(e){toast('Sem acesso à câmera.');}tmCall.semCam=!on;tmCall.local=tmLkLocal();tmDesenharLigacao();return;}if(!tmCall.local)return;const v=tmCall.local.getVideoTracks();if(!v.length){toast('Ligação só de voz.');return;}tmCall.semCam=!tmCall.semCam;v.forEach(t=>t.enabled=!tmCall.semCam);tmDesenharLigacao();}
 async function tmTela(){
+ if(tmCall&&tmCall.lk){const on=!tmCall.tela;try{await tmCall.lk.localParticipant.setScreenShareEnabled(on);tmCall.tela=on;}catch(e){toast('Não foi possível compartilhar a tela.');}tmDesenharLigacao();return;}
  if(!tmCall||!tmCall.local)return;const v=tmCall.local.getVideoTracks()[0];if(!v){toast('Compartilhar a tela só em ligação de vídeo.');return;}
  if(tmCall.tela){const t=tmCall.tela;tmCall.tela=null;t.getTracks().forEach(x=>x.stop());Object.values(tmCall.pcs).forEach(pc=>pc.getSenders().forEach(s=>{if(s.track&&s.track.kind==='video')s.replaceTrack(v);}));tmDesenharLigacao();return;}
  try{const t=await navigator.mediaDevices.getDisplayMedia({video:true});tmCall.tela=t;const tr=t.getVideoTracks()[0];
@@ -1726,11 +1759,11 @@ function tmDesenharLigacao(){
  const rem=Object.keys(c.remotos);
  const tempo=c.inicio&&c.estado==='ativa'?(()=>{const d=Math.round((Date.now()-c.inicio)/1000);return String(Math.floor(d/60)).padStart(2,'0')+':'+String(d%60).padStart(2,'0');})():(c.estado==='chamando'?'Chamando…':'Conectando…');
  o.innerHTML=`<div class="tm-ligbox"><div class="tm-ligtop"><b>${escH(c.nome||'')}</b><span id="tmLigTempo">${tempo}</span></div>
-  <div class="tm-ligpal">${rem.length?rem.map(u=>`<div class="tm-tile"><video autoplay playsinline data-u="${u}"></video><span>${escH(tmPessoa(u).nome)}</span></div>`).join(''):`<div class="tm-tile vazio"><div class="tm-av g" style="width:84px;height:84px;font-size:26px;background:${tmCor(c.nome||'')}">${escH(tmIni(c.nome||''))}</div><span>${escH(c.nome||'')}</span></div>`}
+  <div class="tm-ligpal">${rem.length?rem.map(u=>{const sv=c.remotos[u]&&c.remotos[u].getVideoTracks().length;return `<div class="tm-tile${sv?'':' vazio'}">${sv?'':`<div class="tm-av g" style="width:84px;height:84px;font-size:26px;background:${tmCor(tmPessoa(u).nome)}">${escH(tmIni(tmPessoa(u).nome))}</div>`}<video autoplay playsinline data-u="${u}"${sv?'':' style="display:none"'}></video><span>${escH(tmPessoa(u).nome)}</span></div>`;}).join(''):`<div class="tm-tile vazio"><div class="tm-av g" style="width:84px;height:84px;font-size:26px;background:${tmCor(c.nome||'')}">${escH(tmIni(c.nome||''))}</div><span>${escH(c.nome||'')}</span></div>`}
    ${c.local&&c.local.getVideoTracks().length?`<video class="tm-eu-v" autoplay playsinline muted id="tmEuV"></video>`:''}</div>
-  <div class="tm-ligctl"><button class="tm-lb${c.mudo?' on':''}" onclick="tmMudo()">${c.mudo?'🔇 Sem som':'🎤 Mudo'}</button>${c.local&&c.local.getVideoTracks().length?`<button class="tm-lb${c.semCam?' on':''}" onclick="tmCamera()">${ICO_CAM} ${c.semCam?'Ligar câmera':'Câmera'}</button><button class="tm-lb${c.tela?' on':''}" onclick="tmTela()">🖥 ${c.tela?'Parar tela':'Tela'}</button>`:''}<button class="tm-lb no" onclick="tmEncerrar()">Encerrar</button></div></div>`;
+  <div class="tm-ligctl"><button class="tm-lb${c.mudo?' on':''}" onclick="tmMudo()">${c.mudo?'🔇 Sem som':'🎤 Mudo'}</button>${c.lk||c.local&&c.local.getVideoTracks().length?`<button class="tm-lb${c.semCam?' on':''}" onclick="tmCamera()">${ICO_CAM} ${c.semCam?'Ligar câmera':'Câmera'}</button><button class="tm-lb${c.tela?' on':''}" onclick="tmTela()">🖥 ${c.tela?'Parar tela':'Tela'}</button>`:''}<button class="tm-lb no" onclick="tmEncerrar()">Encerrar</button></div></div>`;
  o.querySelectorAll('video[data-u]').forEach(v=>{const s=c.remotos[v.dataset.u];if(s&&v.srcObject!==s)v.srcObject=s;});
- const ev=el('tmEuV');if(ev)ev.srcObject=c.tela||c.local;
+ const ev=el('tmEuV');if(ev)ev.srcObject=c.lk?c.local:(c.tela||c.local);
  clearInterval(c.relogio);if(c.estado==='ativa')c.relogio=setInterval(()=>{const t=el('tmLigTempo');if(!t||!tmCall||!tmCall.inicio){clearInterval(c.relogio);return;}const d=Math.round((Date.now()-tmCall.inicio)/1000);t.textContent=String(Math.floor(d/60)).padStart(2,'0')+':'+String(d%60).padStart(2,'0');},1000);
 }
 /* ---------- APURAÇÃO (com abas: Apuração · Radar XML · Demanda em lote · Meu espaço) ---------- */
