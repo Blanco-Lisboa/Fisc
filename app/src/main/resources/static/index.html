@@ -731,13 +731,17 @@ function eColab(){return eu&&eu.nivel==='colaborador';}
 function telaInicial(){return eGestor()?'gestor':(eColab()?'central':'apuracao');}
 function podeVer(v){return !((v==='gestor'&&!eGestor())||(v==='central'&&!eColab()));}
 function aplicarMenu(){el('navGestor').style.display=eGestor()?'':'none';el('navCentral').style.display=eColab()?'':'none';}
-function irView(v){if(!podeVer(v))v=telaInicial();view=v;render();}
+function irView(v){if(!podeVer(v))v=telaInicial();view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
 function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central',mapaDados=null,cartAberta=new Set();
 function escH(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmtCnpj(c){const d=String(c||'').replace(/\D/g,'');return d.length===14?d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'):d;}
 let clientesDados=null;
-function setGestorAba(a){gestorAba=a;if(a==='mapa')mapaDados=null;if(a==='clientes'){clientesDados=null;cliPag=1;cliPorPag=0;}if(a==='central')centralDados=null;renderGestor();}
+const emCurso={};
+function umaVez(k,fn){if(!emCurso[k])emCurso[k]=fn().finally(()=>{emCurso[k]=null;});return emCurso[k];}
+function mudou(a,b){return JSON.stringify(a)!==JSON.stringify(b);}
+function preCarregarGestor(){if(!eGestor())return;carregarCentralGestor();carregarMapa();carregarClientes();}
+function setGestorAba(a){gestorAba=a;if(a==='clientes'){cliPag=1;cliPorPag=0;}renderGestor();({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[a])();}
 function renderGestor(){
  const ab=[['central','Central'],['mapa','Mapa do Departamento'],['clientes','Clientes']];
  el('conteudo').innerHTML=`
@@ -778,14 +782,15 @@ function cgInfo(btn,k){
 }
 function cgNum(v){return v==null?'—':Number(v).toLocaleString('pt-BR');}
 function cgDelta(v,maiorRuim){if(v==null||v===0)return '';const ruim=maiorRuim?v>0:v<0;return `<span class="cg-delta ${ruim?'ruim':'bom'}">${v>0?'+':'−'}${Math.abs(v)}</span>`;}
-async function carregarCentralGestor(){
+function carregarCentralGestor(){return umaVez('central',async()=>{
  const r=await sb.rpc('fiscal_central_gestor');
- if(r.error){toast('Não foi possível carregar a central.');return;}
- centralDados=r.data||{};if(view==='gestor'&&gestorAba==='central')renderCentralGestor();
-}
+ if(r.error){if(!centralDados)toast('Não foi possível carregar a central.');return;}
+ const novo=r.data||{};if(!mudou(centralDados,novo))return;
+ centralDados=novo;if(view==='gestor'&&gestorAba==='central')renderCentralGestor();
+});}
 function renderCentralGestor(){
  const b=el('gestorBody');if(!b)return;
- if(!centralDados){b.innerHTML='';carregarCentralGestor();return;}
+ if(!centralDados){b.innerHTML='';return;}
  const d=centralDados,k=d.kpis||{},al=d.alertas||{},tot=k.total_clientes||0;
  const [ano,mes]=(d.competencia||'').split('-').map(Number);const mesNome=mes?MESES[mes-1]+'/'+ano:'';
  const pctAp=k.apuracao_concluida==null||!tot?null:Math.round(100*k.apuracao_concluida/tot);
@@ -826,11 +831,12 @@ function abrirAlertaGestor(c){
  document.body.appendChild(modal);
 }
 /* ---------- clientes ---------- */
-async function carregarClientes(){
+function carregarClientes(){return umaVez('clientes',async()=>{
  const r=await sb.rpc('fiscal_clientes_painel');
- if(r.error){toast('Não foi possível carregar os clientes.');return;}
- clientesDados=r.data||[];if(view==='gestor'&&gestorAba==='clientes')renderClientes();
-}
+ if(r.error){if(!clientesDados)toast('Não foi possível carregar os clientes.');return;}
+ const novo=r.data||[];if(!mudou(clientesDados,novo))return;
+ clientesDados=novo;if(view==='gestor'&&gestorAba==='clientes')renderClientes();
+});}
 let cliBusca='',cliApu='',cliPag=1,cliPorPag=0,cliObs=null,cliApuAberto=false;
 function soDig(s){return String(s||'').replace(/\D/g,'');}
 function cliLinhas(){
@@ -887,14 +893,15 @@ function desenharClientes(){
 
 /* ---------- mapa do departamento ---------- */
 const ICO_CART='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h12v4M3 7v10a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2zM16 14h.01"/></svg>';
-async function carregarMapa(){
+function carregarMapa(){return umaVez('mapa',async()=>{
  const r=await sb.rpc('fiscal_mapa_departamento');
- if(r.error){toast('Não foi possível carregar o mapa do departamento.');return;}
- mapaDados=r.data||[];if(view==='gestor'&&gestorAba==='mapa')renderMapa();
-}
+ if(r.error){if(!mapaDados)toast('Não foi possível carregar o mapa do departamento.');return;}
+ const novo=r.data||[];if(!mudou(mapaDados,novo))return;
+ mapaDados=novo;if(view==='gestor'&&gestorAba==='mapa')renderMapa();
+});}
 function renderMapa(){
  const b=el('gestorBody');if(!b)return;
- if(!mapaDados){b.innerHTML='';carregarMapa();return;}
+ if(!mapaDados){b.innerHTML='';return;}
  b.innerHTML=`<div class="tela"><div class="grade">${mapaDados.map(u=>`<div class="cardP">
    <div class="top"><div class="av" style="width:48px;height:48px;border-radius:13px;font-size:15px;overflow:hidden">${u.foto_url?`<img src="${escH(u.foto_url)}" alt="" style="width:100%;height:100%;object-fit:cover">`:escH(iniciais(u.nome)||u.nome.slice(0,2).toUpperCase())}</div>
      <div><div class="nm">${escH(u.nome)}</div><div style="font-size:11px;color:var(--apagado)">${escH(u.nivel)}</div></div></div>
@@ -1455,13 +1462,14 @@ async function assumirWA(id){const r=await sb.from('wa_conversa').update({respon
 /* ---------- entrada ---------- */
 async function iniciarDados(){
  el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
+ preCarregarGestor();
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
   .on('postgres_changes',{event:'UPDATE',schema:'public',table:'wa_midia'},aoMudarMidia).subscribe();
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).subscribe();
  view=telaInicial();render();}
-function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}eu.nivel=n.nivel;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();if(!podeVer(view))view=telaInicial();render();}
+function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}const era=eGestor();eu.nivel=n.nivel;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();if(!era)preCarregarGestor();if(!podeVer(view))view=telaInicial();render();}
 (async()=>{const s=await fiscalSessaoAtual();if(!s){location.href='login.html';return;}
  sb=fiscalCliente();const m=s.user.app_metadata||{};eu={id:s.user.id,nome:m.nome||s.user.email,nivel:m.fiscal_nivel||''};
  sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')location.href='login.html';});
