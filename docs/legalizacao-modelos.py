@@ -1,5 +1,5 @@
 import json, sys
-A = "Olá, aqui é {{1}}, do Departamento de Legalização da YOU Contabilidade. "
+A = "Olá, aqui é {{1}}, do Departamento de Legalização da YOU Contabilidade.\n\n"
 DOC = "DOC"
 M = [
  ("legal_boas_vindas_cliente","Utilidade",None,
