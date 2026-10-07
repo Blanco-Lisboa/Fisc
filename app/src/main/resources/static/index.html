@@ -257,6 +257,38 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .wa-comp input{flex:1;border:1px solid var(--bordaF);border-radius:999px;padding:11px 15px;font-size:12.5px;font-family:inherit;outline:0;background:var(--superf2)}
 .wa-comp .snd{width:40px;height:40px;border-radius:999px;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;font-size:15px;flex:none;cursor:pointer}
 .wa-lock{padding:12px;text-align:center;color:var(--apagado);font-size:11px;border-top:1px solid var(--borda);background:#fff;flex:none}
+.watabs .wa-ico{flex:none;width:34px;padding:0;color:var(--apoio)}
+.wa-arqlin{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;font-weight:600;color:var(--apoio);border-bottom:1px solid var(--superf2);cursor:pointer;flex:none}
+.wa-arqlin:hover{background:var(--superf)}.wa-arqlin span{margin-left:auto;color:var(--verde);font-size:11px}
+.wa-mini{color:var(--apagado);display:grid;place-items:center;flex:none}
+.wa-seta{border:0;background:transparent;color:var(--apagado);padding:0;width:18px;height:18px;display:none;place-items:center;flex:none}
+.waconv:hover .wa-seta{display:grid}
+.wa-hbtn{border:0;background:transparent;color:#fff;width:32px;height:32px;border-radius:999px;display:grid;place-items:center;flex:none}
+.wa-hbtn:hover{background:rgba(255,255,255,.14)}
+.wa-bbusca{display:flex;gap:8px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--borda);flex:none}
+.wa-bbusca input{flex:1;border:1px solid var(--bordaF);border-radius:999px;padding:7px 13px;font-size:12px;font-family:inherit;outline:0;background:var(--superf2)}
+.wa-linha{display:flex;flex-direction:column;max-width:84%}
+.wa-linha.ag{align-self:flex-end;align-items:flex-end}.wa-linha.cl{align-self:flex-start;align-items:flex-start}
+.wa-linha .wa-b{max-width:100%;position:relative;padding-right:24px}
+.wa-bseta{position:absolute;top:3px;right:3px;border:0;background:transparent;color:inherit;opacity:0;width:20px;height:20px;padding:0;display:grid;place-items:center;border-radius:6px}
+.wa-b:hover .wa-bseta{opacity:.7}
+.wa-autor{font-size:11px;font-weight:700;color:var(--laranjaTx);margin-bottom:2px}
+.wa-enc{font-size:10.5px;font-style:italic;opacity:.7;margin-bottom:2px}
+.wa-cit{border-left:3px solid var(--laranja);background:rgba(127,127,127,.12);border-radius:6px;padding:4px 8px;margin-bottom:5px;font-size:11px;display:flex;flex-direction:column}
+.wa-cit b{font-size:10.5px;color:var(--laranjaTx)}.wa-b.ag .wa-cit b{color:#ffb38a}
+.wa-cit span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;opacity:.85}
+.wa-img{display:block;max-width:260px;max-height:260px;border-radius:8px;margin-bottom:3px;cursor:pointer}
+.wa-reac{background:#fff;border:1px solid var(--borda);border-radius:999px;padding:1px 7px;font-size:12px;margin-top:-6px;z-index:1;box-shadow:var(--sm)}
+.wa-resp{display:flex;align-items:center;gap:8px;padding:8px 12px 0;background:#fff;border-top:1px solid var(--borda);flex:none}
+.wa-resp .q{flex:1;min-width:0;border-left:3px solid var(--laranja);background:var(--superf2);border-radius:6px;padding:5px 9px;display:flex;flex-direction:column;font-size:11.5px}
+.wa-resp .q b{color:var(--laranjaTx);font-size:11px}.wa-resp .q span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wa-resp button{border:0;background:transparent;color:var(--apagado);font-size:14px}
+.wa-rec{color:var(--vermelho);font-weight:700;font-size:12.5px}
+.wa-menu{position:fixed;z-index:80;background:#fff;border:1px solid var(--borda);border-radius:10px;box-shadow:var(--md);padding:5px;display:flex;flex-direction:column;min-width:190px}
+.wa-menu button{border:0;background:transparent;text-align:left;padding:8px 11px;font-size:12.5px;border-radius:7px;color:var(--ink);font-family:inherit}
+.wa-menu button:hover{background:var(--superf)}.wa-menu button.perigo{color:var(--vermelho)}
+.wa-menu.wa-emojis{flex-direction:row;min-width:0;border-radius:999px;padding:4px 6px}
+.wa-menu.wa-emojis button{font-size:20px;padding:4px 6px;border-radius:999px}.wa-menu.wa-emojis button.on{background:var(--laranjaSv)}
 .toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:60}
 .toast{background:var(--ink);color:#fff;padding:9px 15px;border-radius:999px;font-size:12.5px;box-shadow:var(--md)}
 .modal{position:fixed;inset:0;background:rgba(17,17,20,.45);display:grid;place-items:center;z-index:50;padding:16px}
@@ -1136,39 +1168,381 @@ function renderEspacoModal(){
 }
 
 /* ---------- WHATSAPP (janela geral, estilo WhatsApp Web) ---------- */
-function snippet(x){const last=x.wpp[x.wpp.length-1];if(!last)return x.previa||'Sem conversa';if(last.doc)return '📄 '+last.doc;if(last.tpl)return '📄 '+(last.t||'template');return (last.d==='sai'?'Você: ':'')+(last.t||'');}
+function snippet(x){const p=x.previa||'';return x.silenciada?p:p;}
+let waLidaTentada=new Set(),waArq=false,waBusca='',waBuscaMsg=null,waResp=null,waUrls={},waDigitandoEm=0,waGrav=null;
+const WA_EMOJIS=['👍','❤️','😂','😮','😢','🙏'];
+const ICO_PIN='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l-1 6 4 4H6l4-4z"/></svg>';
+const ICO_MUDO='<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4zM23 9l-6 6M17 9l6 6"/></svg>';
+const ICO_SETA='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+const ICO_MAIS='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>';
+const ICO_ARQ='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>';
+const ICO_GRUPO='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg>';
+const ICO_CLIPE='<svg viewBox="0 0 24 24"><path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>';
+const ICO_ESTRELA='★';
+function waTodas(){return waEntrada.concat(waMeus);}
+function waPodeAgir(c){return !!c&&(eGestor()||c.dono===eu.id);}
+function waOrdenar(l){return l.slice().sort((a,b)=>(b.fixada?1:0)-(a.fixada?1:0)||(a.fixada&&b.fixada?new Date(b.fixada)-new Date(a.fixada):0)||new Date(b.ultima||0)-new Date(a.ultima||0));}
+function waListaVisivel(){
+ const base=waAba==='entrada'?waEntrada:waMeus;const t=waBusca.trim().toLowerCase(),td=waBusca.replace(/\D/g,'');
+ return waOrdenar(base.filter(x=>x.arquivada===waArq&&(!t||x.nome.toLowerCase().includes(t)||(td.length>=3&&String(x.telefone||'').includes(td))||String(x.previa||'').toLowerCase().includes(t))));
+}
+function waNaoLidas(x){return x.marcadaNL?Math.max(1,x.naoLidas):x.naoLidas;}
+function waFecharMenus(){document.querySelectorAll('.wa-menu').forEach(m=>m.remove());}
+function waMenu(ev,itens,esquerda){
+ ev.stopPropagation();waFecharMenus();
+ const m=document.createElement('div');m.className='wa-menu';
+ itens.filter(Boolean).forEach(([t,fn,perigo])=>{const b=document.createElement('button');b.textContent=t;if(perigo)b.className='perigo';b.onclick=e=>{e.stopPropagation();waFecharMenus();fn();};m.appendChild(b);});
+ document.body.appendChild(m);
+ let r=ev.currentTarget?ev.currentTarget.getBoundingClientRect():null;if(!r||!r.width)r={left:ev.clientX,right:ev.clientX,top:ev.clientY,bottom:ev.clientY};
+ let x=esquerda?r.left:r.right-m.offsetWidth,y=r.bottom+4;if(x+m.offsetWidth>window.innerWidth-8)x=window.innerWidth-m.offsetWidth-8;
+ if(x<8)x=8;if(y+m.offsetHeight>window.innerHeight-8)y=r.top-m.offsetHeight-4;
+ m.style.left=x+'px';m.style.top=y+'px';
+ setTimeout(()=>document.addEventListener('click',waFecharMenus,{once:true}),0);
+}
 function renderWhatsWeb(){
- const source = waAba==='entrada'?waEntrada:waMeus;
- if(!source.find(x=>x.id===selWhats)) selWhats = source.length?source[0].id:null;
- const c = selWhats?waConv(selWhats):null;
- const isEntrada = c && waEntrada.includes(c);
+ const lista=waListaVisivel();
+ const base=waAba==='entrada'?waEntrada:waMeus;
+ const nArq=base.filter(x=>x.arquivada).length;
+ if(!waTodas().find(x=>x.id===selWhats)&&lista.length)selWhats=lista[0].id;
+ const c=selWhats?waConv(selWhats):null;
+ const isEntrada=c&&!c.grupo&&waEntrada.includes(c);
  if(c&&!c.carregada)carregarMensagens(c.id);
+ const busca=el('wwbusca');const tinhaFoco=busca&&document.activeElement===busca;
  el('conteudo').innerHTML=`
   <div class="waweb">
     <div class="walist">
       <div class="watabs">
-        <button class="${waAba==='entrada'?'on':''}" onclick="waAba='entrada';selWhats=null;render()">Entrada <span class="c">${waEntrada.length}</span></button>
-        <button class="${waAba==='meus'?'on':''}" onclick="waAba='meus';selWhats=null;render()">Meus <span class="c">${waMeus.length}</span></button>
+        <button class="${waAba==='entrada'?'on':''}" onclick="waAba='entrada';waArq=false;selWhats=null;render()">Entrada <span class="c">${waEntrada.filter(x=>!x.arquivada).length}</span></button>
+        <button class="${waAba==='meus'?'on':''}" onclick="waAba='meus';waArq=false;selWhats=null;render()">Meus <span class="c">${waMeus.filter(x=>!x.arquivada).length}</span></button>
+        ${eGestor()?`<button class="wa-ico" title="Novo grupo" onclick="waNovoGrupo()">${ICO_GRUPO}</button>`:''}
       </div>
-      <div class="srch"><input placeholder="🔎  Buscar ou começar conversa"></div>
-      <div class="rl">${source.length?source.map(x=>{const last=x.wpp[x.wpp.length-1];const un=last&&last.d==='ent';
-        return `<div class="waconv ${x.id===selWhats?'sel':''}" onclick="selWhats='${x.id}';render()">
-          <div class="av">${iniciais(x.nome)}</div>
-          <div style="flex:1;min-width:0"><div class="nm"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${x.nome}</span><span class="hr">${last?(last.h||'agora'):(x.ultima?hhmm(x.ultima):'')}</span></div>
-            <div style="display:flex;align-items:center;gap:6px"><div class="last" style="flex:1">${snippet(x)}</div>${un?'<span class="un">1</span>':''}</div></div>
-        </div>`;}).join(''):`<div style="padding:26px 16px;text-align:center;color:var(--apagado);font-size:12px">${waAba==='entrada'?'Nenhum contato sem carteira. 🎉':'Sua carteira está vazia por aqui.'}</div>`}</div>
+      <div class="srch"><input id="wwbusca" placeholder="🔎  Buscar conversa" value="${escH(waBusca)}" oninput="waBusca=this.value;render()"></div>
+      ${waArq?`<div class="wa-arqlin" onclick="waArq=false;selWhats=null;render()">‹ Arquivadas</div>`:(nArq?`<div class="wa-arqlin" onclick="waArq=true;selWhats=null;render()">${ICO_ARQ} Arquivadas <span>${nArq}</span></div>`:'')}
+      <div class="rl">${lista.map(x=>{const n=waNaoLidas(x);
+        return `<div class="waconv ${x.id===selWhats?'sel':''}" onclick="selWhats='${x.id}';waResp=null;waBuscaMsg=null;render()">
+          <div class="av">${x.grupo?ICO_GRUPO:escH(iniciais(x.nome)||x.nome.slice(0,2).toUpperCase())}</div>
+          <div style="flex:1;min-width:0"><div class="nm"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(x.nome)}</span><span class="hr"${n?' style="color:var(--verde);font-weight:700"':''}>${x.ultima?hhmm(x.ultima):''}</span></div>
+            <div style="display:flex;align-items:center;gap:6px"><div class="last" style="flex:1">${x.bloqueado?'Bloqueado':escH(x.previa||'')}</div>${x.silenciada?`<span class="wa-mini">${ICO_MUDO}</span>`:''}${x.fixada?`<span class="wa-mini">${ICO_PIN}</span>`:''}${n?(x.marcadaNL&&!x.naoLidas?`<span class="un" style="width:10px;height:10px;padding:0${x.silenciada?';background:var(--nevoa)':''}"></span>`:`<span class="un"${x.silenciada?' style="background:var(--nevoa)"':''}>${n}</span>`):''}<button class="wa-seta" onclick="waMenuConversa(event,'${x.id}')">${ICO_SETA}</button></div></div>
+        </div>`;}).join('')}</div>
     </div>
     <div class="wachat">
      ${c?`
-      ${waHead(c,isEntrada?`<button class="bt-assumir" onclick="assumirWA('${c.id}')">＋ Assumir p/ minha carteira</button>`:`<span class="wstat2 rob">${eu?eu.nome.split(' ')[0]:''} atendendo</span>`)}
-      <div class="wa-msgs" id="wwms">${c.wpp.map(bolhaWA).join('')||'<div style="margin:auto;color:var(--apagado);font-size:12px;text-align:center">Sem conversa ainda.</div>'}</div>
-      ${isEntrada?`<div class="wa-lock">Contato sem carteira — <b>Assumir</b> para responder e iniciar a apuração.</div>`:(c.janela?`<div class="wa-comp"><span class="pl">+</span><input id="wwin" placeholder="Mensagem" onkeydown="if(event.key==='Enter')enviarWW()"><span class="pl">${MIC}</span><button class="snd" onclick="enviarWW()">➤</button></div>`:`<div class="wa-lock">🔒 Janela de 24h fechada — reabra com um template aprovado${c.optin?'':' · ⚠ cliente sem opt-in'}</div>`)}
-     `:`<div style="margin:auto;color:var(--apagado);font-size:12.5px">Selecione uma conversa</div>`}
+      ${waHeadReal(c,isEntrada)}
+      ${waBuscaMsg!==null?`<div class="wa-bbusca"><input id="wwbmsg" placeholder="Buscar na conversa" value="${escH(waBuscaMsg)}" oninput="waBuscaMsg=this.value;waDesenharMsgs()"><button class="miniB" onclick="waBuscaMsg=null;render()">Fechar</button></div>`:''}
+      <div class="wa-msgs" id="wwms"></div>
+      ${waComposer(c,isEntrada)}
+     `:''}
     </div>
   </div>`;
- const ms=el('wwms');if(ms)ms.scrollTop=ms.scrollHeight;
+ if(c)waDesenharMsgs();
+ if(tinhaFoco){const b=el('wwbusca');b.focus();b.setSelectionRange(b.value.length,b.value.length);}
+ if(c&&c.carregada&&waNaoLidas(c)&&waPodeAgir(c)&&!waLidaTentada.has(c.id+':'+c.naoLidas)){waLidaTentada.add(c.id+':'+c.naoLidas);waMarcarLida(c);}
+}
+function waHeadReal(c,isEntrada){
+ const sub=c.grupo?(c.grupoDesc||'Grupo'):(c.bloqueado?'Bloqueado':fmtTel(c.telefone));
+ const dir=isEntrada?`<button class="bt-assumir" onclick="assumirWA('${c.id}')">＋ Assumir p/ minha carteira</button>`:(c.grupo?'':`<span class="wstat2 rob">${eu?escH(eu.nome.split(' ')[0]):''} atendendo</span>`);
+ return `<div class="wa-head"><span class="wapp">${WA_LOGO}</span><span class="avc">${c.grupo?ICO_GRUPO:escH(iniciais(c.nome))}</span><div class="nm" style="cursor:pointer" onclick="waDados('${c.id}')"><b>${escH(c.nome)}</b><span>${escH(sub)}</span></div>${dir}<button class="wa-hbtn" onclick="waMenuChat(event,'${c.id}')">${ICO_MAIS}</button></div>`;
+}
+function waComposer(c,isEntrada){
+ if(isEntrada)return `<div class="wa-lock">Contato sem carteira — <b>Assumir</b> para responder e iniciar a apuração.</div>`;
+ if(c.bloqueado)return `<div class="wa-lock">Contato bloqueado — <b style="cursor:pointer" onclick="waAcao('desbloquear','${c.id}')">Desbloquear</b></div>`;
+ if(!c.grupo&&!c.janela)return `<div class="wa-lock">🔒 Janela de 24h fechada — reabra com um template aprovado</div>`;
+ const r=waResp?c.wpp.find(m=>m.id===waResp):null;
+ return `${r?`<div class="wa-resp"><div class="q"><b>${r.d==='sai'?'Você':escH(r.autorGrupo||c.nome)}</b><span>${escH(waResumo(r))}</span></div><button onclick="waResp=null;render()">✕</button></div>`:''}
+  ${waGrav?`<div class="wa-comp"><span class="wa-rec">● Gravando ${waGrav.seg||0}s</span><span style="flex:1"></span><button class="miniB" onclick="waGravarCancelar()">Cancelar</button><button class="snd" onclick="waGravarParar()">➤</button></div>`
+  :`<div class="wa-comp"><span class="pl" onclick="waMenuAnexo(event,'${c.id}')">${ICO_CLIPE}</span><input id="wwin" placeholder="Mensagem" oninput="waDigitando()" onkeydown="if(event.key==='Enter')enviarWW()"><span class="pl" title="Gravar áudio" onclick="waGravar()">${MIC}</span><button class="snd" onclick="enviarWW()">➤</button></div>`}`;
+}
+function waResumo(m){if(!m)return '';if(m.tipo==='imagem')return '📷 '+(m.t&&!m.t.startsWith('[')?m.t:'Foto');if(m.tipo==='video')return '🎥 Vídeo';if(m.tipo==='audio')return '🎤 Áudio';if(m.tipo==='documento')return '📄 '+(m.nomeArq||'Documento');if(m.tipo==='local')return '📍 '+(m.t||'Localização');if(m.tipo==='contato')return '👤 '+(m.t||'Contato');return m.t||'';}
+function waDesenharMsgs(){
+ const c=waConv(selWhats);const box=el('wwms');if(!c||!box)return;
+ const t=(waBuscaMsg||'').trim().toLowerCase();
+ let ult=null,html='';
+ c.wpp.forEach(m=>{if(t&&!String(waResumo(m)).toLowerCase().includes(t))return;
+  if(m.dt!==ult){html+=`<span class="ap-dia">${escH(m.dt||'')}</span>`;ult=m.dt;}
+  html+=bolhaReal(c,m);});
+ box.innerHTML=html;
+ if(!t)box.scrollTop=box.scrollHeight;
+ waAssinarMidias(c);
+}
+function bolhaReal(c,m){
+ const cls=m.d==='sai'?'ag':'cl';
+ const q=m.respondeA?c.wpp.find(x=>x.idWa===m.respondeA):null;
+ let inner='';
+ if(c.grupo&&m.d==='ent'&&m.autorGrupo)inner+=`<div class="wa-autor">${escH(m.autorGrupo)}</div>`;
+ if(m.encaminhada)inner+=`<div class="wa-enc">↪ Encaminhada</div>`;
+ if(m.respondeA)inner+=`<div class="wa-cit"><b>${q?(q.d==='sai'?'Você':escH(q.autorGrupo||c.nome)):''}</b><span>${q?escH(waResumo(q)):'Mensagem'}</span></div>`;
+ const u=m.caminho?waUrls[m.caminho]:null;
+ if(m.tipo==='imagem'||m.tipo==='figurinha')inner+=u?`<img class="wa-img" src="${escH(u)}" alt="" onclick="window.open(this.src)">`:`<div class="wa-doc"><span class="fi">IMG</span>${m.midiaEstado==='guardado'||m.caminho?'Carregando…':'Baixando…'}</div>`;
+ else if(m.tipo==='video')inner+=u?`<video class="wa-img" src="${escH(u)}" controls></video>`:`<div class="wa-doc"><span class="fi">VÍD</span>Carregando…</div>`;
+ else if(m.tipo==='audio')inner+=u?`<audio src="${escH(u)}" controls style="max-width:240px;height:34px"></audio>`:`<div class="wa-doc"><span class="fi">ÁUD</span>Carregando…</div>`;
+ else if(m.tipo==='documento')inner+=`<div class="wa-doc" ${u?`style="cursor:pointer" data-u="${escH(u)}" onclick="window.open(this.dataset.u)"`:''}><span class="fi">${escH((String(m.nomeArq||'').split('.').pop()||'DOC').slice(0,4).toUpperCase())}</span>${escH(m.nomeArq||'Documento')}</div>`;
+ if(m.tipo==='local'&&m.dados&&m.dados.latitude!=null){inner+=`<div class="wa-doc" style="cursor:pointer" onclick="window.open('https://www.google.com/maps?q=${Number(m.dados.latitude)},${Number(m.dados.longitude)}')"><span class="fi">MAPA</span>📍 ${escH(m.dados.name||m.dados.address||'Localização')}</div>`;}
+ else if(m.tipo==='contato'){inner+=`<div class="wa-doc"><span class="fi">👤</span>${escH(m.t||'Contato')}${m.dados&&m.dados.telefone?' · '+escH(fmtTel(m.dados.telefone)):''}</div>`;}
+ else if(m.tipo==='audio'&&m.transcricao)inner+=`<div style="margin-top:4px">🎤 ${escH(m.transcricao)}</div>`;
+ else if(m.tipo==='documento'){if(m.legenda)inner+=escH(m.legenda);}
+ else if(['imagem','video','figurinha'].includes(m.tipo)){if(m.legenda)inner+=`<div style="margin-top:4px">${escH(m.legenda)}</div>`;}
+ else if(m.tipo!=='audio')inner+=escH(m.t||'');
+ const reac=[m.reacao,m.reacaoNossa].filter(Boolean);
+ const tag=m.d==='sai'?(ST_WA[m.st]||m.st||'')+(m.autor?' · '+escH(m.autor):''):'whatsapp';
+ return `<div class="wa-linha ${cls}"><div class="wa-b ${cls}">${inner}<button class="wa-bseta" onclick="waMenuMsg(event,'${m.id}')">${ICO_SETA}</button></div>${reac.length?`<div class="wa-reac ${cls}">${reac.map(escH).join(' ')}</div>`:''}</div><div class="wa-t ${cls}">${m.favorita?ICO_ESTRELA+' ':''}${escH(m.h||'')} · ${tag}</div>`;
+}
+async function waAssinarMidias(c){
+ const faltam=[...new Set(c.wpp.filter(m=>m.caminho&&!waUrls[m.caminho]&&!/^https?:/i.test(m.caminho)).map(m=>m.caminho))];
+ c.wpp.forEach(m=>{if(m.caminho&&/^https?:/i.test(m.caminho))waUrls[m.caminho]=m.caminho;});
+ if(!faltam.length)return;
+ faltam.forEach(p=>waUrls[p]=waUrls[p]||null);
+ const r=await sb.storage.from('wa-midia').createSignedUrls(faltam,3600);
+ if(r.error||!r.data)return;
+ let mudou=false;r.data.forEach(x=>{if(x.signedUrl){waUrls[x.path]=x.signedUrl;mudou=true;}});
+ if(mudou&&view==='whatsweb'&&selWhats===c.id)waDesenharMsgs();
+}
+function waMenuConversa(ev,id){
+ const c=waConv(id);if(!c)return;
+ if(!waPodeAgir(c)){toast('Assuma a conversa para usar estas opções.');ev.stopPropagation();return;}
+ waMenu(ev,[
+  [c.arquivada?'Desarquivar conversa':'Arquivar conversa',()=>waMarcar(c,'arquivada',!c.arquivada)],
+  [c.fixada?'Desafixar conversa':'Fixar conversa',()=>waMarcar(c,'fixada',!c.fixada)],
+  [c.silenciada?'Reativar notificações':'Silenciar notificações',()=>waMarcar(c,'silenciada',!c.silenciada)],
+  [waNaoLidas(c)?'Marcar como lida':'Marcar como não lida',()=>waNaoLidas(c)?waMarcarLida(c,true):waMarcar(c,'nao_lida',true)],
+  !c.grupo?[c.bloqueado?'Desbloquear':'Bloquear',()=>waConfirmarBloqueio(c),!c.bloqueado]:null]);
+}
+function waMenuChat(ev,id){
+ const c=waConv(id);if(!c)return;const pode=waPodeAgir(c);
+ waMenu(ev,[
+  [c.grupo?'Dados do grupo':'Dados do contato',()=>waDados(id)],
+  ['Buscar na conversa',()=>{waBuscaMsg='';render();setTimeout(()=>{const i=el('wwbmsg');if(i)i.focus();},0);}],
+  ['Mensagens favoritas',()=>waFavoritas(id)],
+  pode?[c.silenciada?'Reativar notificações':'Silenciar notificações',()=>waMarcar(c,'silenciada',!c.silenciada)]:null,
+  pode?[c.arquivada?'Desarquivar conversa':'Arquivar conversa',()=>waMarcar(c,'arquivada',!c.arquivada)]:null,
+  pode&&c.grupo&&eGestor()?['Link de convite',()=>waGrupoLink(id)]:null,
+  pode&&c.grupo&&eGestor()?['Pedidos para entrar',()=>waGrupoPedidos(id)]:null,
+  pode&&c.grupo&&eGestor()?['Editar grupo',()=>waGrupoEditar(id)]:null,
+  pode&&c.grupo&&eGestor()?['Apagar grupo',()=>waConfirmar('Apagar o grupo "'+c.nome+'"? Todos os participantes saem.','Apagar grupo',()=>waAcao('grupo_apagar',id)),true]:null,
+  pode&&!c.grupo?[c.bloqueado?'Desbloquear':'Bloquear',()=>waConfirmarBloqueio(c),!c.bloqueado]:null]);
+}
+function waMenuMsg(ev,mid){
+ const c=waConv(selWhats);const m=c&&c.wpp.find(x=>x.id===mid);if(!m)return;const pode=waPodeAgir(c)&&!m.id.startsWith('tmp-');
+ waMenu(ev,[
+  pode&&m.idWa&&!c.bloqueado?['Responder',()=>{waResp=m.id;render();setTimeout(()=>{const i=el('wwin');if(i)i.focus();},0);}]:null,
+  pode&&m.idWa&&m.d==='ent'?['Reagir',()=>waEscolherReacao(ev,m)]:null,
+  m.t&&!['imagem','video','audio','figurinha'].includes(m.tipo)?['Copiar',()=>{navigator.clipboard.writeText(m.tipo==='contato'&&m.dados?m.t+' '+fmtTel(m.dados.telefone):m.t).then(()=>toast('Copiado.'),()=>toast('Não foi possível copiar.'));}]:null,
+  !m.id.startsWith('tmp-')&&m.tipo!=='figurinha'&&m.tipo!=='sistema'?['Encaminhar',()=>waEncaminhar(m.id)]:null,
+  pode?[m.favorita?'Desfavoritar':'Favoritar',()=>waMarcarMsg(m,'favorita',!m.favorita)]:null,
+  pode?['Apagar para mim',()=>waConfirmar('Apagar esta mensagem da tela da equipe? O cliente continua vendo a mensagem no WhatsApp dele.','Apagar para mim',()=>waMarcarMsg(m,'apagada',true)),true]:null]);
+}
+function waEscolherReacao(ev,m){
+ waFecharMenus();const bar=document.createElement('div');bar.className='wa-menu wa-emojis';
+ WA_EMOJIS.forEach(e=>{const b=document.createElement('button');b.textContent=e;if(m.reacaoNossa===e)b.className='on';b.onclick=x=>{x.stopPropagation();waFecharMenus();waReagir(m,m.reacaoNossa===e?'':e);};bar.appendChild(b);});
+ document.body.appendChild(bar);const r=ev.target.getBoundingClientRect?ev.target.getBoundingClientRect():{left:200,bottom:200,top:200};
+ bar.style.left=Math.max(8,Math.min(window.innerWidth-bar.offsetWidth-8,r.left-120))+'px';bar.style.top=Math.max(8,r.top-bar.offsetHeight-6)+'px';
+ setTimeout(()=>document.addEventListener('click',waFecharMenus,{once:true}),0);
+}
+async function waReagir(m,emoji){const ant=m.reacaoNossa;m.reacaoNossa=emoji||null;waDesenharMsgs();
+ const j=await waEdge('wa-meta-acao',{acao:'reagir',conversa_id:selWhats,mensagem_id:m.id,emoji});
+ if(!j.ok){m.reacaoNossa=ant;waDesenharMsgs();toast(j.erro||'Não foi possível reagir.');}}
+async function waEdge(nome,corpo){
+ const s=(await sb.auth.getSession()).data.session;
+ const r=await fetch(SB_URL+'/functions/v1/'+nome,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+(s?s.access_token:'')},body:JSON.stringify(corpo)});
+ return await r.json().catch(()=>({ok:false}));
+}
+async function waMarcar(c,campo,valor){
+ const r=await sb.rpc('wa_conversa_marcar',{p_conversa:c.id,p_campo:campo,p_valor:valor});
+ if(r.error||r.data!==true){toast(r.error&&/3 conversas/.test(r.error.message)?'Dá para fixar no máximo 3 conversas.':'Não foi possível alterar a conversa.');return;}
+ if(campo==='arquivada'){c.arquivada=valor;if(valor&&selWhats===c.id)selWhats=null;toast(valor?'Conversa arquivada.':'Conversa desarquivada.');}
+ if(campo==='fixada')c.fixada=valor?new Date().toISOString():null;
+ if(campo==='silenciada')c.silenciada=valor;
+ if(campo==='nao_lida'){c.marcadaNL=valor;if(selWhats===c.id)selWhats=null;}
+ render();
+}
+async function waMarcarLida(c,manual){
+ if(c._lendo)return;c._lendo=true;
+ const j=await waEdge('wa-meta-acao',{acao:'lida',conversa_id:c.id});c._lendo=false;
+ if(j.ok){c.naoLidas=0;c.marcadaNL=false;const b=el('waBadge');if(b)b.textContent=waPendentes();const i=el('wwin');if(manual||!i||!i.value)render();}
+ else if(manual)toast(j.erro||'Não foi possível marcar como lida.');
+}
+function waDigitando(){const c=waConv(selWhats);if(!c||c.grupo||Date.now()-waDigitandoEm<20000)return;waDigitandoEm=Date.now();waEdge('wa-meta-acao',{acao:'digitando',conversa_id:c.id});}
+async function waMarcarMsg(m,campo,valor){
+ const r=await sb.rpc('wa_mensagem_marcar',{p_mensagem:m.id,p_campo:campo,p_valor:valor});
+ if(r.error||r.data!==true){toast('Não foi possível alterar a mensagem.');return;}
+ const c=waConv(selWhats);
+ if(campo==='favorita')m.favorita=valor;
+ if(campo==='apagada'&&c){c.wpp=c.wpp.filter(x=>x.id!==m.id);waMsgs[c.id]=c.wpp;}
+ waDesenharMsgs();
+}
+function waConfirmar(texto,botao,fn){
+ fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx"><div class="mcab"><b>${escH(botao)}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody"><div style="font-size:12.5px;line-height:1.5">${escH(texto)}</div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="wacf">${escH(botao)}</button></div></div></div>`;
+ document.body.appendChild(modal);el('wacf').onclick=()=>{fecharModal();fn();};
+}
+function waConfirmarBloqueio(c){
+ if(c.bloqueado){waAcao('desbloquear',c.id);return;}
+ waConfirmar('Bloquear '+c.nome+'? Ele não consegue mais mandar mensagem para o Fiscal e o Fiscal não consegue mandar para ele. A Meta só permite bloquear quem escreveu nas últimas 24 horas.','Bloquear',()=>waAcao('bloquear',c.id));
+}
+async function waAcao(acao,id,extra){
+ const j=await waEdge('wa-meta-acao',Object.assign({acao,conversa_id:id},extra||{}));
+ if(!j.ok){toast(j.erro||'Não foi possível concluir.');return j;}
+ const c=waConv(id);
+ if(c&&acao==='bloquear'){c.bloqueado=true;toast('Contato bloqueado.');}
+ if(c&&acao==='desbloquear'){c.bloqueado=false;toast('Contato desbloqueado.');}
+ if(acao==='grupo_apagar'){toast('Grupo apagado.');await carregarConversas();selWhats=null;}
+ render();return j;
+}
+function waModal(titulo,corpo,largura){
+ fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(${largura||460}px,96vw)"><div class="mcab"><b>${escH(titulo)}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="wamb">${corpo}</div></div>`;
+ document.body.appendChild(modal);
+}
+async function waDados(id){
+ const c=waConv(id);if(!c)return;
+ if(!c.grupo){waModal('Dados do contato',`<span class="fl">Nome</span><div style="font-size:13px;font-weight:600">${escH(c.nome)}</div><span class="fl">Telefone</span><div style="font-size:13px">${escH(fmtTel(c.telefone))}</div><span class="fl">Situação</span><div style="font-size:13px">${c.bloqueado?'Bloqueado':'Ativo'}</div>${waPodeAgir(c)?`<div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="apubtn" onclick="fecharModal();waConfirmarBloqueio(waConv('${c.id}'))">${c.bloqueado?'Desbloquear':'Bloquear'}</button></div>`:''}`);return;}
+ waModal('Dados do grupo',`<span class="fl">Nome</span><div style="font-size:13px;font-weight:600">${escH(c.nome)}</div><span class="fl">Descrição</span><div style="font-size:12.5px">${escH(c.grupoDesc||'—')}</div><span class="fl">Participantes</span><div id="wapart" style="font-size:12.5px">…</div>`);
+ if(!eGestor())return;
+ const j=await waEdge('wa-meta-acao',{acao:'grupo_info',conversa_id:id});const box=el('wapart');if(!box)return;
+ if(!j.ok){box.textContent=j.erro||'Não foi possível ler os participantes.';return;}
+ const ps=(j.grupo&&j.grupo.participants)||[];
+ box.innerHTML=ps.length?ps.map(p=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--superf2)"><span>${escH(fmtTel(p.wa_id))}</span><button class="miniB" onclick="waGrupoRemover('${c.id}','${String(p.wa_id).replace(/\D/g,'')}')">Remover</button></div>`).join(''):'Nenhum participante ainda.';
+}
+async function waGrupoRemover(id,wa){
+ waConfirmar('Remover '+fmtTel(wa)+' do grupo?','Remover',async()=>{const j=await waAcao('grupo_remover',id,{participantes:[wa]});if(j&&j.ok){toast('Participante removido.');waDados(id);}});
+}
+async function waGrupoLink(id){
+ const c=waConv(id);waModal('Link de convite',`<div id="walink" style="font-size:12.5px;word-break:break-all">${escH(c.grupoLink||'…')}</div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="waGrupoLinkNovo('${id}')">Gerar novo link</button><button class="bt-assumir" onclick="waCopiarLink()">Copiar link</button></div>`);
+ const j=await waEdge('wa-meta-acao',{acao:'grupo_link',conversa_id:id});
+ if(j.ok&&j.link){c.grupoLink=j.link;const b=el('walink');if(b)b.textContent=j.link;}else if(!j.ok)toast(j.erro||'Não foi possível ler o link.');
+}
+function waCopiarLink(){const t=(el('walink')||{}).textContent||'';if(!t.startsWith('http'))return;navigator.clipboard.writeText(t).then(()=>toast('Link copiado.'),()=>toast('Não foi possível copiar.'));}
+async function waGrupoLinkNovo(id){
+ waConfirmar('Gerar um link novo? O link antigo para de funcionar.','Gerar novo link',async()=>{const j=await waEdge('wa-meta-acao',{acao:'grupo_link_novo',conversa_id:id});if(!j.ok){toast(j.erro||'Não foi possível gerar.');return;}const c=waConv(id);if(c)c.grupoLink=j.link;waGrupoLink(id);});
+}
+async function waGrupoPedidos(id){
+ waModal('Pedidos para entrar',`<div id="waped" style="font-size:12.5px">…</div>`);
+ const j=await waEdge('wa-meta-acao',{acao:'grupo_pedidos',conversa_id:id});const b=el('waped');if(!b)return;
+ if(!j.ok){b.textContent=j.erro||'Não foi possível ler os pedidos.';return;}
+ b.innerHTML=(j.pedidos||[]).length?j.pedidos.map(p=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--superf2)"><span style="flex:1">${escH(fmtTel(p.wa_id))}</span><button class="miniB" onclick="waPedido('${id}','${String(p.join_request_id).replace(/[^\w-]/g,'')}',false)">Recusar</button><button class="miniB" style="border-color:var(--verde);color:var(--verde)" onclick="waPedido('${id}','${String(p.join_request_id).replace(/[^\w-]/g,'')}',true)">Aprovar</button></div>`).join(''):'Nenhum pedido.';
+}
+async function waPedido(id,pid,aprovar){const j=await waEdge('wa-meta-acao',{acao:aprovar?'grupo_aprovar':'grupo_recusar',conversa_id:id,pedidos:[pid]});if(!j.ok){toast(j.erro||'Não foi possível concluir.');return;}toast(aprovar?'Entrada aprovada.':'Pedido recusado.');waGrupoPedidos(id);}
+function waGrupoEditar(id){
+ const c=waConv(id);waModal('Editar grupo',`<span class="fl">Nome</span><input class="fi" id="wagn" maxlength="100" value="${escH(c.nome)}"><span class="fl">Descrição</span><textarea class="fi" id="wagd" rows="3" maxlength="2048">${escH(c.grupoDesc||'')}</textarea><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="waGrupoSalvar('${id}')">Salvar</button></div>`);
+}
+async function waGrupoSalvar(id){const n=el('wagn').value.trim(),d=el('wagd').value;if(!n){toast('Escreva o nome do grupo.');return;}
+ const j=await waEdge('wa-meta-acao',{acao:'grupo_editar',conversa_id:id,nome:n,descricao:d});if(!j.ok){toast(j.erro||'Não foi possível salvar.');return;}
+ const c=waConv(id);if(c){c.nome=n;c.grupoDesc=d;}fecharModal();toast('Grupo atualizado.');render();}
+function waNovoGrupo(){
+ waModal('Novo grupo',`<span class="fl">Nome do grupo</span><input class="fi" id="wagn" maxlength="100"><span class="fl">Descrição</span><textarea class="fi" id="wagd" rows="3" maxlength="2048"></textarea><label style="display:flex;gap:8px;align-items:center;font-size:12.5px;margin-top:10px"><input type="checkbox" id="waga" checked> Aprovar cada pessoa antes de entrar</label><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="wagc" onclick="waGrupoCriar()">Criar grupo</button></div>`);
+}
+async function waGrupoCriar(){const n=el('wagn').value.trim();if(!n){toast('Escreva o nome do grupo.');return;}
+ const b=el('wagc');b.disabled=true;
+ const j=await waEdge('wa-meta-acao',{acao:'grupo_criar',nome:n,descricao:el('wagd').value,aprovar_entrada:el('waga').checked});
+ if(!j.ok){b.disabled=false;toast(j.erro||'Não foi possível criar o grupo.');return;}
+ fecharModal();toast('Grupo criado.');await carregarConversas();if(j.conversa_id){waAba='meus';selWhats=j.conversa_id;}render();
+ if(j.conversa_id)waGrupoLink(j.conversa_id);}
+function waFavoritas(id){
+ const c=waConv(id);const f=(c.wpp||[]).filter(m=>m.favorita);
+ waModal('Mensagens favoritas',f.length?f.map(m=>`<div style="padding:8px 0;border-bottom:1px solid var(--superf2);font-size:12.5px"><div style="font-size:10.5px;color:var(--apagado)">${escH(m.dt)} ${escH(m.h)} · ${m.d==='sai'?'Você':escH(m.autorGrupo||c.nome)}</div>${escH(waResumo(m))}</div>`).join(''):'<div style="font-size:12.5px">Nenhuma mensagem favorita.</div>',520);
+}
+function waEncaminhar(mid){
+ const opc=waOrdenar(waTodas().filter(x=>!x.arquivada&&waPodeAgir(x)&&!x.bloqueado));
+ waModal('Encaminhar para',`<input class="fi" placeholder="Buscar conversa" oninput="waFiltrarEnc(this.value)"><div id="waenc" style="margin-top:8px;max-height:50vh;overflow-y:auto">${opc.map(x=>`<div class="waconv" data-n="${escH(x.nome.toLowerCase())}" onclick="waEncaminharPara('${mid}','${x.id}')"><div class="av">${x.grupo?ICO_GRUPO:escH(iniciais(x.nome)||x.nome.slice(0,2).toUpperCase())}</div><div style="flex:1;min-width:0"><div class="nm"><span>${escH(x.nome)}</span></div><div class="last">${x.grupo||x.janela?'':'Janela de 24h fechada'}</div></div></div>`).join('')}</div>`,480);
+}
+function waFiltrarEnc(t){t=t.toLowerCase();document.querySelectorAll('#waenc .waconv').forEach(e=>e.style.display=e.dataset.n.includes(t)?'':'none');}
+async function waEncaminharPara(mid,destino){
+ fecharModal();const id_local=crypto.randomUUID();
+ const j=await waEdge('wa-meta-enviar',{conversa_id:destino,id_local,tipo:'texto',encaminhar_de:mid});
+ if(!j.ok){toast(j.erro||'Não foi possível encaminhar.');return;}
+ toast('Mensagem encaminhada.');const d=waConv(destino);if(d){d.carregada=false;}
+}
+function waMenuAnexo(ev,id){
+ waMenu(ev,[['Documento',()=>waEscolherArquivo(id,'*/*')],['Fotos e vídeos',()=>waEscolherArquivo(id,'image/jpeg,image/png,video/mp4,video/3gpp')],['Áudio',()=>waEscolherArquivo(id,'audio/ogg,audio/mpeg,audio/mp4,audio/aac,audio/amr,.ogg,.mp3,.m4a,.aac,.amr')],['Contato',()=>waContatoForm(id)],['Localização',()=>waLocalForm(id)]],true);
+}
+function waTipoArquivo(f){const t=(f.type||'').toLowerCase();
+ if(['image/jpeg','image/png'].includes(t))return 'imagem';if(['video/mp4','video/3gpp'].includes(t))return 'video';
+ if(/^audio\/(ogg|mpeg|mp4|aac|amr)/.test(t))return 'audio';return 'documento';}
+function waEscolherArquivo(id,aceita){const i=document.createElement('input');i.type='file';i.accept=aceita;i.multiple=true;i.onchange=()=>{if(i.files.length)waEnviarArquivos(id,[...i.files]);};i.click();}
+async function waEnviarArquivos(id,arquivos){
+ const c=waConv(id);if(!c)return;
+ const legenda=(el('wwin')||{}).value||'';if(el('wwin'))el('wwin').value='';
+ for(const f of arquivos){
+  const tipo=waTipoArquivo(f);const nome=f.name||'arquivo';
+  if(/\.(xml|zip)$/i.test(nome)){toast('A Meta não aceita XML nem ZIP: '+nome);continue;}
+  const lim={imagem:5,video:16,audio:16,documento:100}[tipo]*1048576;
+  if(f.size>lim){toast(nome+' passa do limite da Meta ('+(lim/1048576)+' MB).');continue;}
+  await waEnviarMidia(c,f,tipo,nome,arquivos.length===1?legenda:'');
+ }
+}
+async function waEnviarMidia(c,blob,tipo,nome,legenda){
+ const id_local=crypto.randomUUID();const ext=(nome.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'bin';
+ const caminho=`${c.id}/saida/${id_local}.${ext}`;
+ const tmp={id:'tmp-'+id_local,id_local,tipo,d:'sai',t:'',nomeArq:nome,legenda,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]};
+ c.wpp.push(tmp);if(selWhats===c.id)waDesenharMsgs();
+ const up=await sb.storage.from('wa-midia').upload(caminho,blob,{contentType:(blob.type||'application/octet-stream').split(';')[0],upsert:false});
+ if(up.error){tmp.st='falhou';waDesenharMsgs();toast('Não foi possível subir '+nome+'.');return;}
+ const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo,legenda:legenda||undefined,arquivo:{caminho,nome},responder_a:waRespWamid(c)});
+ waResp=null;
+ if(!j.ok){tmp.st='falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar.');}
+}
+function waRespWamid(c){if(!waResp)return undefined;const r=c.wpp.find(m=>m.id===waResp);return r&&r.idWa?r.idWa:undefined;}
+function waContatoForm(id){
+ waModal('Enviar contato',`<span class="fl">Nome</span><input class="fi" id="wacn" maxlength="200"><span class="fl">Telefone com DDD</span><input class="fi" id="wact" placeholder="+55 11 99999-9999"><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="waEnviarContato('${id}')">Enviar</button></div>`);
+}
+async function waEnviarContato(id){const n=el('wacn').value.trim(),t=el('wact').value.replace(/\D/g,'');if(!n||t.length<10){toast('Preencha nome e telefone.');return;}
+ fecharModal();await waEnviarSimples(waConv(id),'contato',{nome:n,telefone:t},n);}
+function waLocalForm(id){
+ waModal('Enviar localização',`<span class="fl">Link do Google Maps ou latitude, longitude</span><input class="fi" id="walc" placeholder="-23.5505, -46.6333"><span class="fl">Nome do local</span><input class="fi" id="waln" maxlength="200"><span class="fl">Endereço</span><input class="fi" id="wale" maxlength="300"><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="waEnviarLocal('${id}')">Enviar</button></div>`);
+}
+function waLerCoordenadas(s){const m=String(s).match(/(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/);if(!m)return null;const la=+m[1],lo=+m[2];return Math.abs(la)<=90&&Math.abs(lo)<=180?{latitude:la,longitude:lo}:null;}
+async function waEnviarLocal(id){const p=waLerCoordenadas(el('walc').value);if(!p){toast('Não encontrei latitude e longitude.');return;}
+ const n=el('waln').value.trim(),e=el('wale').value.trim();fecharModal();
+ await waEnviarSimples(waConv(id),'local',Object.assign(p,n?{name:n}:{},e?{address:e}:{}),n||'Localização');}
+async function waEnviarSimples(c,tipo,arquivo,texto){
+ const id_local=crypto.randomUUID();
+ const tmp={id:'tmp-'+id_local,id_local,tipo,d:'sai',t:texto,dados:arquivo,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]};
+ c.wpp.push(tmp);waDesenharMsgs();
+ const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo,arquivo,responder_a:waRespWamid(c)});waResp=null;
+ if(!j.ok){tmp.st='falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar.');}
 }
 function enviarWW(){const c=waConv(selWhats);const i=el('wwin');if(!c||!i||!i.value.trim())return;const t=i.value.trim();i.value='';enviarTextoWA(c,t);}
+async function waGravar(){
+ if(!navigator.mediaDevices||!window.MediaRecorder){toast('Este computador não permite gravar áudio.');return;}
+ let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true});}catch(e){toast('Sem acesso ao microfone.');return;}
+ const tipo=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'';
+ if(!tipo){st.getTracks().forEach(t=>t.stop());toast('Este computador não grava áudio em formato aceito.');return;}
+ const rec=new MediaRecorder(st,{mimeType:tipo,audioBitsPerSecond:32000});const partes=[];
+ rec.ondataavailable=e=>{if(e.data.size)partes.push(e.data);};
+ waGrav={rec,st,partes,seg:0,conv:selWhats,cancelado:false};
+ waGrav.timer=setInterval(()=>{if(!waGrav)return;waGrav.seg++;const s=document.querySelector('.wa-rec');if(s)s.textContent='● Gravando '+waGrav.seg+'s';if(waGrav.seg>=900)waGravarParar();},1000);
+ rec.onstop=async()=>{const g=waGrav;waGrav=null;clearInterval(g.timer);g.st.getTracks().forEach(t=>t.stop());render();
+  if(g.cancelado||!g.partes.length)return;
+  try{const ogg=webmParaOgg(new Uint8Array(await new Blob(g.partes).arrayBuffer()));
+   const c=waConv(g.conv);if(c)await waEnviarMidia(c,new Blob([ogg],{type:'audio/ogg'}),'audio','audio.ogg','');}
+  catch(e){toast('Não foi possível preparar o áudio.');}};
+ rec.start(250);render();
+}
+function waGravarParar(){if(waGrav&&waGrav.rec.state!=='inactive')waGrav.rec.stop();}
+function waGravarCancelar(){if(waGrav){waGrav.cancelado=true;waGravarParar();}}
+function webmParaOgg(b){
+ let p=0,cab=null;const pac=[];
+ const vint=(marca)=>{const f=b[p];let n=1,m=0x80;while(n<=8&&!(f&m)){m>>=1;n++;}if(n>8)throw new Error('ebml');let v=marca?f:(f&(m-1));let todos=(f&(m-1))===m-1;for(let i=1;i<n;i++){v=v*256+b[p+i];if(b[p+i]!==255)todos=false;}p+=n;return {v,n,todos};};
+ const MESTRES=new Set([0x18538067,0x1F43B675,0x1654AE6B,0xAE,0xA0]);
+ while(p<b.length-2){const id=vint(true).v;const tam=vint(false);const ini=p;
+  if(MESTRES.has(id))continue;
+  const fim=tam.todos?b.length:Math.min(b.length,ini+tam.v);
+  if(id===0x63A2)cab=b.slice(ini,fim);
+  else if(id===0xA3||id===0xA1){p=ini;vint(false);p+=3;pac.push(b.slice(p,fim));}
+  p=fim;}
+ if(!cab||!pac.length)throw new Error('sem audio');
+ const CRC=new Uint32Array(256);for(let i=0;i<256;i++){let r=i<<24;for(let j=0;j<8;j++)r=r&0x80000000?((r<<1)^0x04c11db7)>>>0:(r<<1)>>>0;CRC[i]=r>>>0;}
+ const serial=(Math.random()*0xffffffff)>>>0;let seq=0;const paginas=[];
+ const pagina=(dado,gran,tipo)=>{const seg=[];let r=dado.length;while(r>=255){seg.push(255);r-=255;}seg.push(r);
+  const h=new Uint8Array(27+seg.length+dado.length);const dv=new DataView(h.buffer);
+  h.set([0x4f,0x67,0x67,0x53,0,tipo]);dv.setUint32(6,gran%4294967296,true);dv.setUint32(10,Math.floor(gran/4294967296),true);
+  dv.setUint32(14,serial,true);dv.setUint32(18,seq++,true);h[26]=seg.length;h.set(seg,27);h.set(dado,27+seg.length);
+  let crc=0;for(let i=0;i<h.length;i++)crc=((crc<<8)^CRC[((crc>>>24)^h[i])&0xff])>>>0;dv.setUint32(22,crc,true);paginas.push(h);};
+ const amostras=x=>{const toc=x[0],cfg=toc>>3;const ms=cfg<12?[10,20,40,60][cfg%4]:cfg<16?[10,20][cfg%2]:[2.5,5,10,20][cfg%4];const c=toc&3;const nf=c===0?1:c<3?2:(x[1]&0x3f);return Math.round(nf*ms*48);};
+ pagina(cab,0,2);
+ const tags=new TextEncoder().encode('OpusTags');const vend=new TextEncoder().encode('fiscal');const t=new Uint8Array(8+4+vend.length+4);t.set(tags);new DataView(t.buffer).setUint32(8,vend.length,true);t.set(vend,12);pagina(t,0,0);
+ let g=0;pac.forEach((x,i)=>{g+=amostras(x);pagina(x,g,i===pac.length-1?4:0);});
+ const tot=paginas.reduce((s,x)=>s+x.length,0);const out=new Uint8Array(tot);let o=0;paginas.forEach(x=>{out.set(x,o);o+=x.length;});return out;
+}
 
 let apBusca='',apFiltro='todos';
 const AP_NOME={e1:'Pedir XML ao cliente',e2:'Prefeitura — notas de serviço',e3:'Importar no SIEG',e4:'Apurar no Domínio',e5:'Gerar guias e documentos',e6:'Enviar ao cliente',e7:'Confirmar pagamento'};
@@ -1422,38 +1796,51 @@ function hhmm(d){const x=new Date(d);return String(x.getHours()).padStart(2,'0')
 function ddmm(d){const x=new Date(d);return String(x.getDate()).padStart(2,'0')+'/'+String(x.getMonth()+1).padStart(2,'0');}
 function fmtTel(t){if(!t)return '';const s=String(t);return s.startsWith('55')&&s.length>=12?'+55 '+s.slice(2,4)+' '+s.slice(4,-4)+'-'+s.slice(-4):'+'+s;}
 function transcWA(m){const md=Array.isArray(m.wa_midia)?m.wa_midia[0]:m.wa_midia;return md&&md.transcricao?md.transcricao:'';}
-function msgWA(m){const tr=m.tipo==='audio'?transcWA(m):'';return {id:m.id,id_local:m.id_local,tipo:m.tipo,transcricao:tr,d:m.direcao==='entrada'?'ent':'sai',t:m.legenda||m.texto||(tr?'🎤 '+tr:'['+m.tipo+']'),h:hhmm(m.ocorrido_em),dt:ddmm(m.ocorrido_em),em:m.ocorrido_em,st:m.status,autor:m.autor_id&&eu&&m.autor_id===eu.id?eu.nome.split(' ')[0]:''};}
+function midiaWA(m){const md=Array.isArray(m.wa_midia)?m.wa_midia[0]:m.wa_midia;return md||{};}
+function msgWA(m){const tr=m.tipo==='audio'?transcWA(m):'';const md=midiaWA(m);
+ return {id:m.id,id_local:m.id_local,idWa:m.id_whatsapp||null,tipo:m.tipo,transcricao:tr,d:m.direcao==='entrada'?'ent':'sai',
+  t:m.texto||'',legenda:m.legenda||'',nomeArq:md.nome||(m.tipo==='documento'?m.texto:'')||'',caminho:md.estado==='guardado'?md.caminho:null,midiaEstado:md.estado||null,
+  dados:m.dados||null,respondeA:m.responder_a||null,reacao:m.reacao||null,reacaoNossa:m.reacao_nossa||null,encaminhada:!!m.encaminhada,favorita:!!m.favorita,autorGrupo:m.autor_grupo||'',
+  h:hhmm(m.ocorrido_em),dt:ddmm(m.ocorrido_em),em:m.ocorrido_em,st:m.status,autor:m.autor_id&&eu&&m.autor_id===eu.id?eu.nome.split(' ')[0]:''};}
 function janelaWA(c){const ult=[...c.wpp].reverse().find(m=>m.d==='ent');if(!ult||!ult.em){c.janela=false;c.janelaLbl='fechada';return;}
  const rest=24*3600e3-(Date.now()-new Date(ult.em).getTime());c.janela=rest>0;c.optin=true;
  c.janelaLbl=rest>0?Math.floor(rest/3600e3)+'h'+String(Math.floor(rest%3600e3/60e3)).padStart(2,'0'):'fechada';}
-function convWA(c){return {id:c.id,nome:c.contato_nome||fmtTel(c.contato_telefone)||'Contato',plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
- dono:c.responsavel_id,wpp:waMsgs[c.id]||[],carregada:!!waMsgs[c.id],previa:c.ultima_previa,ultima:c.ultima_em,naoLidas:c.nao_lidas||0};}
+function convWA(c){const ant=waConv(c.id);const ct=Array.isArray(c.wa_contato)?c.wa_contato[0]:c.wa_contato;
+ const x={id:c.id,nome:c.contato_nome||fmtTel(c.contato_telefone)||'Contato',telefone:c.contato_telefone,plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
+ dono:c.responsavel_id,wpp:waMsgs[c.id]||[],carregada:!!waMsgs[c.id],previa:c.ultima_previa,ultima:c.ultima_em,naoLidas:c.nao_lidas||0,
+ arquivada:!!c.arquivada,fixada:c.fixada_em,silenciada:!!c.silenciada,marcadaNL:!!c.marcada_nao_lida,grupo:!!c.grupo_meta_id,grupoLink:c.grupo_link,grupoDesc:c.grupo_descricao,
+ bloqueado:!!(ct&&ct.bloqueado)};
+ if(ant&&ant._lendo)x._lendo=true;return x;}
 async function carregarConversas(){
- const r=await sb.from('wa_conversa').select('id,contato_nome,contato_telefone,responsavel_id,estado,ultima_em,ultima_previa,nao_lidas,wa_numero!inner(provedor)')
-  .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false}).limit(500);
+ const r=await sb.from('wa_conversa').select('id,contato_nome,contato_telefone,responsavel_id,estado,ultima_em,ultima_previa,nao_lidas,arquivada,fixada_em,silenciada,marcada_nao_lida,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado),wa_numero!inner(provedor)')
+  .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false,nullsFirst:false}).limit(500);
  if(r.error){toast('Não foi possível carregar as conversas.');return;}
- waEntrada=r.data.filter(c=>!c.responsavel_id).map(convWA);
- waMeus=r.data.filter(c=>c.responsavel_id===eu.id).map(convWA);
+ const nv=r.data.map(convWA);
+ waEntrada=nv.filter(c=>!c.dono);
+ waMeus=nv.filter(c=>c.dono===eu.id);
  waEntrada.concat(waMeus).forEach(c=>{if(c.carregada)janelaWA(c);});
 }
 async function carregarMensagens(id){
- const r=await sb.from('wa_mensagem').select('id,id_local,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,wa_midia(transcricao)').eq('conversa_id',id).order('ocorrido_em',{ascending:true}).limit(1000);
+ const r=await sb.from('wa_mensagem').select('id,id_local,id_whatsapp,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,autor_grupo,responder_a,reacao,reacao_nossa,encaminhada,favorita,dados,wa_midia(nome,caminho,estado,mimetype,transcricao)')
+  .eq('conversa_id',id).is('apagada_em',null).order('ocorrido_em',{ascending:true}).limit(1000);
  if(r.error){toast('Não foi possível carregar as mensagens.');return;}
  waMsgs[id]=r.data.map(msgWA);const c=waConv(id);if(c){c.wpp=waMsgs[id];c.carregada=true;janelaWA(c);}
  if(view==='whatsweb')render();
 }
-function aoMudarMidia(p){const md=p.new;if(!md||!md.transcricao||!md.mensagem_id)return;for(const k in waMsgs){const m=waMsgs[k].find(x=>x.id===md.mensagem_id);if(m){m.transcricao=md.transcricao;if(!m.t||m.t.startsWith('['))m.t='🎤 '+md.transcricao;if(view==='whatsweb')render();return;}}}
+function aoMudarMidia(p){const md=p.new;if(!md||!md.mensagem_id)return;for(const k in waMsgs){const m=waMsgs[k].find(x=>x.id===md.mensagem_id);if(m){
+  if(md.transcricao)m.transcricao=md.transcricao;if(md.estado==='guardado'&&md.caminho)m.caminho=md.caminho;if(md.nome)m.nomeArq=md.nome;
+  if(view==='whatsweb'&&selWhats===k)waDesenharMsgs();return;}}}
 function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;const lista=waMsgs[m.conversa_id];
- if(lista){const nova=msgWA(m);const i=lista.findIndex(x=>x.id===m.id||(m.id_local&&x.id_local===m.id_local));if(i>=0)lista[i]=nova;else lista.push(nova);
-  const c=waConv(m.conversa_id);if(c)janelaWA(c);}
- if(view==='whatsweb')render();}
-async function aoMudarConversa(){await carregarConversas();if(view==='whatsweb')render();else{const b=el('waBadge');if(b)b.textContent=waPendentes();}}
-async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();
- c.wpp.push({id:'tmp-'+id_local,id_local,d:'sai',t,h:hhmm(new Date()),dt:ddmm(new Date()),st:'enviando',autor:eu.nome.split(' ')[0]});render();
- const s=(await sb.auth.getSession()).data.session;
- const r=await fetch(SB_URL+'/functions/v1/wa-meta-enviar',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+(s?s.access_token:'')},
-  body:JSON.stringify({conversa_id:c.id,id_local,tipo:'texto',texto:t})});
- const j=await r.json().catch(()=>({}));
+ if(lista){if(m.apagada_em){waMsgs[m.conversa_id]=lista.filter(x=>x.id!==m.id);const c=waConv(m.conversa_id);if(c)c.wpp=waMsgs[m.conversa_id];}
+  else{const i=lista.findIndex(x=>x.id===m.id||(m.id_local&&x.id_local===m.id_local));const ant=i>=0?lista[i]:null;const nova=msgWA(m);
+   if(ant){nova.caminho=ant.caminho;nova.nomeArq=nova.nomeArq||ant.nomeArq;nova.transcricao=nova.transcricao||ant.transcricao;nova.midiaEstado=ant.midiaEstado;lista[i]=nova;}else lista.push(nova);
+   const c=waConv(m.conversa_id);if(c)janelaWA(c);
+   if(!ant&&['imagem','audio','video','documento','figurinha'].includes(m.tipo))setTimeout(()=>carregarMensagens(m.conversa_id),1500);}}
+ if(view==='whatsweb'&&selWhats===m.conversa_id)waDesenharMsgs();}
+async function aoMudarConversa(){await carregarConversas();if(view==='whatsweb'){const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'))return;render();}else{const b=el('waBadge');if(b)b.textContent=waPendentes();}}
+async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=waRespWamid(c);waResp=null;
+ c.wpp.push({id:'tmp-'+id_local,id_local,tipo:'texto',d:'sai',t,respondeA:resp||null,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]});render();
+ const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo:'texto',texto:t,responder_a:resp});
  if(!j.ok){const m=c.wpp.find(x=>x.id_local===id_local);if(m)m.st='falhou';toast(j.erro||'Não foi possível enviar.');render();}}
 async function assumirWA(id){const r=await sb.from('wa_conversa').update({responsavel_id:eu.id}).eq('id',id).select('id');
  if(r.error||!r.data||!r.data.length){toast('Não foi possível assumir esta conversa.');return;}

@@ -35,11 +35,12 @@ const TIPO_META: Record<string, string> = { imagem: "image", audio: "audio", vid
 type Pedido = {
   conversa_id: string;
   id_local: string;
-  tipo: "texto" | "template" | "imagem" | "audio" | "video" | "documento";
+  tipo: "texto" | "template" | "imagem" | "audio" | "video" | "documento" | "local" | "contato";
   texto?: string;
   legenda?: string;
   responder_a?: string;
-  arquivo?: { caminho: string; nome: string };
+  arquivo?: { caminho?: string; nome?: string; latitude?: number; longitude?: number; name?: string; address?: string; telefone?: string };
+  encaminhar_de?: string;
   template?: { nome: string; idioma: string; componentes?: unknown[]; previa?: string };
 };
 
@@ -54,6 +55,25 @@ Deno.serve(async (req) => {
   let p: Pedido;
   try { p = await req.json(); } catch { return json({ ok: false, erro: "corpo invalido" }, 400); }
   if (p.tipo === "template" && !p.template?.nome) return json({ ok: false, erro: "falta o modelo" }, 400);
+
+  if (p.encaminhar_de) {
+    const enc = await usuario.rpc("wa_encaminhar_preparar", { p_mensagem: p.encaminhar_de, p_destino: p.conversa_id });
+    if (enc.error || enc.data?.ok !== true) return json(enc.data ?? { ok: false, erro: "nao foi possivel encaminhar" }, 403);
+    const o = enc.data;
+    if (!["texto", "imagem", "audio", "video", "documento", "local", "contato"].includes(o.tipo)) return json({ ok: false, erro: "Este tipo de mensagem nao pode ser encaminhado." }, 400);
+    p.tipo = o.tipo;
+    p.texto = o.texto ?? undefined;
+    p.legenda = o.legenda ?? undefined;
+    p.responder_a = undefined;
+    if (o.tipo === "local" || o.tipo === "contato") p.arquivo = o.dados ?? {};
+    if (["imagem", "audio", "video", "documento"].includes(o.tipo)) {
+      const ext = String(o.caminho).split(".").pop();
+      const novo = `${p.conversa_id}/saida/${crypto.randomUUID()}.${ext}`;
+      const cp = await sb.storage.from("wa-midia").copy(o.caminho, novo);
+      if (cp.error) return json({ ok: false, erro: "nao copiou o arquivo" }, 500);
+      p.arquivo = { caminho: novo, nome: o.nome ?? `arquivo.${ext}` };
+    }
+  }
 
   const prep = await usuario.rpc("wa_meta_preparar_envio", {
     p_conversa_id: p.conversa_id,
@@ -75,8 +95,9 @@ Deno.serve(async (req) => {
   const msgId: string = prep.data.mensagem_id;
   const corpo: Record<string, unknown> = {
     messaging_product: "whatsapp",
-    recipient_type: "individual",
-    ...(prep.data.telefone ? { to: prep.data.telefone } : { recipient: prep.data.bsuid }),
+    ...(prep.data.grupo_id
+      ? { recipient_type: "group", to: prep.data.grupo_id }
+      : { recipient_type: "individual", ...(prep.data.telefone ? { to: prep.data.telefone } : { recipient: prep.data.bsuid }) }),
   };
   if (p.responder_a) corpo.context = { message_id: p.responder_a };
 
@@ -84,6 +105,14 @@ Deno.serve(async (req) => {
     if (p.tipo === "texto") {
       corpo.type = "text";
       corpo.text = { body: p.texto, preview_url: false };
+    } else if (p.tipo === "local") {
+      corpo.type = "location";
+      const l = prep.data.dados;
+      corpo.location = { latitude: l.latitude, longitude: l.longitude, ...(l.name ? { name: l.name } : {}), ...(l.address ? { address: l.address } : {}) };
+    } else if (p.tipo === "contato") {
+      const c = prep.data.dados;
+      corpo.type = "contacts";
+      corpo.contacts = [{ name: { formatted_name: c.nome, first_name: c.nome }, phones: [{ phone: "+" + c.telefone, wa_id: c.telefone, type: "CELL" }] }];
     } else if (p.tipo === "template") {
       corpo.type = "template";
       corpo.template = {
@@ -126,6 +155,7 @@ Deno.serve(async (req) => {
       console.error("meta", erro?.code, erro?.message);
       return json({ ok: false, mensagem_id: msgId, codigo: erro?.code, erro: erro?.code === 131047 ? "fora da janela de 24h" : "a Meta recusou a mensagem" }, 422);
     }
+    if (p.encaminhar_de) await sb.from("wa_mensagem").update({ encaminhada: true }).eq("id", msgId);
     return json({ ok: true, mensagem_id: msgId, wamid });
   } catch (e) {
     console.error("envio", (e as Error).message);

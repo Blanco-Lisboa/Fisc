@@ -31,7 +31,7 @@ public class FiscalApplication {
         builder.getCefSettings().cache_path = perfil.getAbsolutePath();
         builder.getCefSettings().persist_session_cookies = true;
         builder.addJcefArgs("--disable-gpu", "--disable-gpu-compositing", "--disable-http-cache",
-                "--disk-cache-size=1", "--user-data-dir=" + perfil.getAbsolutePath());
+                "--disk-cache-size=1", "--enable-media-stream", "--user-data-dir=" + perfil.getAbsolutePath());
 
         CefApp cefApp = builder.build();
         CefClient client = cefApp.createClient();
