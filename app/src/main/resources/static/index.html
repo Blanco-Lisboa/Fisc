@@ -1933,11 +1933,11 @@ function renderWhatsWeb(){
 }
 function waHeadReal(c,isEntrada){
  const sub=c.grupo?(c.grupoDesc||'Grupo'):(c.bloqueado?'Bloqueado':fmtTel(c.telefone));
- const dir=isEntrada?`<button class="bt-assumir" onclick="assumirWA('${c.id}')">＋ Assumir p/ minha carteira</button>`:(c.grupo?'':`<span class="wstat2 rob">${eu?escH(eu.nome.split(' ')[0]):''} atendendo</span>`);
+ const dir=isEntrada?'':(c.grupo?'':`<span class="wstat2 rob">${eu?escH(eu.nome.split(' ')[0]):''} atendendo</span>`);
  return `<div class="wa-head"><span class="wapp">${WA_LOGO}</span><span class="avc">${c.grupo?ICO_GRUPO:escH(iniciais(c.nome))}</span><div class="nm" style="cursor:pointer" onclick="waDados('${c.id}')"><b>${escH(c.nome)}</b><span>${escH(sub)}</span></div>${dir}<button class="wa-hbtn" onclick="waMenuChat(event,'${c.id}')">${ICO_MAIS}</button></div>`;
 }
 function waComposer(c,isEntrada){
- if(isEntrada)return `<div class="wa-lock">Contato sem carteira — <b>Assumir</b> para responder e iniciar a apuração.</div>`;
+ if(isEntrada&&!eGestor())return '';
  if(c.bloqueado)return `<div class="wa-lock">Contato bloqueado — <b style="cursor:pointer" onclick="waAcao('desbloquear','${c.id}')">Desbloquear</b></div>`;
  if(!c.grupo&&!c.janela)return `<div class="wa-lock">🔒 Janela de 24h fechada — reabra com um template aprovado</div>`;
  const r=waResp?c.wpp.find(m=>m.id===waResp):null;
@@ -2534,9 +2534,6 @@ async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=
  c.wpp.push({id:'tmp-'+id_local,id_local,tipo:'texto',d:'sai',t,respondeA:resp||null,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]});render();
  const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo:'texto',texto:t,responder_a:resp});
  if(!j.ok){const m=c.wpp.find(x=>x.id_local===id_local);if(m)m.st='falhou';toast(j.erro||'Não foi possível enviar.');render();}}
-async function assumirWA(id){const r=await sb.from('wa_conversa').update({responsavel_id:eu.id}).eq('id',id).select('id');
- if(r.error||!r.data||!r.data.length){toast('Não foi possível assumir esta conversa.');return;}
- const c=waConv(id);toast((c?c.nome:'Conversa')+' entrou na sua carteira.');await carregarConversas();waAba='meus';selWhats=id;render();}
 
 /* ---------- entrada ---------- */
 async function iniciarDados(){
