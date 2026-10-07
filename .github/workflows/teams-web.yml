@@ -1,0 +1,26 @@
+name: Publicar Team's na VPS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/src/main/resources/static/teams-web/**'
+      - 'deploy/teams-web/**'
+  workflow_dispatch:
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Avisar a VPS
+        run: curl -sS -X POST https://teams.it-ia.tec.br/_atualizar || true
+      - name: Conferir o que ficou no ar
+        run: |
+          esperado=$(sha256sum app/src/main/resources/static/teams-web/teams.js | cut -d' ' -f1)
+          for i in $(seq 1 12); do
+            sleep 10
+            no_ar=$(curl -fsS "https://teams.it-ia.tec.br/teams.js?c=$(date +%s)" | sha256sum | cut -d' ' -f1)
+            if [ "$no_ar" = "$esperado" ]; then echo "Team's no ar igual ao GitHub"; exit 0; fi
+          done
+          echo "O arquivo no ar nao bate com o GitHub"; exit 1

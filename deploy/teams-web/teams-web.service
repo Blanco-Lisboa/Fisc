@@ -1,0 +1,21 @@
+[Unit]
+Description=Team's - pacote unico servido para todos os Javas
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=teamsweb
+Group=teamsweb
+Environment=TEAMS_REPO=/opt/teams-web/repo
+Environment=TEAMS_PORTA=7890
+ExecStart=/usr/bin/python3 /opt/teams-web/repo/deploy/teams-web/servidor.py
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/teams-web
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
