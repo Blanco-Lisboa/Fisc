@@ -273,7 +273,7 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .tm-bolb{position:absolute;top:-3px;right:-3px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--vermelho);color:#fff;font-size:10.5px;font-weight:700;display:grid;place-items:center;border:2px solid #fff}
 .tm-flut{position:fixed;right:24px;bottom:92px;width:430px;height:500px;max-height:calc(100vh - 180px);background:#efe7de;border-radius:16px;box-shadow:var(--md);display:flex;flex-direction:column;overflow:hidden;z-index:66;opacity:0;transform:translateY(24px);transition:opacity .16s,transform .18s}
 .tm-flut{transition:opacity .16s,transform .18s,top .2s,right .2s}.tm-flut.on{opacity:1;transform:none}.tm-flut.sai{opacity:0;transform:translateY(24px)}
-.tm-flut .rl{background:var(--pagina)}.tm-flut .wa-head,.wa-head.tm-head{background:var(--grad)}.tm-flut .srch{padding:10px;border-bottom:1px solid var(--borda);flex:none;background:var(--pagina)}.tm-flut .srch input{width:100%;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:8px 13px;font-size:12px;outline:0;font-family:inherit}.tm-flut .wa-head .wa-hbtn{font-size:15px}
+.tm-flut .rl{background:var(--pagina)}.tm-flut .wa-head,.wa-head.tm-head{background:var(--grad)}.tm-abrir{border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.14);color:#fff;border-radius:999px;padding:5px 11px;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer;font-family:inherit}.tm-abrir:hover{background:rgba(255,255,255,.26)}.tm-flut .srch{padding:10px;border-bottom:1px solid var(--borda);flex:none;background:var(--pagina)}.tm-flut .srch input{width:100%;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:8px 13px;font-size:12px;outline:0;font-family:inherit}.tm-flut .wa-head .wa-hbtn{font-size:15px}
 .tm-eu{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--borda);flex:none}
 .tm-eu b{font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tm-eu select{margin-top:3px;border:1px solid var(--borda);border-radius:999px;padding:3px 9px;font-size:11px;font-family:inherit;background:var(--superf2);outline:0}
@@ -318,9 +318,9 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .wa-menu button:hover{background:var(--superf)}.wa-menu button.perigo{color:var(--vermelho)}
 .wa-menu.wa-emojis{flex-direction:row;min-width:0;border-radius:999px;padding:4px 6px}
 .wa-menu.wa-emojis button{font-size:20px;padding:4px 6px;border-radius:999px}.wa-menu.wa-emojis button.on{background:var(--laranjaSv)}
-.toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:60}
+.toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:85}
 .toast{background:var(--ink);color:#fff;padding:9px 15px;border-radius:999px;font-size:12.5px;box-shadow:var(--md)}
-.modal{position:fixed;inset:0;background:rgba(17,17,20,.45);display:grid;place-items:center;z-index:50;padding:16px}
+.modal{position:fixed;inset:0;background:rgba(17,17,20,.45);display:grid;place-items:center;z-index:75;padding:16px}
 .mcx{background:var(--pagina);border-radius:16px;width:min(460px,96vw);max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--md)}
 .mcab{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--borda)}
 .mcab b{flex:1;font-family:var(--disp)}.mcab .x{width:28px;height:28px;border-radius:8px;background:var(--superf2);border:0}
@@ -1329,23 +1329,23 @@ async function tmConfirmarPessoas(acao){
 function tmMenuAnexo(ev){waMenu(ev,[['Documento',()=>tmEscolherArquivo('*/*')],['Fotos',()=>tmEscolherArquivo('image/*')]],true);}
 function tmEscolherArquivo(aceita){const i=document.createElement('input');i.type='file';i.accept=aceita;i.multiple=true;i.onchange=async()=>{for(const f of i.files)await tmEnviarArquivo(f,f.name,/^image\//.test(f.type)?'imagem':'documento');};i.click();}
 async function tmEnviarArquivo(blob,nome,tipo){
- if(!tmSel)return;if(blob.size>100*1048576){toast(nome+' passa de 100 MB.');return;}
- const ext=(nome.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'bin';const caminho=`${tmSel}/${crypto.randomUUID()}.${ext}`;
+ const canal=tmAlvo();if(!canal)return;if(blob.size>100*1048576){toast(nome+' passa de 100 MB.');return;}
+ const ext=(nome.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'bin';const caminho=`${canal}/${crypto.randomUUID()}.${ext}`;
  const up=await tm.storage.from('chat-anexo').upload(caminho,blob,{contentType:(blob.type||'application/octet-stream').split(';')[0]});
  if(up.error){toast('Não foi possível subir '+nome+'.');return;}
- const id=await tmGravarMsg({tipo:tipo==='audio'?'audio':'arquivo',corpo:tipo==='audio'?'Áudio':nome});if(!id)return;
+ const id=await tmGravarMsg({tipo:tipo==='audio'?'audio':'arquivo',corpo:tipo==='audio'?'Áudio':nome},null,canal);if(!id)return;
  const a=await tm.from('chat_anexo').insert({mensagem_id:id,tipo,nome,url:caminho,tamanho:blob.size});if(a.error)toast('Arquivo enviado sem o anexo registrado.');
- tmCarregarMsgs(tmSel);
+ tmCarregarMsgs(canal);
 }
 async function tmGravar(){
  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Este computador não permite gravar áudio.');return;}
  let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true});}catch(e){toast('Sem acesso ao microfone.');return;}
  const rec=new MediaRecorder(st,{mimeType:'audio/webm;codecs=opus',audioBitsPerSecond:32000});const partes=[];rec.ondataavailable=e=>{if(e.data.size)partes.push(e.data);};
- tmGrav={rec,st,partes,seg:0,canal:tmSel,cancelado:false};
- tmGrav.timer=setInterval(()=>{if(!tmGrav)return;tmGrav.seg++;const s=document.querySelector('#tmComp .wa-rec');if(s)s.textContent='● Gravando '+tmGrav.seg+'s';if(tmGrav.seg>=900)tmGravarParar();},1000);
- rec.onstop=async()=>{const g=tmGrav;tmGrav=null;clearInterval(g.timer);g.st.getTracks().forEach(t=>t.stop());if(el('tmComp'))el('tmComp').innerHTML=tmComposer();
-  if(g.cancelado||!g.partes.length)return;try{const ogg=webmParaOgg(new Uint8Array(await new Blob(g.partes).arrayBuffer()));await tmEnviarArquivo(new Blob([ogg],{type:'audio/ogg'}),'audio.ogg','audio');}catch(e){toast('Não foi possível preparar o áudio.');}};
- rec.start(250);el('tmComp').innerHTML=tmComposer();
+ tmGrav={rec,st,partes,seg:0,canal:tmAlvo(),cancelado:false};
+ tmGrav.timer=setInterval(()=>{if(!tmGrav)return;tmGrav.seg++;const s=document.querySelector('#tmComp .wa-rec,#tmfComp .wa-rec');if(s)s.textContent='● Gravando '+tmGrav.seg+'s';if(tmGrav.seg>=900)tmGravarParar();},1000);
+ rec.onstop=async()=>{const g=tmGrav;tmGrav=null;clearInterval(g.timer);g.st.getTracks().forEach(t=>t.stop());tmCompAtualizar();
+  if(g.cancelado||!g.partes.length)return;try{const ogg=webmParaOgg(new Uint8Array(await new Blob(g.partes).arrayBuffer()));const ant=tmSel;if(!(tmFlutAberto&&tmFlutCanal===g.canal))tmSel=g.canal;await tmEnviarArquivo(new Blob([ogg],{type:'audio/ogg'}),'audio.ogg','audio');tmSel=ant;}catch(e){toast('Não foi possível preparar o áudio.');}};
+ rec.start(250);tmCompAtualizar();
 }
 function tmGravarParar(){if(tmGrav&&tmGrav.rec.state!=='inactive')tmGrav.rec.stop();}
 function tmGravarCancelar(){if(tmGrav){tmGrav.cancelado=true;tmGravarParar();}}
@@ -1408,6 +1408,9 @@ async function tmCriarReuniao(){
 }
 /* ---------- TEAM'S flutuante ---------- */
 let tmFlutAberto=false,tmFlutCanal=null;
+function tmAlvo(){return tmFlutAberto&&tmFlutCanal?tmFlutCanal:tmSel;}
+function tmCompAtualizar(){if(tmFlutAberto&&tmFlutCanal){const c=el('tmfComp');if(c)c.innerHTML=tmFlutComposer();}else{const c=el('tmComp');if(c)c.innerHTML=tmComposer();}}
+function tmFlutComposer(){return tmGrav?`<div class="wa-comp"><span class="wa-rec">● Gravando ${tmGrav.seg||0}s</span><span style="flex:1"></span><button class="miniB" onclick="tmGravarCancelar()">Cancelar</button><button class="snd" onclick="tmGravarParar()">➤</button></div>`:`<div class="wa-comp"><span class="pl" onclick="tmMenuAnexo(event)">${ICO_CLIPE}</span><input id="tmfin" placeholder="Mensagem" onkeydown="if(event.key==='Enter')tmFlutEnviar()"><span class="pl" title="Gravar áudio" onclick="tmGravar()">${MIC}</span><button class="snd" onclick="tmFlutEnviar()">➤</button></div>`;}
 let tmBolY=null,tmBolArrastou=false;
 try{const v=parseInt(localStorage.getItem('fiscal-teams-bolinha-y'),10);if(v>0)tmBolY=v;}catch(e){}
 function tmBolLimite(y){return Math.max(12,Math.min(window.innerHeight-70,y));}
@@ -1448,12 +1451,12 @@ function tmFlutAbrir(){
 function tmFlutFechar(){tmFlutAberto=false;const f=el('tmFlut');if(!f)return;f.classList.remove('on');f.classList.add('sai');setTimeout(()=>{if(!tmFlutAberto)f.remove();},160);}
 function tmFlutDesenhar(){
  const f=el('tmFlut');if(!f)return;const c=tmFlutCanal?tmCanais.find(x=>x.id===tmFlutCanal):null;
- const cab=`<div class="wa-head">${c?`<button class="wa-hbtn" onclick="tmFlutCanal=null;tmFlutDesenhar()">‹</button><span class="avc">${c.tipo==='grupo'?ICO_GRUPO:escH(tmIni(tmNomeCanal(c)))}</span>`:`<span class="avc">${ICO_GRUPO}</span>`}<div class="nm"><b>${escH(c?tmNomeCanal(c):"Team's")}</b><span>${c?'':escH(tmTotal()+' não vistas')}</span></div><button class="wa-hbtn" title="Abrir o Team's" onclick="tmFlutExpandir()">⤢</button><button class="wa-hbtn" onclick="tmFlutFechar()">✕</button></div>`;
+ const cab=`<div class="wa-head">${c?`<button class="wa-hbtn" onclick="tmFlutCanal=null;tmFlutDesenhar()">‹</button><span class="avc">${c.tipo==='grupo'?ICO_GRUPO:escH(tmIni(tmNomeCanal(c)))}</span>`:`<span class="avc">${ICO_GRUPO}</span>`}<div class="nm"><b>${escH(c?tmNomeCanal(c):"Team's")}</b><span>${c?'':escH(tmTotal()+' não vistas')}</span></div><button class="tm-abrir" onclick="tmFlutExpandir()">Abrir no Team's ⤢</button><button class="wa-hbtn" onclick="tmFlutFechar()">✕</button></div>`;
  if(!c&&tmNova){f.innerHTML=cab+`<div style="flex:1;min-height:0;display:flex;flex-direction:column;background:var(--pagina)">${tmNovaHtml(true)}</div>`;return;}
  if(!c){
   f.innerHTML=cab+`<div class="srch tm-srchmais" style="background:var(--pagina)"><input id="tmfbusca" placeholder="🔎  Buscar conversa" value="${escH(tmBusca)}" oninput="tmBusca=this.value;tmFlutDesenhar();const b=el('tmfbusca');b.focus();b.setSelectionRange(b.value.length,b.value.length)"><button class="tm-mais" title="Nova conversa" onclick="tmAbrirNova(true)">＋</button></div><div class="rl" style="flex:1;overflow-y:auto">${tmCaixa().map(x=>tmItemCanal(x,false,`tmFlutAbrirCanal('${x.id}')`)).join('')}</div>`;
   return;}
- f.innerHTML=cab+`<div class="wa-msgs" id="tmfms"></div><div class="wa-comp"><input id="tmfin" placeholder="Mensagem" onkeydown="if(event.key==='Enter')tmFlutEnviar()"><button class="snd" onclick="tmFlutEnviar()">➤</button></div>`;
+ f.innerHTML=cab+`<div class="wa-msgs" id="tmfms"></div><div id="tmfComp">${tmFlutComposer()}</div>`;
  if(!tmMsgs[c.id])tmCarregarMsgs(c.id).then(()=>tmDesenharMsgs('tmfms',c.id));else tmDesenharMsgs('tmfms',c.id);
  const i=el('tmfin');if(i)i.focus();
 }
