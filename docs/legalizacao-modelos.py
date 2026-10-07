@@ -27,14 +27,14 @@ M = [
   A+"Informamos que o protocolo da empresa {{2}} referente a {{3}} já consta como concluído. Permanecemos à disposição.",
   ["Recebido, obrigado","Tenho dúvidas"],["Bruna","Loja Exemplo","alteração de endereço"]),
  ("legal_pesquisa_satisfacao","Marketing",None,
-  A+"Concluímos o atendimento da empresa {{2}}. Em uma escala de 0 a 10, o quanto você recomendaria nosso atendimento de Legalização?",
-  ["0 a 6","7 a 8","9 a 10","Parar de receber"],["Bruna","Loja Exemplo"]),
+  "Obrigado pelo contato. Concluímos o atendimento da empresa {{1}}, realizado por {{2}}.\n\nSua opinião é importante para nós: em uma escala de 0 a 10, o quanto você recomendaria o atendimento do Departamento de Legalização da YOU Contabilidade?",
+  ["0 a 6","7 a 8","9 a 10","Parar de receber"],["Loja Exemplo","Bruna"]),
  ("legal_comunicado_institucional","Marketing",None,
-  A+"Informamos: {{2}}. Permanecemos à disposição para eventuais dúvidas.",
-  ["Parar de receber"],["Bruna","nosso atendimento de Legalização agora é feito por este número oficial"]),
+  "Prezado(a) cliente,\n\ninformamos: {{1}}.\n\nO Departamento de Legalização da YOU Contabilidade permanece à disposição para eventuais dúvidas.",
+  ["Parar de receber"],["nosso atendimento de Legalização agora é feito por este número oficial"]),
  ("legal_divulgacao_servicos_grupo","Marketing",None,
-  A+"Também oferecemos suporte em {{2}} para empresas como a sua. Gostaria de receber mais informações?",
-  ["Quero saber mais","Parar de receber"],["Bruna","abertura e alteração de empresas"]),
+  "Prezado(a) cliente,\n\nalém dos serviços de Legalização, a YOU Contabilidade também oferece suporte em {{1}} para empresas como a sua.\n\nGostaria de receber mais informações?",
+  ["Quero saber mais","Parar de receber"],["abertura e alteração de empresas"]),
 ]
 H, F = "Departamento de Legalização", "Equipe de Legalização"
 api = []
