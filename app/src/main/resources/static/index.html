@@ -382,6 +382,12 @@ tr.rnovo:hover{background:#ffe6d6}
 .cg-lin .b i{position:absolute;top:0;bottom:0;left:0;border-radius:6px}
 .cg-lin .b em{position:absolute;top:-4px;bottom:-4px;width:0;border-left:2px dashed var(--apagado)}
 .cg-lin b{text-align:right;font-variant-numeric:tabular-nums}
+
+.cg-i{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:999px;border:1px solid var(--bordaF);background:var(--pagina);color:var(--apagado);font-size:11px;font-weight:700;font-family:var(--disp);display:grid;place-items:center;padding:0;z-index:2}
+.cg-i:hover{color:var(--laranjaTx);border-color:var(--laranja)}
+.cg-pop{position:fixed;z-index:70;max-width:300px;background:var(--ink);color:#fff;border-radius:10px;padding:11px 13px;font-size:12px;line-height:1.5;box-shadow:var(--md)}
+.cg-rel{position:relative}
+.cg-tit{font-family:var(--disp);font-size:14px;font-weight:600;margin:0 0 10px;padding-right:26px}
 </style>
 </head>
 <body>
@@ -635,6 +641,29 @@ function renderGestor(){
 let centralDados=null;
 const ALERTAS_GESTOR=[['prazo','Prazo apertando sem resposta','XML pendente perto do fechamento (dia 31), sem mensagem há 48h+','crit'],['respondeu','Cliente respondeu, time não andou','conversa de WhatsApp com resposta nova, tarefa ligada ainda "a fazer"','crit'],['fila','Fila de um colaborador crescendo','tarefas "a fazer" subindo semana a semana','aten'],['ciclo','Tarefa recorrente atravessou o ciclo','ciclo seguinte já começou e a tarefa anterior segue aberta','aten'],['zerada','Pico de declaração "zerada"','colaborador acima do próprio histórico de zeradas no mês','aten'],['retificacao','Retificação de zerada parada','pedido de correção esperando revisão há mais de alguns dias','aten']];
 const MES_ABR=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const CG_INFO={
+ apuracao:'Mostra quantos clientes já tiveram a apuração do mês terminada, até a entrega da guia (DAS). O prazo é o dia 5 do mês seguinte. O número pequeno compara com o mesmo dia do mês passado.',
+ xml:'Quantos clientes ainda não mandaram os arquivos XML das notas que pedimos. Sem esses arquivos não dá para fazer a apuração.',
+ sem_carteira:'Clientes ativos da YOU que ainda não têm um colaborador do Fiscal responsável por eles. Todo cliente precisa ter um responsável.',
+ alertas:'Soma de todas as situações que pedem atenção do gestor, mostradas nos cartões de alerta logo abaixo.',
+ prazo:'Clientes que ainda não mandaram o XML, o mês está perto de fechar (dia 31) e ninguém falou com eles nas últimas 48 horas.',
+ respondeu:'O cliente respondeu no WhatsApp, mas a tarefa dele continua parada como "a fazer". Alguém precisa dar andamento.',
+ fila:'Colaborador com a lista de tarefas pendentes aumentando a cada semana. Pode estar sobrecarregado.',
+ ciclo:'Uma tarefa que se repete todo mês ficou aberta do mês passado, mesmo com o mês novo já começado.',
+ zerada:'Colaborador que declarou mais empresas como "sem movimento" (zerada) do que costuma. Vale conferir se está certo.',
+ retificacao:'Pedido para corrigir uma declaração zerada que está esperando revisão há vários dias.',
+ etapas:'Cada barra é uma etapa do trabalho do mês. Verde: clientes que já terminaram a etapa. Azul: em andamento. Vermelho: passou do prazo. Cinza: ainda não começou. A linha preta marca o dia de hoje, para comparar com o prazo de cada etapa.',
+ xml_mes:'Quantos pedidos de XML continuam sem resposta em cada mês. No mês atual é normal ter mais; meses que já fecharam e ainda têm número são tarefas esquecidas.',
+ carga:'Quantos clientes cada colaborador cuida. A linha tracejada é a média da equipe: quem está muito acima pode estar sobrecarregado, quem está muito abaixo pode receber mais.'};
+function cgI(k){return `<button class="cg-i" title="O que é isto?" onclick="event.stopPropagation();cgInfo(this,'${k}')">i</button>`;}
+function cgInfo(btn,k){
+ document.querySelectorAll('.cg-pop').forEach(p=>p.remove());
+ const p=document.createElement('div');p.className='cg-pop';p.textContent=CG_INFO[k]||'';document.body.appendChild(p);
+ const r=btn.getBoundingClientRect();let x=r.right-p.offsetWidth,y=r.bottom+6;
+ if(x<8)x=8;if(y+p.offsetHeight>window.innerHeight-8)y=r.top-p.offsetHeight-6;
+ p.style.left=x+'px';p.style.top=y+'px';
+ setTimeout(()=>document.addEventListener('click',function f(){p.remove();document.removeEventListener('click',f);}),0);
+}
 function cgNum(v){return v==null?'—':Number(v).toLocaleString('pt-BR');}
 function cgDelta(v,maiorRuim){if(v==null||v===0)return '';const ruim=maiorRuim?v>0:v<0;return `<span class="cg-delta ${ruim?'ruim':'bom'}">${v>0?'+':'−'}${Math.abs(v)}</span>`;}
 async function carregarCentralGestor(){
@@ -648,35 +677,32 @@ function renderCentralGestor(){
  const d=centralDados,k=d.kpis||{},al=d.alertas||{},tot=k.total_clientes||0;
  const [ano,mes]=(d.competencia||'').split('-').map(Number);const mesNome=mes?MESES[mes-1]+'/'+ano:'';
  const pctAp=k.apuracao_concluida==null||!tot?null:Math.round(100*k.apuracao_concluida/tot);
- const kpi=(rot,val,rod,cor)=>`<div class="cg-card cg-kpi"><div class="rot">${rot}</div><div class="val"${cor?` style="color:${cor}"`:''}>${val}</div><div class="rod">${rod}</div></div>`;
+ const kpi=(rot,val,rod,cor,info)=>`<div class="cg-card cg-kpi cg-rel">${cgI(info)}<div class="rot">${rot}</div><div class="val"${cor?` style="color:${cor}"`:''}>${val}</div><div class="rod">${rod}</div></div>`;
  const ordem=ALERTAS_GESTOR.slice().sort((a,b2)=>(al[b2[0]]||0)-(al[a[0]]||0));
  const alerta=([c,t,s,sev])=>{const n=al[c];const cor=n==null?'var(--nevoa)':(n>0?(sev==='crit'?'var(--vermelho)':'var(--ambar)'):'var(--verde)');
   const fundo=n==null?'var(--superf2)':(n>0?(sev==='crit'?'var(--vermelhoSv)':'var(--ambarSv)'):'var(--verdeSv)');
   const rot=n==null?'—':(n>0?(sev==='crit'?'crítico':'atenção'):'em dia');
-  return `<div class="cg-card cg-alerta${n>0?' clic':''}" style="--cor:${cor};--fundo:${fundo}"${n>0?` onclick="abrirAlertaGestor('${c}')"`:''}><div class="cg-top"><span class="cg-sev">${rot}</span><span class="n">${cgNum(n)}</span></div><b>${t}</b><div class="d">${s}</div>${n>0?`<div class="ver">Ver lista →</div>`:''}</div>`;};
+  return `<div class="cg-card cg-alerta${n>0?' clic':''}" style="--cor:${cor};--fundo:${fundo}"${n>0?` onclick="abrirAlertaGestor('${c}')"`:''}>${cgI(c)}<div class="cg-top" style="padding-right:26px"><span class="cg-sev">${rot}</span><span class="n">${cgNum(n)}</span></div><b>${t}</b>${n>0?`<div class="ver">Ver lista →</div>`:''}</div>`;};
  const hoje=new Date();const diasMes=new Date(hoje.getFullYear(),hoje.getMonth()+1,0).getDate();const pHoje=Math.round(100*hoje.getDate()/diasMes);
  const pc=v=>v==null||!tot?0:Math.round(100*v/tot);
  const etapa=(e,i)=>`<div class="cg-etapa"><div class="nm"><b>${i+1} · ${escH(e.nome)}</b><span>prazo ${escH(e.prazo)}</span></div><div class="cg-barra"><div class="s cg-ok" style="width:${pc(e.concluido)}%"></div><div class="s cg-and" style="width:${pc(e.andamento)}%"></div><div class="s cg-atr" style="width:${pc(e.atrasado)}%"></div><div class="cg-hoje" style="left:${pHoje}%"></div></div><div class="num">${e.concluido==null?'<b>—</b>':`<b>${pc(e.concluido)}%</b> · ${cgNum(e.concluido)} de ${cgNum(tot)}`}${e.atrasado?` · <span style="color:var(--vermelho);font-weight:700">${cgNum(e.atrasado)} atrasados</span>`:''}</div></div>`;
  const xm=d.xml_por_mes||[];const mxX=Math.max(1,...xm.map(x=>x.qtd||0));
  const cg=d.carga||[];const mxC=Math.max(1,...cg.map(x=>x.clientes));const media=cg.length?cg.reduce((s,x)=>s+x.clientes,0)/cg.length:0;
  b.innerHTML=`<div class="tela"><div class="cg">
-  <section class="cg-sec"><div class="cg-cab"><div><h2>Resumo do ciclo · ${mesNome}</h2><div class="cg-sub">Os 4 números que dizem se o mês está no rumo. Comparação com o mesmo dia do mês anterior.</div></div></div>
    <div class="cg-kpis">
-    ${kpi('Apuração concluída',pctAp==null?'—':pctAp+'%',`${cgDelta(k.apuracao_delta,false)} ${k.apuracao_concluida==null?'':cgNum(k.apuracao_concluida)+' de '+cgNum(tot)+' clientes · '}prazo dia 5`)}
-    ${kpi('XML em aberto',cgNum(k.xml_aberto),`${cgDelta(k.xml_delta,true)} pedidos ainda sem retorno`)}
-    ${kpi('Clientes sem carteira',cgNum(k.sem_carteira),`${cgDelta(k.sem_carteira_delta,true)} CNPJ ativo sem colaborador`)}
-    ${kpi('Alertas ativos',cgNum(k.alertas),`${ALERTAS_GESTOR.filter(a=>al[a[0]]>0).length} tipos com ocorrência`,k.alertas>0?'var(--vermelho)':'')}
-   </div></section>
-  <section class="cg-sec"><div class="cg-cab"><div><h2>Alertas do departamento</h2><div class="cg-sub">Um cartão por situação. A faixa colorida mostra a gravidade; clicar abre a lista de clientes e colaboradores envolvidos.</div></div></div>
-   <div class="cg-alertas">${ordem.map(alerta).join('')}</div></section>
-  <section class="cg-sec"><div class="cg-cab"><div><h2>Andamento do ciclo por etapa</h2><div class="cg-sub">Quantos clientes já passaram por cada etapa fixa do mês, comparado com o prazo de cada uma. A linha preta é o dia de hoje.</div></div>
-    <div class="cg-leg"><span><i class="cg-ok"></i>concluído</span><span><i class="cg-and"></i>em andamento</span><span><i class="cg-atr"></i>atrasado</span><span><i style="background:var(--superf2);border:1px solid var(--borda)"></i>não iniciado</span></div></div>
-   <div class="cg-card cg-ciclo">${(d.ciclo||[]).map(etapa).join('')}</div></section>
+    ${kpi('Apuração concluída · '+(mes?MES_ABR[mes-1]:''),pctAp==null?'—':pctAp+'%',`${cgDelta(k.apuracao_delta,false)} ${k.apuracao_concluida==null?'':cgNum(k.apuracao_concluida)+' de '+cgNum(tot)+' clientes · '}prazo dia 5`,'','apuracao')}
+    ${kpi('XML em aberto',cgNum(k.xml_aberto),`${cgDelta(k.xml_delta,true)} pedidos ainda sem retorno`,'','xml')}
+    ${kpi('Clientes sem carteira',cgNum(k.sem_carteira),`${cgDelta(k.sem_carteira_delta,true)} CNPJ ativo sem colaborador`,'','sem_carteira')}
+    ${kpi('Alertas ativos',cgNum(k.alertas),`${ALERTAS_GESTOR.filter(a=>al[a[0]]>0).length} tipos com ocorrência`,k.alertas>0?'var(--vermelho)':'','alertas')}
+   </div>
+   <div class="cg-alertas">${ordem.map(alerta).join('')}</div>
+   <div class="cg-card cg-rel">${cgI('etapas')}<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding-right:26px"><div class="cg-tit" style="margin:0;padding:0">Andamento do ciclo por etapa</div><div class="cg-leg"><span><i class="cg-ok"></i>concluído</span><span><i class="cg-and"></i>em andamento</span><span><i class="cg-atr"></i>atrasado</span><span><i style="background:var(--superf2);border:1px solid var(--borda)"></i>não iniciado</span></div></div>
+    <div class="cg-ciclo">${(d.ciclo||[]).map(etapa).join('')}</div></div>
   <section class="cg-duas">
-   <div class="cg-card cg-sec"><div><h2 class="disp" style="font-size:15px;margin:0">XML em aberto por competência</h2><div class="cg-sub">Pedido de XML ainda sem retorno. O que sobra de meses fechados é tarefa esquecida.</div></div>
+   <div class="cg-card cg-sec cg-rel">${cgI('xml_mes')}<div class="cg-tit">XML em aberto por competência</div>
     <div class="cg-colunas">${xm.map(x=>`<div class="cg-col${x.atual?' atual':''}"><span class="v">${cgNum(x.qtd)}</span><div class="c" style="height:${Math.round(100*(x.qtd||0)/mxX)}%"></div></div>`).join('')}</div>
     <div class="cg-rotcol">${xm.map(x=>{const m=Number(x.mes.split('-')[1]);return `<span>${MES_ABR[m-1]}${x.atual?' · atual':''}</span>`;}).join('')}</div></div>
-   <div class="cg-card cg-sec"><div><h2 class="disp" style="font-size:15px;margin:0">Clientes ativos por responsável</h2><div class="cg-sub">Linha tracejada = média da equipe (${Math.round(media)}). Laranja acima da média, cinza abaixo.</div></div>
+   <div class="cg-card cg-sec cg-rel">${cgI('carga')}<div class="cg-tit">Clientes ativos por responsável <span style="font-family:var(--corpo);font-size:11px;color:var(--apagado);font-weight:400">· média ${Math.round(media)}</span></div>
     <div class="cg-carga">${cg.map(x=>`<div class="cg-lin"><span class="t" title="${escH(x.nome)}">${escH(x.nome)}</span><div class="b"><i style="width:${Math.round(100*x.clientes/mxC)}%;background:${x.clientes>media?'var(--laranja)':'var(--nevoa)'}"></i><em style="left:${Math.round(100*media/mxC)}%"></em></div><b>${cgNum(x.clientes)}</b></div>`).join('')}</div></div>
   </section>
  </div></div>`;
