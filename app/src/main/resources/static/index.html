@@ -257,6 +257,24 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .wa-comp input{flex:1;border:1px solid var(--bordaF);border-radius:999px;padding:11px 15px;font-size:12.5px;font-family:inherit;outline:0;background:var(--superf2)}
 .wa-comp .snd{width:40px;height:40px;border-radius:999px;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;font-size:15px;flex:none;cursor:pointer}
 .wa-lock{padding:12px;text-align:center;color:var(--apagado);font-size:11px;border-top:1px solid var(--borda);background:#fff;flex:none}
+.tm-bol{position:fixed;right:24px;bottom:92px;width:54px;height:54px;border-radius:999px;border:0;background:var(--grad);color:#fff;display:grid;place-items:center;box-shadow:var(--md);z-index:65;cursor:pointer}
+.tm-bol svg{width:24px;height:24px}
+.tm-bolb{position:absolute;top:-3px;right:-3px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--vermelho);color:#fff;font-size:10.5px;font-weight:700;display:grid;place-items:center;border:2px solid #fff}
+.tm-flut{position:fixed;right:24px;bottom:158px;width:430px;height:500px;max-height:calc(100vh - 180px);background:#efe7de;border-radius:16px;box-shadow:var(--md);display:flex;flex-direction:column;overflow:hidden;z-index:66;opacity:0;transform:translateY(24px);transition:opacity .16s,transform .18s}
+.tm-flut.on{opacity:1;transform:none}.tm-flut.sai{opacity:0;transform:translateY(24px)}
+.tm-flut .rl{background:var(--pagina)}.tm-flut .wa-head .wa-hbtn{font-size:15px}
+.tm-eu{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--borda);flex:none}
+.tm-eu b{font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-eu select{margin-top:3px;border:1px solid var(--borda);border-radius:999px;padding:3px 9px;font-size:11px;font-family:inherit;background:var(--superf2);outline:0}
+.tm-pres{position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:999px;border:2px solid #fff}
+.tm-sec{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 5px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--apagado)}
+.tm-sec button{border:0;background:transparent;color:var(--laranjaTx);font-size:15px;font-weight:700;padding:0 2px}
+.tm-men{background:var(--laranjaSv);color:var(--laranjaTx);border-radius:4px;padding:0 3px;font-weight:700}
+.wa-b.ag .tm-men{background:rgba(255,255,255,.18);color:#ffd3b8}
+.tm-ped{display:flex;flex-direction:column;gap:2px;border:1px solid var(--laranjaCl);background:var(--laranjaSv);color:var(--ink);border-radius:9px;padding:8px 10px;font-size:12px}
+.tm-ped b{color:var(--laranjaTx)}
+.tm-pag{flex:1;overflow-y:auto;padding:18px 20px;background:var(--fundo)}
+.tm-pagcab{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}.tm-pagcab>b{font-family:var(--disp);font-size:16px}
 .watabs .wa-ico{flex:none;width:34px;padding:0;color:var(--apoio)}
 .wa-arqlin{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:12px;font-weight:600;color:var(--apoio);border-bottom:1px solid var(--superf2);cursor:pointer;flex:none}
 .wa-arqlin:hover{background:var(--superf)}.wa-arqlin span{margin-left:auto;color:var(--verde);font-size:11px}
@@ -549,6 +567,8 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="lab">APOIO</div>
   <div class="it" data-view="templates" onclick="irView('templates')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg></span> Templates</div>
   <div class="it" data-view="ia" onclick="irView('ia')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg></span> IA &amp; Meta</div>
+  <div class="lab">INTERNO</div>
+  <div class="it" data-view="teams" onclick="irView('teams')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span> Team's <span class="bd" id="tmBadge" style="display:none">0</span></div>
   <div class="foot"><span class="av" id="euAv"></span><div><b id="euNome"></b><span id="euInfo"></span></div></div>
 </nav>
 
@@ -757,7 +777,7 @@ function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
 function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
 function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
-const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta'};
+const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta',teams:"Team's"};
 function eGestor(){return eu&&['assistente','gerente'].includes(eu.nivel);}
 function eColab(){return eu&&eu.nivel==='colaborador';}
 function telaInicial(){return eGestor()?'gestor':(eColab()?'central':'apuracao');}
@@ -1069,10 +1089,315 @@ function render(){
   el('crumbTitulo').textContent=TITULOS[view]||view;
   document.querySelector('.topo .crumb').style.display='none';
   document.querySelector('.topo').style.display='none';
-  ({apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA}[view])();
+  ({teams:renderTeams,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA}[view])();
   document.querySelectorAll('.wa-msgs').forEach(m=>m.scrollTop=m.scrollHeight);
+  tmBolinha();
 }
 
+/* ---------- TEAM'S (chat interno) ---------- */
+const TM_URL='https://lhqjfdexfexpmnoqhbyv.supabase.co',TM_KEY='sb_publishable_wJLNCeunyVFZz4yUJAaJMQ_x7qPMU_v';
+const TM_ST={online:['Online','var(--verde)'],reuniao:['Em reunião','var(--azul)'],ausente:['Ausente','var(--ambar)'],nao_interromper:['Não me interrompam','var(--vermelho)'],offline:['Offline','var(--nevoa)']};
+const TM_PED={aberto:'Aberto',em_andamento:'Em andamento',concluido:'Concluído',cancelado:'Cancelado'};
+let tm=null,tmEquipe=null,tmCanais=[],tmMsgs={},tmPres={},tmSel=null,tmAba='conversas',tmBusca='',tmResp=null,tmUrls={},tmPedidos=[],tmAvisos=[],tmVistos=new Set(),tmReunioes=[],tmGrav=null,tmPedFiltro='meus',tmPronto=false,tmIniciando=null;
+function tmPessoa(id){return (tmEquipe&&tmEquipe.pessoas||[]).find(p=>p.id===id)||{id,nome:'Usuário',setores:[]};}
+function tmSetorNome(id){const s=(tmEquipe&&tmEquipe.setores||[]).find(x=>x.id===id);return s?s.nome:'';}
+function tmCor(t){let h=0;for(const ch of String(t||''))h=(h*31+ch.charCodeAt(0))>>>0;return ['#2F6FED','#5b3f96','#1B7A44','#B25E09','#0891B2','#C0392B','#6D4AA0','#3A5A8C'][h%8];}
+function tmIni(n){const p=String(n||'').trim().split(/\s+/);return ((p[0]||'')[0]||'').concat(p.length>1?p[p.length-1][0]:'').toUpperCase();}
+function tmNomeCanal(c){if(!c)return '';if(c.tipo==='direta'){const o=(c.membros||[]).find(x=>x!==eu.id);return tmPessoa(o).nome;}if(c.tipo==='setor')return tmSetorNome(c.setor_id)||c.nome||'Setor';return c.nome||'Grupo';}
+function tmNaoLidasTotal(){return tmCanais.filter(c=>!c.silenciado).reduce((s,c)=>s+(c.nao_lidas||0),0);}
+function tmBadge(){const b=el('tmBadge');const n=tmNaoLidasTotal();if(b){b.textContent=n;b.style.display=n?'':'none';}tmBolinha();}
+async function tmIniciar(){
+ if(tmPronto)return true;if(tmIniciando)return tmIniciando;
+ tmIniciando=(async()=>{
+  const s=(await sb.auth.getSession()).data.session;if(!s)return false;
+  const r=await fetch(TM_URL+'/functions/v1/teams-entrar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fiscal_token:s.access_token})});
+  const j=await r.json().catch(()=>({}));if(!j.ok)return false;
+  tm=supabase.createClient(TM_URL,TM_KEY,{auth:{persistSession:false,autoRefreshToken:true,storageKey:'teams-sessao'}});
+  const ss=await tm.auth.setSession({access_token:j.access_token,refresh_token:j.refresh_token});if(ss.error)return false;
+  const [eq]=await Promise.all([sb.rpc('fiscal_equipe'),tmCarregarCanais()]);
+  if(!eq.error)tmEquipe=eq.data;
+  await tm.from('chat_presenca').upsert({usuario_id:eu.id,status:'online',visto_por_ultimo_em:new Date().toISOString(),atualizado_em:new Date().toISOString()});
+  const p=await tm.from('chat_presenca').select('usuario_id,status');if(!p.error)p.data.forEach(x=>tmPres[x.usuario_id]=x.status);
+  tm.channel('teams').on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_mensagem'},tmChegou)
+   .on('postgres_changes',{event:'*',schema:'public',table:'chat_presenca'},x=>{const n=x.new||{};if(n.usuario_id){tmPres[n.usuario_id]=n.status;if(view==='teams')tmDesenharLista();}})
+   .on('postgres_changes',{event:'*',schema:'public',table:'chat_canal_membro'},()=>tmCarregarCanais().then(()=>{if(view==='teams')tmDesenharLista();}))
+   .on('postgres_changes',{event:'*',schema:'public',table:'chat_pedido'},()=>{if(view==='teams'&&tmAba==='pedidos')tmAbrirPedidos();})
+   .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_aviso'},()=>{if(view==='teams'&&tmAba==='avisos')tmAbrirAvisos();})
+   .subscribe();
+  window.addEventListener('beforeunload',()=>{try{tm.from('chat_presenca').upsert({usuario_id:eu.id,status:'offline',atualizado_em:new Date().toISOString()});}catch(e){}});
+  tmPronto=true;tmBadge();return true;})();
+ const ok=await tmIniciando;tmIniciando=null;return ok;
+}
+async function tmCarregarCanais(){const r=await tm.rpc('chat_resumo');if(!r.error)tmCanais=r.data||[];tmBadge();}
+async function tmChegou(p){
+ const m=p.new;if(!m)return;
+ const lista=tmMsgs[m.canal_id];
+ if(lista&&!lista.find(x=>x.id===m.id)){const i=lista.findIndex(x=>x.tmp&&x.corpo===m.corpo&&m.autor_id===eu.id);if(i>=0)lista.splice(i,1);lista.push(m);if(['arquivo','audio'].includes(m.tipo))setTimeout(()=>tmCarregarMsgs(m.canal_id),900);}
+ let c=tmCanais.find(x=>x.id===m.canal_id);
+ if(!c){await tmCarregarCanais();c=tmCanais.find(x=>x.id===m.canal_id);}
+ if(c){c.ultima={autor_id:m.autor_id,corpo:m.corpo,tipo:m.tipo,em:m.criada_em};
+  if(m.autor_id!==eu.id){if((view==='teams'&&tmSel===c.id&&tmAba==='conversas')||(tmFlutAberto&&tmFlutCanal===c.id))tm.rpc('chat_marcar_lido',{p_canal:c.id});else c.nao_lidas=(c.nao_lidas||0)+1;}}
+ tmBadge();
+ if(view==='teams'){tmDesenharLista();if(tmSel===m.canal_id)tmDesenharMsgs();}
+ if(tmFlutAberto){if(tmFlutCanal===m.canal_id)tmDesenharMsgs('tmfms',m.canal_id);else if(!tmFlutCanal)tmFlutDesenhar();}
+}
+function renderTeams(){
+ el('conteudo').innerHTML=`<div class="waweb"><div class="walist" id="tmLista"></div><div class="wachat" id="tmCentro"></div></div>`;
+ if(!tmPronto){tmIniciar().then(ok=>{if(view!=='teams')return;if(!ok){el('tmCentro').innerHTML='';toast('Não foi possível entrar no Team\'s.');return;}tmDesenharTudo();});return;}
+ tmDesenharTudo();
+}
+function tmDesenharTudo(){tmDesenharLista();if(tmAba==='avisos')tmAbrirAvisos();else if(tmAba==='pedidos')tmAbrirPedidos();else if(tmAba==='reunioes')tmAbrirReunioes();else tmDesenharConversa();}
+function tmItem(id,nome,sub,av,n,on,fn){return `<div class="waconv ${on?'sel':''}" onclick="${fn}"><div class="av" style="background:${av.cor};position:relative">${av.html}${av.pres?`<span class="tm-pres" style="background:${av.pres}"></span>`:''}</div><div style="flex:1;min-width:0"><div class="nm"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(nome)}</span><span class="hr">${escH(sub.h||'')}</span></div><div style="display:flex;gap:6px;align-items:center"><div class="last" style="flex:1">${escH(sub.t||'')}</div>${n?`<span class="un">${n}</span>`:''}</div></div></div>`;}
+function tmPrevia(c){const u=c.ultima;if(!u)return {t:'',h:''};const quem=u.autor_id===eu.id?'Você: ':(c.tipo!=='direta'?tmPessoa(u.autor_id).nome.split(' ')[0]+': ':'');return {t:quem+(u.tipo==='audio'?'🎤 Áudio':u.tipo==='arquivo'?'📎 '+(u.corpo||'Arquivo'):u.tipo==='pedido'?'📌 '+(u.corpo||'Pedido'):(u.corpo||'')),h:u.em?hhmm(u.em):''};}
+function tmDesenharLista(){
+ const box=el('tmLista');if(!box)return;const t=tmBusca.trim().toLowerCase();const f=n=>!t||String(n).toLowerCase().includes(t);
+ const meuSt=tmPres[eu.id]||'online';
+ const setores=(tmEquipe&&tmEquipe.setores||[]).filter(s=>f(s.nome)).map(s=>{const c=tmCanais.find(x=>x.tipo==='setor'&&x.setor_id===s.id);const n=c&&!c.silenciado?c.nao_lidas:0;
+  return tmItem(s.id,s.nome,c?tmPrevia(c):{t:(n=>n+(n===1?' pessoa':' pessoas'))((tmEquipe.pessoas||[]).filter(p=>(p.setores||[]).includes(s.id)).length),h:''},{cor:tmCor(s.nome),html:escH(tmIni(s.nome))},n,c&&tmSel===c.id&&tmAba==='conversas',`tmAbrirSetor('${s.id}')`);}).join('');
+ const diretas=tmCanais.filter(c=>c.tipo==='direta'&&f(tmNomeCanal(c))).sort((a,b)=>new Date((b.ultima||{}).em||0)-new Date((a.ultima||{}).em||0)).map(c=>{const o=(c.membros||[]).find(x=>x!==eu.id);const pe=tmPessoa(o);
+  return tmItem(c.id,pe.nome,tmPrevia(c),{cor:tmCor(pe.nome),html:pe.foto_url?`<img src="${escH(pe.foto_url)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`:escH(tmIni(pe.nome)),pres:(TM_ST[tmPres[o]||'offline']||TM_ST.offline)[1]},c.silenciado?0:c.nao_lidas,tmSel===c.id&&tmAba==='conversas',`tmAbrirCanal('${c.id}')`);}).join('');
+ const grupos=tmCanais.filter(c=>c.tipo==='grupo'&&f(c.nome)).map(c=>tmItem(c.id,c.nome,tmPrevia(c),{cor:tmCor(c.nome),html:ICO_GRUPO},c.silenciado?0:c.nao_lidas,tmSel===c.id&&tmAba==='conversas',`tmAbrirCanal('${c.id}')`)).join('');
+ const pessoas=t?(tmEquipe&&tmEquipe.pessoas||[]).filter(p=>p.id!==eu.id&&f(p.nome)&&!tmCanais.some(c=>c.tipo==='direta'&&(c.membros||[]).includes(p.id))).map(p=>tmItem(p.id,p.nome,{t:(p.setores||[]).map(tmSetorNome).join(', '),h:''},{cor:tmCor(p.nome),html:escH(tmIni(p.nome)),pres:(TM_ST[tmPres[p.id]||'offline']||TM_ST.offline)[1]},0,false,`tmAbrirDireta('${p.id}')`)).join(''):'';
+ const ferr=(id,tit)=>`<button class="${tmAba===id?'on':''}" onclick="tmIrAba('${id}')">${tit}</button>`;
+ const busca=el('tmbusca');const foco=busca&&document.activeElement===busca;
+ box.innerHTML=`<div class="tm-eu"><div class="av" style="width:36px;height:36px;font-size:12px;background:${tmCor(eu.nome)}">${escH(tmIni(eu.nome))}</div><div style="flex:1;min-width:0"><b>${escH(eu.nome)}</b><select onchange="tmMudarStatus(this.value)">${Object.keys(TM_ST).filter(k=>k!=='offline').map(k=>`<option value="${k}" ${k===meuSt?'selected':''}>${TM_ST[k][0]}</option>`).join('')}</select></div></div>
+  <div class="watabs">${ferr('conversas','Conversas')}${ferr('avisos','Avisos')}${ferr('pedidos','Pedidos')}${ferr('reunioes','Reuniões')}</div>
+  <div class="srch"><input id="tmbusca" placeholder="🔎  Buscar pessoa, setor ou grupo" value="${escH(tmBusca)}" oninput="tmBusca=this.value;tmDesenharLista()"></div>
+  <div class="rl">${pessoas?`<div class="tm-sec">Pessoas</div>${pessoas}`:''}${setores||!t?`<div class="tm-sec">Setores</div>${setores}`:''}${diretas||!t?`<div class="tm-sec">Diretas<button onclick="tmNovaDireta()" title="Nova conversa">＋</button></div>${diretas}`:''}${grupos||!t?`<div class="tm-sec">Grupos<button onclick="tmNovoGrupo()" title="Novo grupo">＋</button></div>${grupos}`:''}</div>`;
+ if(foco){const b=el('tmbusca');b.focus();b.setSelectionRange(b.value.length,b.value.length);}
+}
+function tmIrAba(a){tmAba=a;tmDesenharTudo();}
+async function tmMudarStatus(s){tmPres[eu.id]=s;const r=await tm.from('chat_presenca').upsert({usuario_id:eu.id,status:s,visto_por_ultimo_em:new Date().toISOString(),atualizado_em:new Date().toISOString()}).select('usuario_id');if(r.error||!r.data||!r.data.length)toast('Não foi possível mudar o status.');}
+async function tmAbrirSetor(sid){const r=await tm.rpc('chat_abrir_setor',{p_setor:sid,p_nome:tmSetorNome(sid)});if(r.error){toast('Não foi possível abrir o setor.');return;}if(!tmCanais.find(c=>c.id===r.data))await tmCarregarCanais();tmAbrirCanal(r.data);}
+async function tmAbrirDireta(pid){const r=await tm.rpc('chat_abrir_direta',{p_outro:pid});if(r.error){toast('Não foi possível abrir a conversa.');return;}tmBusca='';await tmCarregarCanais();tmAbrirCanal(r.data);}
+function tmAbrirCanal(id){tmAba='conversas';tmSel=id;tmResp=null;const c=tmCanais.find(x=>x.id===id);if(c&&c.nao_lidas){c.nao_lidas=0;tmBadge();}tm.rpc('chat_marcar_lido',{p_canal:id});tmDesenharLista();tmDesenharConversa();}
+async function tmCarregarMsgs(id){
+ const r=await tm.from('chat_mensagem').select('id,canal_id,autor_id,tipo,corpo,meta,responde_a,criada_em,editada_em,excluida_em,chat_anexo(id,tipo,nome,url,tamanho,transcricao)').eq('canal_id',id).is('excluida_em',null).order('criada_em',{ascending:false}).limit(300);
+ if(r.error){toast('Não foi possível carregar as mensagens.');return;}
+ tmMsgs[id]=r.data.reverse();if(view==='teams'&&tmSel===id)tmDesenharMsgs();if(tmFlutAberto&&tmFlutCanal===id)tmDesenharMsgs('tmfms',id);
+}
+function tmDesenharConversa(){
+ const box=el('tmCentro');if(!box)return;const c=tmCanais.find(x=>x.id===tmSel);
+ if(!c){box.innerHTML='';return;}
+ const nome=tmNomeCanal(c);let sub='';
+ if(c.tipo==='direta'){const o=(c.membros||[]).find(x=>x!==eu.id);sub=(TM_ST[tmPres[o]||'offline']||TM_ST.offline)[0]+' · '+(tmPessoa(o).setores||[]).map(tmSetorNome).join(', ');}
+ else if(c.tipo==='setor'){const ps=(tmEquipe.pessoas||[]).filter(p=>(p.setores||[]).includes(c.setor_id));sub=ps.length+(ps.length===1?' pessoa · ':' pessoas · ')+ps.filter(p=>tmPres[p.id]&&tmPres[p.id]!=='offline').length+' online';}
+ else sub=(c.membros||[]).length+' participantes';
+ box.innerHTML=`<div class="wa-head"><span class="avc">${c.tipo==='grupo'?ICO_GRUPO:escH(tmIni(nome))}</span><div class="nm" style="cursor:pointer" onclick="tmParticipantes()"><b>${escH(nome)}</b><span>${escH(sub)}</span></div><button class="wa-hbtn" onclick="tmMenuCanal(event)">${ICO_MAIS}</button></div>
+  <div class="wa-msgs" id="tmms"></div>
+  <div id="tmComp">${tmComposer()}</div>`;
+ if(!tmMsgs[c.id])tmCarregarMsgs(c.id);else tmDesenharMsgs();
+}
+function tmComposer(){
+ const c=tmCanais.find(x=>x.id===tmSel);const msgs=tmMsgs[tmSel]||[];const r=tmResp?msgs.find(m=>m.id===tmResp):null;
+ return `${r?`<div class="wa-resp"><div class="q"><b>${escH(r.autor_id===eu.id?'Você':tmPessoa(r.autor_id).nome)}</b><span>${escH(r.corpo||'')}</span></div><button onclick="tmResp=null;el('tmComp').innerHTML=tmComposer()">✕</button></div>`:''}
+ ${tmGrav?`<div class="wa-comp"><span class="wa-rec">● Gravando ${tmGrav.seg||0}s</span><span style="flex:1"></span><button class="miniB" onclick="tmGravarCancelar()">Cancelar</button><button class="snd" onclick="tmGravarParar()">➤</button></div>`
+ :`<div class="wa-comp"><span class="pl" onclick="tmMenuAnexo(event)">${ICO_CLIPE}</span><input id="tmin" placeholder="Mensagem — use @ para mencionar" onkeydown="if(event.key==='Enter')tmEnviar()"><span class="pl" title="Gravar áudio" onclick="tmGravar()">${MIC}</span><button class="snd" onclick="tmEnviar()">➤</button></div>`}`;
+}
+function tmTexto(t){let h=escH(t||'');(tmEquipe&&tmEquipe.pessoas||[]).forEach(p=>{const n=escH('@'+p.nome);if(h.includes(n))h=h.split(n).join(`<span class="tm-men">${n}</span>`);});return h;}
+function tmDesenharMsgs(boxId,canalId){
+ boxId=boxId||'tmms';canalId=canalId||tmSel;const flut=boxId!=='tmms';
+ const box=el(boxId);if(!box)return;const c=tmCanais.find(x=>x.id===canalId);const msgs=tmMsgs[canalId]||[];
+ let ult=null,html='';
+ msgs.forEach(m=>{const d=ddmm(m.criada_em);if(d!==ult){html+=`<span class="ap-dia">${escH(d)}</span>`;ult=d;}
+  const mine=m.autor_id===eu.id,cls=mine?'ag':'cl',pe=tmPessoa(m.autor_id);
+  const q=m.responde_a?msgs.find(x=>x.id===m.responde_a):null;
+  let inner='';
+  if(!mine&&c&&c.tipo!=='direta')inner+=`<div class="wa-autor" style="color:${tmCor(pe.nome)}">${escH(pe.nome)}</div>`;
+  if(m.responde_a)inner+=`<div class="wa-cit"><b>${q?escH(q.autor_id===eu.id?'Você':tmPessoa(q.autor_id).nome):''}</b><span>${q?escH(q.corpo||''):'Mensagem'}</span></div>`;
+  (m.chat_anexo||[]).forEach(a=>{const u=tmUrls[a.url];
+   if(a.tipo==='imagem')inner+=u?`<img class="wa-img" src="${escH(u)}" alt="" onclick="window.open(this.src)">`:`<div class="wa-doc"><span class="fi">IMG</span>Carregando…</div>`;
+   else if(a.tipo==='audio')inner+=u?`<audio src="${escH(u)}" controls style="max-width:240px;height:34px"></audio>`:`<div class="wa-doc"><span class="fi">ÁUD</span>Carregando…</div>`;
+   else inner+=`<div class="wa-doc" ${u?`style="cursor:pointer" data-u="${escH(u)}" onclick="window.open(this.dataset.u)"`:''}><span class="fi">${escH((String(a.nome||'').split('.').pop()||'ARQ').slice(0,4).toUpperCase())}</span>${escH(a.nome||'Arquivo')}</div>`;});
+  if(m.tipo==='pedido'&&m.meta&&m.meta.pedido_id){const p=tmPedidos.find(x=>x.id===m.meta.pedido_id);inner+=`<div class="tm-ped"><b>📌 Pedido</b><span>${escH(m.corpo||'')}</span><span>Responsável: ${escH(tmPessoa(m.meta.responsavel_id).nome)}${m.meta.prazo?' · prazo '+escH(m.meta.prazo.split('-').reverse().join('/')):''}${p?' · '+escH(TM_PED[p.status]||p.status):''}</span></div>`;}
+  else if(m.tipo!=='audio'&&m.tipo!=='arquivo')inner+=tmTexto(m.corpo);
+  else if(m.tipo==='arquivo'&&m.corpo&&!(m.chat_anexo||[]).some(a=>a.nome===m.corpo))inner+=tmTexto(m.corpo);
+  html+=`<div class="wa-linha ${cls}"><div class="wa-b ${cls}">${inner}${m.tmp||flut?'':`<button class="wa-bseta" onclick="tmMenuMsg(event,'${m.id}')">${ICO_SETA}</button>`}</div></div><div class="wa-t ${cls}">${hhmm(m.criada_em)}${m.editada_em?' · editada':''}${m.tmp?' · enviando':''}</div>`;});
+ box.innerHTML=html;box.scrollTop=box.scrollHeight;tmAssinar(msgs);
+}
+async function tmAssinar(msgs){
+ const faltam=[...new Set(msgs.flatMap(m=>(m.chat_anexo||[]).map(a=>a.url)).filter(u=>u&&!(u in tmUrls)))];if(!faltam.length)return;
+ faltam.forEach(u=>tmUrls[u]=null);const r=await tm.storage.from('chat-anexo').createSignedUrls(faltam,3600);
+ if(!r.error&&r.data){r.data.forEach(x=>{if(x.signedUrl)tmUrls[x.path]=x.signedUrl;});if(view==='teams')tmDesenharMsgs();if(tmFlutAberto&&tmFlutCanal)tmDesenharMsgs('tmfms',tmFlutCanal);}
+}
+function tmMencoes(t){return (tmEquipe&&tmEquipe.pessoas||[]).filter(p=>t.includes('@'+p.nome)).map(p=>p.id);}
+async function tmGravarMsg(dados,mencoes,canal){
+ canal=canal||tmSel;
+ const r=await tm.from('chat_mensagem').insert(Object.assign({canal_id:canal,autor_id:eu.id},dados)).select('id').single();
+ if(r.error){toast('Não foi possível enviar.');return null;}
+ if(mencoes&&mencoes.length){const x=await tm.from('chat_mencao').insert(mencoes.map(u=>({mensagem_id:r.data.id,usuario_id:u})));if(x.error)toast('Mensagem enviada, mas a menção não foi registrada.');}
+ tm.from('chat_evento').insert({tipo:'mensagem',origem:'fiscal',canal_id:canal,mensagem_id:r.data.id,payload:{tipo:dados.tipo||'texto'}});
+ return r.data.id;
+}
+async function tmEnviar(){
+ const i=el('tmin');if(!i||!i.value.trim()||!tmSel)return;const t=i.value.trim();i.value='';
+ const lista=tmMsgs[tmSel]||(tmMsgs[tmSel]=[]);lista.push({id:'tmp-'+Date.now(),tmp:true,autor_id:eu.id,corpo:t,tipo:'texto',criada_em:new Date().toISOString(),responde_a:tmResp});tmDesenharMsgs();
+ const resp=tmResp;tmResp=null;el('tmComp').innerHTML=tmComposer();
+ const id=await tmGravarMsg({tipo:'texto',corpo:t,responde_a:resp},tmMencoes(t));
+ if(!id){tmMsgs[tmSel]=lista.filter(m=>!m.tmp);tmDesenharMsgs();}
+ const c=el('tmin');if(c)c.focus();
+}
+function tmMenuMsg(ev,id){
+ const m=(tmMsgs[tmSel]||[]).find(x=>x.id===id);if(!m)return;const mine=m.autor_id===eu.id;
+ waMenu(ev,[['Responder',()=>{tmResp=m.id;el('tmComp').innerHTML=tmComposer();const i=el('tmin');if(i)i.focus();}],
+  m.corpo?['Copiar',()=>navigator.clipboard.writeText(m.corpo).then(()=>toast('Copiado.'),()=>toast('Não foi possível copiar.'))]:null,
+  ['Criar pedido a partir desta',()=>tmNovoPedido(m)],
+  mine&&m.tipo==='texto'?['Editar',()=>tmEditar(m)]:null,
+  mine?['Apagar',()=>waConfirmar('Apagar esta mensagem para todos?','Apagar',()=>tmApagar(m)),true]:null]);
+}
+function tmEditar(m){waModal('Editar mensagem',`<textarea class="fi" id="tmed" rows="4">${escH(m.corpo||'')}</textarea><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="tmSalvarEdicao('${m.id}')">Salvar</button></div>`);}
+async function tmSalvarEdicao(id){const t=el('tmed').value.trim();if(!t)return;const r=await tm.from('chat_mensagem').update({corpo:t,editada_em:new Date().toISOString()}).eq('id',id).select('id');
+ if(r.error||!r.data.length){toast('Não foi possível editar.');return;}fecharModal();const m=(tmMsgs[tmSel]||[]).find(x=>x.id===id);if(m){m.corpo=t;m.editada_em=new Date().toISOString();}tmDesenharMsgs();}
+async function tmApagar(m){const r=await tm.from('chat_mensagem').update({excluida_em:new Date().toISOString()}).eq('id',m.id).select('id');
+ if(r.error||!r.data.length){toast('Não foi possível apagar.');return;}tmMsgs[tmSel]=(tmMsgs[tmSel]||[]).filter(x=>x.id!==m.id);tmDesenharMsgs();}
+function tmMenuCanal(ev){
+ const c=tmCanais.find(x=>x.id===tmSel);if(!c)return;
+ waMenu(ev,[[c.tipo==='direta'?'Dados da pessoa':'Participantes',()=>tmParticipantes()],['Novo pedido',()=>tmNovoPedido(null)],['Agendar reunião',()=>tmNovaReuniao()],
+  c.tipo!=='setor'||true?[c.silenciado?'Reativar notificações':'Silenciar notificações',()=>tmSilenciar(c)]:null,
+  c.tipo==='grupo'?['Adicionar pessoas',()=>tmAdicionar(c)]:null]);
+}
+async function tmSilenciar(c){await tm.rpc('chat_marcar_lido',{p_canal:c.id});const r=await tm.from('chat_canal_membro').update({silenciado:!c.silenciado}).eq('canal_id',c.id).eq('usuario_id',eu.id).select('canal_id');
+ if(r.error||!r.data.length){toast('Não foi possível alterar.');return;}c.silenciado=!c.silenciado;tmBadge();toast(c.silenciado?'Notificações silenciadas.':'Notificações reativadas.');tmDesenharLista();}
+function tmParticipantes(){
+ const c=tmCanais.find(x=>x.id===tmSel);if(!c)return;
+ const ids=c.tipo==='setor'?(tmEquipe.pessoas||[]).filter(p=>(p.setores||[]).includes(c.setor_id)).map(p=>p.id):(c.membros||[]);
+ waModal(c.tipo==='direta'?'Dados da pessoa':'Participantes',ids.map(id=>{const p=tmPessoa(id);const st=TM_ST[tmPres[id]||'offline']||TM_ST.offline;
+  return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--superf2)"><div class="av" style="width:34px;height:34px;font-size:11px;background:${tmCor(p.nome)}">${escH(tmIni(p.nome))}</div><div style="flex:1;min-width:0"><b style="font-size:12.5px">${escH(p.nome)}</b><div style="font-size:11px;color:var(--apagado)">${escH((p.setores||[]).map(tmSetorNome).join(', '))}${p.email?' · '+escH(p.email):''}</div></div><span style="font-size:11px;color:${st[1]};font-weight:700">● ${st[0]}</span>${id!==eu.id&&c.tipo!=='direta'?`<button class="miniB" onclick="fecharModal();tmAbrirDireta('${id}')">Conversar</button>`:''}</div>`;}).join(''),520);
+}
+function tmEscolherPessoas(titulo,botao,acao,excluir){
+ const ps=(tmEquipe&&tmEquipe.pessoas||[]).filter(p=>p.id!==eu.id&&!(excluir||[]).includes(p.id));
+ waModal(titulo,`${acao==='grupo'?'<span class="fl">Nome do grupo</span><input class="fi" id="tmgn" maxlength="120">':''}<span class="fl">Pessoas</span><input class="fi" placeholder="Buscar" oninput="document.querySelectorAll('#tmps label').forEach(l=>l.style.display=l.dataset.n.includes(this.value.toLowerCase())?'':'none')"><div id="tmps" style="max-height:44vh;overflow-y:auto;margin-top:6px">${ps.map(p=>`<label data-n="${escH(p.nome.toLowerCase())}" style="display:flex;gap:9px;align-items:center;padding:6px 2px;font-size:12.5px;cursor:pointer"><input type="${acao==='direta'?'radio':'checkbox'}" name="tmp" value="${p.id}"> ${escH(p.nome)} <span style="color:var(--apagado);font-size:11px">${escH((p.setores||[]).map(tmSetorNome).join(', '))}</span></label>`).join('')}</div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="tmConfirmarPessoas('${acao}')">${escH(botao)}</button></div>`,500);
+}
+function tmNovaDireta(){tmEscolherPessoas('Nova conversa','Conversar','direta');}
+function tmNovoGrupo(){tmEscolherPessoas('Novo grupo','Criar grupo','grupo');}
+function tmAdicionar(c){tmEscolherPessoas('Adicionar pessoas','Adicionar','adicionar',c.membros);}
+async function tmConfirmarPessoas(acao){
+ const ids=[...document.querySelectorAll('#tmps input:checked')].map(i=>i.value);
+ if(acao==='direta'){if(!ids.length)return;fecharModal();tmAbrirDireta(ids[0]);return;}
+ if(acao==='grupo'){const n=el('tmgn').value.trim();if(!n){toast('Escreva o nome do grupo.');return;}if(!ids.length){toast('Escolha pelo menos uma pessoa.');return;}
+  const r=await tm.rpc('chat_criar_grupo',{p_nome:n,p_membros:ids});if(r.error){toast('Não foi possível criar o grupo.');return;}fecharModal();await tmCarregarCanais();tmAbrirCanal(r.data);return;}
+ if(acao==='adicionar'){if(!ids.length)return;const r=await tm.from('chat_canal_membro').insert(ids.map(u=>({canal_id:tmSel,usuario_id:u,papel:'membro'})));
+  if(r.error){toast('Só quem administra o grupo pode adicionar pessoas.');return;}fecharModal();await tmCarregarCanais();tmDesenharConversa();toast('Pessoas adicionadas.');}
+}
+function tmMenuAnexo(ev){waMenu(ev,[['Documento',()=>tmEscolherArquivo('*/*')],['Fotos',()=>tmEscolherArquivo('image/*')]],true);}
+function tmEscolherArquivo(aceita){const i=document.createElement('input');i.type='file';i.accept=aceita;i.multiple=true;i.onchange=async()=>{for(const f of i.files)await tmEnviarArquivo(f,f.name,/^image\//.test(f.type)?'imagem':'documento');};i.click();}
+async function tmEnviarArquivo(blob,nome,tipo){
+ if(!tmSel)return;if(blob.size>100*1048576){toast(nome+' passa de 100 MB.');return;}
+ const ext=(nome.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'bin';const caminho=`${tmSel}/${crypto.randomUUID()}.${ext}`;
+ const up=await tm.storage.from('chat-anexo').upload(caminho,blob,{contentType:(blob.type||'application/octet-stream').split(';')[0]});
+ if(up.error){toast('Não foi possível subir '+nome+'.');return;}
+ const id=await tmGravarMsg({tipo:tipo==='audio'?'audio':'arquivo',corpo:tipo==='audio'?'Áudio':nome});if(!id)return;
+ const a=await tm.from('chat_anexo').insert({mensagem_id:id,tipo,nome,url:caminho,tamanho:blob.size});if(a.error)toast('Arquivo enviado sem o anexo registrado.');
+ tmCarregarMsgs(tmSel);
+}
+async function tmGravar(){
+ if(!navigator.mediaDevices||!window.MediaRecorder){toast('Este computador não permite gravar áudio.');return;}
+ let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true});}catch(e){toast('Sem acesso ao microfone.');return;}
+ const rec=new MediaRecorder(st,{mimeType:'audio/webm;codecs=opus',audioBitsPerSecond:32000});const partes=[];rec.ondataavailable=e=>{if(e.data.size)partes.push(e.data);};
+ tmGrav={rec,st,partes,seg:0,canal:tmSel,cancelado:false};
+ tmGrav.timer=setInterval(()=>{if(!tmGrav)return;tmGrav.seg++;const s=document.querySelector('#tmComp .wa-rec');if(s)s.textContent='● Gravando '+tmGrav.seg+'s';if(tmGrav.seg>=900)tmGravarParar();},1000);
+ rec.onstop=async()=>{const g=tmGrav;tmGrav=null;clearInterval(g.timer);g.st.getTracks().forEach(t=>t.stop());if(el('tmComp'))el('tmComp').innerHTML=tmComposer();
+  if(g.cancelado||!g.partes.length)return;try{const ogg=webmParaOgg(new Uint8Array(await new Blob(g.partes).arrayBuffer()));await tmEnviarArquivo(new Blob([ogg],{type:'audio/ogg'}),'audio.ogg','audio');}catch(e){toast('Não foi possível preparar o áudio.');}};
+ rec.start(250);el('tmComp').innerHTML=tmComposer();
+}
+function tmGravarParar(){if(tmGrav&&tmGrav.rec.state!=='inactive')tmGrav.rec.stop();}
+function tmGravarCancelar(){if(tmGrav){tmGrav.cancelado=true;tmGravarParar();}}
+function tmOpcoesPessoas(sel){return (tmEquipe&&tmEquipe.pessoas||[]).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${escH(p.nome)}</option>`).join('');}
+function tmNovoPedido(m){
+ waModal('Novo pedido',`<span class="fl">O que precisa ser feito</span><input class="fi" id="tmpt" maxlength="200" value="${escH(m&&m.corpo?m.corpo.slice(0,200):'')}"><span class="fl">Detalhes</span><textarea class="fi" id="tmpd" rows="3"></textarea><span class="fl">Responsável</span><select class="fi" id="tmpr"><option value="">Escolha</option>${tmOpcoesPessoas('')}</select><span class="fl">Prazo</span><input class="fi" type="date" id="tmpp"><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="tmCriarPedido('${m?m.id:''}')">Criar pedido</button></div>`);
+}
+async function tmCriarPedido(mid){
+ const t=el('tmpt').value.trim(),resp=el('tmpr').value,prazo=el('tmpp').value||null;if(!t||!resp){toast('Preencha o pedido e o responsável.');return;}
+ const r=await tm.from('chat_pedido').insert({canal_id:tmSel||null,mensagem_id:mid||null,titulo:t,descricao:el('tmpd').value||null,solicitante_id:eu.id,responsavel_id:resp,prazo}).select('id').single();
+ if(r.error){toast('Não foi possível criar o pedido.');return;}fecharModal();
+ if(tmSel){await tmGravarMsg({tipo:'pedido',corpo:t,meta:{pedido_id:r.data.id,responsavel_id:resp,prazo}},[resp]);tmPedidos.push({id:r.data.id,status:'aberto'});tmCarregarMsgs(tmSel);}
+ toast('Pedido criado.');
+}
+async function tmAbrirPedidos(){
+ tmAba='pedidos';tmDesenharLista();const box=el('tmCentro');if(!box)return;
+ const r=await tm.from('chat_pedido').select('id,titulo,descricao,solicitante_id,responsavel_id,status,prazo,criado_em,canal_id').order('criado_em',{ascending:false}).limit(300);
+ if(r.error){toast('Não foi possível carregar os pedidos.');return;}tmPedidos=r.data;
+ const lista=tmPedidos.filter(p=>tmPedFiltro==='meus'?p.responsavel_id===eu.id:tmPedFiltro==='pedi'?p.solicitante_id===eu.id:true);
+ const f=(k,t)=>`<button class="ap-fil ${tmPedFiltro===k?'on':''}" onclick="tmPedFiltro='${k}';tmAbrirPedidos()">${t}</button>`;
+ box.innerHTML=`<div class="tm-pag"><div class="tm-pagcab"><b>Pedidos</b><div class="ap-fils">${f('meus','Para mim')}${f('pedi','Que eu pedi')}${f('todos','Todos')}</div><span style="flex:1"></span><button class="bt-assumir" onclick="tmSel=null;tmNovoPedido(null)">Novo pedido</button></div>
+  <div class="tbwrap"><table><thead><tr><th>Pedido</th><th>Quem pediu</th><th>Responsável</th><th>Prazo</th><th>Situação</th><th></th></tr></thead><tbody>${lista.map(p=>{const venc=p.prazo&&p.status!=='concluido'&&p.status!=='cancelado'&&p.prazo<new Date().toISOString().slice(0,10);
+   return `<tr><td style="white-space:normal"><b>${escH(p.titulo)}</b>${p.descricao?`<div style="font-size:11px;color:var(--apagado)">${escH(p.descricao)}</div>`:''}</td><td>${escH(tmPessoa(p.solicitante_id).nome)}</td><td>${escH(tmPessoa(p.responsavel_id).nome)}</td><td${venc?' style="color:var(--vermelho);font-weight:700"':''}>${p.prazo?escH(p.prazo.split('-').reverse().join('/')):'—'}</td><td><span class="pill ${p.status==='concluido'?'ok':p.status==='cancelado'?'falta':'pend'}">${TM_PED[p.status]||p.status}</span></td><td>${(p.responsavel_id===eu.id||p.solicitante_id===eu.id)&&p.status!=='concluido'&&p.status!=='cancelado'?`<button class="miniB" onclick="tmAvancarPedido('${p.id}')">${p.status==='aberto'?'Começar':'Concluir'}</button>`:''}</td></tr>`;}).join('')}</tbody></table></div></div>`;
+}
+async function tmAvancarPedido(id){const p=tmPedidos.find(x=>x.id===id);if(!p)return;const nv=p.status==='aberto'?'em_andamento':'concluido';
+ const r=await tm.from('chat_pedido').update({status:nv,atualizado_em:new Date().toISOString()}).eq('id',id).select('id');if(r.error||!r.data.length){toast('Não foi possível atualizar o pedido.');return;}toast(nv==='concluido'?'Pedido concluído.':'Pedido em andamento.');tmAbrirPedidos();}
+async function tmAbrirAvisos(){
+ tmAba='avisos';tmDesenharLista();const box=el('tmCentro');if(!box)return;
+ const [a,v]=await Promise.all([tm.from('chat_aviso').select('id,escopo,setor_id,titulo,corpo,autor_id,criado_em').order('criado_em',{ascending:false}).limit(100),tm.from('chat_aviso_visto').select('aviso_id,usuario_id')]);
+ if(a.error){toast('Não foi possível carregar os avisos.');return;}tmAvisos=a.data;const vistos=v.data||[];tmVistos=new Set(vistos.filter(x=>x.usuario_id===eu.id).map(x=>x.aviso_id));
+ const total=(tmEquipe&&tmEquipe.pessoas||[]).length;
+ box.innerHTML=`<div class="tm-pag"><div class="tm-pagcab"><b>Central de avisos</b><span style="flex:1"></span><button class="bt-assumir" onclick="tmNovoAviso()">Novo aviso</button></div>${tmAvisos.map(x=>{const vi=vistos.filter(y=>y.aviso_id===x.id).length;const alvo=x.escopo==='setor'?(tmEquipe.pessoas||[]).filter(p=>(p.setores||[]).includes(x.setor_id)).length:total;
+   return `<div class="cg-card" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1"><b style="font-size:13.5px">${escH(x.titulo)}</b><div style="font-size:11px;color:var(--apagado);margin-top:2px">${escH(tmPessoa(x.autor_id).nome)} · ${escH(ddmm(x.criado_em))} ${escH(hhmm(x.criado_em))} · ${x.escopo==='setor'?escH(tmSetorNome(x.setor_id)):'Todos'}</div></div><span style="font-size:11px;color:var(--apagado)">${vi} de ${alvo} viram</span></div>${x.corpo?`<div style="font-size:12.5px;margin-top:8px;white-space:pre-line">${escH(x.corpo)}</div>`:''}<div style="margin-top:10px">${tmVistos.has(x.id)?'<span class="pill ok">Visto</span>':`<button class="miniB" onclick="tmDarVisto('${x.id}')">Marcar como visto</button>`}</div></div>`;}).join('')}</div>`;
+}
+async function tmDarVisto(id){const r=await tm.from('chat_aviso_visto').upsert({aviso_id:id,usuario_id:eu.id}).select('aviso_id');if(r.error){toast('Não foi possível marcar.');return;}tmAbrirAvisos();}
+function tmNovoAviso(){waModal('Novo aviso',`<span class="fl">Título</span><input class="fi" id="tmat" maxlength="160"><span class="fl">Texto</span><textarea class="fi" id="tmac" rows="4"></textarea><span class="fl">Para quem</span><select class="fi" id="tmas"><option value="">Todos</option>${(tmEquipe.setores||[]).map(s=>`<option value="${s.id}">${escH(s.nome)}</option>`).join('')}</select><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="tmCriarAviso()">Enviar aviso</button></div>`);}
+async function tmCriarAviso(){const t=el('tmat').value.trim();if(!t){toast('Dê um título ao aviso.');return;}const s=el('tmas').value;
+ const r=await tm.from('chat_aviso').insert({titulo:t,corpo:el('tmac').value||null,escopo:s?'setor':'central',setor_id:s||null,autor_id:eu.id}).select('id');if(r.error||!r.data.length){toast('Não foi possível enviar o aviso.');return;}fecharModal();toast('Aviso enviado.');tmAbrirAvisos();}
+async function tmAbrirReunioes(){
+ tmAba='reunioes';tmDesenharLista();const box=el('tmCentro');if(!box)return;
+ const r=await tm.from('chat_reuniao').select('id,titulo,pauta,inicio,fim,criado_por,chat_reuniao_participante(usuario_id,confirmado)').order('inicio',{ascending:true}).limit(100);
+ if(r.error){toast('Não foi possível carregar as reuniões.');return;}tmReunioes=r.data;const hoje=new Date(Date.now()-3600e3).toISOString();
+ const prox=tmReunioes.filter(x=>!x.inicio||x.inicio>=hoje),pass=tmReunioes.filter(x=>x.inicio&&x.inicio<hoje).reverse().slice(0,10);
+ const card=x=>{const me=(x.chat_reuniao_participante||[]).find(p=>p.usuario_id===eu.id);return `<div class="cg-card" style="margin-bottom:10px"><div style="display:flex;gap:10px"><div style="flex:1"><b style="font-size:13.5px">${escH(x.titulo)}</b><div style="font-size:11.5px;color:var(--apoio);margin-top:3px">${x.inicio?escH(ddmm(x.inicio)+' '+hhmm(x.inicio)):'Sem data'}${x.fim?' até '+escH(hhmm(x.fim)):''} · organizada por ${escH(tmPessoa(x.criado_por).nome)}</div>${x.pauta?`<div style="font-size:12px;margin-top:6px">${escH(x.pauta)}</div>`:''}<div style="font-size:11px;color:var(--apagado);margin-top:6px">${(x.chat_reuniao_participante||[]).map(p=>escH(tmPessoa(p.usuario_id).nome)+(p.confirmado?' ✓':'')).join(', ')}</div></div>${me&&!me.confirmado?`<button class="miniB" style="align-self:flex-start;white-space:nowrap" onclick="tmConfirmar('${x.id}')">Confirmar presença</button>`:''}</div></div>`;};
+ box.innerHTML=`<div class="tm-pag"><div class="tm-pagcab"><b>Reuniões</b><span style="flex:1"></span><button class="bt-assumir" onclick="tmNovaReuniao()">Agendar reunião</button></div>${prox.map(card).join('')}${pass.length?`<div class="tm-sec" style="padding-left:0">Anteriores</div>${pass.map(card).join('')}`:''}</div>`;
+}
+async function tmConfirmar(id){const r=await tm.from('chat_reuniao_participante').update({confirmado:true}).eq('reuniao_id',id).eq('usuario_id',eu.id).select('reuniao_id');if(r.error||!r.data.length){toast('Não foi possível confirmar.');return;}tmAbrirReunioes();}
+function tmNovaReuniao(){
+ const ps=(tmEquipe.pessoas||[]).filter(p=>p.id!==eu.id);
+ waModal('Agendar reunião',`<span class="fl">Assunto</span><input class="fi" id="tmrt" maxlength="160"><span class="fl">Pauta</span><textarea class="fi" id="tmrp" rows="2"></textarea><div style="display:flex;gap:10px"><div style="flex:1"><span class="fl">Começa</span><input class="fi" type="datetime-local" id="tmri"></div><div style="flex:1"><span class="fl">Termina</span><input class="fi" type="datetime-local" id="tmrf"></div></div><span class="fl">Participantes</span><div id="tmps" style="max-height:30vh;overflow-y:auto">${ps.map(p=>`<label data-n="${escH(p.nome.toLowerCase())}" style="display:flex;gap:9px;align-items:center;padding:5px 2px;font-size:12.5px"><input type="checkbox" value="${p.id}"> ${escH(p.nome)}</label>`).join('')}</div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="tmCriarReuniao()">Agendar</button></div>`,520);
+}
+async function tmCriarReuniao(){
+ const t=el('tmrt').value.trim(),i=el('tmri').value,f=el('tmrf').value;if(!t||!i){toast('Preencha o assunto e o horário.');return;}if(f&&f<=i){toast('O fim precisa ser depois do começo.');return;}
+ const ids=[...document.querySelectorAll('#tmps input:checked')].map(x=>x.value);
+ const r=await tm.from('chat_reuniao').insert({titulo:t,pauta:el('tmrp').value||null,inicio:new Date(i).toISOString(),fim:f?new Date(f).toISOString():null,canal_id:tmSel||null,criado_por:eu.id}).select('id').single();
+ if(r.error){toast('Não foi possível agendar.');return;}
+ const p=await tm.from('chat_reuniao_participante').insert([eu.id,...ids].map(u=>({reuniao_id:r.data.id,usuario_id:u,confirmado:u===eu.id})));
+ if(p.error){toast('Reunião criada, mas os participantes não foram registrados.');}
+ fecharModal();toast('Reunião agendada.');if(tmAba==='reunioes')tmAbrirReunioes();
+}
+/* ---------- TEAM'S flutuante ---------- */
+let tmFlutAberto=false,tmFlutCanal=null;
+function tmBolinha(){
+ let b=el('tmBol');
+ if(!b){b=document.createElement('button');b.id='tmBol';b.className='tm-bol';b.title="Team's";b.onclick=tmFlutAlternar;b.innerHTML=`${ICO_GRUPO}<span class="tm-bolb" id="tmBolB"></span>`;document.body.appendChild(b);}
+ const mostra=tmPronto&&view!=='teams';b.style.display=mostra?'':'none';
+ if(!mostra&&tmFlutAberto)tmFlutFechar();
+ const n=tmNaoLidasTotal();const bb=el('tmBolB');if(bb){bb.textContent=n>99?'99+':n;bb.style.display=n?'':'none';}
+}
+function tmFlutAlternar(){tmFlutAberto?tmFlutFechar():tmFlutAbrir();}
+function tmFlutAbrir(){
+ if(!tmPronto)return;tmFlutAberto=true;
+ let f=el('tmFlut');if(!f){f=document.createElement('div');f.id='tmFlut';f.className='tm-flut';document.body.appendChild(f);}
+ f.classList.remove('sai');requestAnimationFrame(()=>f.classList.add('on'));tmFlutDesenhar();
+}
+function tmFlutFechar(){tmFlutAberto=false;const f=el('tmFlut');if(!f)return;f.classList.remove('on');f.classList.add('sai');setTimeout(()=>{if(!tmFlutAberto)f.remove();},160);}
+function tmFlutDesenhar(){
+ const f=el('tmFlut');if(!f)return;const c=tmFlutCanal?tmCanais.find(x=>x.id===tmFlutCanal):null;
+ const cab=`<div class="wa-head">${c?`<button class="wa-hbtn" onclick="tmFlutCanal=null;tmFlutDesenhar()">‹</button><span class="avc">${c.tipo==='grupo'?ICO_GRUPO:escH(tmIni(tmNomeCanal(c)))}</span>`:`<span class="avc">${ICO_GRUPO}</span>`}<div class="nm"><b>${escH(c?tmNomeCanal(c):"Team's")}</b><span>${c?'':escH(tmNaoLidasTotal()+' não lidas')}</span></div><button class="wa-hbtn" title="Abrir o Team's" onclick="tmFlutExpandir()">⤢</button><button class="wa-hbtn" onclick="tmFlutFechar()">✕</button></div>`;
+ if(!c){
+  const t=(tmBusca||'').trim().toLowerCase();
+  const canais=tmCanais.filter(x=>x.ultima||x.nao_lidas).sort((a,b)=>new Date((b.ultima||{}).em||0)-new Date((a.ultima||{}).em||0));
+  const setores=(tmEquipe&&tmEquipe.setores||[]).filter(s=>!canais.some(x=>x.tipo==='setor'&&x.setor_id===s.id));
+  f.innerHTML=cab+`<div class="rl" style="flex:1;overflow-y:auto">${canais.map(x=>{const nm=tmNomeCanal(x);return tmItem(x.id,nm,tmPrevia(x),{cor:tmCor(nm),html:x.tipo==='grupo'?ICO_GRUPO:escH(tmIni(nm))},x.silenciado?0:x.nao_lidas,false,`tmFlutAbrirCanal('${x.id}')`);}).join('')}
+   ${setores.length?`<div class="tm-sec">Setores</div>${setores.map(s=>tmItem(s.id,s.nome,{t:'',h:''},{cor:tmCor(s.nome),html:escH(tmIni(s.nome))},0,false,`tmFlutAbrirSetor('${s.id}')`)).join('')}`:''}</div>`;
+  return;}
+ f.innerHTML=cab+`<div class="wa-msgs" id="tmfms"></div><div class="wa-comp"><input id="tmfin" placeholder="Mensagem" onkeydown="if(event.key==='Enter')tmFlutEnviar()"><button class="snd" onclick="tmFlutEnviar()">➤</button></div>`;
+ if(!tmMsgs[c.id])tmCarregarMsgs(c.id).then(()=>tmDesenharMsgs('tmfms',c.id));else tmDesenharMsgs('tmfms',c.id);
+ const i=el('tmfin');if(i)i.focus();
+}
+async function tmFlutAbrirSetor(sid){const r=await tm.rpc('chat_abrir_setor',{p_setor:sid,p_nome:tmSetorNome(sid)});if(r.error){toast('Não foi possível abrir o setor.');return;}if(!tmCanais.find(c=>c.id===r.data))await tmCarregarCanais();tmFlutAbrirCanal(r.data);}
+function tmFlutAbrirCanal(id){tmFlutCanal=id;const c=tmCanais.find(x=>x.id===id);if(c&&c.nao_lidas){c.nao_lidas=0;tmBadge();}tm.rpc('chat_marcar_lido',{p_canal:id});tmFlutDesenhar();}
+function tmFlutExpandir(){const c=tmFlutCanal;tmFlutFechar();irView('teams');if(c)setTimeout(()=>tmAbrirCanal(c),0);}
+async function tmFlutEnviar(){
+ const i=el('tmfin');if(!i||!i.value.trim()||!tmFlutCanal)return;const t=i.value.trim(),canal=tmFlutCanal;i.value='';
+ const lista=tmMsgs[canal]||(tmMsgs[canal]=[]);lista.push({id:'tmp-'+Date.now(),tmp:true,autor_id:eu.id,corpo:t,tipo:'texto',criada_em:new Date().toISOString()});tmDesenharMsgs('tmfms',canal);
+ const id=await tmGravarMsg({tipo:'texto',corpo:t},tmMencoes(t),canal);
+ if(!id){tmMsgs[canal]=lista.filter(m=>!m.tmp);tmDesenharMsgs('tmfms',canal);}
+}
 /* ---------- APURAÇÃO (com abas: Apuração · Radar XML · Demanda em lote · Meu espaço) ---------- */
 function renderApuracao(){
  const nv=radarNovos();
@@ -1849,6 +2174,7 @@ async function assumirWA(id){const r=await sb.from('wa_conversa').update({respon
 async function iniciarDados(){
  el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
  preCarregarGestor();
+ tmIniciar();
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
