@@ -572,7 +572,7 @@ let gestorAba='central',mapaDados=null,cartAberta=new Set();
 function escH(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmtCnpj(c){const d=String(c||'').replace(/\D/g,'');return d.length===14?d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'):d;}
 let clientesDados=null;
-function setGestorAba(a){gestorAba=a;if(a==='mapa')mapaDados=null;if(a==='clientes')clientesDados=null;renderGestor();}
+function setGestorAba(a){gestorAba=a;if(a==='mapa')mapaDados=null;if(a==='clientes'){clientesDados=null;cliPag=1;cliPorPag=0;}renderGestor();}
 function renderGestor(){
  const ab=[['central','Central'],['mapa','Mapa do Departamento'],['clientes','Clientes']];
  el('conteudo').innerHTML=`
@@ -589,11 +589,60 @@ async function carregarClientes(){
  if(r.error){toast('Não foi possível carregar os clientes.');return;}
  clientesDados=r.data||[];if(view==='gestor'&&gestorAba==='clientes')renderClientes();
 }
+let cliBusca='',cliApu='',cliPag=1,cliPorPag=0,cliObs=null,cliApuAberto=false;
+function soDig(s){return String(s||'').replace(/\D/g,'');}
+function cliLinhas(){
+ const t=cliBusca.trim().toLowerCase(),td=soDig(cliBusca);const out=[];
+ (clientesDados||[]).forEach(g=>g.empresas.forEach(e=>{
+  if(cliApu&&(e.apuracao||'')!==cliApu)return;
+  if(t){const txt=[g.responsavel,e.empresa,e.carteira].join(' ').toLowerCase();
+   const ok=txt.includes(t)||(td.length>=3&&(soDig(g.cpf).includes(td)||soDig(e.cnpj).includes(td)));if(!ok)return;}
+  out.push({g,e});}));
+ return out;
+}
+function cliOpcoesApu(){return [...new Set((clientesDados||[]).flatMap(g=>g.empresas.map(e=>e.apuracao)).filter(Boolean))].sort();}
 function renderClientes(){
  const b=el('gestorBody');if(!b)return;
  if(!clientesDados){b.innerHTML='';carregarClientes();return;}
- b.innerHTML=`<div class="tela"><div class="tbwrap"><table><thead><tr><th>Responsável</th><th>CNPJ</th><th>Empresa</th><th>Carteira</th><th>Apuração</th></tr></thead><tbody>${clientesDados.map(g=>g.empresas.map((e,i)=>`<tr>${i===0?`<td rowspan="${g.empresas.length}" style="vertical-align:middle;white-space:normal;max-width:280px;font-weight:600;color:var(--ink);border-right:1px solid var(--borda);background:var(--pagina)">${escH(g.responsavel||'—')}</td>`:''}<td>${fmtCnpj(e.cnpj)}</td><td style="white-space:normal">${escH(e.empresa)}</td><td>${escH(e.carteira||'—')}</td><td>${e.apuracao?escH(e.apuracao):'—'}</td></tr>`).join('')).join('')}</tbody></table></div></div>`;
+ b.innerHTML=`<div class="tela" style="display:flex;flex-direction:column;overflow:hidden;gap:10px">
+  <div class="busca" style="margin:0;max-width:520px">🔎<input id="cliBuscaIn" placeholder="Buscar por responsável, CPF, CNPJ, empresa ou carteira" value="${escH(cliBusca)}" oninput="cliBusca=this.value;cliPag=1;desenharClientes()"></div>
+  <div class="tbwrap" id="cliWrap" style="flex:1;min-height:0;overflow:hidden;position:relative"></div>
+  <div id="cliPager" style="display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;min-height:30px"></div></div>`;
+ if(cliObs)cliObs.disconnect();
+ cliObs=new ResizeObserver(()=>{cliPorPag=0;desenharClientes();});cliObs.observe(el('cliWrap'));
+ desenharClientes();
 }
+function cliTabela(linhas){
+ const ops=cliOpcoesApu();
+ let html=`<table><thead><tr><th>Responsável</th><th>CNPJ</th><th>Empresa</th><th>Carteira</th><th style="position:relative">Apuração <button class="miniB" style="padding:1px 6px;margin-left:4px${cliApu?';border-color:var(--laranja);color:var(--laranjaTx)':''}" onclick="event.stopPropagation();cliApuAberto=!cliApuAberto;desenharClientes()">▾</button>${cliApuAberto?`<div class="cardP" style="position:absolute;right:8px;top:30px;z-index:5;padding:6px;min-width:160px;text-transform:none;letter-spacing:0;font-size:12px">${['',...ops].map(o=>`<div style="padding:6px 8px;border-radius:6px;cursor:pointer;${o===cliApu?'background:var(--superf2);font-weight:700':''}" onclick="cliApu='${escH(o)}';cliApuAberto=false;cliPag=1;desenharClientes()">${o?escH(o):'Todas'}</div>`).join('')}</div>`:''}</th></tr></thead><tbody>`;
+ let k=0;
+ while(k<linhas.length){
+  const g=linhas[k].g;let n=0;while(k+n<linhas.length&&linhas[k+n].g===g)n++;
+  for(let m=0;m<n;m++){const e=linhas[k+m].e;
+   html+=`<tr>${m===0?`<td rowspan="${n}" title="${escH(g.responsavel||'')}" style="vertical-align:middle;max-width:280px;overflow:hidden;text-overflow:ellipsis;font-weight:600;color:var(--ink);border-right:1px solid var(--borda);background:var(--pagina)">${escH(g.responsavel||'—')}</td>`:''}<td>${fmtCnpj(e.cnpj)}</td><td title="${escH(e.empresa)}" style="max-width:420px;overflow:hidden;text-overflow:ellipsis">${escH(e.empresa)}</td><td>${escH(e.carteira||'—')}</td><td>${e.apuracao?escH(e.apuracao):'—'}</td></tr>`;}
+  k+=n;}
+ return html+'</tbody></table>';
+}
+function desenharClientes(){
+ const w=el('cliWrap'),p=el('cliPager');if(!w||!p)return;
+ const linhas=cliLinhas();
+ if(!cliPorPag){
+  w.innerHTML=cliTabela(linhas.slice(0,1));
+  const th=w.querySelector('thead'),tr=w.querySelector('tbody tr');
+  const hH=th?th.getBoundingClientRect().height:36,rH=tr?tr.getBoundingClientRect().height:38;
+  cliPorPag=Math.max(1,Math.floor((w.clientHeight-hH-2)/rH));
+ }
+ const tot=Math.max(1,Math.ceil(linhas.length/cliPorPag));if(cliPag>tot)cliPag=tot;
+ w.innerHTML=cliTabela(linhas.slice((cliPag-1)*cliPorPag,cliPag*cliPorPag));
+ const nums=new Set([1,tot]);for(let i=cliPag-2;i<=cliPag+2;i++)if(i>=1&&i<=tot)nums.add(i);
+ const lista=[...nums].sort((a,b)=>a-b);let html='',ant=0;
+ const bt=(i,t)=>`<button class="miniB" style="min-width:32px${i===cliPag?';background:var(--ink);color:#fff;border-color:var(--ink)':''}" onclick="cliPag=${i};desenharClientes()">${t||i}</button>`;
+ if(cliPag>1)html+=bt(cliPag-1,'‹');
+ lista.forEach(i=>{if(i-ant>1)html+='<span style="color:var(--apagado)">…</span>';html+=bt(i);ant=i;});
+ if(cliPag<tot)html+=bt(cliPag+1,'›');
+ p.innerHTML=html+`<span style="font-size:11px;color:var(--apagado);margin-left:8px">${linhas.length} CNPJ</span>`;
+}
+
 /* ---------- mapa do departamento ---------- */
 const ICO_CART='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h12v4M3 7v10a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2zM16 14h.01"/></svg>';
 async function carregarMapa(){
