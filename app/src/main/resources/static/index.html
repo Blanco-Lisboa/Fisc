@@ -263,6 +263,7 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .wa-lock{padding:12px;text-align:center;color:var(--apagado);font-size:11px;border-top:1px solid var(--borda);background:#fff;flex:none}
 .tm-bol{position:fixed;right:24px;bottom:24px;touch-action:none;user-select:none;width:56px;height:56px;border-radius:999px;border:0;padding:0;background:#fff;display:grid;place-items:center;box-shadow:var(--md);z-index:65;cursor:pointer;transition:bottom .2s}
 .tm-bol.alto{bottom:92px}.tm-bol img{width:40px;height:40px;pointer-events:none;-webkit-user-drag:none}
+.tm-abas{gap:4px;padding:10px 8px 8px}.tm-abas button{padding:6px 4px;font-size:11px;gap:4px;min-width:0}.tm-abas .c{padding:0 4px}
 .tm-srchmais{display:flex;gap:8px;align-items:center}.tm-srchmais input{flex:1}
 .tm-mais{width:34px;height:34px;flex:none;border-radius:999px;border:0;background:var(--grad);color:#fff;font-size:18px;font-weight:700;display:grid;place-items:center;cursor:pointer}
 .tm-novacab{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--borda);flex:none;background:var(--pagina)}
@@ -271,8 +272,8 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .tm-filtros select{flex:1;min-width:0;border:1px solid var(--borda);border-radius:999px;padding:6px 10px;font-size:11.5px;font-family:inherit;background:var(--superf2);outline:0}
 .tm-bolb{position:absolute;top:-3px;right:-3px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--vermelho);color:#fff;font-size:10.5px;font-weight:700;display:grid;place-items:center;border:2px solid #fff}
 .tm-flut{position:fixed;right:24px;bottom:92px;width:430px;height:500px;max-height:calc(100vh - 180px);background:#efe7de;border-radius:16px;box-shadow:var(--md);display:flex;flex-direction:column;overflow:hidden;z-index:66;opacity:0;transform:translateY(24px);transition:opacity .16s,transform .18s}
-.tm-flut.on{opacity:1;transform:none}.tm-flut.sai{opacity:0;transform:translateY(24px)}
-.tm-flut .rl{background:var(--pagina)}.tm-flut .srch{padding:10px;border-bottom:1px solid var(--borda);flex:none;background:var(--pagina)}.tm-flut .srch input{width:100%;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:8px 13px;font-size:12px;outline:0;font-family:inherit}.tm-flut .wa-head .wa-hbtn{font-size:15px}
+.tm-flut{transition:opacity .16s,transform .18s,top .2s,right .2s}.tm-flut.on{opacity:1;transform:none}.tm-flut.sai{opacity:0;transform:translateY(24px)}
+.tm-flut .rl{background:var(--pagina)}.tm-flut .wa-head,.wa-head.tm-head{background:var(--grad)}.tm-flut .srch{padding:10px;border-bottom:1px solid var(--borda);flex:none;background:var(--pagina)}.tm-flut .srch input{width:100%;background:var(--superf2);border:1px solid var(--borda);border-radius:999px;padding:8px 13px;font-size:12px;outline:0;font-family:inherit}.tm-flut .wa-head .wa-hbtn{font-size:15px}
 .tm-eu{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--borda);flex:none}
 .tm-eu b{font-size:12.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tm-eu select{margin-top:3px;border:1px solid var(--borda);border-radius:999px;padding:3px 9px;font-size:11px;font-family:inherit;background:var(--superf2);outline:0}
@@ -1114,8 +1115,11 @@ function tmSetorNome(id){const s=(tmEquipe&&tmEquipe.setores||[]).find(x=>x.id==
 function tmCor(t){let h=0;for(const ch of String(t||''))h=(h*31+ch.charCodeAt(0))>>>0;return ['#2F6FED','#5b3f96','#1B7A44','#B25E09','#0891B2','#C0392B','#6D4AA0','#3A5A8C'][h%8];}
 function tmIni(n){const p=String(n||'').trim().split(/\s+/);return ((p[0]||'')[0]||'').concat(p.length>1?p[p.length-1][0]:'').toUpperCase();}
 function tmNomeCanal(c){if(!c)return '';if(c.tipo==='direta'){const o=(c.membros||[]).find(x=>x!==eu.id);return tmPessoa(o).nome;}if(c.tipo==='setor')return tmSetorNome(c.setor_id)||c.nome||'Setor';return c.nome||'Grupo';}
+let tmPend={avisos:0,pedidos:0,reunioes:0};
 function tmNaoLidasTotal(){return tmCanais.filter(c=>!c.silenciado).reduce((s,c)=>s+(c.nao_lidas||0),0);}
-function tmBadge(){const b=el('tmBadge');const n=tmNaoLidasTotal();if(b){b.textContent=n;b.style.display=n?'':'none';}tmBolinha();}
+function tmTotal(){return tmNaoLidasTotal()+(tmPend.avisos||0)+(tmPend.pedidos||0)+(tmPend.reunioes||0);}
+async function tmCarregarPend(){if(!tm)return;const r=await tm.rpc('chat_pendencias',{p_setores:(tmPessoa(eu.id).setores||[])});if(!r.error&&r.data){tmPend=r.data;tmBadge();if(view==='teams')tmDesenharLista();if(tmFlutAberto&&!tmFlutCanal)tmFlutDesenhar();}}
+function tmBadge(){const b=el('tmBadge');const n=tmTotal();if(b){b.textContent=n;b.style.display=n?'':'none';}tmBolinha();}
 async function tmIniciar(){
  if(tmPronto)return true;if(tmIniciando)return tmIniciando;
  tmIniciando=(async()=>{
@@ -1131,11 +1135,13 @@ async function tmIniciar(){
   tm.channel('teams').on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_mensagem'},tmChegou)
    .on('postgres_changes',{event:'*',schema:'public',table:'chat_presenca'},x=>{const n=x.new||{};if(n.usuario_id){tmPres[n.usuario_id]=n.status;if(view==='teams')tmDesenharLista();}})
    .on('postgres_changes',{event:'*',schema:'public',table:'chat_canal_membro'},()=>tmCarregarCanais().then(()=>{if(view==='teams')tmDesenharLista();}))
-   .on('postgres_changes',{event:'*',schema:'public',table:'chat_pedido'},()=>{if(view==='teams'&&tmAba==='pedidos')tmAbrirPedidos();})
-   .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_aviso'},()=>{if(view==='teams'&&tmAba==='avisos')tmAbrirAvisos();})
+   .on('postgres_changes',{event:'*',schema:'public',table:'chat_pedido'},()=>{tmCarregarPend();if(view==='teams'&&tmAba==='pedidos')tmAbrirPedidos();})
+   .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_aviso'},()=>{tmCarregarPend();if(view==='teams'&&tmAba==='avisos')tmAbrirAvisos();})
+   .on('postgres_changes',{event:'*',schema:'public',table:'chat_reuniao_participante'},()=>{tmCarregarPend();if(view==='teams'&&tmAba==='reunioes')tmAbrirReunioes();})
+   .on('postgres_changes',{event:'*',schema:'public',table:'chat_aviso_visto'},()=>tmCarregarPend())
    .subscribe();
   window.addEventListener('beforeunload',()=>{try{tm.from('chat_presenca').upsert({usuario_id:eu.id,status:'offline',atualizado_em:new Date().toISOString()});}catch(e){}});
-  tmPronto=true;tmBadge();return true;})();
+  tmPronto=true;tmBadge();tmCarregarPend();return true;})();
  const ok=await tmIniciando;tmIniciando=null;return ok;
 }
 async function tmCarregarCanais(){const r=await tm.rpc('chat_resumo');if(!r.error)tmCanais=r.data||[];tmBadge();}
@@ -1197,9 +1203,10 @@ function tmNovaSetor(sid,flut){tmNova=false;if(flut)tmFlutAbrirSetor(sid);else t
 function tmDesenharLista(){
  const box=el('tmLista');if(!box)return;
  const meuSt=tmPres[eu.id]||'online';
- const ferr=(id,tit)=>`<button class="${tmAba===id?'on':''}" onclick="tmIrAba('${id}')">${tit}</button>`;
+ const qtd={conversas:tmNaoLidasTotal(),avisos:tmPend.avisos||0,pedidos:tmPend.pedidos||0,reunioes:tmPend.reunioes||0};
+ const ferr=(id,tit)=>`<button class="${tmAba===id?'on':''}" onclick="tmIrAba('${id}')">${tit}${qtd[id]?` <span class="c">${qtd[id]>99?'99+':qtd[id]}</span>`:''}</button>`;
  const topo=`<div class="tm-eu"><div class="av" style="width:36px;height:36px;font-size:12px;background:${tmCor(eu.nome)}">${escH(tmIni(eu.nome))}</div><div style="flex:1;min-width:0"><b>${escH(eu.nome)}</b><select onchange="tmMudarStatus(this.value)">${Object.keys(TM_ST).filter(k=>k!=='offline').map(k=>`<option value="${k}" ${k===meuSt?'selected':''}>${TM_ST[k][0]}</option>`).join('')}</select></div></div>
-  <div class="watabs">${ferr('conversas','Conversas')}${ferr('avisos','Avisos')}${ferr('pedidos','Pedidos')}${ferr('reunioes','Reuniões')}</div>`;
+  <div class="watabs tm-abas">${ferr('conversas','Conversas')}${ferr('avisos','Avisos')}${ferr('pedidos','Pedidos')}${ferr('reunioes','Reuniões')}</div>`;
  if(tmNova){box.innerHTML=topo+tmNovaHtml(false);return;}
  const busca=el('tmbusca');const foco=busca&&document.activeElement===busca;
  box.innerHTML=topo+`<div class="srch tm-srchmais"><input id="tmbusca" placeholder="🔎  Buscar conversa" value="${escH(tmBusca)}" oninput="tmBusca=this.value;tmDesenharLista()"><button class="tm-mais" title="Nova conversa" onclick="tmAbrirNova(false)">＋</button></div>
@@ -1223,7 +1230,7 @@ function tmDesenharConversa(){
  if(c.tipo==='direta'){const o=(c.membros||[]).find(x=>x!==eu.id);sub=(TM_ST[tmPres[o]||'offline']||TM_ST.offline)[0]+' · '+(tmPessoa(o).setores||[]).map(tmSetorNome).join(', ');}
  else if(c.tipo==='setor'){const ps=(tmEquipe.pessoas||[]).filter(p=>(p.setores||[]).includes(c.setor_id));sub=ps.length+(ps.length===1?' pessoa · ':' pessoas · ')+ps.filter(p=>tmPres[p.id]&&tmPres[p.id]!=='offline').length+' online';}
  else sub=(c.membros||[]).length+' participantes';
- box.innerHTML=`<div class="wa-head"><span class="avc">${c.tipo==='grupo'?ICO_GRUPO:escH(tmIni(nome))}</span><div class="nm" style="cursor:pointer" onclick="tmParticipantes()"><b>${escH(nome)}</b><span>${escH(sub)}</span></div><button class="wa-hbtn" onclick="tmMenuCanal(event)">${ICO_MAIS}</button></div>
+ box.innerHTML=`<div class="wa-head tm-head"><span class="avc">${c.tipo==='grupo'?ICO_GRUPO:escH(tmIni(nome))}</span><div class="nm" style="cursor:pointer" onclick="tmParticipantes()"><b>${escH(nome)}</b><span>${escH(sub)}</span></div><button class="wa-hbtn" onclick="tmMenuCanal(event)">${ICO_MAIS}</button></div>
   <div class="wa-msgs" id="tmms"></div>
   <div id="tmComp">${tmComposer()}</div>`;
  if(!tmMsgs[c.id])tmCarregarMsgs(c.id);else tmDesenharMsgs();
@@ -1356,7 +1363,7 @@ async function tmCriarPedido(mid){
 async function tmAbrirPedidos(){
  tmAba='pedidos';tmDesenharLista();const box=el('tmCentro');if(!box)return;
  const r=await tm.from('chat_pedido').select('id,titulo,descricao,solicitante_id,responsavel_id,status,prazo,criado_em,canal_id').order('criado_em',{ascending:false}).limit(300);
- if(r.error){toast('Não foi possível carregar os pedidos.');return;}tmPedidos=r.data;
+ if(r.error){toast('Não foi possível carregar os pedidos.');return;}tmPedidos=r.data;if(tmPend.pedidos){tm.rpc('chat_marcar_visto',{p_o_que:'pedidos'}).then(()=>tmCarregarPend());}
  const lista=tmPedidos.filter(p=>tmPedFiltro==='meus'?p.responsavel_id===eu.id:tmPedFiltro==='pedi'?p.solicitante_id===eu.id:true);
  const f=(k,t)=>`<button class="ap-fil ${tmPedFiltro===k?'on':''}" onclick="tmPedFiltro='${k}';tmAbrirPedidos()">${t}</button>`;
  box.innerHTML=`<div class="tm-pag"><div class="tm-pagcab"><b>Pedidos</b><div class="ap-fils">${f('meus','Para mim')}${f('pedi','Que eu pedi')}${f('todos','Todos')}</div><span style="flex:1"></span><button class="bt-assumir" onclick="tmSel=null;tmNovoPedido(null)">Novo pedido</button></div>
@@ -1373,14 +1380,14 @@ async function tmAbrirAvisos(){
  box.innerHTML=`<div class="tm-pag"><div class="tm-pagcab"><b>Central de avisos</b><span style="flex:1"></span><button class="bt-assumir" onclick="tmNovoAviso()">Novo aviso</button></div>${tmAvisos.map(x=>{const vi=vistos.filter(y=>y.aviso_id===x.id).length;const alvo=x.escopo==='setor'?(tmEquipe.pessoas||[]).filter(p=>(p.setores||[]).includes(x.setor_id)).length:total;
    return `<div class="cg-card" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1"><b style="font-size:13.5px">${escH(x.titulo)}</b><div style="font-size:11px;color:var(--apagado);margin-top:2px">${escH(tmPessoa(x.autor_id).nome)} · ${escH(ddmm(x.criado_em))} ${escH(hhmm(x.criado_em))} · ${x.escopo==='setor'?escH(tmSetorNome(x.setor_id)):'Todos'}</div></div><span style="font-size:11px;color:var(--apagado)">${vi} de ${alvo} viram</span></div>${x.corpo?`<div style="font-size:12.5px;margin-top:8px;white-space:pre-line">${escH(x.corpo)}</div>`:''}<div style="margin-top:10px">${tmVistos.has(x.id)?'<span class="pill ok">Visto</span>':`<button class="miniB" onclick="tmDarVisto('${x.id}')">Marcar como visto</button>`}</div></div>`;}).join('')}</div>`;
 }
-async function tmDarVisto(id){const r=await tm.from('chat_aviso_visto').upsert({aviso_id:id,usuario_id:eu.id}).select('aviso_id');if(r.error){toast('Não foi possível marcar.');return;}tmAbrirAvisos();}
+async function tmDarVisto(id){const r=await tm.from('chat_aviso_visto').upsert({aviso_id:id,usuario_id:eu.id}).select('aviso_id');if(r.error){toast('Não foi possível marcar.');return;}tmCarregarPend();tmAbrirAvisos();}
 function tmNovoAviso(){waModal('Novo aviso',`<span class="fl">Título</span><input class="fi" id="tmat" maxlength="160"><span class="fl">Texto</span><textarea class="fi" id="tmac" rows="4"></textarea><span class="fl">Para quem</span><select class="fi" id="tmas"><option value="">Todos</option>${(tmEquipe.setores||[]).map(s=>`<option value="${s.id}">${escH(s.nome)}</option>`).join('')}</select><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="tmCriarAviso()">Enviar aviso</button></div>`);}
 async function tmCriarAviso(){const t=el('tmat').value.trim();if(!t){toast('Dê um título ao aviso.');return;}const s=el('tmas').value;
  const r=await tm.from('chat_aviso').insert({titulo:t,corpo:el('tmac').value||null,escopo:s?'setor':'central',setor_id:s||null,autor_id:eu.id}).select('id');if(r.error||!r.data.length){toast('Não foi possível enviar o aviso.');return;}fecharModal();toast('Aviso enviado.');tmAbrirAvisos();}
 async function tmAbrirReunioes(){
  tmAba='reunioes';tmDesenharLista();const box=el('tmCentro');if(!box)return;
  const r=await tm.from('chat_reuniao').select('id,titulo,pauta,inicio,fim,criado_por,chat_reuniao_participante(usuario_id,confirmado)').order('inicio',{ascending:true}).limit(100);
- if(r.error){toast('Não foi possível carregar as reuniões.');return;}tmReunioes=r.data;const hoje=new Date(Date.now()-3600e3).toISOString();
+ if(r.error){toast('Não foi possível carregar as reuniões.');return;}tmReunioes=r.data;if(tmPend.reunioes){tm.rpc('chat_marcar_visto',{p_o_que:'reunioes'}).then(()=>tmCarregarPend());}const hoje=new Date(Date.now()-3600e3).toISOString();
  const prox=tmReunioes.filter(x=>!x.inicio||x.inicio>=hoje),pass=tmReunioes.filter(x=>x.inicio&&x.inicio<hoje).reverse().slice(0,10);
  const card=x=>{const me=(x.chat_reuniao_participante||[]).find(p=>p.usuario_id===eu.id);return `<div class="cg-card" style="margin-bottom:10px"><div style="display:flex;gap:10px"><div style="flex:1"><b style="font-size:13.5px">${escH(x.titulo)}</b><div style="font-size:11.5px;color:var(--apoio);margin-top:3px">${x.inicio?escH(ddmm(x.inicio)+' '+hhmm(x.inicio)):'Sem data'}${x.fim?' até '+escH(hhmm(x.fim)):''} · organizada por ${escH(tmPessoa(x.criado_por).nome)}</div>${x.pauta?`<div style="font-size:12px;margin-top:6px">${escH(x.pauta)}</div>`:''}<div style="font-size:11px;color:var(--apagado);margin-top:6px">${(x.chat_reuniao_participante||[]).map(p=>escH(tmPessoa(p.usuario_id).nome)+(p.confirmado?' ✓':'')).join(', ')}</div></div>${me&&!me.confirmado?`<button class="miniB" style="align-self:flex-start;white-space:nowrap" onclick="tmConfirmar('${x.id}')">Confirmar presença</button>`:''}</div></div>`;};
  box.innerHTML=`<div class="tm-pag"><div class="tm-pagcab"><b>Reuniões</b><span style="flex:1"></span><button class="bt-assumir" onclick="tmNovaReuniao()">Agendar reunião</button></div>${prox.map(card).join('')}${pass.length?`<div class="tm-sec" style="padding-left:0">Anteriores</div>${pass.map(card).join('')}`:''}</div>`;
@@ -1407,7 +1414,11 @@ function tmBolLimite(y){return Math.max(12,Math.min(window.innerHeight-70,y));}
 function tmBolPosicionar(){
  const b=el('tmBol');if(!b)return;
  if(tmBolY==null)b.style.bottom='';else b.style.bottom=tmBolLimite(tmBolY)+'px';
- const f=el('tmFlut');if(f){const base=parseInt(getComputedStyle(b).bottom,10)||24;f.style.bottom=Math.min(base+68,window.innerHeight-200)+'px';}
+ const f=el('tmFlut');if(f&&b.style.display!=='none'){const W=window.innerWidth,Hj=window.innerHeight,H=Math.min(500,Hj-24),m=10,bot=tmBolY!=null?tmBolLimite(tmBolY):(b.classList.contains('alto')?92:24),r={top:Hj-bot-56,bottom:Hj-bot,left:W-24-56,height:56};
+  f.style.height=H+'px';f.style.maxHeight='none';f.style.bottom='auto';f.style.left='auto';
+  if(r.top-m-12>=H){f.style.top=(r.top-m-H)+'px';f.style.right='24px';}
+  else if(Hj-r.bottom-m-12>=H){f.style.top=(r.bottom+m)+'px';f.style.right='24px';}
+  else{f.style.right=(W-r.left+m)+'px';f.style.top=Math.max(12,Math.min(Hj-12-H,r.top+r.height/2-H/2))+'px';}}
 }
 function tmBolSalvar(){try{if(tmBolY==null)localStorage.removeItem('fiscal-teams-bolinha-y');else localStorage.setItem('fiscal-teams-bolinha-y',String(tmBolY));}catch(e){}}
 function tmBolResetar(){tmBolY=null;tmBolSalvar();tmBolPosicionar();}
@@ -1416,7 +1427,7 @@ function tmBolArrastavel(b){
  b.addEventListener('pointerdown',e=>{if(e.button!==0)return;ini={y:e.clientY,base:parseInt(getComputedStyle(b).bottom,10)||24,moveu:false};try{b.setPointerCapture(e.pointerId);}catch(x){}});
  b.addEventListener('pointermove',e=>{if(!ini)return;const dy=e.clientY-ini.y;if(!ini.moveu&&Math.abs(dy)<5)return;ini.moveu=true;b.style.transition='none';tmBolY=tmBolLimite(ini.base-dy);tmBolPosicionar();});
  b.addEventListener('pointerup',e=>{if(!ini)return;if(ini.moveu){tmBolArrastou=true;tmBolSalvar();b.style.transition='';}ini=null;});
- b.addEventListener('dblclick',e=>{e.preventDefault();tmBolResetar();if(tmFlutAberto)tmFlutFechar();});
+ b.addEventListener('dblclick',e=>{e.preventDefault();tmBolResetar();});
  b.addEventListener('contextmenu',e=>{e.preventDefault();tmBolResetar();});
  window.addEventListener('resize',tmBolPosicionar);
 }
@@ -1426,7 +1437,7 @@ function tmBolinha(){
  b.classList.toggle('alto',view==='whatsweb');tmBolPosicionar();
  const mostra=tmPronto&&view!=='teams';b.style.display=mostra?'':'none';
  if(!mostra&&tmFlutAberto)tmFlutFechar();
- const n=tmNaoLidasTotal();const bb=el('tmBolB');if(bb){bb.textContent=n>99?'99+':n;bb.style.display=n?'':'none';}
+ const n=tmTotal();const bb=el('tmBolB');if(bb){bb.textContent=n>99?'99+':n;bb.style.display=n?'':'none';}
 }
 function tmFlutAlternar(){tmFlutAberto?tmFlutFechar():tmFlutAbrir();}
 function tmFlutAbrir(){
@@ -1437,7 +1448,7 @@ function tmFlutAbrir(){
 function tmFlutFechar(){tmFlutAberto=false;const f=el('tmFlut');if(!f)return;f.classList.remove('on');f.classList.add('sai');setTimeout(()=>{if(!tmFlutAberto)f.remove();},160);}
 function tmFlutDesenhar(){
  const f=el('tmFlut');if(!f)return;const c=tmFlutCanal?tmCanais.find(x=>x.id===tmFlutCanal):null;
- const cab=`<div class="wa-head">${c?`<button class="wa-hbtn" onclick="tmFlutCanal=null;tmFlutDesenhar()">‹</button><span class="avc">${c.tipo==='grupo'?ICO_GRUPO:escH(tmIni(tmNomeCanal(c)))}</span>`:`<span class="avc">${ICO_GRUPO}</span>`}<div class="nm"><b>${escH(c?tmNomeCanal(c):"Team's")}</b><span>${c?'':escH(tmNaoLidasTotal()+' não lidas')}</span></div><button class="wa-hbtn" title="Abrir o Team's" onclick="tmFlutExpandir()">⤢</button><button class="wa-hbtn" onclick="tmFlutFechar()">✕</button></div>`;
+ const cab=`<div class="wa-head">${c?`<button class="wa-hbtn" onclick="tmFlutCanal=null;tmFlutDesenhar()">‹</button><span class="avc">${c.tipo==='grupo'?ICO_GRUPO:escH(tmIni(tmNomeCanal(c)))}</span>`:`<span class="avc">${ICO_GRUPO}</span>`}<div class="nm"><b>${escH(c?tmNomeCanal(c):"Team's")}</b><span>${c?'':escH(tmTotal()+' não vistas')}</span></div><button class="wa-hbtn" title="Abrir o Team's" onclick="tmFlutExpandir()">⤢</button><button class="wa-hbtn" onclick="tmFlutFechar()">✕</button></div>`;
  if(!c&&tmNova){f.innerHTML=cab+`<div style="flex:1;min-height:0;display:flex;flex-direction:column;background:var(--pagina)">${tmNovaHtml(true)}</div>`;return;}
  if(!c){
   f.innerHTML=cab+`<div class="srch tm-srchmais" style="background:var(--pagina)"><input id="tmfbusca" placeholder="🔎  Buscar conversa" value="${escH(tmBusca)}" oninput="tmBusca=this.value;tmFlutDesenhar();const b=el('tmfbusca');b.focus();b.setSelectionRange(b.value.length,b.value.length)"><button class="tm-mais" title="Nova conversa" onclick="tmAbrirNova(true)">＋</button></div><div class="rl" style="flex:1;overflow-y:auto">${tmCaixa().map(x=>tmItemCanal(x,false,`tmFlutAbrirCanal('${x.id}')`)).join('')}</div>`;
