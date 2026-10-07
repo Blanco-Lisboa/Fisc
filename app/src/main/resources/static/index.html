@@ -261,8 +261,8 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .wa-comp input{flex:1;border:1px solid var(--bordaF);border-radius:999px;padding:11px 15px;font-size:12.5px;font-family:inherit;outline:0;background:var(--superf2)}
 .wa-comp .snd{width:40px;height:40px;border-radius:999px;background:var(--grad);color:#fff;border:0;display:grid;place-items:center;font-size:15px;flex:none;cursor:pointer}
 .wa-lock{padding:12px;text-align:center;color:var(--apagado);font-size:11px;border-top:1px solid var(--borda);background:#fff;flex:none}
-.tm-bol{position:fixed;right:24px;bottom:24px;width:56px;height:56px;border-radius:999px;border:0;padding:0;background:#fff;display:grid;place-items:center;box-shadow:var(--md);z-index:65;cursor:pointer;transition:bottom .2s}
-.tm-bol.alto{bottom:92px}.tm-bol img{width:40px;height:40px}
+.tm-bol{position:fixed;right:24px;bottom:24px;touch-action:none;user-select:none;width:56px;height:56px;border-radius:999px;border:0;padding:0;background:#fff;display:grid;place-items:center;box-shadow:var(--md);z-index:65;cursor:pointer;transition:bottom .2s}
+.tm-bol.alto{bottom:92px}.tm-bol img{width:40px;height:40px;pointer-events:none;-webkit-user-drag:none}
 .tm-srchmais{display:flex;gap:8px;align-items:center}.tm-srchmais input{flex:1}
 .tm-mais{width:34px;height:34px;flex:none;border-radius:999px;border:0;background:var(--grad);color:#fff;font-size:18px;font-weight:700;display:grid;place-items:center;cursor:pointer}
 .tm-novacab{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--borda);flex:none;background:var(--pagina)}
@@ -1401,10 +1401,29 @@ async function tmCriarReuniao(){
 }
 /* ---------- TEAM'S flutuante ---------- */
 let tmFlutAberto=false,tmFlutCanal=null;
+let tmBolY=null,tmBolArrastou=false;
+try{const v=parseInt(localStorage.getItem('fiscal-teams-bolinha-y'),10);if(v>0)tmBolY=v;}catch(e){}
+function tmBolLimite(y){return Math.max(12,Math.min(window.innerHeight-70,y));}
+function tmBolPosicionar(){
+ const b=el('tmBol');if(!b)return;
+ if(tmBolY==null)b.style.bottom='';else b.style.bottom=tmBolLimite(tmBolY)+'px';
+ const f=el('tmFlut');if(f){const base=parseInt(getComputedStyle(b).bottom,10)||24;f.style.bottom=Math.min(base+68,window.innerHeight-200)+'px';}
+}
+function tmBolSalvar(){try{if(tmBolY==null)localStorage.removeItem('fiscal-teams-bolinha-y');else localStorage.setItem('fiscal-teams-bolinha-y',String(tmBolY));}catch(e){}}
+function tmBolResetar(){tmBolY=null;tmBolSalvar();tmBolPosicionar();}
+function tmBolArrastavel(b){
+ let ini=null;
+ b.addEventListener('pointerdown',e=>{if(e.button!==0)return;ini={y:e.clientY,base:parseInt(getComputedStyle(b).bottom,10)||24,moveu:false};try{b.setPointerCapture(e.pointerId);}catch(x){}});
+ b.addEventListener('pointermove',e=>{if(!ini)return;const dy=e.clientY-ini.y;if(!ini.moveu&&Math.abs(dy)<5)return;ini.moveu=true;b.style.transition='none';tmBolY=tmBolLimite(ini.base-dy);tmBolPosicionar();});
+ b.addEventListener('pointerup',e=>{if(!ini)return;if(ini.moveu){tmBolArrastou=true;tmBolSalvar();b.style.transition='';}ini=null;});
+ b.addEventListener('dblclick',e=>{e.preventDefault();tmBolResetar();if(tmFlutAberto)tmFlutFechar();});
+ b.addEventListener('contextmenu',e=>{e.preventDefault();tmBolResetar();});
+ window.addEventListener('resize',tmBolPosicionar);
+}
 function tmBolinha(){
  let b=el('tmBol');
- if(!b){b=document.createElement('button');b.id='tmBol';b.className='tm-bol';b.title="Team's";b.onclick=tmFlutAlternar;b.innerHTML=`<img src="img/teams-bolinha.png" alt=""><span class="tm-bolb" id="tmBolB"></span>`;document.body.appendChild(b);}
- b.classList.toggle('alto',view==='whatsweb');
+ if(!b){b=document.createElement('button');b.id='tmBol';b.className='tm-bol';b.title="Team's";b.onclick=()=>{if(tmBolArrastou){tmBolArrastou=false;return;}tmFlutAlternar();};tmBolArrastavel(b);b.innerHTML=`<img src="img/teams-bolinha.png" alt=""><span class="tm-bolb" id="tmBolB"></span>`;document.body.appendChild(b);}
+ b.classList.toggle('alto',view==='whatsweb');tmBolPosicionar();
  const mostra=tmPronto&&view!=='teams';b.style.display=mostra?'':'none';
  if(!mostra&&tmFlutAberto)tmFlutFechar();
  const n=tmNaoLidasTotal();const bb=el('tmBolB');if(bb){bb.textContent=n>99?'99+':n;bb.style.display=n?'':'none';}
@@ -1413,7 +1432,7 @@ function tmFlutAlternar(){tmFlutAberto?tmFlutFechar():tmFlutAbrir();}
 function tmFlutAbrir(){
  if(!tmPronto)return;tmFlutAberto=true;
  let f=el('tmFlut');if(!f){f=document.createElement('div');f.id='tmFlut';f.className='tm-flut';document.body.appendChild(f);}
- f.classList.remove('sai');requestAnimationFrame(()=>f.classList.add('on'));tmFlutDesenhar();
+ f.classList.remove('sai');tmBolPosicionar();requestAnimationFrame(()=>f.classList.add('on'));tmFlutDesenhar();
 }
 function tmFlutFechar(){tmFlutAberto=false;const f=el('tmFlut');if(!f)return;f.classList.remove('on');f.classList.add('sai');setTimeout(()=>{if(!tmFlutAberto)f.remove();},160);}
 function tmFlutDesenhar(){
