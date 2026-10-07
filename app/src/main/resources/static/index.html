@@ -531,6 +531,7 @@ tr.rnovo:hover{background:#ffe6d6}
 <div class="toasts" id="toasts"></div>
 
 <script src="vendor/supabase.js"></script>
+<script src="vendor/xlsx.full.min.js"></script>
 <script src="sessao.js"></script>
 <script>
 const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -911,7 +912,7 @@ function abrirAtencao(id){
  document.body.appendChild(modal);
 }
 async function abrirCarteira(id){
- const u=usuarioMapa(id);fecharModal();cartAberta=new Set();
+ const u=usuarioMapa(id);fecharModal();cartAberta=new Set();cartUsuario=id;plan=null;
  modal=document.createElement('div');modal.className='modal';
  modal.innerHTML=`<div class="mcx" style="width:min(980px,96vw)"><div class="mcab">${ICO_CART}<b>Carteira · ${escH(u.nome)} · ${u.carteira} CNPJ</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="cartBody"></div></div>`;
  document.body.appendChild(modal);
@@ -923,9 +924,104 @@ async function abrirCarteira(id){
 function togOutras(i){cartAberta.has(i)?cartAberta.delete(i):cartAberta.add(i);renderCarteira();}
 function renderCarteira(){
  const c=window._cart||[];const b=el('cartBody');if(!b)return;
- b.innerHTML=`<div class="tbwrap"><table><thead><tr><th>Responsável (quem trata)</th><th>CNPJ</th><th>Empresa</th></tr></thead><tbody>${c.map((l,i)=>`
+ b.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="apubtn" onclick="escolherPlanilha()">${ICO_PLAN} Vincular por planilha</button></div><div class="tbwrap"><table><thead><tr><th>Responsável (quem trata)</th><th>CNPJ</th><th>Empresa</th></tr></thead><tbody>${c.map((l,i)=>`
   <tr><td>${escH(l.responsavel||'—')}${l.outras.length?` <button class="miniB" style="border-color:var(--ambar);color:var(--ambar);margin-left:6px" onclick="togOutras(${i})">⚠ ${l.outras.length}</button>`:''}</td><td>${fmtCnpj(l.cnpj)}</td><td>${escH(l.empresa)}</td></tr>
   ${cartAberta.has(i)?l.outras.map(o=>`<tr style="background:var(--ambarSv)"><td style="padding-left:28px;color:var(--ambar)">${o.carteira_de?'na carteira de '+escH(o.carteira_de):'sem carteira'}</td><td>${fmtCnpj(o.cnpj)}</td><td>${escH(o.empresa)}</td></tr>`).join(''):''}`).join('')}</tbody></table></div>`;
+}
+/* ---------- carteira por planilha ---------- */
+const ICO_PLAN='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h8"/></svg>';
+let cartUsuario=null,plan=null;
+const PL_SIT={ok:['ok','Pronto'],ja_na_carteira:['cz','Já está na carteira'],em_outra_carteira:['pend','Em outra carteira'],repetido:['cz','Repetido'],invalido:['falta','CNPJ inválido'],nao_encontrado:['falta','Não encontrado'],sem_vinculo_you:['falta','Sem vínculo com a YOU'],inativo:['falta','Empresa inativa']};
+const PL_ERRO=['invalido','nao_encontrado','sem_vinculo_you','inativo'];
+function escolherPlanilha(){
+ const i=document.createElement('input');i.type='file';i.accept='.xlsx,.xls,.csv,.txt';
+ i.onchange=()=>{if(i.files[0])lerPlanilha(i.files[0]);};i.click();
+}
+function celulaTexto(v){
+ if(v==null)return '';
+ if(typeof v==='number')return Number.isFinite(v)?String(Math.round(v)):'';
+ return String(v).trim();
+}
+async function lerPlanilha(f){
+ let col=[];
+ try{
+  if(/\.(csv|txt)$/i.test(f.name)){
+   col=(await f.text()).replace(/^﻿/,'').split(/\r?\n/).map(l=>l.split(/[;\t]/)[0].replace(/^"|"$/g,'').trim());
+  }else{
+   const wb=XLSX.read(await f.arrayBuffer(),{type:'array'});
+   const ws=wb.Sheets[wb.SheetNames[0]];
+   col=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,blankrows:true,defval:null}).map(r=>celulaTexto((r||[])[0]));
+  }
+ }catch(e){toast('Não foi possível ler a planilha.');return;}
+ while(col.length&&!col[col.length-1])col.pop();
+ let ini=0;while(ini<col.length&&!/\d/.test(col[ini]))ini++;
+ col=col.slice(ini);
+ if(!col.length){toast('A planilha não tem CNPJ na primeira coluna.');return;}
+ if(col.length>5000){toast('A planilha passa de 5000 linhas.');return;}
+ plan={arquivo:f.name,linhas:[],ocupado:false};
+ renderPlanilha(true);
+ const r=await sb.rpc('fiscal_carteira_analisar',{p_usuario:cartUsuario,p_linhas:col});
+ if(!plan)return;
+ if(r.error){plan=null;toast('Não foi possível conferir a planilha.');renderCarteira();return;}
+ plan.linhas=(r.data||[]).filter(l=>l.situacao!=='vazio').map(l=>({...l,linha:l.linha+ini,transferir:false,descartado:false,editando:''}));
+ renderPlanilha();
+}
+function plContas(){
+ const L=plan.linhas.filter(l=>!l.descartado);
+ const c=s=>L.filter(l=>l.situacao===s).length;
+ const vinc=L.filter(l=>l.situacao==='ok'||(l.situacao==='em_outra_carteira'&&l.transferir));
+ return {total:plan.linhas.length,ok:c('ok'),ja:c('ja_na_carteira'),outra:c('em_outra_carteira'),rep:c('repetido'),erro:L.filter(l=>PL_ERRO.includes(l.situacao)).length,desc:plan.linhas.filter(l=>l.descartado).length,vinc};
+}
+function renderPlanilha(carregando){
+ const b=el('cartBody');if(!b||!plan)return;
+ if(carregando){b.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:30px 4px;color:var(--apoio);font-size:12.5px">${ICO_PLAN} ${escH(plan.arquivo)}</div>`;return;}
+ const k=plContas();
+ const ord={invalido:0,nao_encontrado:0,sem_vinculo_you:0,inativo:0,em_outra_carteira:1,repetido:2,ok:3,ja_na_carteira:4};
+ const lin=plan.linhas.map((l,i)=>({l,i})).sort((a,b)=>(a.l.descartado-b.l.descartado)||(ord[a.l.situacao]-ord[b.l.situacao])||(a.l.linha-b.l.linha));
+ const PL_CZ='background:var(--superf2);color:var(--apoio)';
+ const chip=(n,t,cls)=>`<span class="pill ${cls}" style="font-size:11px;padding:4px 10px;${cls==='cz'?PL_CZ:''}">${n} ${n===1?t[0]:t[1]}</span>`;
+ const parcial=k.erro||k.desc||k.outra>k.vinc.filter(l=>l.situacao==='em_outra_carteira').length;
+ b.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+   <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600">${ICO_PLAN} ${escH(plan.arquivo)} <span style="color:var(--apagado);font-weight:400">· ${k.total} linhas</span></div>
+   <div style="display:flex;gap:6px;flex-wrap:wrap">${chip(k.ok,['pronto','prontos'],'ok')}${k.outra?chip(k.outra,['em outra carteira','em outra carteira'],'pend'):''}${k.erro?chip(k.erro,['com problema','com problema'],'falta'):''}${k.ja?chip(k.ja,['já na carteira','já na carteira'],'cz'):''}${k.rep?chip(k.rep,['repetido','repetidos'],'cz'):''}${k.desc?chip(k.desc,['descartado','descartados'],'cz'):''}</div></div>
+  <div class="tbwrap" style="max-height:52vh;overflow-y:auto"><table><thead><tr><th style="width:60px">Linha</th><th>CNPJ</th><th>Empresa</th><th>Situação</th><th style="width:1%"></th></tr></thead><tbody>${lin.map(({l,i})=>plLinha(l,i)).join('')}</tbody></table></div>
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;flex-wrap:wrap">
+   <button class="apubtn" onclick="plCancelar()">Cancelar, não subir</button>
+   <button class="bt-assumir" ${k.vinc.length&&!plan.ocupado?'':'disabled style="opacity:.45"'} onclick="plVincular()">${parcial?'Vincular só os válidos':'Vincular'} (${k.vinc.length})</button>
+  </div>`;
+}
+function plLinha(l,i){
+ const [cls,txt]=PL_SIT[l.situacao]||['cz',l.situacao];
+ const cnpj=l.valido?fmtCnpj(l.cnpj):escH(l.original);
+ let sit=`<span class="pill ${cls}" style="${cls==='cz'?'background:var(--superf2);color:var(--apoio)':''}">${txt}</span>`;
+ if(l.situacao==='em_outra_carteira')sit+=` <span style="font-size:11px;color:var(--apoio)">de ${escH(l.dono||'')}</span>`;
+ if(l.situacao==='repetido')sit+=` <span style="font-size:11px;color:var(--apagado)">ignorado</span>`;
+ if(l.zeros_completados)sit+=` <span style="font-size:11px;color:var(--apagado)">zeros completados</span>`;
+ let acao='';
+ if(l.descartado)acao=`<button class="miniB" onclick="plDescartar(${i},false)">Desfazer</button>`;
+ else if(PL_ERRO.includes(l.situacao))acao=`<div style="display:flex;gap:6px;align-items:center"><input placeholder="CNPJ correto" value="${escH(l.editando)}" oninput="plan.linhas[${i}].editando=this.value" onkeydown="if(event.key==='Enter')plCorrigir(${i})" style="width:130px;border:1px solid var(--borda);border-radius:8px;padding:5px 8px;font-size:11.5px;font-family:inherit;outline:0"><button class="miniB" onclick="plCorrigir(${i})">Conferir</button><button class="miniB" onclick="plDescartar(${i},true)">Descartar</button></div>`;
+ else if(l.situacao==='em_outra_carteira')acao=`<label style="display:flex;gap:6px;align-items:center;font-size:11.5px;font-weight:600;white-space:nowrap"><input type="checkbox" ${l.transferir?'checked':''} onchange="plan.linhas[${i}].transferir=this.checked;renderPlanilha()"> Transferir para esta carteira</label>`;
+ return `<tr style="${l.descartado?'opacity:.45':''}"><td style="color:var(--apagado)">${l.linha}</td><td style="font-variant-numeric:tabular-nums">${cnpj}</td><td style="max-width:230px;overflow:hidden;text-overflow:ellipsis">${escH(l.empresa||'—')}</td><td>${sit}</td><td>${acao}</td></tr>`;
+}
+function plDescartar(i,v){plan.linhas[i].descartado=v;renderPlanilha();}
+async function plCorrigir(i){
+ const l=plan.linhas[i];const v=(l.editando||'').trim();if(!v)return;
+ const r=await sb.rpc('fiscal_carteira_analisar',{p_usuario:cartUsuario,p_linhas:[v]});
+ if(!plan)return;
+ if(r.error||!r.data||!r.data[0]){toast('Não foi possível conferir o CNPJ.');return;}
+ const n=r.data[0];
+ if(n.valido&&plan.linhas.some((o,j)=>j!==i&&!o.descartado&&o.valido&&o.cnpj===n.cnpj&&o.situacao!=='repetido'))n.situacao='repetido';
+ Object.assign(l,{original:n.original,cnpj:n.cnpj,valido:n.valido,zeros_completados:n.zeros_completados,situacao:n.situacao,empresa_id:n.empresa_id,empresa:n.empresa,dono:n.dono,dono_id:n.dono_id,editando:PL_ERRO.includes(n.situacao)?v:'',transferir:false});
+ renderPlanilha();
+}
+function plCancelar(){plan=null;renderCarteira();}
+async function plVincular(){
+ const k=plContas();if(!k.vinc.length||plan.ocupado)return;
+ plan.ocupado=true;renderPlanilha();
+ const r=await sb.rpc('fiscal_carteira_vincular',{p_usuario:cartUsuario,p_empresas:k.vinc.map(l=>l.empresa_id),p_transferir:k.vinc.filter(l=>l.situacao==='em_outra_carteira').map(l=>l.empresa_id)});
+ if(r.error||!r.data||r.data.ok!==true){plan.ocupado=false;renderPlanilha();toast('Nada foi vinculado: '+((r.error&&r.error.message)||'falha ao gravar'));return;}
+ toast(`${r.data.vinculados} CNPJ vinculados${r.data.transferidos?` · ${r.data.transferidos} transferidos`:''}`);
+ const id=cartUsuario;plan=null;await carregarMapa();abrirCarteira(id);
 }
 function waPendentes(){return waEntrada.concat(waMeus).filter(c=>c.naoLidas>0).length;}
 function render(){
