@@ -341,6 +341,7 @@ tr.rnovo:hover{background:#ffe6d6}
 <nav class="side">
   <div class="brand2"><span class="lg">YOU</span><div><b>Fiscal</b><span class="rl">YOU Contabilidade</span></div></div>
   <div class="lab">OPERAÇÃO</div>
+  <div class="it" data-view="central" id="navCentral" style="display:none" onclick="irView('central')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span> Central</div>
   <div class="it" data-view="gestor" id="navGestor" style="display:none" onclick="irView('gestor')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span> Painel do Gestor</div>
   <div class="it" data-view="apuracao" onclick="irView('apuracao')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 5h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM9.5 11l1.8 1.8L14.8 9.5M10 16h4"/></svg></span> Apuração</div>
   <div class="sub">
@@ -559,9 +560,14 @@ function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
 function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
 function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
-const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',gestor:'Painel do Gestor',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta'};
+const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta'};
 function eGestor(){return eu&&['assistente','gerente'].includes(eu.nivel);}
-function irView(v){if(v==='gestor'&&!eGestor())v='whatsweb';view=v;render();}
+function eColab(){return eu&&eu.nivel==='colaborador';}
+function telaInicial(){return eGestor()?'gestor':(eColab()?'central':'apuracao');}
+function podeVer(v){return !((v==='gestor'&&!eGestor())||(v==='central'&&!eColab()));}
+function aplicarMenu(){el('navGestor').style.display=eGestor()?'':'none';el('navCentral').style.display=eColab()?'':'none';}
+function irView(v){if(!podeVer(v))v=telaInicial();view=v;render();}
+function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central';
 function setGestorAba(a){gestorAba=a;renderGestor();}
 function renderGestor(){
@@ -577,8 +583,9 @@ function render(){
   document.querySelectorAll('.side .it[data-view]').forEach(e=>e.classList.toggle('on',e.dataset.view===view));
   const b=el('waBadge');if(b)b.textContent=waPendentes();
   el('crumbTitulo').textContent=TITULOS[view]||view;
-  document.querySelectorAll('.topo .proto,.topo .iaon,.topo .comp').forEach(e=>e.style.display=view==='gestor'?'none':'');
-  ({apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,gestor:renderGestor,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA}[view])();
+  document.querySelector('.topo .crumb').style.display='none';
+  document.querySelector('.topo').style.display=(view==='gestor'||view==='central')?'none':'';
+  ({apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA}[view])();
 }
 
 /* ---------- APURAÇÃO (com abas: Apuração · Radar XML · Demanda em lote · Meu espaço) ---------- */
@@ -956,13 +963,13 @@ async function assumirWA(id){const r=await sb.from('wa_conversa').update({respon
 
 /* ---------- entrada ---------- */
 async function iniciarDados(){
- el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';el('navGestor').style.display=eGestor()?'':'none';
+ el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa).subscribe();
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).subscribe();
- view='whatsweb';render();}
-function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}eu.nivel=n.nivel;el('euInfo').textContent=eu.nivel+' · Fiscal';el('navGestor').style.display=eGestor()?'':'none';if(view==='gestor'&&!eGestor())view='whatsweb';render();}
+ view=telaInicial();render();}
+function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}eu.nivel=n.nivel;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();if(!podeVer(view))view=telaInicial();render();}
 (async()=>{const s=await fiscalSessaoAtual();if(!s){location.href='login.html';return;}
  sb=fiscalCliente();const m=s.user.app_metadata||{};eu={id:s.user.id,nome:m.nome||s.user.email,nivel:m.fiscal_nivel||''};
  sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')location.href='login.html';});
