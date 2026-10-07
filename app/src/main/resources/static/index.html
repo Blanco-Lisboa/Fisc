@@ -1327,8 +1327,7 @@ function waMenuMsg(ev,mid){
   pode&&m.idWa&&m.d==='ent'?['Reagir',()=>waEscolherReacao(ev,m)]:null,
   m.t&&!['imagem','video','audio','figurinha'].includes(m.tipo)?['Copiar',()=>{navigator.clipboard.writeText(m.tipo==='contato'&&m.dados?m.t+' '+fmtTel(m.dados.telefone):m.t).then(()=>toast('Copiado.'),()=>toast('Não foi possível copiar.'));}]:null,
   !m.id.startsWith('tmp-')&&m.tipo!=='figurinha'&&m.tipo!=='sistema'?['Encaminhar',()=>waEncaminhar(m.id)]:null,
-  pode?[m.favorita?'Desfavoritar':'Favoritar',()=>waMarcarMsg(m,'favorita',!m.favorita)]:null,
-  pode?['Apagar para mim',()=>waConfirmar('Apagar esta mensagem da tela da equipe? O cliente continua vendo a mensagem no WhatsApp dele.','Apagar para mim',()=>waMarcarMsg(m,'apagada',true)),true]:null]);
+  pode?[m.favorita?'Desfavoritar':'Favoritar',()=>waMarcarMsg(m,'favorita',!m.favorita)]:null]);
 }
 function waEscolherReacao(ev,m){
  waFecharMenus();const bar=document.createElement('div');bar.className='wa-menu wa-emojis';
@@ -1376,7 +1375,7 @@ function waConfirmar(texto,botao,fn){
 }
 function waConfirmarBloqueio(c){
  if(c.bloqueado){waAcao('desbloquear',c.id);return;}
- waConfirmar('Bloquear '+c.nome+'? Ele não consegue mais mandar mensagem para o Fiscal e o Fiscal não consegue mandar para ele. A Meta só permite bloquear quem escreveu nas últimas 24 horas.','Bloquear',()=>waAcao('bloquear',c.id));
+ waConfirmar('Bloquear '+c.nome+'? Ele não consegue mais mandar mensagem para o Fiscal e o Fiscal não consegue mandar para ele.','Bloquear',()=>waAcao('bloquear',c.id));
 }
 async function waAcao(acao,id,extra){
  const j=await waEdge('wa-meta-acao',Object.assign({acao,conversa_id:id},extra||{}));
