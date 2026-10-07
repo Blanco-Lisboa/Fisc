@@ -465,7 +465,7 @@ const clientes=[
    et('e6','Enviar Guia ao cliente','📤','a_fazer','Guia pronta. Template envio_guia + PDFs já anexados — é só revisar e mandar.','guia'),
    et('e7','Confirmar pagamento','✅','a_fazer',null,null),
   ],
-  wpp:[{d:'sai',tpl:'solicitacao_xml',t:'Olá Jecksson, envie os XMLs das vendas de agosto.',flow:true},{d:'ent',t:'Enviei pelo formulário ✅',h:'seg'}],
+  wpp:[{d:'sai',tpl:'Pedir XML do mês',t:'Olá Jecksson, envie os XMLs das vendas de agosto.',flow:true},{d:'ent',t:'Enviei pelo formulário ✅',h:'seg'}],
   demCeo:null},
  {id:'c3',nome:'Studio Bela Arte ME',cnpj:'44.555.666/0001-77',regime:'Simples',plats:['Loja física'],erp:'—',optin:true,janela:true,janelaLbl:'5h10',
   etapas:[
@@ -590,7 +590,7 @@ function loteRefresh(){if(el('loteBody'))renderLoteModal();else renderApuracao()
 function loteTog(id){if(loteSel.has(id))loteSel.delete(id);else loteSel.add(id);loteRefresh();}
 function loteMarcarTodos(){const a=loteAlvo();const todos=a.every(c=>loteSel.has(c.id));loteSel=new Set(todos?[]:a.map(c=>c.id));loteRefresh();}
 function loteExecutar(){let n=0;loteSel.forEach(id=>{const c=clientes.find(x=>x.id===id);if(!c)return;const e=c.etapas.find(x=>x.id===loteTipo);if(!e||e.status==='concluido')return;
-  if(loteTipo==='e1'){if(c.optin){e.status='aguardando';c.wpp.push({d:'sai',tpl:'fiscal_solicitacao_xml',cab:'Departamento Fiscal',t:tplPreencher(TPL_FISCAL[0],c),rod:'Equipe Fiscal',btns:TPL_FISCAL[0].btns});n++;}}
+  if(loteTipo==='e1'){if(c.optin){e.status='aguardando';c.wpp.push({d:'sai',tpl:TPL_FISCAL[0].titulo,cab:'Departamento Fiscal',t:tplPreencher(TPL_FISCAL[0],c),rod:'Equipe Fiscal',btns:TPL_FISCAL[0].btns});n++;}}
   else{e.status='concluido';n++;}});
  loteSel=new Set();toast(n?('Feito em '+n+' cliente(s).'):'Nada aplicado (veja opt-in/etapas).');loteRefresh();}
 
@@ -1022,7 +1022,7 @@ function bolhaWA(m){
  const cls=m.d==='sai'?'ag':'cl';
  const tag=m.st?(m.d==='sai'?(ST_WA[m.st]||m.st)+(m.autor?' · '+m.autor:''):'whatsapp'):(m.d==='sai'?'na fila · agente':'respondida · whatsapp');
  let inner='';
- if(m.tpl)inner+=`<div class="wa-tpl">template · ${m.tpl}</div>`;
+ if(m.tpl)inner+=`<div class="wa-tpl">Modelo · ${m.tpl}</div>`;
  if(m.cab)inner+=`<div class="wa-cab">${m.cab}</div>`;
  if(m.doc)inner+=`<div class="wa-doc"><span class="fi">PDF</span>${m.doc}</div>`;
  if(m.t)inner+=m.t;
@@ -1034,28 +1034,28 @@ function bolhaWA(m){
 }
 function renderWpp(c){
  return `<div class="wa-wrap">
-  ${waHead(c,`<span class="wstat2 rob">Robô atendendo</span>`)}
+  ${waHead(c,'')}
   <div class="wa-msgs">${c.wpp.map(bolhaWA).join('')||'<div style="margin:auto;color:var(--apagado);text-align:center;font-size:12px">Sem conversa. Inicie por template.</div>'}</div>
   ${c.janela?`<div class="wa-comp"><button class="pl" title="Modelos" onclick="abrirModelosWA()">${ICO_TPL}</button><input id="wppin" placeholder="Mensagem" onkeydown="if(event.key==='Enter')enviarLivre()"><span class="pl">${MIC}</span><button class="snd" onclick="enviarLivre()">➤</button></div>`:`<div class="wa-comp" style="justify-content:center"><button class="wa-tplbtn" onclick="abrirModelosWA()">${ICO_TPL} Modelos</button></div>`}
  </div>`;
 }
 const ICO_TPL='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v6H4zM4 14h10v6H4zM17 17h4M19 15v4"/></svg>';
 const TPL_FISCAL=[
- {nome:'fiscal_solicitacao_xml',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nPoderia nos encaminhar os arquivos XML da empresa {2} referentes a {3}?\n\nEsses arquivos são necessários para darmos continuidade à apuração.',btns:['Vou enviar agora','Tenho dúvidas']},
- {nome:'fiscal_lembrete_urgente_xml',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nReforçamos a solicitação dos arquivos XML da empresa {2}, referentes a {3}. O não envio dentro do prazo pode resultar em multa para a empresa. Pedimos a gentileza de encaminhá-los ainda hoje.',btns:['Enviarei agora','Preciso de mais prazo']},
- {nome:'fiscal_confirmacao_movimento_mes',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nGostaríamos de confirmar: houve emissão de notas fiscais pela empresa {2} no mês de {3}? Aguardamos seu retorno.',btns:['Sim, tive notas','Não tive notas']},
- {nome:'fiscal_confirmacao_dados_apuracao',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nDaremos início à apuração de {3} referente à empresa {2}. Poderia confirmar se houve alguma alteração ou inclusão no ERP, no faturador (emissor de nota) ou em outro dado relevante neste período?',btns:['Sem alterações','Tive alteração']},
- {nome:'fiscal_entrega_apuracao_mensal',cat:'Utilidade',doc:'Apuracao.pdf',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nSegue a apuração de {3} da empresa {2} (CNPJ {4}): DAS e relatórios.\n\nVencimento do DAS: {5}. Qualquer dúvida, estamos à disposição.',btns:['Recebido, obrigado','Tenho dúvidas']},
- {nome:'fiscal_aviso_declaracao_zerada',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nInformamos que, por não termos recebido os arquivos XML dentro do prazo, a competência de {3} da empresa {2} foi declarada como zerada perante a Receita Federal. Caso o XML seja enviado posteriormente, o imposto devido será apurado com juros e multa.',btns:['Vou enviar o XML','Tenho dúvidas']},
- {nome:'fiscal_aviso_vencimento_certificado',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nO certificado digital da empresa {2}, usado para transmitirmos as obrigações fiscais dela, vence em {5}. Sem ele não conseguimos entregar a apuração. Poderia confirmar se a renovação já foi providenciada?',btns:['Já renovei','Preciso de ajuda']},
- {nome:'fiscal_boas_vindas_cliente',cat:'Utilidade',corpo:'Olá. Sou {1}, do Departamento Fiscal da YOU Contabilidade, responsável pelas obrigações fiscais da empresa {2} (CNPJ {4}).\n\nPara darmos início às apurações, precisamos confirmar três informações: os canais de venda utilizados, o sistema emissor das notas fiscais e o certificado digital da empresa.\n\nFico no aguardo do seu retorno.',btns:['Vou enviar agora','Tenho dúvidas']}];
+ {nome:'fiscal_solicitacao_xml',titulo:'Pedir XML do mês',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nPoderia nos encaminhar os arquivos XML da empresa {2} referentes a {3}?\n\nEsses arquivos são necessários para darmos continuidade à apuração.',btns:['Vou enviar agora','Tenho dúvidas']},
+ {nome:'fiscal_lembrete_urgente_xml',titulo:'Cobrar XML (urgente)',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nReforçamos a solicitação dos arquivos XML da empresa {2}, referentes a {3}. O não envio dentro do prazo pode resultar em multa para a empresa. Pedimos a gentileza de encaminhá-los ainda hoje.',btns:['Enviarei agora','Preciso de mais prazo']},
+ {nome:'fiscal_confirmacao_movimento_mes',titulo:'Perguntar se teve notas no mês',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nGostaríamos de confirmar: houve emissão de notas fiscais pela empresa {2} no mês de {3}? Aguardamos seu retorno.',btns:['Sim, tive notas','Não tive notas']},
+ {nome:'fiscal_confirmacao_dados_apuracao',titulo:'Confirmar dados antes da apuração',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nDaremos início à apuração de {3} referente à empresa {2}. Poderia confirmar se houve alguma alteração ou inclusão no ERP, no faturador (emissor de nota) ou em outro dado relevante neste período?',btns:['Sem alterações','Tive alteração']},
+ {nome:'fiscal_entrega_apuracao_mensal',titulo:'Enviar apuração e guia (DAS)',cat:'Utilidade',doc:'Apuracao.pdf',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nSegue a apuração de {3} da empresa {2} (CNPJ {4}): DAS e relatórios.\n\nVencimento do DAS: {5}. Qualquer dúvida, estamos à disposição.',btns:['Recebido, obrigado','Tenho dúvidas']},
+ {nome:'fiscal_aviso_declaracao_zerada',titulo:'Avisar declaração zerada',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nInformamos que, por não termos recebido os arquivos XML dentro do prazo, a competência de {3} da empresa {2} foi declarada como zerada perante a Receita Federal. Caso o XML seja enviado posteriormente, o imposto devido será apurado com juros e multa.',btns:['Vou enviar o XML','Tenho dúvidas']},
+ {nome:'fiscal_aviso_vencimento_certificado',titulo:'Avisar vencimento do certificado',cat:'Utilidade',corpo:'Olá, aqui é {1}, do Departamento Fiscal da YOU Contabilidade.\n\nO certificado digital da empresa {2}, usado para transmitirmos as obrigações fiscais dela, vence em {5}. Sem ele não conseguimos entregar a apuração. Poderia confirmar se a renovação já foi providenciada?',btns:['Já renovei','Preciso de ajuda']},
+ {nome:'fiscal_boas_vindas_cliente',titulo:'Boas-vindas ao cliente novo',cat:'Utilidade',corpo:'Olá. Sou {1}, do Departamento Fiscal da YOU Contabilidade, responsável pelas obrigações fiscais da empresa {2} (CNPJ {4}).\n\nPara darmos início às apurações, precisamos confirmar três informações: os canais de venda utilizados, o sistema emissor das notas fiscais e o certificado digital da empresa.\n\nFico no aguardo do seu retorno.',btns:['Vou enviar agora','Tenho dúvidas']}];
 function tplPreencher(t,c){const quem=(eu&&eu.nome)||c.dono||'Colaborador';const venc='20/'+String(comp.mes+2>12?1:comp.mes+2).padStart(2,'0');
  return t.corpo.replace(/\{1\}/g,quem.split(' ')[0]).replace(/\{2\}/g,c.nome).replace(/\{3\}/g,mesTxt()).replace(/\{4\}/g,c.cnpj||'—').replace(/\{5\}/g,venc);}
 function abrirModelosWA(){
  const c=cli();fecharModal();
  modal=document.createElement('div');modal.className='modal';
  modal.innerHTML=`<div class="mcx" style="width:min(560px,96vw)"><div class="mcab">${ICO_TPL}<b>Modelos aprovados · ${c.nome}</b><button class="x" onclick="fecharModal()">✕</button></div>
-  <div class="mbody"><div class="tplLista">${TPL_FISCAL.map((t,i)=>`<div class="tplItem"><div class="tn"><b>${t.nome}</b><span class="tc${t.cat==='Marketing'?' mkt':''}">${t.cat}</span></div>
+  <div class="mbody"><div class="tplLista">${TPL_FISCAL.map((t,i)=>`<div class="tplItem"><div class="tn"><b>${t.titulo}</b><span class="tc${t.cat==='Marketing'?' mkt':''}">${t.cat}</span></div>
    <div class="tp">${(t.doc?'📄 '+t.doc+'\n':'')+tplPreencher(t,c)}</div>
    <div class="tb"><span>${t.btns.join(' · ')}</span><button class="bwpp" onclick="enviarModeloWA(${i})">Enviar</button></div></div>`).join('')}</div></div></div>`;
  document.body.appendChild(modal);
@@ -1063,14 +1063,14 @@ function abrirModelosWA(){
 function enviarModeloWA(i){
  const c=cli();const t=TPL_FISCAL[i];fecharModal();
  const h=new Date().toTimeString().slice(0,5);
- c.wpp.push({d:'sai',tpl:t.nome,cab:t.doc?null:'Departamento Fiscal',doc:t.doc,t:tplPreencher(t,c),rod:'Equipe Fiscal',btns:t.btns,h,st:'sent',autor:(eu&&eu.nome)||''});
+ c.wpp.push({d:'sai',tpl:t.titulo,cab:t.doc?null:'Departamento Fiscal',doc:t.doc,t:tplPreencher(t,c),rod:'Equipe Fiscal',btns:t.btns,h,st:'sent',autor:(eu&&eu.nome)||''});
  if(t.nome==='fiscal_solicitacao_xml'){const e=c.etapas.find(x=>x.acao==='flow_xml');if(e)e.status='aguardando';}
  toast('Modelo enviado. A conversa abre quando o cliente responder.');render();
  const cid=c.id;
  setTimeout(()=>{const cc=clientes.find(x=>x.id===cid);if(!cc)return;cc.wpp.push({d:'ent',t:t.btns[0],h:new Date().toTimeString().slice(0,5)});cc.janela=true;cc.janelaLbl='24h00';cc.optin=true;render();toast(cc.nome+' respondeu — janela de 24h aberta.');},2500);
 }
 function qaTpl(cod){const c=cli();if(!c.optin){toast('Cliente sem opt-in — peça o aceite antes (regra da Meta).');return;}const t=templates.find(x=>x.cod===cod);let corpo=t.corpo.replace('{cliente}',c.nome.split(' ')[0]).replace('{mes}',mesTxt()).replace('{tributo}','Simples Nacional').replace('{venc}','20/'+String(comp.mes+1).padStart(2,'0')).replace('{valor}','R$ 348,20').replace('{doc}','DAS');c.wpp.push({d:'sai',tpl:cod,t:corpo,flow:t.flow,btn:t.btn});c.janela=true;c.janelaLbl='24h00';toast('Template '+cod+' enviado.');render();}
-function pedirXml(){const c=cli();qaTpl('solicitacao_xml');const e=c.etapas.find(x=>x.acao==='flow_xml');if(e)e.status='aguardando';render();}
+function pedirXml(){enviarModeloWA(0);}
 function enviarLivre(){const c=cli();const i=el('wppin');if(!i||!i.value.trim())return;c.wpp.push({d:'sai',t:i.value.trim()});render();}
 
 /* IA rail — com escopo por cliente (ponto 4) */
@@ -1128,7 +1128,7 @@ function abrirGuia(){const c=cli();if(!c.optin){toast('Cliente sem opt-in — n�
 function toggleArq(id){if(guiaSel.has(id)){guiaSel.delete(id);el('arq-'+id).classList.remove('sel');el('vinc-'+id).innerHTML='';}else{guiaSel.add(id);el('arq-'+id).classList.add('sel');if(window._pend.length)el('vinc-'+id).innerHTML=`<select onclick="event.stopPropagation()" onchange="guiaVinc['${id}']=this.value"><option value="">É a guia: (não vincular)</option>${window._pend.map(g=>`<option value="${g.id}">${g.nome}</option>`).join('')}</select>`;}
  const n=guiaSel.size;el('gc').innerHTML=n?`<b style="color:var(--ink)">${n} arquivo${n>1?'s':''}</b> selecionado${n>1?'s':''}`:'Nenhum selecionado';el('ge').disabled=!n;}
 function enviarGuia(){const c=cli();const docs=docsCliente[c.id]||[];let concl=0;
- guiaSel.forEach(id=>{const d=docs.find(x=>x.id===id);c.wpp.push({d:'sai',tpl:'envio_guia',t:`Olá ${c.nome.split(' ')[0]}, segue a guia (comp. ${mesTxt()}), vence 20/${String(comp.mes+1).padStart(2,'0')}.`,btns:['Já paguei','Falar com o fiscal']});c.wpp.push({d:'sai',doc:d.nome});const v=guiaVinc[id];if(v){const e=c.etapas.find(x=>x.id===v);if(e){e.status='concluido';concl++;}}});
+ guiaSel.forEach(id=>{const d=docs.find(x=>x.id===id);c.wpp.push({d:'sai',tpl:'Enviar apuração e guia (DAS)',t:`Olá ${c.nome.split(' ')[0]}, segue a guia (comp. ${mesTxt()}), vence 20/${String(comp.mes+1).padStart(2,'0')}.`,btns:['Já paguei','Falar com o fiscal']});c.wpp.push({d:'sai',doc:d.nome});const v=guiaVinc[id];if(v){const e=c.etapas.find(x=>x.id===v);if(e){e.status='concluido';concl++;}}});
  c.janela=true;c.janelaLbl='24h00';fecharModal();toast(concl?`Enviado — ${concl} guia(s) concluída(s).`:'Enviado no WhatsApp.');render();}
 function fecharModal(){if(modal){modal.remove();modal=null;}}
 
