@@ -572,7 +572,7 @@ let gestorAba='central',mapaDados=null,cartAberta=new Set();
 function escH(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmtCnpj(c){const d=String(c||'').replace(/\D/g,'');return d.length===14?d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'):d;}
 let clientesDados=null;
-function setGestorAba(a){gestorAba=a;if(a==='mapa')mapaDados=null;if(a==='clientes'){clientesDados=null;cliPag=1;cliPorPag=0;}renderGestor();}
+function setGestorAba(a){gestorAba=a;if(a==='mapa')mapaDados=null;if(a==='clientes'){clientesDados=null;cliPag=1;cliPorPag=0;}if(a==='central')centralDados=null;renderGestor();}
 function renderGestor(){
  const ab=[['central','Central'],['mapa','Mapa do Departamento'],['clientes','Clientes']];
  el('conteudo').innerHTML=`
@@ -582,6 +582,36 @@ function renderGestor(){
   <div class="apuBody" id="gestorBody"></div>`;
  if(gestorAba==='mapa')renderMapa();
  if(gestorAba==='clientes')renderClientes();
+ if(gestorAba==='central')renderCentralGestor();
+}
+/* ---------- central do gestor ---------- */
+let centralDados=null;
+const ALERTAS_GESTOR=[['ciclo','Tarefa recorrente atravessou o ciclo','ciclo seguinte já começou e a tarefa anterior segue aberta'],['prazo','Prazo apertando sem resposta','XML pendente perto do fechamento (dia 31), sem mensagem há 48h+'],['respondeu','Cliente respondeu, time não andou','conversa de WhatsApp com resposta nova, tarefa ligada ainda "a fazer"'],['zerada','Pico de declaração "zerada"','colaborador acima do próprio histórico de zeradas no mês'],['retificacao','Retificação de zerada parada','pedido de correção esperando revisão há mais de alguns dias'],['fila','Fila de um colaborador crescendo','tarefas "a fazer" subindo semana a semana']];
+async function carregarCentralGestor(){
+ const r=await sb.rpc('fiscal_central_gestor');
+ if(r.error){toast('Não foi possível carregar a central.');return;}
+ centralDados=r.data||{};if(view==='gestor'&&gestorAba==='central')renderCentralGestor();
+}
+function barras(lista,rot,val){
+ const mx=Math.max(1,...lista.map(val));
+ return lista.map(x=>`<div style="display:grid;grid-template-columns:120px 1fr 44px;gap:8px;align-items:center;font-size:12px;margin-bottom:6px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escH(rot(x))}">${escH(rot(x))}</span><div style="background:var(--superf2);border-radius:6px;height:12px;overflow:hidden"><div style="width:${Math.round(100*val(x)/mx)}%;height:100%;background:var(--laranja);border-radius:6px"></div></div><b style="text-align:right;font-variant-numeric:tabular-nums">${val(x)}</b></div>`).join('');
+}
+function renderCentralGestor(){
+ const b=el('gestorBody');if(!b)return;
+ if(!centralDados){b.innerHTML='';carregarCentralGestor();return;}
+ const d=centralDados,et=(d.ciclo&&d.ciclo.etapas)||[],cl=(d.ciclo&&d.ciclo.clientes)||[],al=d.alertas||{};
+ const tit=(t,s)=>`<div style="margin-bottom:10px"><b class="disp" style="font-size:14px">${t}</b><div style="font-size:11.5px;color:var(--apagado);margin-top:2px">${s}</div></div>`;
+ b.innerHTML=`<div class="tela"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px">
+  <div class="cardP">${tit('Tarefa esquecida / atravessando ciclo','Só o pedido de XML, a tarefa que mais se repete no Fiscal — em aberto, por competência.')}
+   ${barras(d.xml_aberto||[],x=>x.competencia,x=>x.qtd)}</div>
+  <div class="cardP">${tit('Clientes ativos por responsável','Desequilíbrio de carga antes de virar atraso.')}
+   ${barras(d.carga||[],x=>x.nome,x=>x.clientes)}</div>
+  <div class="cardP" style="grid-column:1/-1">${tit('Ciclo mensal','Etapas fixas do ciclo mensal, já configuradas no sistema.')}
+   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px">${et.map((e,i)=>`${i?'<span style="color:var(--apagado)">→</span>':''}<span class="pill pend" style="font-size:11.5px;padding:5px 11px">${escH(e.nome)} · dia ${escH(e.dia)}</span>`).join('')}</div>
+   <div class="tbwrap"><table style="table-layout:fixed"><thead><tr><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Cliente</th>${et.map(e=>`<th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">${escH(e.nome)}</th>`).join('')}</tr></thead><tbody>${cl.map(c=>`<tr><td style="overflow:hidden;text-overflow:ellipsis" title="${escH(c.cliente)}">${escH(c.cliente)}</td>${et.map(e=>`<td>${escH((c.status||{})[e.chave]||'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
+  <div class="cardP" style="grid-column:1/-1">${tit('Alertas do departamento','Situações que pedem ação do gestor.')}
+   ${ALERTAS_GESTOR.map(([k,t,s])=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--superf2)"><div style="flex:1"><b style="font-size:13px">${t}</b><div style="font-size:11.5px;color:var(--apagado)">${s}</div></div><span class="pill ${al[k]==null?'':(al[k]?'falta':'ok')}" style="font-size:12px;padding:3px 11px;${al[k]==null?'color:var(--apagado)':''}">${al[k]==null?'—':(al[k]||'✓')}</span></div>`).join('')}</div>
+ </div></div>`;
 }
 /* ---------- clientes ---------- */
 async function carregarClientes(){
@@ -614,7 +644,7 @@ function renderClientes(){
 }
 function cliTabela(linhas){
  const ops=cliOpcoesApu();
- let html=`<table style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:15%"><col style="width:33%"><col style="width:16%"><col style="width:12%"></colgroup><thead><tr><th>Responsável</th><th>CNPJ</th><th>Empresa</th><th>Carteira</th><th style="position:relative;overflow:visible">Apuração <button class="miniB" style="padding:1px 6px;margin-left:4px${cliApu?';border-color:var(--laranja);color:var(--laranjaTx)':''}" onclick="event.stopPropagation();cliApuAberto=!cliApuAberto;desenharClientes()">▾</button>${cliApuAberto?`<div class="cardP" style="position:absolute;right:8px;top:30px;z-index:5;padding:6px;min-width:160px;text-transform:none;letter-spacing:0;font-size:12px">${['',...ops].map(o=>`<div style="padding:6px 8px;border-radius:6px;cursor:pointer;${o===cliApu?'background:var(--superf2);font-weight:700':''}" onclick="cliApu='${escH(o)}';cliApuAberto=false;cliPag=1;desenharClientes()">${o?escH(o):'Todas'}</div>`).join('')}</div>`:''}</th></tr></thead><tbody>`;
+ let html=`<table style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:15%"><col style="width:33%"><col style="width:16%"><col style="width:12%"></colgroup><thead><tr><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Responsável</th><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">CNPJ</th><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Empresa</th><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Carteira</th><th style="position:relative;overflow:visible;background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Apuração <button class="miniB" style="padding:1px 6px;margin-left:4px;color:var(--ink)${cliApu?';border-color:var(--laranja);color:var(--laranjaTx)':''}" onclick="event.stopPropagation();cliApuAberto=!cliApuAberto;desenharClientes()">▾</button>${cliApuAberto?`<div class="cardP" style="position:absolute;right:8px;top:30px;z-index:5;padding:6px;min-width:160px;text-transform:none;letter-spacing:0;font-size:12px">${['',...ops].map(o=>`<div style="padding:6px 8px;border-radius:6px;cursor:pointer;${o===cliApu?'background:var(--superf2);font-weight:700':''}" onclick="cliApu='${escH(o)}';cliApuAberto=false;cliPag=1;desenharClientes()">${o?escH(o):'Todas'}</div>`).join('')}</div>`:''}</th></tr></thead><tbody>`;
  let k=0;
  while(k<linhas.length){
   const g=linhas[k].g;let n=0;while(k+n<linhas.length&&linhas[k+n].g===g)n++;
