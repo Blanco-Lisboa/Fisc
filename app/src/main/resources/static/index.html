@@ -1318,7 +1318,8 @@ function waConv(id){return waEntrada.find(x=>x.id===id)||waMeus.find(x=>x.id===i
 function hhmm(d){const x=new Date(d);return String(x.getHours()).padStart(2,'0')+':'+String(x.getMinutes()).padStart(2,'0');}
 function ddmm(d){const x=new Date(d);return String(x.getDate()).padStart(2,'0')+'/'+String(x.getMonth()+1).padStart(2,'0');}
 function fmtTel(t){if(!t)return '';const s=String(t);return s.startsWith('55')&&s.length>=12?'+55 '+s.slice(2,4)+' '+s.slice(4,-4)+'-'+s.slice(-4):'+'+s;}
-function msgWA(m){return {id:m.id,id_local:m.id_local,d:m.direcao==='entrada'?'ent':'sai',t:m.legenda||m.texto||('['+m.tipo+']'),h:hhmm(m.ocorrido_em),dt:ddmm(m.ocorrido_em),em:m.ocorrido_em,st:m.status,autor:m.autor_id&&eu&&m.autor_id===eu.id?eu.nome.split(' ')[0]:''};}
+function transcWA(m){const md=Array.isArray(m.wa_midia)?m.wa_midia[0]:m.wa_midia;return md&&md.transcricao?md.transcricao:'';}
+function msgWA(m){const tr=m.tipo==='audio'?transcWA(m):'';return {id:m.id,id_local:m.id_local,tipo:m.tipo,transcricao:tr,d:m.direcao==='entrada'?'ent':'sai',t:m.legenda||m.texto||(tr?'🎤 '+tr:'['+m.tipo+']'),h:hhmm(m.ocorrido_em),dt:ddmm(m.ocorrido_em),em:m.ocorrido_em,st:m.status,autor:m.autor_id&&eu&&m.autor_id===eu.id?eu.nome.split(' ')[0]:''};}
 function janelaWA(c){const ult=[...c.wpp].reverse().find(m=>m.d==='ent');if(!ult||!ult.em){c.janela=false;c.janelaLbl='fechada';return;}
  const rest=24*3600e3-(Date.now()-new Date(ult.em).getTime());c.janela=rest>0;c.optin=true;
  c.janelaLbl=rest>0?Math.floor(rest/3600e3)+'h'+String(Math.floor(rest%3600e3/60e3)).padStart(2,'0'):'fechada';}
@@ -1333,11 +1334,12 @@ async function carregarConversas(){
  waEntrada.concat(waMeus).forEach(c=>{if(c.carregada)janelaWA(c);});
 }
 async function carregarMensagens(id){
- const r=await sb.from('wa_mensagem').select('id,id_local,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id').eq('conversa_id',id).order('ocorrido_em',{ascending:true}).limit(1000);
+ const r=await sb.from('wa_mensagem').select('id,id_local,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,wa_midia(transcricao)').eq('conversa_id',id).order('ocorrido_em',{ascending:true}).limit(1000);
  if(r.error){toast('Não foi possível carregar as mensagens.');return;}
  waMsgs[id]=r.data.map(msgWA);const c=waConv(id);if(c){c.wpp=waMsgs[id];c.carregada=true;janelaWA(c);}
  if(view==='whatsweb')render();
 }
+function aoMudarMidia(p){const md=p.new;if(!md||!md.transcricao||!md.mensagem_id)return;for(const k in waMsgs){const m=waMsgs[k].find(x=>x.id===md.mensagem_id);if(m){m.transcricao=md.transcricao;if(!m.t||m.t.startsWith('['))m.t='🎤 '+md.transcricao;if(view==='whatsweb')render();return;}}}
 function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;const lista=waMsgs[m.conversa_id];
  if(lista){const nova=msgWA(m);const i=lista.findIndex(x=>x.id===m.id||(m.id_local&&x.id_local===m.id_local));if(i>=0)lista[i]=nova;else lista.push(nova);
   const c=waConv(m.conversa_id);if(c)janelaWA(c);}
@@ -1359,7 +1361,8 @@ async function iniciarDados(){
  el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
-  .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa).subscribe();
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
+  .on('postgres_changes',{event:'UPDATE',schema:'public',table:'wa_midia'},aoMudarMidia).subscribe();
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).subscribe();
  view=telaInicial();render();}
 function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}eu.nivel=n.nivel;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();if(!podeVer(view))view=telaInicial();render();}
