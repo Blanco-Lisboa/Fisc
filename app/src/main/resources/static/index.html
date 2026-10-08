@@ -33,6 +33,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .lab{font-size:10px;font-weight:700;letter-spacing:.11em;color:#63636b;margin:15px 8px 6px}
 .it{display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:9px;color:#c7c7cd;font-size:13.5px;cursor:pointer;flex:none}
 .it:hover{background:rgba(255,255,255,.05)}
+#navPessoal{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .it .ic{width:18px;height:18px;display:grid;place-items:center;flex:none}
 .it .ic svg{width:18px;height:18px;fill:none;stroke:#c7c7cd;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .it.on{background:rgba(254,73,1,.15);color:#fff;box-shadow:inset 2px 0 0 var(--laranja)}
@@ -869,7 +870,7 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="it" data-view="central" id="navCentral" style="display:none" onclick="irView('central')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span> Central</div>
   <div class="it" data-view="gestor" id="navGestor" style="display:none" onclick="irView('gestor')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span> Painel do Gestor</div>
   <div class="it" data-view="apuracao" onclick="irView('apuracao')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 5h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM9.5 11l1.8 1.8L14.8 9.5M10 16h4"/></svg></span> Apuração</div>
-  <div class="it" data-view="pendencias" onclick="irView('pendencias')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 4a6 6 0 0 1 6 6v3l1.5 3h-15L6 13v-3a6 6 0 0 1 6-6zM10 19a2 2 0 0 0 4 0"/></svg></span> Pendências <span class="bd">7</span></div>
+  <div class="it" data-view="pessoal" onclick="irView('pessoal')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 4a6 6 0 0 1 6 6v3l1.5 3h-15L6 13v-3a6 6 0 0 1 6-6zM10 19a2 2 0 0 0 4 0"/></svg></span> <span id="navPessoal"></span></div>
   <div class="lab">FLUXO</div>
   <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd">2</span></div>
   <div class="lab">APOIO</div>
@@ -1092,7 +1093,7 @@ function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
 function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
 function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
-const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
+const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
 let acesso={perfil:'',tela_inicial:'apuracao',permissoes:[]};
 async function carregarAcesso(){const r=await sb.rpc('fiscal_minhas_permissoes');if(r.error){toast('Não foi possível ler as permissões.');return;}acesso=r.data||{perfil:'',tela_inicial:'apuracao',permissoes:[]};}
 function tem(p){return (acesso.permissoes||[]).includes(p);}
@@ -1426,7 +1427,7 @@ function render(){
   el('crumbTitulo').textContent=TITULOS[view]||view;
   document.querySelector('.topo .crumb').style.display='none';
   document.querySelector('.topo').style.display='none';
-  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pendencias:renderPend,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA,email:renderEmail,config:renderConfig}[view])();
+  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pessoal:renderPessoal,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA,email:renderEmail,config:renderConfig}[view])();
   document.querySelectorAll('.wa-msgs').forEach(m=>m.scrollTop=m.scrollHeight);
   teamsTela();
 }
@@ -1603,6 +1604,7 @@ function renderApuracao(){
     <div class="aputabs-l">
       <button class="${apuAba==='apuracao'?'on':''}" onclick="setApuAba('apuracao')">Apuração</button>
       <button class="${apuAba==='radar'?'on':''}" onclick="setApuAba('radar')">Radar XML ${nv?`<span class="nb">${nv}</span>`:''}</button>
+      <button class="${apuAba==='pendencias'?'on':''}" onclick="setApuAba('pendencias')">Pendências</button>
     </div>
     <div class="aputabs-r">
       <div class="comp"><button onclick="mudarComp(-1)">‹</button><span class="v" id="compV">${MESES[comp.mes]+' / '+comp.ano}</span><button onclick="mudarComp(1)">›</button></div>
@@ -1611,7 +1613,7 @@ function renderApuracao(){
     </div>
   </div>
   <div class="apuBody" id="apuBody"></div>`;
- if(apuAba==='radar')renderRadar(); else renderApuMesa();
+ if(apuAba==='radar')renderRadar(); else if(apuAba==='pendencias')renderPend(el('apuBody')); else renderApuMesa();
 }
 function renderApuMesa(){
  el('apuBody').innerHTML=`<div class="ap-cols">
@@ -2137,12 +2139,13 @@ function enviarGuia(){const c=cli();const docs=docsCliente[c.id]||[];let concl=0
 function fecharModal(){if(modal){modal.remove();modal=null;}}
 
 /* pendências */
-function renderPend(){const cats=[['xml','XML pendente',2],['guias','Guias a enviar',3],['aguardando','Aguardando cliente',1],['outras','Outras',1]];
+function renderPend(alvo){const cats=[['xml','XML pendente',2],['guias','Guias a enviar',3],['aguardando','Aguardando cliente',1],['outras','Outras',1]];
  const dados={xml:[{c:'Mix Imports ME',d:'Faltam XMLs Shopee/TikTok de '+mesTxt(),cli:'c1'},{c:'TransLog Cargas LTDA',d:'Sem movimento + opt-in pendente',cli:'c4'}],guias:[{c:'Jecksson Store',d:'DAS apurado, guia pronta',cli:'c2'},{c:'TransLog Cargas LTDA',d:'2 guias a enviar',cli:'c4'},{c:'Mix Imports ME',d:'Guia após apurar',cli:'c1'}],aguardando:[{c:'Mix Imports ME',d:'Aguardando XMLs há 1h20',cli:'c1'}],outras:[{c:'Studio Bela Arte ME',d:'Confirmar zerada',cli:'c3'}]};
- el('conteudo').innerHTML=`<div class="tela"><h1>Minhas pendências</h1><p class="intro">O que falta tratar nesta competência (${mesTxt()}).</p>
+ (alvo||el('conteudo')).innerHTML=`<div class="tela"><h1>Minhas pendências</h1><p class="intro">O que falta tratar nesta competência (${mesTxt()}).</p>
   <div class="subtabs">${cats.map(([k,l,n])=>`<button class="${pendSub===k?'on':''}" onclick="pendSub='${k}';render()">${l} <span class="c">${n}</span></button>`).join('')}</div>
   <div class="grade">${(dados[pendSub]||[]).map(x=>`<div class="cardP"><div class="top"><div class="av">${iniciais(x.c)}</div><div class="nm">${x.c}</div></div><div style="font-size:12.5px;color:var(--apoio)">${x.d}</div><div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="selCli='${x.cli}';irView('apuracao')">Abrir na Apuração →</button></div></div>`).join('')}</div></div>`;
 }
+function renderPessoal(){el('conteudo').innerHTML='';}
 /* radar xml */
 function renderXml(){const linhas=[{c:'Mix Imports ME',sh:'pend',tk:'pend',ml:'-',s:'Aguardando'},{c:'Jecksson Store',sh:'-',tk:'-',ml:'ok',s:'Coletado'},{c:'Studio Bela Arte ME',sh:'-',tk:'-',ml:'-',s:'Zerada'},{c:'TransLog Cargas LTDA',sh:'-',tk:'-',ml:'-',s:'Sem movimento'}];
  const cell=v=>v==='ok'?'<span class="pill ok">recebido</span>':v==='pend'?'<span class="pill falta">pendente</span>':'<span style="color:var(--nevoa)">—</span>';
@@ -2628,7 +2631,7 @@ async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=
 
 /* ---------- entrada ---------- */
 async function iniciarDados(){
- el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
+ el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('navPessoal').textContent=eu.nome;TITULOS.pessoal=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
  preCarregarGestor();
  teamsIniciar();
  await carregarConversas();
