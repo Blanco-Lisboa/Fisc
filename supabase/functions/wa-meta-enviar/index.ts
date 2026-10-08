@@ -93,6 +93,7 @@ Deno.serve(async (req) => {
   if (prep.data.repetida) return json(prep.data);
 
   const msgId: string = prep.data.mensagem_id;
+  const assina = (t?: string) => (prep.data.assinatura && !p.encaminhar_de && t ? `*${prep.data.assinatura}*\n${t}` : t);
   const corpo: Record<string, unknown> = {
     messaging_product: "whatsapp",
     ...(prep.data.grupo_id
@@ -104,7 +105,7 @@ Deno.serve(async (req) => {
   try {
     if (p.tipo === "texto") {
       corpo.type = "text";
-      corpo.text = { body: p.texto, preview_url: false };
+      corpo.text = { body: assina(p.texto), preview_url: false };
     } else if (p.tipo === "local") {
       corpo.type = "location";
       const l = prep.data.dados;
@@ -125,7 +126,7 @@ Deno.serve(async (req) => {
       if (assinado.error) throw new Error(`arquivo: ${assinado.error.message}`);
       const tm = TIPO_META[p.tipo];
       const midia: Record<string, unknown> = { link: assinado.data.signedUrl };
-      if (p.legenda && tm !== "audio") midia.caption = p.legenda;
+      if (p.legenda && tm !== "audio") midia.caption = assina(p.legenda);
       if (tm === "document") midia.filename = p.arquivo!.nome;
       corpo.type = tm;
       corpo[tm] = midia;
