@@ -14,3 +14,11 @@ Conclusão: o Fiscal já envia arquivo por link (URL assinada do bucket wa-midia
 até 100 MB para documento. Tirada a trava de XML/ZIP (tela + wa_meta_preparar_envio). Limites mantidos:
 imagem 5 MB, áudio e vídeo 16 MB, documento 100 MB (o bucket também barra acima de 100 MB).
 A documentação oficial lista só txt/pdf/office para documento, mas o envio por link entregou XML e ZIP.
+
+## Regras aplicadas no envio (conferidas com a tabela da Meta que o William trouxe)
+- Imagem: só JPEG/PNG até 5 MB vão como imagem. Imagem maior ou de outro tipo (WebP, GIF, HEIC) vai como documento, original.
+- Vídeo: só MP4/3GP com H.264 (o sistema confere "avc1" dentro do arquivo) e até 16 MB vai como vídeo. H.265 ou maior vai como documento, original.
+- Áudio: até 16 MB; OGG só vai como áudio se for Opus (confere "OpusHead"). Senão vai como documento, original. A gravação do próprio Fiscal já é OGG/Opus.
+- Documento: qualquer formato até 100 MB.
+- Acima de 100 MB: não envia e abre a janela "Arquivo acima do limite" com o nome e o tamanho de cada arquivo.
+- Sticker (WebP 100 KB): o Fiscal não envia figurinha.

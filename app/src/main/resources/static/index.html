@@ -1540,13 +1540,26 @@ function waEscolherArquivo(id,aceita){const i=document.createElement('input');i.
 async function waEnviarArquivos(id,arquivos){
  const c=waConv(id);if(!c)return;
  const legenda=(el('wwin')||{}).value||'';if(el('wwin'))el('wwin').value='';
+ const grandes=[];
  for(const f of arquivos){
-  const tipo=waTipoArquivo(f);const nome=f.name||'arquivo';
-  const lim={imagem:5,video:16,audio:16,documento:100}[tipo]*1048576;
-  if(f.size>lim){toast(nome+' passa do limite da Meta ('+(lim/1048576)+' MB).');continue;}
+  const nome=f.name||'arquivo';
+  if(f.size>WA_LIM_DOC){grandes.push(f);continue;}
+  const tipo=await waTipoEnvio(f);
   await waEnviarMidia(c,f,tipo,nome,arquivos.length===1?legenda:'');
  }
+ if(grandes.length)waAvisoGrande(grandes);
 }
+const WA_LIM_DOC=100*1048576;
+function waMB(n){return (n/1048576).toLocaleString('pt-BR',{maximumFractionDigits:1})+' MB';}
+function waAvisoGrande(fs){waModal('Arquivo acima do limite',`<div style="font-size:12.5px;line-height:1.55">${fs.length>1?'Estes arquivos não foram enviados:':'Este arquivo não foi enviado:'}<div style="margin:10px 0;display:flex;flex-direction:column;gap:6px">${fs.map(f=>`<div style="display:flex;justify-content:space-between;gap:12px;border:1px solid var(--borda);border-radius:9px;padding:8px 10px"><b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(f.name||'arquivo')}</b><span style="color:var(--vermelho);font-weight:700;white-space:nowrap">${waMB(f.size)}</span></div>`).join('')}</div>O WhatsApp oficial aceita no máximo <b>100 MB</b> por arquivo. Divida o arquivo em partes menores ou envie por outro meio.</div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="bt-assumir" onclick="fecharModal()">Entendi</button></div>`,460);}
+async function waBytes(f,n){return new Uint8Array(await f.slice(0,Math.min(f.size,n)).arrayBuffer());}
+function waTem(b,txt){const t=[...txt].map(c=>c.charCodeAt(0));outer:for(let i=0;i<=b.length-t.length;i++){for(let j=0;j<t.length;j++)if(b[i+j]!==t[j])continue outer;return true;}return false;}
+async function waTipoEnvio(f){
+ let tipo=waTipoArquivo(f);const t=(f.type||'').toLowerCase();
+ if(tipo==='imagem'&&f.size>5*1048576)return 'documento';
+ if(tipo==='video'){if(f.size>16*1048576)return 'documento';const b=await waBytes(f,16*1048576);if(!waTem(b,'avc1'))return 'documento';}
+ if(tipo==='audio'){if(f.size>16*1048576)return 'documento';if(/ogg|opus/.test(t)&&!waTem(await waBytes(f,512),'OpusHead'))return 'documento';}
+ return tipo;}
 async function waEnviarMidia(c,blob,tipo,nome,legenda){
  const id_local=crypto.randomUUID();const ext=(nome.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'bin';
  const caminho=`${c.id}/saida/${id_local}.${ext}`;
