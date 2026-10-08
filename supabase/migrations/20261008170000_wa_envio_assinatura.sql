@@ -7,7 +7,7 @@ begin
     d := replace(d, 'length(coalesce(p_legenda, '''')) > 1024', 'length(coalesce(p_legenda, '''')) > 970');
     d := replace(d, '''arquivo_caminho'', v_caminho, ''arquivo_mime'', v_mime);',
       '''arquivo_caminho'', v_caminho, ''arquivo_mime'', v_mime,' || E'\n' ||
-      '                            ''assinatura'', (select nullif(split_part(btrim(u.nome), '' '', 1), '''') || '' - Fiscal You'' from fiscal_usuario u where u.id = auth.uid()));');
+      '                            ''assinatura'', (select initcap(nullif(split_part(btrim(u.nome), '' '', 1), '''')) || '' - Fiscal You'' from fiscal_usuario u where u.id = auth.uid()));');
     if position('''assinatura''' in d) = 0 then raise exception 'nao achei o ponto de troca'; end if;
     execute d;
   end if;
