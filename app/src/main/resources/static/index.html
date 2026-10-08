@@ -773,6 +773,39 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-aleg{resize:none;line-height:1.35;max-height:110px;font-family:inherit}
 .wz-emojipainel{flex-direction:row;flex-wrap:wrap;width:316px;min-width:0;padding:6px;gap:2px}
 .wz-emojipainel button{font-size:20px;padding:3px 5px;border-radius:8px;width:36px;text-align:center}
+.apz{padding:0!important;overflow:hidden;display:flex;flex-direction:column;background:var(--superf)}
+.apz-top{padding:16px 14px 12px;display:flex;flex-direction:column;gap:12px;background:var(--pagina);border-bottom:1px solid var(--borda)}
+.apz-top h2{font-family:var(--disp);font-size:17px;margin:0;flex:1}
+.apz-mes{font-size:11.5px;color:var(--apagado);font-weight:600}
+.apz-top .wz-kpi.vd b{color:var(--verde)}
+.wz-kpi{text-align:left;min-width:0;overflow:hidden}
+.apz-top .wz-kpi{text-align:left;padding:8px 9px}
+.apz-top .wz-kpi span{font-size:10.5px;letter-spacing:0;text-transform:none}
+.apz-lista{flex:1;min-height:0;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:2px}
+.apz-cli{display:grid;grid-template-columns:44px minmax(0,1fr);gap:11px;padding:10px;border-radius:12px;cursor:pointer;align-items:start}
+.apz-cli:hover{background:var(--superf2)}
+.apz-cli.sel{background:var(--pagina);box-shadow:0 0 0 1px var(--laranjaCl),var(--sm)}
+.apz-cli .wz-cm{gap:4px}
+.apz-cli .ap-st{align-self:flex-start}
+.apz-prog{display:flex;align-items:center;gap:8px}
+.apz-prog .b{flex:1;height:5px;border-radius:99px;background:var(--superf2);overflow:hidden}
+.apz-prog .b i{display:block;height:100%;border-radius:inherit}
+.apz-prog span{font-size:11px;font-weight:700;color:var(--grafite);font-variant-numeric:tabular-nums;min-width:30px;text-align:right}
+.wz-cseta{top:8px}
+.wz-conv:hover .wz-hora{visibility:hidden}
+.cb{display:flex;flex-direction:column;gap:10px}
+.cb svg.i{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.cb-top{display:flex;gap:8px;align-items:center}
+.cb-busca{flex:1}
+.cb-res{display:flex;flex-direction:column;gap:4px;max-height:44vh;overflow-y:auto}
+.cb-it{display:flex;align-items:center;gap:10px;border:1px solid var(--borda);border-radius:10px;padding:8px 10px;cursor:pointer;background:var(--pagina)}
+.cb-it:hover{background:var(--superf)}
+.cb-it.on{border-color:var(--laranjaCl);background:var(--laranjaSv)}
+.cb-it div{display:flex;flex-direction:column;min-width:0}
+.cb-it b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cb-it span{font-size:11px;color:var(--apagado)}
+.cb-sel{max-height:96px;overflow-y:auto}
+.cb-rod{display:flex;justify-content:flex-end;gap:8px}
 </style>
 </head>
 <body>
@@ -1138,7 +1171,7 @@ function renderClientes(){
 }
 function cliTabela(linhas){
  const ops=cliOpcoesApu();
- let html=`<table style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:15%"><col style="width:33%"><col style="width:16%"><col style="width:12%"></colgroup><thead><tr><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Responsável</th><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">CNPJ</th><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Empresa</th><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Carteira</th><th style="position:relative;overflow:visible;background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Apuração <button class="miniB" style="padding:1px 6px;margin-left:4px;color:var(--ink)${cliApu?';border-color:var(--laranja);color:var(--laranjaTx)':''}" onclick="event.stopPropagation();cliApuAberto=!cliApuAberto;desenharClientes()">▾</button>${cliApuAberto?`<div class="cardP" style="position:absolute;right:8px;top:30px;z-index:5;padding:6px;min-width:160px;text-transform:none;letter-spacing:0;font-size:12px">${['',...ops].map(o=>`<div style="padding:6px 8px;border-radius:6px;cursor:pointer;${o===cliApu?'background:var(--superf2);font-weight:700':''}" onclick="cliApu='${escH(o)}';cliApuAberto=false;cliPag=1;desenharClientes()">${o?escH(o):'Todas'}</div>`).join('')}</div>`:''}</th></tr></thead><tbody>`;
+ let html=`<table style="table-layout:fixed"><colgroup><col style="width:24%"><col style="width:15%"><col style="width:33%"><col style="width:16%"><col style="width:12%"></colgroup><thead><tr><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Responsável</th><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">CNPJ</th><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Empresa</th><th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Carteira</th><th style="position:relative;overflow:visible;background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">Apuração <button class="miniB" style="padding:1px 6px;margin-left:4px;color:var(--ink)${cliApu?';border-color:var(--laranja);color:var(--laranjaTx)':''}" onclick="event.stopPropagation();cliApuAberto=!cliApuAberto;desenharClientes()">▾</button>${cliApuAberto?`<div class="cardP" style="position:absolute;right:8px;top:30px;z-index:5;padding:6px;min-width:160px;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink);font-weight:500;text-align:left">${['',...ops].map(o=>`<div style="padding:6px 8px;border-radius:6px;cursor:pointer;${o===cliApu?'background:var(--superf2);font-weight:700':''}" onclick="cliApu='${escH(o)}';cliApuAberto=false;cliPag=1;desenharClientes()">${o?escH(o):'Todas'}</div>`).join('')}</div>`:''}</th></tr></thead><tbody>`;
  let k=0;
  while(k<linhas.length){
   const g=linhas[k].g;let n=0;while(k+n<linhas.length&&linhas[k+n].g===g)n++;
@@ -1207,10 +1240,30 @@ async function abrirCarteira(id){
 function togOutras(i){cartAberta.has(i)?cartAberta.delete(i):cartAberta.add(i);renderCarteira();}
 function renderCarteira(){
  const c=window._cart||[];const b=el('cartBody');if(!b)return;
- b.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="apubtn" onclick="escolherPlanilha()">${ICO_PLAN} Vincular por planilha</button></div><div class="tbwrap"><table><thead><tr><th>Responsável (quem trata)</th><th>CNPJ</th><th>Empresa</th></tr></thead><tbody>${c.map((l,i)=>`
+ b.innerHTML=`<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px"><button class="apubtn" onclick="cartAbrirBase()">+ Adicionar da base de clientes</button><button class="apubtn" onclick="escolherPlanilha()">${ICO_PLAN} Vincular por planilha</button></div><div class="tbwrap"><table><thead><tr><th>Responsável (quem trata)</th><th>CNPJ</th><th>Empresa</th></tr></thead><tbody>${c.map((l,i)=>`
   <tr><td>${escH(l.responsavel||'—')}${l.outras.length?` <button class="miniB" style="border-color:var(--ambar);color:var(--ambar);margin-left:6px" onclick="togOutras(${i})">⚠ ${l.outras.length}</button>`:''}</td><td>${fmtCnpj(l.cnpj)}</td><td>${escH(l.empresa)}</td></tr>
   ${cartAberta.has(i)?l.outras.map(o=>`<tr style="background:var(--ambarSv)"><td style="padding-left:28px;color:var(--ambar)">${o.carteira_de?'na carteira de '+escH(o.carteira_de):'sem carteira'}</td><td>${fmtCnpj(o.cnpj)}</td><td>${escH(o.empresa)}</td></tr>`).join(''):''}`).join('')}</tbody></table></div>`;
 }
+/* ---------- carteira pela base de clientes ---------- */
+let cartBase=null;
+function cartAbrirBase(){cartBase={busca:'',res:[],sel:new Map(),t:null};renderCartBase();}
+function renderCartBase(){const b=el('cartBody');if(!b||!cartBase)return;const sel=[...cartBase.sel.values()];
+ const i0=el('cbBusca');const foco=i0&&document.activeElement===i0;const pos=foco?i0.selectionStart:null;
+ b.innerHTML=`<div class="cb"><div class="cb-top"><label class="wz-busca cb-busca">${WZ.busca}<input id="cbBusca" placeholder="Buscar cliente por nome ou CNPJ" value="${escH(cartBase.busca)}" oninput="cartBase.busca=this.value;clearTimeout(cartBase.t);cartBase.t=setTimeout(cartBuscar,300)"></label>${cartBase.res.length?`<button class="miniB" onclick="cartMarcarTodos()">Marcar todos</button>`:''}</div>
+  <div class="cb-res">${cartBase.res.map(e=>`<label class="cb-it${cartBase.sel.has(e.empresa_id)?' on':''}"><input type="checkbox" ${cartBase.sel.has(e.empresa_id)?'checked':''} onchange="cartMarcar('${e.empresa_id}',this.checked)"><div><b>${escH(e.razao_social||e.nome_fantasia||'')}</b><span>${escH(fmtCnpj(e.cnpj))}${e.nome_fantasia&&e.razao_social?' · '+escH(e.nome_fantasia):''}</span></div></label>`).join('')}</div>
+  ${sel.length?`<div class="wz-escolhidas cb-sel">${sel.map(e=>`<span>${escH(e.nome_fantasia||e.razao_social||'')}<button title="Tirar" onclick="cartMarcar('${e.empresa_id}',false)">✕</button></span>`).join('')}</div>`:''}
+  <div class="cb-rod"><button class="apubtn" onclick="cartBase=null;renderCarteira()">Cancelar</button><button class="bt-assumir" ${sel.length?'':'disabled style="opacity:.45"'} onclick="cartConferirBase()">Conferir e vincular (${sel.length})</button></div></div>`;
+ const i=el('cbBusca');if(i&&(foco||!sel.length&&!cartBase.res.length)){i.focus();if(pos!=null)i.setSelectionRange(pos,pos);}}
+async function cartBuscar(){if(!cartBase)return;const t=cartBase.busca.trim();if(t.length<2){cartBase.res=[];renderCartBase();return;}
+ const r=await sb.rpc('fiscal_buscar_clientes',{p_texto:t});if(!cartBase||cartBase.busca.trim()!==t)return;
+ if(r.error){toast('Não foi possível buscar.');return;}cartBase.res=r.data||[];renderCartBase();}
+function cartMarcar(id,on){if(!cartBase)return;const e=cartBase.res.find(x=>x.empresa_id===id)||cartBase.sel.get(id);if(!e)return;if(on)cartBase.sel.set(id,e);else cartBase.sel.delete(id);renderCartBase();}
+function cartMarcarTodos(){if(!cartBase)return;cartBase.res.forEach(e=>cartBase.sel.set(e.empresa_id,e));renderCartBase();}
+async function cartConferirBase(){if(!cartBase||!cartBase.sel.size)return;const col=[...cartBase.sel.values()].map(e=>String(e.cnpj||''));cartBase=null;
+ plan={arquivo:'Escolhidos na base de clientes',linhas:[],ocupado:false};renderPlanilha(true);
+ const r=await sb.rpc('fiscal_carteira_analisar',{p_usuario:cartUsuario,p_linhas:col});
+ if(!plan)return;if(r.error){plan=null;toast('Não foi possível conferir os clientes.');renderCarteira();return;}
+ plan.linhas=(r.data||[]).filter(l=>l.situacao!=='vazio').map(l=>({...l,transferir:false,descartado:false,editando:''}));renderPlanilha();}
 /* ---------- carteira por planilha ---------- */
 const ICO_PLAN='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h8"/></svg>';
 let cartUsuario=null,plan=null;
@@ -1431,7 +1484,7 @@ function renderApuracao(){
 }
 function renderApuMesa(){
  el('apuBody').innerHTML=`<div class="ap-cols">
-   <div class="ap-card ap-lista"><div class="ap-top"><div class="ap-busca">🔎<input id="apBuscaIn" placeholder="Buscar cliente, CNPJ…" value="${escH(apBusca)}" oninput="apBusca=this.value;renderLista()"></div><div class="ap-fils" id="apFils"></div></div><div class="ap-rol" id="listaCli"></div></div>
+   <div class="ap-card ap-lista wz-emb apz"><div class="apz-top"><div class="wz-l1"><h2>Clientes</h2><span class="apz-mes">${escH(mesTxt())}</span></div><div class="wz-kpis" id="apKpis"></div><label class="wz-busca">${WZ.busca}<input id="apBuscaIn" placeholder="Buscar cliente ou CNPJ" value="${escH(apBusca)}" oninput="apBusca=this.value;renderLista()"></label><div class="wz-chips" id="apFils"></div></div><div class="apz-lista" id="listaCli"></div></div>
    <div class="ap-centro" id="ws"></div>
    <div class="ap-card ap-ia" id="iaRail"></div>
   </div>`;
@@ -1810,13 +1863,15 @@ function renderLista(){
  const base=clientes.filter(c=>!t||(c.nome+' '+(c.cnpj||'')).toLowerCase().includes(t));
  const cont=k=>k==='todos'?base.length:base.filter(c=>apSituacao(c)[2]===k).length;
  const fils=[['todos','Todos'],['aguardando','Aguardando cliente'],['atrasados','Atrasados'],['concluidos','Concluídos']];
- el('apFils').innerHTML=fils.map(([k,r])=>`<button class="ap-fil ${apFiltro===k?'on':''}" onclick="apFiltro='${k}';renderLista()">${r} ${cont(k)}</button>`).join('');
+ el('apFils').innerHTML=fils.map(([k,r])=>`<button class="wz-chip${apFiltro===k?' on':''}" onclick="apFiltro='${k}';renderLista()">${r}${k==='todos'?'':` <b>${cont(k)}</b>`}</button>`).join('');
+ const kp=(k,r,cl)=>`<button class="wz-kpi ${cl}${apFiltro===k?' on':''}" onclick="apFiltro=apFiltro==='${k}'?'todos':'${k}';renderLista()"><span>${r}</span><b>${cont(k)}</b></button>`;
+ const ke=el('apKpis');if(ke)ke.innerHTML=kp('aguardando','Aguardando','av')+kp('atrasados','Atrasados','al')+kp('concluidos','Concluídos','vd');
  const lista=base.filter(c=>apFiltro==='todos'||apSituacao(c)[2]===apFiltro);
  el('listaCli').innerHTML=lista.map(c=>{const pct=prog(c);const cor=pct===100?'var(--verde)':pct>0?'var(--laranja)':'var(--nevoa)';const s=apSituacao(c);
-  return `<div class="ap-cli ${c.id===selCli?'sel':''}" onclick="selCli='${c.id}';render()"><div class="ap-av">${iniciais(c.nome)}</div>
-   <div style="min-width:0"><div class="nm">${escH(c.nome)}</div><div class="sb">${escH(c.regime)}${c.plats.length?' · '+escH(c.plats.join(', ')):''}</div>
-    <div class="ap-prog"><div class="b"><i style="width:${pct}%;background:${cor}"></i></div><span>${pct}%</span></div>
-    <span class="ap-st ${s[1]}" style="margin-top:6px">${escH(s[0])}</span></div></div>`;
+  return `<div class="apz-cli${c.id===selCli?' sel':''}" onclick="selCli='${c.id}';render()"><div class="wz-av" style="background:${waCorNome(c.nome)}">${escH(iniciais(c.nome))}</div>
+   <div class="wz-cm"><span class="wz-nome">${escH(c.nome)}</span><span class="wz-cemp">${escH(c.regime)}${c.plats.length?' · '+escH(c.plats.join(', ')):''}</span>
+    <div class="apz-prog"><div class="b"><i style="width:${pct}%;background:${cor}"></i></div><span>${pct}%</span></div>
+    <span class="ap-st ${s[1]}">${escH(s[0])}</span></div></div>`;
  }).join('');
 }
 function apHoras(l){const m=String(l||'').match(/^(\d+)h/);return m?m[1]+'h':String(l||'');}
