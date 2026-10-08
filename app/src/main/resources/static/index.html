@@ -732,6 +732,27 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-bord button[disabled]{opacity:.35;cursor:default}
 .wz-brod{display:flex;align-items:center;gap:10px}
 .wz-brod span{flex:1;font-size:12px;color:var(--apagado);text-align:right}
+.wz-anexos{border:1px solid var(--borda);border-radius:14px;background:var(--superf);padding:8px;display:flex;flex-direction:column;gap:6px}
+.wz-acab{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0 4px}
+.wz-acab b{font-size:12px;color:var(--grafite)}
+.wz-acab .sp{flex:1}
+.wz-pos{display:flex;background:var(--superf2);border-radius:9px;padding:2px;gap:2px}
+.wz-pos button{border:0;background:transparent;border-radius:7px;padding:4px 10px;font-size:11.5px;font-weight:600;color:var(--apoio)}
+.wz-pos button.on{background:var(--pagina);color:var(--ink);box-shadow:var(--sm)}
+.wz-alnk{border:0;background:transparent;color:var(--laranjaTx);font-size:12px;font-weight:600;padding:2px 4px}
+.wz-alista{display:flex;flex-direction:column;gap:5px;max-height:210px;overflow-y:auto}
+.wz-ai{display:flex;align-items:center;gap:9px;background:var(--pagina);border:1px solid var(--borda);border-radius:10px;padding:6px 8px}
+.wz-ai.arr{opacity:.45}
+.wz-ai .wz-ext{width:30px;height:34px;font-size:8.5px}
+.wz-athumb{width:34px;height:34px;object-fit:cover;border-radius:7px;flex:none}
+.wz-am{width:190px;min-width:0;display:flex;flex-direction:column}
+.wz-am b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wz-am span{font-size:10.5px;color:var(--apagado)}
+.wz-aleg{flex:1;min-width:0;border:1px solid var(--borda);border-radius:8px;padding:6px 9px;font:inherit;font-size:12.5px;outline:0}
+.wz-aleg:focus{border-color:var(--laranja)}
+.wz-aord{display:flex;gap:3px;flex:none}
+.wz-aord button{width:26px;height:26px;border-radius:7px;border:1px solid var(--borda);background:var(--pagina);color:var(--grafite);font-size:12px}
+.wz-aord button[disabled]{opacity:.35;cursor:default}
 </style>
 </head>
 <body>
@@ -1707,7 +1728,9 @@ async function waEnviarSimples(c,tipo,arquivo,texto){
  const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo,arquivo,responder_a:waRespWamid(c)});waResp=null;
  if(!j.ok){tmp.st='falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar.');}
 }
-function enviarWW(){const c=waConv(selWhats);const i=el('wwin');if(!c||!i||!i.value.trim())return;const t=i.value.trim();i.value='';waRasc[c.id]='';waCresce(i);enviarTextoWA(c,t);}
+function enviarWW(){const c=waConv(selWhats);const i=el('wwin');if(!c||!i)return;const t=i.value.trim();
+ if(waBandejas[c.id]&&waBandejas[c.id].length){i.value='';waRasc[c.id]='';waCresce(i);waEnviarComArquivos(c,t);return;}
+ if(!t)return;i.value='';waRasc[c.id]='';waCresce(i);enviarTextoWA(c,t);}
 async function waGravar(){
  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Este computador não permite gravar áudio.');return;}
  let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true});}catch(e){toast('Sem acesso ao microfone.');return;}
@@ -2091,7 +2114,7 @@ function waComposer(c,isEntrada){
  const r=waResp?c.wpp.find(m=>m.id===waResp):null;
  return `<div class="wz-comp">${r?`<div class="wz-respondendo"><div><b>Respondendo a ${escH(r.d==='sai'?(r.autorNome||'você'):(r.autorGrupo||c.nome))}</b><span>${escH(waResumo(r))}</span></div><button title="Cancelar" onclick="waResp=null;render()">✕</button></div>`:''}
   ${waGrav?`<div class="wz-grav"><b class="wa-rec">Gravando ${waGrav.seg||0}s</b><button class="wz-sec2" onclick="waGravarCancelar()">Cancelar</button><button class="wz-env" onclick="waGravarParar()">Enviar ${WZ.env}</button></div>`
-  :`<div class="wz-caixa"><div class="wz-ferr"><button title="Modelos" onclick="waModelos('${c.id}')">${WZ.tpl}</button><button title="Anexar" onclick="waMenuAnexo(event,'${c.id}')">${WZ.clipe}</button><button title="Gravar áudio" onclick="waGravar()">${WZ.mic}</button></div>
+  :`${waBandejaHtml(c)}<div class="wz-caixa"><div class="wz-ferr"><button title="Modelos" onclick="waModelos('${c.id}')">${WZ.tpl}</button><button title="Anexar" onclick="waMenuAnexo(event,'${c.id}')">${WZ.clipe}</button><button title="Gravar áudio" onclick="waGravar()">${WZ.mic}</button></div>
    <textarea id="wwin" rows="1" placeholder="Escreva para ${escH(c.nome.split(' ')[0])}…" oninput="waRasc['${c.id}']=this.value;waDigitando();waCresce(this)" onkeydown="waTecla(event,'${c.id}')"></textarea>
    <button class="wz-env" onclick="enviarWW()">Enviar ${WZ.env}</button></div>
   <div class="wz-dica"><span><kbd>Enter</kbd> envia</span><span><kbd>Shift</kbd>+<kbd>Enter</kbd> nova linha</span><span><kbd>/</kbd> abre modelos</span></div>`}</div>`;}
@@ -2237,72 +2260,72 @@ function waAplicarPainel(){waTodas().forEach(x=>{const p=waPainel[x.id];if(!p)re
  if(p.ultima_entrada&&(!x.ultEnt||new Date(p.ultima_entrada)>new Date(x.ultEnt)))x.ultEnt=p.ultima_entrada;});}
 setInterval(()=>{if(view!=='whatsweb')return;const c=selWhats&&waConv(selWhats);const m=el('wzMed');if(c&&m){const t=document.createElement('div');t.innerHTML=waMedidor(c);if(t.firstElementChild)m.replaceWith(t.firstElementChild);}},60000);
 /* ---------- WHATSAPP bandeja de arquivos ---------- */
-let waBandeja=null,waArrastoItem=null;const waEsperas={};
-const WA_TIPO_ROT={imagem:'vai como foto',video:'vai como vídeo',audio:'vai como áudio',documento:'vai como arquivo'};
+const waBandejas={};let waArrastoItem=null,waTextoPos=null;const waEsperas={};
+const WA_TIPO_ROT={imagem:'foto',video:'vídeo',audio:'áudio',documento:'arquivo'};
 function waPodeAnexar(c){if(!c)return 'Escolha uma conversa.';if(waEntrada.includes(c)&&!c.grupo&&!eGestor())return 'Só quem atende a conversa pode enviar arquivos.';
  if(c.bloqueado)return 'Contato bloqueado.';if(!c.grupo&&waRestante(c)<=0)return 'Janela de 24h fechada: só é possível enviar modelo.';return '';}
 function waNomeColado(f){if(f.name&&f.name!=='image.png'&&f.name!=='blob')return f.name;const d=new Date();const ext=((f.type||'').split('/')[1]||'bin').replace(/[^a-z0-9]/g,'').slice(0,5);
  return 'colado-'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0')+'.'+ext;}
+async function waCarregarTextoPos(){if(waTextoPos)return;waTextoPos='final';const r=await sb.from('fiscal_usuario_pref').select('valor').eq('chave','wa_texto_arquivos').maybeSingle();if(!r.error&&r.data&&(r.data.valor==='topo'||r.data.valor==='final'))waTextoPos=r.data.valor;}
+async function waMudarTextoPos(v){if(v===waTextoPos)return;const ant=waTextoPos;waTextoPos=v;waBandejaRedesenhar();
+ const r=await sb.from('fiscal_usuario_pref').upsert({usuario_id:eu.id,chave:'wa_texto_arquivos',valor:v,atualizado_em:new Date().toISOString()}).select('chave');
+ if(r.error||!r.data||!r.data.length){waTextoPos=ant;waBandejaRedesenhar();toast('Não foi possível salvar a preferência.');}}
 async function waAdicionarArquivos(id,lista){
  const fs=[...(lista||[])].filter(f=>f&&f.size>=0);if(!fs.length)return;
  const c=waConv(id);const motivo=waPodeAnexar(c);if(motivo){toast(motivo);return;}
- if(!waBandeja||waBandeja.conv!==id){const ii=el('wwin');waBandeja={conv:id,itens:[]};
-  if(ii&&ii.value.trim()){waBandeja.leg0=ii.value.trim();ii.value='';waRasc[id]='';waCresce(ii);}}
- const grandes=[],vazios=[];
+ waBandejaLerLegendas();const b=waBandejas[id]||(waBandejas[id]=[]);const grandes=[],vazios=[];
  for(const f of fs){if(f.size>WA_LIM_DOC){grandes.push(f);continue;}if(!f.size){vazios.push(f);continue;}
-  const nome=waNomeColado(f);waBandeja.itens.push({id:crypto.randomUUID(),f,nome,tipo:await waTipoEnvio(f),leg:'',url:/^image\/(jpeg|png|gif|webp)$/.test(f.type)?URL.createObjectURL(f):null});}
- if(waBandeja.leg0&&waBandeja.itens.length){waBandeja.itens[0].leg=waBandeja.leg0;waBandeja.leg0='';}
+  const nome=waNomeColado(f);b.push({id:crypto.randomUUID(),f,nome,tipo:await waTipoEnvio(f),leg:'',url:/^image\/(jpeg|png|gif|webp)$/.test(f.type)?URL.createObjectURL(f):null});}
  if(vazios.length)toast(vazios.length>1?'Arquivos vazios não são enviados.':'Arquivo vazio não é enviado.');
- if(grandes.length){waAvisoGrande(grandes,waBandeja.itens.length?()=>waBandejaDesenhar():null);return;}
- waBandejaDesenhar();}
+ await waCarregarTextoPos();
+ if(selWhats===id)waBandejaRedesenhar();
+ if(grandes.length)waAvisoGrande(grandes);}
 function waEnviarArquivos(id,arquivos){return waAdicionarArquivos(id,arquivos);}
-function waBandejaFechar(){if(waBandeja)waBandeja.itens.forEach(x=>{if(x.url)URL.revokeObjectURL(x.url);});waBandeja=null;fecharModal();}
-function waBandejaDesenhar(){
- const b=waBandeja;if(!b||!b.itens.length){waBandejaFechar();return;}const c=waConv(b.conv);
- const tot=b.itens.reduce((s,x)=>s+x.f.size,0);
- waModal('Enviar para '+(c?c.nome:''),`<div class="wz wz-bandeja" ondragover="waBandejaSobre(event)" ondrop="waBandejaSolta(event)">
-  <div class="wz-blista" id="wzBLista">${b.itens.map((x,k)=>{const [ek,er]=waExt(x.nome,x.tipo);return `<div class="wz-bi" draggable="true" data-k="${k}" ondragstart="waArrastoItem=${k};this.classList.add('arr')" ondragend="this.classList.remove('arr')" ondragover="waItemSobre(event,${k})" ondrop="waItemSolta(event,${k})">
+function waBandejaHtml(c){const b=waBandejas[c.id];if(!b||!b.length)return '';const tot=b.reduce((s,x)=>s+x.f.size,0);
+ return `<div class="wz-anexos" id="wzAnexos"><div class="wz-acab"><b>${b.length} ${b.length>1?'arquivos':'arquivo'} · ${escH(waTam(tot))}</b>
+   <div class="wz-pos"><button class="${waTextoPos==='topo'?'on':''}" onclick="waMudarTextoPos('topo')">Texto no topo</button><button class="${waTextoPos!=='topo'?'on':''}" onclick="waMudarTextoPos('final')">Texto no final</button></div>
+   <span class="sp"></span><button class="wz-alnk" onclick="waEscolherArquivo('${c.id}','*/*')">+ Adicionar</button><button class="wz-alnk" onclick="waBandejaLimpar('${c.id}')">Limpar</button></div>
+  <div class="wz-alista">${b.map((x,k)=>{const [ek,er]=waExt(x.nome,x.tipo);return `<div class="wz-ai" draggable="true" ondragstart="waArrastoItem=${k};this.classList.add('arr')" ondragend="this.classList.remove('arr');waArrastoItem=null" ondragover="if(waArrastoItem!==null){event.preventDefault();event.stopPropagation()}" ondrop="waItemSolta(event,'${c.id}',${k})">
    <span class="wz-grip" title="Arrastar para mudar a ordem">⋮⋮</span><span class="wz-ord">${k+1}</span>
-   ${x.url?`<img class="wz-bthumb" src="${escH(x.url)}" alt="">`:`<span class="wz-ext ${ek}">${escH(er)}</span>`}
-   <div class="wz-bm"><b title="${escH(x.nome)}">${escH(x.nome)}</b><span>${escH(WA_TIPO_ROT[x.tipo])} · ${escH(waTam(x.f.size))}</span>
-    <input class="wz-bleg" id="wzbl-${k}" maxlength="970" placeholder="${x.tipo==='audio'?'Texto (vai logo depois do áudio)':'Texto deste arquivo'}" value="${escH(x.leg)}" oninput="waBandeja.itens[${k}].leg=this.value"></div>
-   <div class="wz-bord"><button title="Subir" ${k?'':'disabled'} onclick="waBandejaMover(${k},-1)">↑</button><button title="Descer" ${k<b.itens.length-1?'':'disabled'} onclick="waBandejaMover(${k},1)">↓</button><button title="Tirar" onclick="waBandejaTirar(${k})">✕</button></div></div>`;}).join('')}</div>
-  <div class="wz-brod"><button class="wz-sec2" onclick="waBandejaMais()">+ Adicionar</button><span>${b.itens.length} ${b.itens.length>1?'arquivos':'arquivo'} · ${escH(waTam(tot))}</span><button class="wz-env" id="wzBEnv" onclick="waBandejaEnviar()">Enviar ${WZ.env}</button></div></div>`,640);
- const x=document.querySelector('.modal .x');if(x)x.setAttribute('onclick','waBandejaFechar()');
- const i=el('wzbl-0');if(i&&!document.activeElement.closest('.wz-bandeja'))i.focus();}
-function waBandejaLerLegendas(){if(!waBandeja)return;waBandeja.itens.forEach((x,k)=>{const i=el('wzbl-'+k);if(i)x.leg=i.value;});}
-function waBandejaMover(k,d){waBandejaLerLegendas();const it=waBandeja.itens;const j=k+d;if(j<0||j>=it.length)return;[it[k],it[j]]=[it[j],it[k]];waBandejaDesenhar();}
-function waBandejaTirar(k){waBandejaLerLegendas();const x=waBandeja.itens.splice(k,1)[0];if(x&&x.url)URL.revokeObjectURL(x.url);waBandejaDesenhar();}
-function waBandejaMais(){waBandejaLerLegendas();const i=document.createElement('input');i.type='file';i.multiple=true;i.onchange=()=>{if(i.files.length)waAdicionarArquivos(waBandeja?waBandeja.conv:selWhats,[...i.files]);};i.click();}
-function waItemSobre(ev,k){if(waArrastoItem===null)return;ev.preventDefault();ev.stopPropagation();}
-function waItemSolta(ev,k){if(waArrastoItem===null)return;ev.preventDefault();ev.stopPropagation();waBandejaLerLegendas();const it=waBandeja.itens;const de=waArrastoItem;waArrastoItem=null;if(de===k)return;const [x]=it.splice(de,1);it.splice(k,0,x);waBandejaDesenhar();}
-function waBandejaSobre(ev){if(ev.dataTransfer&&[...ev.dataTransfer.types].includes('Files'))ev.preventDefault();}
-function waBandejaSolta(ev){if(!ev.dataTransfer||!ev.dataTransfer.files.length)return;ev.preventDefault();waBandejaLerLegendas();waAdicionarArquivos(waBandeja.conv,ev.dataTransfer.files);}
+   ${x.url?`<img class="wz-athumb" src="${escH(x.url)}" alt="">`:`<span class="wz-ext ${ek}">${escH(er)}</span>`}
+   <div class="wz-am"><b title="${escH(x.nome)}">${escH(x.nome)}</b><span>${escH(WA_TIPO_ROT[x.tipo])} · ${escH(waTam(x.f.size))}</span></div>
+   <input class="wz-aleg" id="wzal-${k}" maxlength="970" placeholder="${x.tipo==='audio'?'Texto logo depois do áudio':'Texto deste arquivo'}" value="${escH(x.leg)}" oninput="waBandejas['${c.id}'][${k}].leg=this.value" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarWW();}">
+   <div class="wz-aord"><button title="Subir" ${k?'':'disabled'} onclick="waBandejaMover('${c.id}',${k},-1)">↑</button><button title="Descer" ${k<b.length-1?'':'disabled'} onclick="waBandejaMover('${c.id}',${k},1)">↓</button><button title="Tirar" onclick="waBandejaTirar('${c.id}',${k})">✕</button></div></div>`;}).join('')}</div></div>`;}
+function waBandejaRedesenhar(){const c=selWhats&&waConv(selWhats);if(!c)return;const a=el('wzAnexos');const h=waBandejaHtml(c);
+ if(a){if(h)a.outerHTML=h;else a.remove();return;}const cx=document.querySelector('.wz-comp .wz-caixa');if(cx&&h)cx.insertAdjacentHTML('beforebegin',h);}
+function waBandejaLerLegendas(){const c=selWhats&&waConv(selWhats);const b=c&&waBandejas[c.id];if(!b)return;b.forEach((x,k)=>{const i=el('wzal-'+k);if(i)x.leg=i.value;});}
+function waBandejaMover(id,k,d){waBandejaLerLegendas();const it=waBandejas[id];const j=k+d;if(!it||j<0||j>=it.length)return;[it[k],it[j]]=[it[j],it[k]];waBandejaRedesenhar();}
+function waBandejaTirar(id,k){waBandejaLerLegendas();const it=waBandejas[id];const x=it.splice(k,1)[0];if(x&&x.url)URL.revokeObjectURL(x.url);if(!it.length)delete waBandejas[id];waBandejaRedesenhar();}
+function waBandejaLimpar(id){(waBandejas[id]||[]).forEach(x=>{if(x.url)URL.revokeObjectURL(x.url);});delete waBandejas[id];waBandejaRedesenhar();}
+function waItemSolta(ev,id,k){if(waArrastoItem===null)return;ev.preventDefault();ev.stopPropagation();waBandejaLerLegendas();const it=waBandejas[id];const de=waArrastoItem;waArrastoItem=null;if(!it||de===k)return;const [x]=it.splice(de,1);it.splice(k,0,x);waBandejaRedesenhar();}
 function waEsperarStatus(c,mid,ms){
  const m=(c.wpp||[]).find(x=>x.id===mid);if(m&&['enviada','entregue','lida','falhou'].includes(m.st))return Promise.resolve(m.st);
  return new Promise(ok=>{const t=setTimeout(()=>{delete waEsperas[mid];ok('tempo');},ms);waEsperas[mid]=st=>{clearTimeout(t);delete waEsperas[mid];ok(st);};});}
-async function waBandejaEnviar(){
- waBandejaLerLegendas();const b=waBandeja;if(!b||!b.itens.length)return;const c=waConv(b.conv);
- const motivo=waPodeAnexar(c);if(motivo){toast(motivo);return;}
- waBandeja=null;fecharModal();
- const fila=b.itens.map(x=>{const id_local=crypto.randomUUID();
-  const tmp={id:'tmp-'+id_local,id_local,tipo:x.tipo,d:'sai',t:'',nomeArq:x.nome,legenda:x.tipo==='audio'?'':x.leg.trim(),h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'aguardando',autorNome:waAssinatura(eu.nome),tam:x.f.size};
-  c.wpp.push(tmp);return {x,tmp};});
+async function waEnviarComArquivos(c,texto){
+ waBandejaLerLegendas();const itens=(waBandejas[c.id]||[]).slice();if(!itens.length)return false;
+ const motivo=waPodeAnexar(c);if(motivo){toast(motivo);return true;}
+ delete waBandejas[c.id];waBandejaRedesenhar();
+ const passos=[];if(texto&&waTextoPos==='topo')passos.push({texto});
+ itens.forEach(x=>{passos.push({x});if(x.tipo==='audio'&&x.leg.trim())passos.push({texto:x.leg.trim()});});
+ if(texto&&waTextoPos!=='topo')passos.push({texto});
+ const nomeEu=waAssinatura(eu.nome);
+ passos.forEach(p=>{if(!p.x)return;const id_local=crypto.randomUUID();
+  p.tmp={id:'tmp-'+id_local,id_local,tipo:p.x.tipo,d:'sai',t:'',nomeArq:p.x.nome,legenda:p.x.tipo==='audio'?'':p.x.leg.trim(),h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'aguardando',autorNome:nomeEu,tam:p.x.f.size};
+  c.wpp.push(p.tmp);});
  if(selWhats===c.id)waDesenharMsgs();
- for(let i=0;i<fila.length;i++){const {x,tmp}=fila[i];
-  tmp.st='enviando';if(selWhats===c.id)waDesenharMsgs();
-  const j=await waEnviarMidia(c,x.f,x.tipo,x.nome,x.tipo==='audio'?'':x.leg.trim(),tmp);
-  let st=j&&j.ok?await waEsperarStatus(c,j.mensagem_id,120000):'falhou';
-  if(st!=='falhou'&&x.tipo==='audio'&&x.leg.trim()){const k=await enviarTextoWA(c,x.leg.trim());st=k&&k.ok?await waEsperarStatus(c,k.mensagem_id,120000):'falhou';}
-  if(x.url)URL.revokeObjectURL(x.url);
-  if(st==='falhou'){const resto=fila.slice(i+1);resto.forEach(r=>{r.tmp.st='falhou';});if(selWhats===c.id)waDesenharMsgs();
-   waModal('Envio interrompido',`<div style="font-size:12.5px;line-height:1.55">O arquivo <b>${escH(x.nome)}</b> não foi enviado${resto.length?`, e os ${resto.length} seguintes ficaram parados para não sair fora de ordem`:''}.</div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="bt-assumir" onclick="fecharModal()">Entendi</button></div>`,440);return;}}}
+ for(let i=0;i<passos.length;i++){const p=passos[i];let j;
+  if(p.x){p.tmp.st='enviando';if(selWhats===c.id)waDesenharMsgs();j=await waEnviarMidia(c,p.x.f,p.x.tipo,p.x.nome,p.x.tipo==='audio'?'':p.x.leg.trim(),p.tmp);if(p.x.url)URL.revokeObjectURL(p.x.url);}
+  else j=await enviarTextoWA(c,p.texto);
+  const st=j&&j.ok?await waEsperarStatus(c,j.mensagem_id,120000):'falhou';
+  if(st==='falhou'){const resto=passos.slice(i+1);resto.forEach(r=>{if(r.tmp)r.tmp.st='falhou';});if(selWhats===c.id)waDesenharMsgs();
+   waModal('Envio interrompido',`<div style="font-size:12.5px;line-height:1.55">${p.x?`O arquivo <b>${escH(p.x.nome)}</b>`:'O texto'} não foi enviado${resto.length?`, e ${resto.length>1?'os '+resto.length+' itens seguintes ficaram parados':'o item seguinte ficou parado'} para não chegar fora de ordem`:''}.</div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="bt-assumir" onclick="fecharModal()">Entendi</button></div>`,440);return true;}}
+ return true;}
 function waTemArquivos(ev){return !!(ev.dataTransfer&&[...ev.dataTransfer.types].includes('Files'));}
 function waSobreConversa(ev){if(!waTemArquivos(ev)||!selWhats)return;ev.preventDefault();ev.currentTarget.classList.add('solta');}
 function waSoltaConversa(ev){ev.currentTarget.classList.remove('solta');if(!ev.dataTransfer||!ev.dataTransfer.files.length||!selWhats)return;ev.preventDefault();waAdicionarArquivos(selWhats,ev.dataTransfer.files);}
 window.addEventListener('dragover',e=>{if(waTemArquivos(e))e.preventDefault();});
 window.addEventListener('drop',e=>{if(waTemArquivos(e))e.preventDefault();});
-document.addEventListener('paste',e=>{if(view!=='whatsweb'||!selWhats)return;const fs=[...((e.clipboardData&&e.clipboardData.files)||[])];if(!fs.length)return;e.preventDefault();if(waBandeja)waBandejaLerLegendas();waAdicionarArquivos(waBandeja?waBandeja.conv:selWhats,fs);});
+document.addEventListener('paste',e=>{if(view!=='whatsweb'||!selWhats)return;const fs=[...((e.clipboardData&&e.clipboardData.files)||[])];if(!fs.length)return;e.preventDefault();waAdicionarArquivos(selWhats,fs);});
 /* ---------- dados reais ---------- */
 const ST_WA={enviando:'enviando',aguardando:'na fila',enviada:'enviada',entregue:'entregue',lida:'lida',falhou:'falhou'};
 let sb=null,eu=null,waEntrada=[],waMeus=[],waMsgs={};
