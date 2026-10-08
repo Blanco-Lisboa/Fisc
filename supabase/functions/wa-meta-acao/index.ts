@@ -79,8 +79,8 @@ Deno.serve(async (req) => {
 
   try {
     if (p.acao === "grupo_criar") {
-      const nv = await usuario.rpc("fiscal_nivel");
-      if (nv.error || !["assistente", "gerente"].includes(nv.data)) return json({ ok: false, erro: "So gestor cria grupo." }, 403);
+      const pode = await usuario.rpc("fiscal_pode", { p_permissao: "wa_grupo_criar" });
+      if (pode.error || pode.data !== true) return json({ ok: false, erro: "Sem permissao para criar grupo." }, 403);
       const nome = String(p.nome ?? "").trim();
       if (!nome || nome.length > 100) return json({ ok: false, erro: "Nome do grupo obrigatorio (ate 100 letras)." }, 400);
       const num = await sb.from("wa_numero").select("identificador").eq("provedor", "meta_cloud").eq("ativo", true).limit(1).maybeSingle();

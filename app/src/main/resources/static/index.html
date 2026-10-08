@@ -1093,11 +1093,13 @@ function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp
 function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
 const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pendencias:'Pendências',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
-function eGestor(){return eu&&['assistente','gerente'].includes(eu.nivel);}
-function eColab(){return eu&&eu.nivel==='colaborador';}
-function telaInicial(){return eGestor()?'gestor':(eColab()?'central':'apuracao');}
-function podeVer(v){return !((v==='gestor'&&!eGestor())||(v==='central'&&!eColab()));}
-function aplicarMenu(){el('navGestor').style.display=eGestor()?'':'none';el('navCentral').style.display=eColab()?'':'none';}
+let acesso={perfil:'',tela_inicial:'apuracao',permissoes:[]};
+async function carregarAcesso(){const r=await sb.rpc('fiscal_minhas_permissoes');if(r.error){toast('Não foi possível ler as permissões.');return;}acesso=r.data||{perfil:'',tela_inicial:'apuracao',permissoes:[]};}
+function tem(p){return (acesso.permissoes||[]).includes(p);}
+function eGestor(){return acesso.perfil==='gestor';}
+function telaInicial(){return acesso.tela_inicial||'apuracao';}
+function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador')));}
+function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';}
 function irView(v){if(!podeVer(v))v=telaInicial();view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
 function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central',mapaDados=null,cartAberta=new Set();
@@ -1107,7 +1109,7 @@ let clientesDados=null;
 const emCurso={};
 function umaVez(k,fn){if(!emCurso[k])emCurso[k]=fn().finally(()=>{emCurso[k]=null;});return emCurso[k];}
 function mudou(a,b){return JSON.stringify(a)!==JSON.stringify(b);}
-function preCarregarGestor(){if(!eGestor())return;carregarCentralGestor();carregarMapa();carregarClientes();}
+function preCarregarGestor(){if(!tem('painel_gestor'))return;carregarCentralGestor();carregarMapa();carregarClientes();}
 function setGestorAba(a){gestorAba=a;if(a==='clientes'){cliPag=1;cliPorPag=0;}renderGestor();({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[a])();}
 function renderGestor(){
  const ab=[['central','Central'],['mapa','Mapa do Departamento'],['clientes','Clientes']];
@@ -1700,7 +1702,7 @@ const ICO_GRUPO='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" str
 const ICO_CLIPE='<svg viewBox="0 0 24 24"><path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>';
 const ICO_ESTRELA='★';
 function waTodas(){return waEntrada.concat(waMeus);}
-function waPodeAgir(c){return !!c&&(eGestor()||c.dono===eu.id);}
+function waPodeAgir(c){return !!c&&(tem('wa_conversa_qualquer')||c.dono===eu.id);}
 function waOrdenar(l){return l.slice().sort((a,b)=>(b.fixada?1:0)-(a.fixada?1:0)||(a.fixada&&b.fixada?new Date(b.fixada)-new Date(a.fixada):0)||new Date(b.ultima||0)-new Date(a.ultima||0));}
 function waNaoLidas(x){return x.marcadaNL?Math.max(1,x.naoLidas):x.naoLidas;}
 function waFecharMenus(){document.querySelectorAll('.wa-menu').forEach(m=>m.remove());}
@@ -1744,10 +1746,10 @@ function waMenuChat(ev,id){
   ['Mensagens favoritas',()=>waFavoritas(id)],
   pode?[c.silenciada?'Reativar notificações':'Silenciar notificações',()=>waMarcar(c,'silenciada',!c.silenciada)]:null,
   pode?[c.arquivada?'Desarquivar conversa':'Arquivar conversa',()=>waMarcar(c,'arquivada',!c.arquivada)]:null,
-  pode&&c.grupo&&eGestor()?['Link de convite',()=>waGrupoLink(id)]:null,
-  pode&&c.grupo&&eGestor()?['Pedidos para entrar',()=>waGrupoPedidos(id)]:null,
-  pode&&c.grupo&&eGestor()?['Editar grupo',()=>waGrupoEditar(id)]:null,
-  pode&&c.grupo&&eGestor()?['Apagar grupo',()=>waConfirmar('Apagar o grupo "'+c.nome+'"? Todos os participantes saem.','Apagar grupo',()=>waAcao('grupo_apagar',id)),true]:null,
+  pode&&c.grupo&&tem('wa_grupo_gerir')?['Link de convite',()=>waGrupoLink(id)]:null,
+  pode&&c.grupo&&tem('wa_grupo_gerir')?['Pedidos para entrar',()=>waGrupoPedidos(id)]:null,
+  pode&&c.grupo&&tem('wa_grupo_gerir')?['Editar grupo',()=>waGrupoEditar(id)]:null,
+  pode&&c.grupo&&tem('wa_grupo_gerir')?['Apagar grupo',()=>waConfirmar('Apagar o grupo "'+c.nome+'"? Todos os participantes saem.','Apagar grupo',()=>waAcao('grupo_apagar',id)),true]:null,
   pode&&!c.grupo?[c.bloqueado?'Desbloquear':'Bloquear',()=>waConfirmarBloqueio(c),!c.bloqueado]:null]);
 }
 function waMenuMsg(ev,mid){
@@ -1825,7 +1827,7 @@ async function waDados(id){
  const c=waConv(id);if(!c)return;
  if(!c.grupo){waModal('Dados do contato',`<span class="fl">Nome</span><div style="font-size:13px;font-weight:600">${escH(c.nome)}</div><span class="fl">Telefone</span><div style="font-size:13px">${escH(fmtTel(c.telefone))}</div><span class="fl">Situação</span><div style="font-size:13px">${c.bloqueado?'Bloqueado':'Ativo'}</div>${waPodeAgir(c)?`<div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="apubtn" onclick="fecharModal();waConfirmarBloqueio(waConv('${c.id}'))">${c.bloqueado?'Desbloquear':'Bloquear'}</button></div>`:''}`);return;}
  waModal('Dados do grupo',`<span class="fl">Nome</span><div style="font-size:13px;font-weight:600">${escH(c.nome)}</div><span class="fl">Descrição</span><div style="font-size:12.5px">${escH(c.grupoDesc||'—')}</div><span class="fl">Participantes</span><div id="wapart" style="font-size:12.5px">…</div>`);
- if(!eGestor())return;
+ if(!tem('wa_grupo_gerir'))return;
  const j=await waEdge('wa-meta-acao',{acao:'grupo_info',conversa_id:id});const box=el('wapart');if(!box)return;
  if(!j.ok){box.textContent=j.erro||'Não foi possível ler os participantes.';return;}
  const ps=(j.grupo&&j.grupo.participants)||[];
@@ -2278,7 +2280,7 @@ function renderWhatsWeb(){
  el('conteudo').innerHTML=`<div class="wz">
   <aside class="wz-fila">
    <div class="wz-ftop">
-    <div class="wz-l1"><h2>WhatsApp</h2>${waNumOf?`<span class="wz-num"><i></i><b>Oficial</b> ${escH(fmtTel(waNumOf.telefone))}</span>`:''}${eGestor()?`<button class="wz-ibtn" title="Novo grupo" onclick="waNovoGrupo()">${WZ.grupo}</button>`:''}</div>
+    <div class="wz-l1"><h2>WhatsApp</h2>${waNumOf?`<span class="wz-num"><i></i><b>Oficial</b> ${escH(fmtTel(waNumOf.telefone))}</span>`:''}${tem('wa_grupo_criar')?`<button class="wz-ibtn" title="Novo grupo" onclick="waNovoGrupo()">${WZ.grupo}</button>`:''}</div>
     <div class="wz-kpis"><button class="wz-kpi al${waFiltro==='naolidas'?' on':''}" onclick="waFiltrar('naolidas')"><span>Não lidas</span><b>${k.nl}</b></button><button class="wz-kpi${waFiltro==='todas'?'':''}" onclick="waFiltrar('todas')"><span>Abertas</span><b>${k.ab}</b></button><button class="wz-kpi av${waFiltro==='acabando'?' on':''}" onclick="waFiltrar('acabando')"><span>Janela acaba</span><b>${k.fim}</b></button></div>
     <div class="wz-seg"><button class="${waAba==='entrada'?'on':''}" onclick="waAba='entrada';selWhats=null;render()">Entrada <em>${waEntrada.filter(x=>!x.arquivada).length}</em></button><button class="${waAba==='meus'?'on':''}" onclick="waAba='meus';selWhats=null;render()">Minhas <em>${waMeus.filter(x=>!x.arquivada).length}</em></button></div>
     <label class="wz-busca">${WZ.busca}<input id="wwbusca" placeholder="Buscar por nome, telefone, empresa ou CNPJ" value="${escH(waBusca)}" oninput="waBusca=this.value;render()"></label>
@@ -2305,7 +2307,7 @@ function waCabecalho(c){
   <button class="wz-ibtn" title="Buscar na conversa" onclick="waBuscaMsg='';render();setTimeout(()=>{const i=el('wwbmsg');if(i)i.focus();},0)">${WZ.busca}</button>
   <button class="wz-ibtn" title="Mais opções" onclick="waMenuChat(event,'${c.id}')">${WZ.mais}</button></header>`;}
 function waComposer(c,isEntrada){
- if(isEntrada&&!eGestor())return '';
+ if(isEntrada&&!tem('wa_entrada_responder'))return '';
  if(c.bloqueado)return `<div class="wz-comp"><div class="wz-bloq"><span>Contato bloqueado</span><button class="wz-sec2" onclick="waAcao('desbloquear','${c.id}')">Desbloquear</button></div></div>`;
  if(!c.grupo&&waRestante(c)<=0)return `<div class="wz-comp"><div class="wz-fechada">${waMedidor(c).replace('id="wzMed"','')}<span class="sp"></span><button class="wz-modbtn" onclick="waModelos('${c.id}')">${WZ.tpl}Enviar modelo</button></div></div>`;
  const r=waResp?c.wpp.find(m=>m.id===waResp):null;
@@ -2391,7 +2393,7 @@ function waNivelDe(n){return WA_NIVEIS.findIndex(x=>x[0]===n);}
 function waFichaHtml(c){const f=waFicha[c.id];
  const tags=[];if(c.natureza)tags.push(`<span class="wz-tg">${escH(WA_NATUREZA[c.natureza]||c.natureza)}</span>`);if(c.principal)tags.push('<span class="wz-tg v">Contato principal</span>');if(c.bloqueado)tags.push('<span class="wz-tg a">Bloqueado</span>');
  const pode=f&&f.pode_vincular;
- const acoes=[!c.grupo&&!(waEntrada.includes(c)&&!eGestor())?`<button onclick="waModelos('${c.id}')">${WZ.tpl}Modelos</button>`:'',pode&&!c.grupo?`<button onclick="waEtiqueta('${c.id}')">${WZ.etiqueta}Etiqueta</button>`:'',waPodeAgir(c)?`<button onclick="waMarcar(waConv('${c.id}'),'fixada',${!c.fixada})">${WZ.fixar}${c.fixada?'Desafixar':'Fixar'}</button>`:''].filter(Boolean).join('');
+ const acoes=[!c.grupo&&!(waEntrada.includes(c)&&!tem('wa_entrada_responder'))?`<button onclick="waModelos('${c.id}')">${WZ.tpl}Modelos</button>`:'',pode&&!c.grupo?`<button onclick="waEtiqueta('${c.id}')">${WZ.etiqueta}Etiqueta</button>`:'',waPodeAgir(c)?`<button onclick="waMarcar(waConv('${c.id}'),'fixada',${!c.fixada})">${WZ.fixar}${c.fixada?'Desafixar':'Fixar'}</button>`:''].filter(Boolean).join('');
  const alc=[];(f&&f.vinculos||[]).forEach(v=>(v.alcance||[]).forEach(a=>{if(a.escopo==='empresa'&&a.empresa_id){const ex=alc.find(x=>x.id===a.empresa_id);const n=waNivelDe(a.nivel);if(!ex)alc.push({id:a.empresa_id,n});else ex.n=Math.max(ex.n,n);}}));
  const emp=alc.map(a=>{const e=waEmp[a.id]||{};return `<div class="wz-emp"><b>${escH(e.razao_social||e.nome_fantasia||'Empresa')}</b><span class="cn">${escH(e.cnpj?fmtCnpj(e.cnpj):'')}</span><div class="wz-niv">${WA_NIVEIS.map(([k,r],i)=>`<span class="${i<=a.n?'ok':''}">${r}</span>`).join('')}</div></div>`;}).join('');
  const cart=f?[...new Set((f.carteira||[]).map(x=>x.usuario))].join(', '):'';
@@ -2459,7 +2461,7 @@ setInterval(()=>{if(view!=='whatsweb')return;const c=selWhats&&waConv(selWhats);
 /* ---------- WHATSAPP bandeja de arquivos ---------- */
 const waBandejas={};let waArrastoItem=null,waTextoPos=null;const waEsperas={};
 const WA_TIPO_ROT={imagem:'foto',video:'vídeo',audio:'áudio',documento:'arquivo'};
-function waPodeAnexar(c){if(!c)return 'Escolha uma conversa.';if(waEntrada.includes(c)&&!c.grupo&&!eGestor())return 'Só quem atende a conversa pode enviar arquivos.';
+function waPodeAnexar(c){if(!c)return 'Escolha uma conversa.';if(waEntrada.includes(c)&&!c.grupo&&!tem('wa_entrada_responder'))return 'Só quem atende a conversa pode enviar arquivos.';
  if(c.bloqueado)return 'Contato bloqueado.';if(!c.grupo&&waRestante(c)<=0)return 'Janela de 24h fechada: só é possível enviar modelo.';return '';}
 function waNomeColado(f){if(f.name&&f.name!=='image.png'&&f.name!=='blob')return f.name;const d=new Date();const ext=((f.type||'').split('/')[1]||'bin').replace(/[^a-z0-9]/g,'').slice(0,5);
  return 'colado-'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0')+'.'+ext;}
@@ -2562,7 +2564,7 @@ document.addEventListener('keydown',e=>{
  if(cod==='ASf'||cod==='Sf'){if(c)fazer(()=>{waBuscaMsg='';render();setTimeout(()=>{const i=el('wwbmsg');if(i)i.focus();},0);});return;}
  if(cod==='Atab'||cod==='tab'){if(view==='whatsweb')fazer(()=>waIrConversa(1));return;}
  if(cod==='AStab'||cod==='Stab'){if(view==='whatsweb')fazer(()=>waIrConversa(-1));return;}
- if(cod==='ASn'||cod==='Sn'){if(eGestor())fazer(()=>waNovoGrupo());return;}
+ if(cod==='ASn'||cod==='Sn'){if(tem('wa_grupo_criar'))fazer(()=>waNovoGrupo());return;}
  if(cod==='Ap'||cod==='p'){if(c)fazer(()=>waDados(c.id));return;}
  if(cod==='Ae'||cod==='e'){if(c)fazer(()=>waEmojiPainel(waCampoTexto(t)?t:null));return;}
 },true);
@@ -2633,15 +2635,16 @@ async function iniciarDados(){
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
   .on('postgres_changes',{event:'UPDATE',schema:'public',table:'wa_midia'},aoMudarMidia).subscribe();
- sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).subscribe();
+ sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).on('postgres_changes',{event:'*',schema:'public',table:'fiscal_nivel_permissao'},()=>aoMudarEu({new:{ativo:true,nivel:eu.nivel}})).subscribe();
  view=telaInicial();render();}
-function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}const era=eGestor();eu.nivel=n.nivel;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();if(!era)preCarregarGestor();if(!podeVer(view))view=telaInicial();render();}
+async function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}const era=tem('painel_gestor');eu.nivel=n.nivel;await carregarAcesso();el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();if(!era)preCarregarGestor();if(!podeVer(view))view=telaInicial();render();}
 (async()=>{const s=await fiscalSessaoAtual();if(!s){location.href='login.html';return;}
  const sbl=await blSessao();if(!sbl||sbl.user.id!==s.user.id){fiscalSair();return;}
  EMAILS.aoContar=n=>{const b=el('emBadge');if(b){b.textContent=n;b.style.display=n?'':'none';}};EMAILS.contar();
  sb=fiscalCliente();const m=s.user.app_metadata||{};eu={id:s.user.id,nome:m.nome||s.user.email,nivel:m.fiscal_nivel||''};
  sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')location.href='login.html';});
  const u=await sb.from('fiscal_usuario').select('nivel,ativo').eq('id',eu.id).maybeSingle();if(!u.data||!u.data.ativo){fiscalSair();return;}eu.nivel=u.data.nivel;
+ await carregarAcesso();
  await iniciarDados();})();
 </script>
 </body>
