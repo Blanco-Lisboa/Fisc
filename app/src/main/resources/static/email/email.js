@@ -154,11 +154,25 @@
    if(E.contaId){carregarPastas();carregarLista({});}
   }).catch(function(){E.contas=[];E.carregandoContas=false;desenhar();});
  }
+ /* ---- nao lidas ---- */
+ var NAO_LIDAS={};
+ function anotarNaoLidas(id,pastas){var n=0;(pastas||[]).forEach(function(p){if(p.id==='INBOX')n=p.nao_lidas||0;});NAO_LIDAS[id]=n;avisarContagem();}
+ function avisarContagem(){var t=0;Object.keys(NAO_LIDAS).forEach(function(k){t+=NAO_LIDAS[k];});if(window.EMAILS&&EMAILS.aoContar)EMAILS.aoContar(t);}
+ function contarTudo(){
+  return rpc('gmail_contas_permitidas').then(function(r){
+   var ids=(Array.isArray(r)?r:[]).map(function(c){return c.id;});
+   Object.keys(NAO_LIDAS).forEach(function(k){if(ids.indexOf(k)<0)delete NAO_LIDAS[k];});
+   avisarContagem();
+   return Promise.all(ids.map(function(id){return fn('gmail-listar-mensagens',{contaId:id,acao:'pastas'}).then(function(d){anotarNaoLidas(id,d.pastas);}).catch(function(){});}));
+  }).catch(function(){});
+ }
+
  /* ---- carga: caixa ---- */
  function carregarPastas(){
   if(!E.contaId)return Promise.resolve();
   return cx({acao:'pastas'}).then(function(d){
-   E.pastas=d.pastas||[];E.categorias=d.categorias||[];E.mais=d.mais||[];E.marcadores=d.marcadores||[];desenhar();
+   E.pastas=d.pastas||[];E.categorias=d.categorias||[];E.mais=d.mais||[];E.marcadores=d.marcadores||[];
+   anotarNaoLidas(E.contaId,d.pastas);desenhar();
   }).catch(function(){E.pastas=[];E.categorias=[];E.mais=[];E.marcadores=[];desenhar();});
  }
  function carregarLista(o){
@@ -1047,6 +1061,8 @@
 
  /* ================= ABRIR O MODULO ================= */
  window.EMAILS={
+  aoContar:null,
+  contar:contarTudo,
   aberto:function(caixa){return !!(E.raiz&&caixa.contains(E.raiz));},
   abrir:function(caixa){
    caixa.innerHTML='<div id="emRoot"></div>';

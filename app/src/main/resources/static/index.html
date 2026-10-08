@@ -45,6 +45,10 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .swa .bd{background:#1f8f5a;color:#fff}
 .it.swa.on{background:#12513a;color:#fff;box-shadow:inset 2px 0 0 #2fae6e}
 .it.swa.on .ic svg{stroke:#dff5ea}
+.sem{background:#3d1606;border-color:#a8380a;color:#ffe7da}
+.sem .bd{background:var(--laranja);color:#fff}
+.it.sem.on{background:#55200a;color:#fff;box-shadow:inset 2px 0 0 #ff7a3d}
+.it.sem.on .ic svg{stroke:#ffe7da}
 .stm{background:#0e2a4d;border-color:#1f4f8f;color:#dfe9f8}
 .stm .bd{background:#2f6fed;color:#fff}
 .it.stm.on{background:#13386a;color:#fff;box-shadow:inset 2px 0 0 #4f8ef5}
@@ -824,7 +828,7 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="it" data-view="ia" onclick="irView('ia')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg></span> IA &amp; Meta</div>
   <div class="lab">MENSAGENS</div>
   <div class="sub">
-    <div class="it" data-view="email" onclick="irView('email')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></span> E-mail's</div>
+    <div class="it sem" data-view="email" onclick="irView('email')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></span> E-mail's <span class="bd" id="emBadge" style="display:none">0</span></div>
     <div class="it stm" data-view="teams" onclick="irView('teams')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span> Team's <span class="bd" id="tmBadge" style="display:none">0</span></div>
     <div class="it swa" data-view="whatsweb" onclick="irView('whatsweb')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.38 8.38 0 0 1-4-1L3 20l1-5.5a8.38 8.38 0 0 1-1-4A8.5 8.5 0 0 1 21 11.5z"/></svg></span> WhatsApp <span class="bd" id="waBadge">0</span></div>
   </div>
@@ -2515,6 +2519,7 @@ async function iniciarDados(){
 function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}const era=eGestor();eu.nivel=n.nivel;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();if(!era)preCarregarGestor();if(!podeVer(view))view=telaInicial();render();}
 (async()=>{const s=await fiscalSessaoAtual();if(!s){location.href='login.html';return;}
  const sbl=await blSessao();if(!sbl||sbl.user.id!==s.user.id){fiscalSair();return;}
+ EMAILS.aoContar=n=>{const b=el('emBadge');if(b){b.textContent=n;b.style.display=n?'':'none';}};EMAILS.contar();
  sb=fiscalCliente();const m=s.user.app_metadata||{};eu={id:s.user.id,nome:m.nome||s.user.email,nivel:m.fiscal_nivel||''};
  sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')location.href='login.html';});
  const u=await sb.from('fiscal_usuario').select('nivel,ativo').eq('id',eu.id).maybeSingle();if(!u.data||!u.data.ativo){fiscalSair();return;}eu.nivel=u.data.nivel;
