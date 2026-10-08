@@ -39,6 +39,15 @@ public class FiscalApplication {
 
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Fiscal — You Contabilidade");
+            java.util.List<Image> icones = new java.util.ArrayList<>();
+            for (int s : new int[]{16, 24, 32, 48, 64, 128, 256}) {
+                java.net.URL u = FiscalApplication.class.getResource("/icone/fiscal-" + s + ".png");
+                if (u != null) icones.add(Toolkit.getDefaultToolkit().getImage(u));
+            }
+            frame.setIconImages(icones);
+            if (Taskbar.isTaskbarSupported() && Taskbar.getTaskbar().isSupported(Taskbar.Feature.ICON_IMAGE) && !icones.isEmpty()) {
+                Taskbar.getTaskbar().setIconImage(icones.get(icones.size() - 1));
+            }
             frame.getContentPane().add(browser.getUIComponent(), BorderLayout.CENTER);
             frame.setSize(1440, 900);
             frame.setLocationRelativeTo(null);
