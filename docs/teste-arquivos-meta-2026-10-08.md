@@ -22,3 +22,19 @@ A documentação oficial lista só txt/pdf/office para documento, mas o envio po
 - Documento: qualquer formato até 100 MB.
 - Acima de 100 MB: não envia e abre a janela "Arquivo acima do limite" com o nome e o tamanho de cada arquivo.
 - Sticker (WebP 100 KB): o Fiscal não envia figurinha.
+
+## Teste real 2 (08/10, 10:22) — conferindo a tabela do outro agente
+| Envio | Mandado como | Chegou? |
+|---|---|---|
+| T1 foto JPEG 11,6 MB | foto | NÃO (acima de 5 MB) |
+| T2 vídeo H.264 1 MB | vídeo | SIM, toca |
+| T3 vídeo H.264 30 MB | vídeo | NÃO (acima de 16 MB) |
+| T4 vídeo H.265 1 MB | vídeo | NÃO (formato de vídeo errado) |
+| T5 áudio OGG Vorbis | áudio | NÃO (OGG precisa ser Opus) |
+| T6 foto 11,6 MB | arquivo | SIM |
+| T7 vídeo 30 MB | arquivo | SIM |
+| T8 vídeo H.265 | arquivo | SIM |
+| T9 áudio OGG Vorbis | arquivo | SIM |
+
+Em todos os casos a Meta respondeu "aceito" (200) e simplesmente não entregou — por isso o sistema decide ANTES de enviar.
+Confirma as regras aplicadas no Fiscal (commit 46c706c): o que sai do padrão vai como arquivo original e chega.
