@@ -421,7 +421,7 @@ async function tmxCriarReuniao(){
 let tmxFlutAberto=false,tmxFlutCanal=null;
 function tmxAlvo(){return tmxFlutAberto&&tmxFlutCanal?tmxFlutCanal:tmxSel;}
 function tmxCompAtualizar(){if(tmxFlutAberto&&tmxFlutCanal){const c=tmxEl('tmfComp');if(c)c.innerHTML=tmxFlutComposer();}else{const c=tmxEl('tmxComp');if(c)c.innerHTML=tmxComposer();}}
-function tmxFlutComposer(){return tmxGrav?`<div class="wa-comp"><span class="wa-rec">● Gravando ${tmxGrav.seg||0}s</span><span style="flex:1"></span><button class="miniB" onclick="tmxGravarCancelar()">Cancelar</button><button class="snd" onclick="tmxGravarParar()">➤</button></div>`:`${tmxToolsHtml()}<div class="wa-comp"><span class="pl" onclick="tmxMenuAnexo(event)">${TMX_ICO_CLIPE}</span><input id="tmfin" placeholder="Mensagem" oninput="if(this.value.endsWith('@'))tmxMencionar()" onkeydown="if(event.key==='Enter')tmxFlutEnviar()"><span class="pl" title="Gravar áudio" onclick="tmxGravar()">${TMX_MIC}</span><button class="snd" onclick="tmxFlutEnviar()">➤</button></div>`;}
+function tmxFlutComposer(){return tmxGrav?`<div class="wa-comp"><span class="wa-rec">● Gravando ${tmxGrav.seg||0}s</span><span style="flex:1"></span><button class="miniB" onclick="tmxGravarCancelar()">Cancelar</button><button class="snd" onclick="tmxGravarParar()">➤</button></div>`:`<div class="wa-comp"><span class="pl" onclick="tmxMenuAnexo(event)">${TMX_ICO_CLIPE}</span><span class="pl" title="Ações" onclick="tmxMenuAcoes(event)">${TMX_ICO_ACOES}</span><input id="tmfin" placeholder="Mensagem" oninput="if(this.value.endsWith('@'))tmxMencionar()" onkeydown="if(event.key==='Enter')tmxFlutEnviar()"><span class="pl" title="Gravar áudio" onclick="tmxGravar()">${TMX_MIC}</span><button class="snd" onclick="tmxFlutEnviar()">➤</button></div>`;}
 let tmxBolY=null,tmxBolArrastou=false;
 function tmxBolCarregar(){try{const v=parseInt(localStorage.getItem(tmxChave()),10);if(v>0)tmxBolY=v;}catch(e){}}
 function tmxBolLimite(y){return Math.max(12,Math.min(window.innerHeight-70,y));}
@@ -484,6 +484,8 @@ async function tmxFlutEnviar(){
 const TMX_ICO_FONE='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>';
 const TMX_ICO_CAM='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7zM1 5h15v14H1z"/></svg>';
 const TMX_TOOLS=[['pedido','📌 Pedido'],['aviso','📣 Aviso'],['reuniao','📅 Reunião'],['anexo','📎 Anexo'],['audio','🎤 Áudio'],['voz','📞 Chamar'],['video','🎥 Vídeo'],['cliente','🏢 Cliente'],['mencao','@ Menção']];
+const TMX_ICO_ACOES='<svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>';
+function tmxMenuAcoes(ev){tmxMenu(ev,TMX_TOOLS.map(([k,t])=>[t,()=>tmxFerramenta(k)]),true);}
 function tmxToolsHtml(){return `<div class="tm-tools">${TMX_TOOLS.map(([k,t])=>`<button onclick="tmxFerramenta('${k}')">${t}</button>`).join('')}</div>`;}
 function tmxFerramenta(k){
  if(k==='pedido')tmxNovoPedido(null);else if(k==='aviso')tmxNovoAviso();else if(k==='reuniao')tmxNovaReuniao();
