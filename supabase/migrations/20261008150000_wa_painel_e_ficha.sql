@@ -1,5 +1,6 @@
-create or replace function public.wa_painel_conversas()
-returns table(conversa_id uuid, ultima_entrada timestamptz, empresas uuid[], natureza text, principal boolean, responsavel_nome text)
+drop function if exists public.wa_painel_conversas();
+create function public.wa_painel_conversas()
+returns table(conversa_id uuid, ultima_entrada timestamptz, empresas uuid[], natureza text, principal boolean, responsavel_nome text, ultima_direcao text, ultima_status text)
 language sql stable security definer set search_path to 'public', 'pg_temp' as $$
   select c.id,
          (select max(m.ocorrido_em) from wa_mensagem m where m.conversa_id = c.id and m.direcao = 'entrada'),
@@ -9,9 +10,12 @@ language sql stable security definer set search_path to 'public', 'pg_temp' as $
          (select v.natureza from wa_pessoa_vinculo v where v.contato_id = c.contato_id and v.ativo
            order by v.principal desc, v.vinculado_em desc limit 1),
          coalesce((select bool_or(v.principal) from wa_pessoa_vinculo v where v.contato_id = c.contato_id and v.ativo), false),
-         (select u.nome from fiscal_usuario u where u.id = c.responsavel_id)
+         (select u.nome from fiscal_usuario u where u.id = c.responsavel_id),
+         u.direcao, u.status
     from wa_conversa c
     join wa_numero n on n.id = c.numero_id and n.provedor = 'meta_cloud'
+    left join lateral (select m.direcao, m.status from wa_mensagem m where m.conversa_id = c.id and m.apagada_em is null
+                        order by m.ocorrido_em desc limit 1) u on true
    where c.estado <> 'arquivada' and (fiscal_e_servidor() or fiscal_nivel() is not null)
      and (c.grupo_meta_id is not null or wa_pode_ver_conversa(c.id));
 $$;
@@ -56,8 +60,8 @@ create or replace function public.fiscal_pessoas_da_empresa(p_empresa uuid)
 returns table(pessoa_id uuid, nome text, cpf_fim text)
 language plpgsql stable security definer set search_path to 'public', 'pg_temp' as $$
 begin
-  if not (fiscal_e_servidor() or fiscal_nivel() in ('assistente', 'gerente')) then raise exception 'so gestor'; end if;
-  if p_empresa is null or not (fiscal_e_servidor() or fiscal_pode_ver_empresa(p_empresa)) then return; end if;
+  if not (fiscal_e_servidor() or coalesce(fiscal_nivel(), '') in ('assistente', 'gerente')) then raise exception 'so gestor'; end if;
+  if p_empresa is null or not (fiscal_e_servidor() or coalesce(fiscal_pode_ver_empresa(p_empresa), false)) then return; end if;
   return query
   select distinct (r->>'pessoa_id')::uuid, r->>'nome', right(regexp_replace(coalesce(r->>'cpf', ''), '\D', '', 'g'), 4)
     from jsonb_array_elements(fiscal_bl('you_pessoas_para_fiscal?select=pessoa_id,nome,cpf&empresa_id=eq.' || p_empresa)) r
