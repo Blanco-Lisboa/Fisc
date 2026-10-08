@@ -713,6 +713,25 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-res small{color:var(--apagado);margin-left:6px}
 @media (max-width:1180px){.wz{grid-template-columns:320px minmax(0,1fr)}.wz-ficha{display:none}}
 @media (max-width:860px){.wz-med{display:none}}
+.wz-conversa{position:relative}
+.wz-conversa.solta::after{content:'';position:absolute;inset:10px;border:2px dashed var(--laranja);border-radius:16px;background:rgba(254,73,1,.06);pointer-events:none;z-index:5}
+.wz-bandeja{display:flex!important;flex-direction:column;gap:12px}
+.wz-blista{display:flex;flex-direction:column;gap:8px;max-height:56vh;overflow-y:auto;padding:2px}
+.wz-bi{display:flex;align-items:center;gap:10px;border:1px solid var(--borda);border-radius:12px;padding:8px 10px;background:var(--pagina)}
+.wz-bi.arr{opacity:.45}
+.wz-grip{cursor:grab;color:var(--nevoa);font-weight:700;letter-spacing:-2px;user-select:none}
+.wz-ord{width:22px;height:22px;border-radius:50%;background:var(--superf2);color:var(--apoio);font-size:11px;font-weight:700;display:grid;place-items:center;flex:none}
+.wz-bthumb{width:42px;height:42px;object-fit:cover;border-radius:8px;flex:none}
+.wz-bm{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.wz-bm b{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wz-bm span{font-size:11px;color:var(--apagado)}
+.wz-bleg{border:1px solid var(--borda);border-radius:8px;padding:6px 9px;font:inherit;font-size:12.5px;outline:0;margin-top:3px}
+.wz-bleg:focus{border-color:var(--laranja)}
+.wz-bord{display:flex;gap:4px;flex:none}
+.wz-bord button{width:28px;height:28px;border-radius:8px;border:1px solid var(--borda);background:var(--pagina);color:var(--grafite)}
+.wz-bord button[disabled]{opacity:.35;cursor:default}
+.wz-brod{display:flex;align-items:center;gap:10px}
+.wz-brod span{flex:1;font-size:12px;color:var(--apagado);text-align:right}
 </style>
 </head>
 <body>
@@ -1644,22 +1663,10 @@ function waMenuAnexo(ev,id){
 function waTipoArquivo(f){const t=(f.type||'').toLowerCase();
  if(['image/jpeg','image/png'].includes(t))return 'imagem';if(['video/mp4','video/3gpp'].includes(t))return 'video';
  if(/^audio\/(ogg|mpeg|mp4|aac|amr)/.test(t))return 'audio';return 'documento';}
-function waEscolherArquivo(id,aceita){const i=document.createElement('input');i.type='file';i.accept=aceita;i.multiple=true;i.onchange=()=>{if(i.files.length)waEnviarArquivos(id,[...i.files]);};i.click();}
-async function waEnviarArquivos(id,arquivos){
- const c=waConv(id);if(!c)return;
- const legenda=(el('wwin')||{}).value||'';if(el('wwin'))el('wwin').value='';waRasc[id]='';
- const grandes=[];
- for(const f of arquivos){
-  const nome=f.name||'arquivo';
-  if(f.size>WA_LIM_DOC){grandes.push(f);continue;}
-  const tipo=await waTipoEnvio(f);
-  await waEnviarMidia(c,f,tipo,nome,arquivos.length===1?legenda:'');
- }
- if(grandes.length)waAvisoGrande(grandes);
-}
+function waEscolherArquivo(id,aceita){const i=document.createElement('input');i.type='file';i.accept=aceita;i.multiple=true;i.onchange=()=>{if(i.files.length)waAdicionarArquivos(id,[...i.files]);};i.click();}
 const WA_LIM_DOC=100*1048576;
 function waMB(n){return (n/1048576).toLocaleString('pt-BR',{maximumFractionDigits:1})+' MB';}
-function waAvisoGrande(fs){waModal('Arquivo acima do limite',`<div style="font-size:12.5px;line-height:1.55">${fs.length>1?'Estes arquivos não foram enviados:':'Este arquivo não foi enviado:'}<div style="margin:10px 0;display:flex;flex-direction:column;gap:6px">${fs.map(f=>`<div style="display:flex;justify-content:space-between;gap:12px;border:1px solid var(--borda);border-radius:9px;padding:8px 10px"><b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(f.name||'arquivo')}</b><span style="color:var(--vermelho);font-weight:700;white-space:nowrap">${waMB(f.size)}</span></div>`).join('')}</div>O WhatsApp oficial aceita no máximo <b>100 MB</b> por arquivo. Divida o arquivo em partes menores ou envie por outro meio.</div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="bt-assumir" onclick="fecharModal()">Entendi</button></div>`,460);}
+function waAvisoGrande(fs,depois){window._waDepois=depois||null;waModal('Arquivo acima do limite',`<div style="font-size:12.5px;line-height:1.55">${fs.length>1?'Estes arquivos não foram enviados:':'Este arquivo não foi enviado:'}<div style="margin:10px 0;display:flex;flex-direction:column;gap:6px">${fs.map(f=>`<div style="display:flex;justify-content:space-between;gap:12px;border:1px solid var(--borda);border-radius:9px;padding:8px 10px"><b style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(f.name||'arquivo')}</b><span style="color:var(--vermelho);font-weight:700;white-space:nowrap">${waMB(f.size)}</span></div>`).join('')}</div>O WhatsApp oficial aceita no máximo <b>100 MB</b> por arquivo. Divida o arquivo em partes menores ou envie por outro meio.</div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="bt-assumir" onclick="fecharModal();const d=window._waDepois;window._waDepois=null;if(d)d()">Entendi</button></div>`,460);}
 async function waBytes(f,n){return new Uint8Array(await f.slice(0,Math.min(f.size,n)).arrayBuffer());}
 function waTem(b,txt){const t=[...txt].map(c=>c.charCodeAt(0));outer:for(let i=0;i<=b.length-t.length;i++){for(let j=0;j<t.length;j++)if(b[i+j]!==t[j])continue outer;return true;}return false;}
 async function waTipoEnvio(f){
@@ -1668,16 +1675,17 @@ async function waTipoEnvio(f){
  if(tipo==='video'){if(f.size>16*1048576)return 'documento';const b=await waBytes(f,16*1048576);if(!waTem(b,'avc1'))return 'documento';}
  if(tipo==='audio'){if(f.size>16*1048576)return 'documento';if(/ogg|opus/.test(t)&&!waTem(await waBytes(f,512),'OpusHead'))return 'documento';}
  return tipo;}
-async function waEnviarMidia(c,blob,tipo,nome,legenda){
- const id_local=crypto.randomUUID();const ext=(nome.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'bin';
+async function waEnviarMidia(c,blob,tipo,nome,legenda,ptmp){
+ const id_local=ptmp?ptmp.id_local:crypto.randomUUID();const ext=(nome.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'bin';
  const caminho=`${c.id}/saida/${id_local}.${ext}`;
- const tmp={id:'tmp-'+id_local,id_local,tipo,d:'sai',t:'',nomeArq:nome,legenda,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]};
- c.wpp.push(tmp);if(selWhats===c.id)waDesenharMsgs();
+ const tmp=ptmp||{id:'tmp-'+id_local,id_local,tipo,d:'sai',t:'',nomeArq:nome,legenda,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]};
+ if(!ptmp)c.wpp.push(tmp);if(selWhats===c.id)waDesenharMsgs();
  const up=await sb.storage.from('wa-midia').upload(caminho,blob,{contentType:(blob.type||'application/octet-stream').split(';')[0],upsert:false});
- if(up.error){tmp.st='falhou';waDesenharMsgs();toast('Não foi possível subir '+nome+'.');return;}
+ if(up.error){tmp.st='falhou';waDesenharMsgs();toast('Não foi possível subir '+nome+'.');return {ok:false};}
  const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo,legenda:legenda||undefined,arquivo:{caminho,nome},responder_a:waRespWamid(c)});
  waResp=null;
  if(!j.ok){tmp.st='falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar.');}
+ return j;
 }
 function waRespWamid(c){if(!waResp)return undefined;const r=c.wpp.find(m=>m.id===waResp);return r&&r.idWa?r.idWa:undefined;}
 function waContatoForm(id){
@@ -2058,7 +2066,7 @@ function renderWhatsWeb(){
    </div>
    <div class="wz-lista">${waSecoes(lista)}</div>
   </aside>
-  <section class="wz-conversa">${c?`${waCabecalho(c)}${waBuscaMsg!==null?`<div class="wz-bbusca"><input id="wwbmsg" placeholder="Buscar na conversa" value="${escH(waBuscaMsg)}" oninput="waBuscaMsg=this.value;waDesenharMsgs()"><button class="wz-sec2" onclick="waBuscaMsg=null;render()">Fechar</button></div>`:''}<div class="wz-msgs" id="wwms"></div>${waComposer(c,isEntrada)}`:`<div class="wz-vazio">${WZ.balao}</div>`}</section>
+  <section class="wz-conversa" ondragover="waSobreConversa(event)" ondragleave="if(!this.contains(event.relatedTarget))this.classList.remove('solta')" ondrop="waSoltaConversa(event)">${c?`${waCabecalho(c)}${waBuscaMsg!==null?`<div class="wz-bbusca"><input id="wwbmsg" placeholder="Buscar na conversa" value="${escH(waBuscaMsg)}" oninput="waBuscaMsg=this.value;waDesenharMsgs()"><button class="wz-sec2" onclick="waBuscaMsg=null;render()">Fechar</button></div>`:''}<div class="wz-msgs" id="wwms"></div>${waComposer(c,isEntrada)}`:`<div class="wz-vazio">${WZ.balao}</div>`}</section>
   <aside class="wz-ficha" id="wzFicha">${c?waFichaHtml(c):''}</aside>
  </div>`;
  if(c){waDesenharMsgs();if(!waFicha[c.id])waCarregarFicha(c.id);const t=el('wwin');if(t){t.value=waRasc[c.id]||'';waCresce(t);}}
@@ -2228,6 +2236,73 @@ function waAplicarPainel(){waTodas().forEach(x=>{const p=waPainel[x.id];if(!p)re
  x.empresas=p.empresas||[];x.natureza=p.natureza;x.principal=!!p.principal;x.respNome=p.responsavel_nome||'';x.ultDir=p.ultima_direcao;x.ultSt=p.ultima_status;
  if(p.ultima_entrada&&(!x.ultEnt||new Date(p.ultima_entrada)>new Date(x.ultEnt)))x.ultEnt=p.ultima_entrada;});}
 setInterval(()=>{if(view!=='whatsweb')return;const c=selWhats&&waConv(selWhats);const m=el('wzMed');if(c&&m){const t=document.createElement('div');t.innerHTML=waMedidor(c);if(t.firstElementChild)m.replaceWith(t.firstElementChild);}},60000);
+/* ---------- WHATSAPP bandeja de arquivos ---------- */
+let waBandeja=null,waArrastoItem=null;const waEsperas={};
+const WA_TIPO_ROT={imagem:'vai como foto',video:'vai como vídeo',audio:'vai como áudio',documento:'vai como arquivo'};
+function waPodeAnexar(c){if(!c)return 'Escolha uma conversa.';if(waEntrada.includes(c)&&!c.grupo&&!eGestor())return 'Só quem atende a conversa pode enviar arquivos.';
+ if(c.bloqueado)return 'Contato bloqueado.';if(!c.grupo&&waRestante(c)<=0)return 'Janela de 24h fechada: só é possível enviar modelo.';return '';}
+function waNomeColado(f){if(f.name&&f.name!=='image.png'&&f.name!=='blob')return f.name;const d=new Date();const ext=((f.type||'').split('/')[1]||'bin').replace(/[^a-z0-9]/g,'').slice(0,5);
+ return 'colado-'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0')+'.'+ext;}
+async function waAdicionarArquivos(id,lista){
+ const fs=[...(lista||[])].filter(f=>f&&f.size>=0);if(!fs.length)return;
+ const c=waConv(id);const motivo=waPodeAnexar(c);if(motivo){toast(motivo);return;}
+ if(!waBandeja||waBandeja.conv!==id){const ii=el('wwin');waBandeja={conv:id,itens:[]};
+  if(ii&&ii.value.trim()){waBandeja.leg0=ii.value.trim();ii.value='';waRasc[id]='';waCresce(ii);}}
+ const grandes=[],vazios=[];
+ for(const f of fs){if(f.size>WA_LIM_DOC){grandes.push(f);continue;}if(!f.size){vazios.push(f);continue;}
+  const nome=waNomeColado(f);waBandeja.itens.push({id:crypto.randomUUID(),f,nome,tipo:await waTipoEnvio(f),leg:'',url:/^image\/(jpeg|png|gif|webp)$/.test(f.type)?URL.createObjectURL(f):null});}
+ if(waBandeja.leg0&&waBandeja.itens.length){waBandeja.itens[0].leg=waBandeja.leg0;waBandeja.leg0='';}
+ if(vazios.length)toast(vazios.length>1?'Arquivos vazios não são enviados.':'Arquivo vazio não é enviado.');
+ if(grandes.length){waAvisoGrande(grandes,waBandeja.itens.length?()=>waBandejaDesenhar():null);return;}
+ waBandejaDesenhar();}
+function waEnviarArquivos(id,arquivos){return waAdicionarArquivos(id,arquivos);}
+function waBandejaFechar(){if(waBandeja)waBandeja.itens.forEach(x=>{if(x.url)URL.revokeObjectURL(x.url);});waBandeja=null;fecharModal();}
+function waBandejaDesenhar(){
+ const b=waBandeja;if(!b||!b.itens.length){waBandejaFechar();return;}const c=waConv(b.conv);
+ const tot=b.itens.reduce((s,x)=>s+x.f.size,0);
+ waModal('Enviar para '+(c?c.nome:''),`<div class="wz wz-bandeja" ondragover="waBandejaSobre(event)" ondrop="waBandejaSolta(event)">
+  <div class="wz-blista" id="wzBLista">${b.itens.map((x,k)=>{const [ek,er]=waExt(x.nome,x.tipo);return `<div class="wz-bi" draggable="true" data-k="${k}" ondragstart="waArrastoItem=${k};this.classList.add('arr')" ondragend="this.classList.remove('arr')" ondragover="waItemSobre(event,${k})" ondrop="waItemSolta(event,${k})">
+   <span class="wz-grip" title="Arrastar para mudar a ordem">⋮⋮</span><span class="wz-ord">${k+1}</span>
+   ${x.url?`<img class="wz-bthumb" src="${escH(x.url)}" alt="">`:`<span class="wz-ext ${ek}">${escH(er)}</span>`}
+   <div class="wz-bm"><b title="${escH(x.nome)}">${escH(x.nome)}</b><span>${escH(WA_TIPO_ROT[x.tipo])} · ${escH(waTam(x.f.size))}</span>
+    <input class="wz-bleg" id="wzbl-${k}" maxlength="970" placeholder="${x.tipo==='audio'?'Texto (vai logo depois do áudio)':'Texto deste arquivo'}" value="${escH(x.leg)}" oninput="waBandeja.itens[${k}].leg=this.value"></div>
+   <div class="wz-bord"><button title="Subir" ${k?'':'disabled'} onclick="waBandejaMover(${k},-1)">↑</button><button title="Descer" ${k<b.itens.length-1?'':'disabled'} onclick="waBandejaMover(${k},1)">↓</button><button title="Tirar" onclick="waBandejaTirar(${k})">✕</button></div></div>`;}).join('')}</div>
+  <div class="wz-brod"><button class="wz-sec2" onclick="waBandejaMais()">+ Adicionar</button><span>${b.itens.length} ${b.itens.length>1?'arquivos':'arquivo'} · ${escH(waTam(tot))}</span><button class="wz-env" id="wzBEnv" onclick="waBandejaEnviar()">Enviar ${WZ.env}</button></div></div>`,640);
+ const x=document.querySelector('.modal .x');if(x)x.setAttribute('onclick','waBandejaFechar()');
+ const i=el('wzbl-0');if(i&&!document.activeElement.closest('.wz-bandeja'))i.focus();}
+function waBandejaLerLegendas(){if(!waBandeja)return;waBandeja.itens.forEach((x,k)=>{const i=el('wzbl-'+k);if(i)x.leg=i.value;});}
+function waBandejaMover(k,d){waBandejaLerLegendas();const it=waBandeja.itens;const j=k+d;if(j<0||j>=it.length)return;[it[k],it[j]]=[it[j],it[k]];waBandejaDesenhar();}
+function waBandejaTirar(k){waBandejaLerLegendas();const x=waBandeja.itens.splice(k,1)[0];if(x&&x.url)URL.revokeObjectURL(x.url);waBandejaDesenhar();}
+function waBandejaMais(){waBandejaLerLegendas();const i=document.createElement('input');i.type='file';i.multiple=true;i.onchange=()=>{if(i.files.length)waAdicionarArquivos(waBandeja?waBandeja.conv:selWhats,[...i.files]);};i.click();}
+function waItemSobre(ev,k){if(waArrastoItem===null)return;ev.preventDefault();ev.stopPropagation();}
+function waItemSolta(ev,k){if(waArrastoItem===null)return;ev.preventDefault();ev.stopPropagation();waBandejaLerLegendas();const it=waBandeja.itens;const de=waArrastoItem;waArrastoItem=null;if(de===k)return;const [x]=it.splice(de,1);it.splice(k,0,x);waBandejaDesenhar();}
+function waBandejaSobre(ev){if(ev.dataTransfer&&[...ev.dataTransfer.types].includes('Files'))ev.preventDefault();}
+function waBandejaSolta(ev){if(!ev.dataTransfer||!ev.dataTransfer.files.length)return;ev.preventDefault();waBandejaLerLegendas();waAdicionarArquivos(waBandeja.conv,ev.dataTransfer.files);}
+function waEsperarStatus(c,mid,ms){
+ const m=(c.wpp||[]).find(x=>x.id===mid);if(m&&['enviada','entregue','lida','falhou'].includes(m.st))return Promise.resolve(m.st);
+ return new Promise(ok=>{const t=setTimeout(()=>{delete waEsperas[mid];ok('tempo');},ms);waEsperas[mid]=st=>{clearTimeout(t);delete waEsperas[mid];ok(st);};});}
+async function waBandejaEnviar(){
+ waBandejaLerLegendas();const b=waBandeja;if(!b||!b.itens.length)return;const c=waConv(b.conv);
+ const motivo=waPodeAnexar(c);if(motivo){toast(motivo);return;}
+ waBandeja=null;fecharModal();
+ const fila=b.itens.map(x=>{const id_local=crypto.randomUUID();
+  const tmp={id:'tmp-'+id_local,id_local,tipo:x.tipo,d:'sai',t:'',nomeArq:x.nome,legenda:x.tipo==='audio'?'':x.leg.trim(),h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'aguardando',autorNome:waAssinatura(eu.nome),tam:x.f.size};
+  c.wpp.push(tmp);return {x,tmp};});
+ if(selWhats===c.id)waDesenharMsgs();
+ for(let i=0;i<fila.length;i++){const {x,tmp}=fila[i];
+  tmp.st='enviando';if(selWhats===c.id)waDesenharMsgs();
+  const j=await waEnviarMidia(c,x.f,x.tipo,x.nome,x.tipo==='audio'?'':x.leg.trim(),tmp);
+  let st=j&&j.ok?await waEsperarStatus(c,j.mensagem_id,120000):'falhou';
+  if(st!=='falhou'&&x.tipo==='audio'&&x.leg.trim()){const k=await enviarTextoWA(c,x.leg.trim());st=k&&k.ok?await waEsperarStatus(c,k.mensagem_id,120000):'falhou';}
+  if(x.url)URL.revokeObjectURL(x.url);
+  if(st==='falhou'){const resto=fila.slice(i+1);resto.forEach(r=>{r.tmp.st='falhou';});if(selWhats===c.id)waDesenharMsgs();
+   waModal('Envio interrompido',`<div style="font-size:12.5px;line-height:1.55">O arquivo <b>${escH(x.nome)}</b> não foi enviado${resto.length?`, e os ${resto.length} seguintes ficaram parados para não sair fora de ordem`:''}.</div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="bt-assumir" onclick="fecharModal()">Entendi</button></div>`,440);return;}}}
+function waTemArquivos(ev){return !!(ev.dataTransfer&&[...ev.dataTransfer.types].includes('Files'));}
+function waSobreConversa(ev){if(!waTemArquivos(ev)||!selWhats)return;ev.preventDefault();ev.currentTarget.classList.add('solta');}
+function waSoltaConversa(ev){ev.currentTarget.classList.remove('solta');if(!ev.dataTransfer||!ev.dataTransfer.files.length||!selWhats)return;ev.preventDefault();waAdicionarArquivos(selWhats,ev.dataTransfer.files);}
+window.addEventListener('dragover',e=>{if(waTemArquivos(e))e.preventDefault();});
+window.addEventListener('drop',e=>{if(waTemArquivos(e))e.preventDefault();});
+document.addEventListener('paste',e=>{if(view!=='whatsweb'||!selWhats)return;const fs=[...((e.clipboardData&&e.clipboardData.files)||[])];if(!fs.length)return;e.preventDefault();if(waBandeja)waBandejaLerLegendas();waAdicionarArquivos(waBandeja?waBandeja.conv:selWhats,fs);});
 /* ---------- dados reais ---------- */
 const ST_WA={enviando:'enviando',aguardando:'na fila',enviada:'enviada',entregue:'entregue',lida:'lida',falhou:'falhou'};
 let sb=null,eu=null,waEntrada=[],waMeus=[],waMsgs={};
@@ -2272,7 +2347,7 @@ async function carregarMensagens(id){
 function aoMudarMidia(p){const md=p.new;if(!md||!md.mensagem_id)return;for(const k in waMsgs){const m=waMsgs[k].find(x=>x.id===md.mensagem_id);if(m){
   if(md.transcricao)m.transcricao=md.transcricao;if(md.estado==='guardado'&&md.caminho)m.caminho=md.caminho;if(md.nome)m.nomeArq=md.nome;
   if(view==='whatsweb'&&selWhats===k)waDesenharMsgs();return;}}}
-function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;const lista=waMsgs[m.conversa_id];
+function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;if(waEsperas[m.id]&&['enviada','entregue','lida','falhou'].includes(m.status)){const r=waEsperas[m.id];setTimeout(()=>r(m.status),0);}const lista=waMsgs[m.conversa_id];
  if(lista){if(m.apagada_em){waMsgs[m.conversa_id]=lista.filter(x=>x.id!==m.id);const c=waConv(m.conversa_id);if(c)c.wpp=waMsgs[m.conversa_id];}
   else{const i=lista.findIndex(x=>x.id===m.id||(m.id_local&&x.id_local===m.id_local));const ant=i>=0?lista[i]:null;const nova=msgWA(m);
    if(ant){nova.caminho=ant.caminho;nova.nomeArq=nova.nomeArq||ant.nomeArq;nova.transcricao=nova.transcricao||ant.transcricao;nova.midiaEstado=ant.midiaEstado;lista[i]=nova;}else lista.push(nova);
@@ -2283,7 +2358,8 @@ async function aoMudarConversa(){await carregarConversas();if(view==='whatsweb')
 async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=waRespWamid(c);waResp=null;
  c.wpp.push({id:'tmp-'+id_local,id_local,tipo:'texto',d:'sai',t,respondeA:resp||null,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]});render();
  const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo:'texto',texto:t,responder_a:resp});
- if(!j.ok){const m=c.wpp.find(x=>x.id_local===id_local);if(m)m.st='falhou';toast(j.erro||'Não foi possível enviar.');render();}}
+ if(!j.ok){const m=c.wpp.find(x=>x.id_local===id_local);if(m)m.st='falhou';toast(j.erro||'Não foi possível enviar.');render();}
+ return j;}
 
 /* ---------- entrada ---------- */
 async function iniciarDados(){
