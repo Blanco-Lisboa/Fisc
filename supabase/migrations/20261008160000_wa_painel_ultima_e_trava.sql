@@ -1,0 +1,2 @@
+-- aplicado em 08/10/2026 pelas migracoes wa_painel_conversas_ultima e fiscal_pessoas_da_empresa_trava
+-- (wa_painel_conversas ganhou ultima_direcao/ultima_status; fiscal_pessoas_da_empresa trata nivel nulo)
