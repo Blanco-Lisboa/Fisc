@@ -9,10 +9,22 @@ trava = threading.Lock()
 ultima = [0.0]
 
 
+def assinatura():
+    try:
+        return hashlib.sha256(open(os.path.abspath(__file__), 'rb').read()).hexdigest()
+    except OSError:
+        return ''
+
+
+PROPRIO = assinatura()
+
+
 def atualizar():
     with trava:
         subprocess.run(['git', '-C', REPO, 'fetch', '--depth', '1', 'origin', 'main'], timeout=120, check=False)
         subprocess.run(['git', '-C', REPO, 'reset', '--hard', 'origin/main'], timeout=60, check=False)
+        if assinatura() != PROPRIO:
+            os._exit(0)
 
 
 class Pedido(BaseHTTPRequestHandler):
@@ -34,7 +46,9 @@ class Pedido(BaseHTTPRequestHandler):
             self.wfile.write(corpo)
 
     def do_GET(self):
-        caminho = self.path.split('?', 1)[0].lstrip('/') or 'teams.js'
+        caminho = self.path.split('?', 1)[0].lstrip('/')
+        if not caminho or self.headers.get('Sec-Fetch-Dest', '') in ('document', 'iframe', 'frame', 'embed', 'object'):
+            return self.responder(404, b'nao encontrado')
         alvo = os.path.realpath(os.path.join(PASTA, caminho))
         if not alvo.startswith(PASTA + os.sep) or not os.path.isfile(alvo):
             return self.responder(404, b'nao encontrado')
