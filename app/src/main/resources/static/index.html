@@ -1084,15 +1084,15 @@ async function modCarregar(){const r=await sb.from('wa_modelo').select('nome,idi
  modLista=(r.data||[]).filter(m=>m.nome!=='hello_world'&&m.categoria!=='AUTHENTICATION');return modLista;}
 function modParte(m,t){return (m.componentes||[]).find(c=>c.type===t)||null;}
 function modVars(m){const b=modParte(m,'BODY');const ex=(b&&b.example&&b.example.body_text&&b.example.body_text[0])||[];const n=((b&&b.text)||'').match(/\{\{\d+\}\}/g)||[];
- return [...new Set(n)].map(x=>+x.replace(/\D/g,'')).sort((a,b)=>a-b).map(i=>({i,ex:ex[i-1]||''}));}
+ return [...new Set(n)].map(x=>+x.replace(/\D/g,'')).sort((a,b)=>a-b).map(i=>({i,ex:ex[i-1]||'',eu:['aqui é','Sou','realizado por'].some(w=>((b&&b.text)||'').includes(w+' {{'+i+'}}'))}));}
 function modPalpite(v,ctx){const e=String(v.ex);
- if(v.i===1)return ((eu&&eu.nome)||'').split(' ')[0];
+ if(v.eu)return ((eu&&eu.nome)||'').split(' ')[0];
  if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return ctx.cnpj?fmtCnpj(ctx.cnpj):'';
  if(/^[a-zç]+\/\d{4}$/i.test(e))return mesTxt();
  if(/^\d{2}\/\d{2}\/\d{4}$/.test(e)){const m=comp.mes+2>12?1:comp.mes+2,a=comp.mes+2>12?comp.ano+1:comp.ano;return '20/'+String(m).padStart(2,'0')+'/'+a;}
  if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e)&&ctx.empresa)return ctx.empresa;
  return '';}
-function modRotulo(v){const e=String(v.ex);if(v.i===1)return 'Seu nome';if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return 'CNPJ';if(/^[a-zç]+\/\d{4}$/i.test(e))return 'Mês';if(/^\d{2}\/\d{2}\/\d{4}$/.test(e))return 'Vencimento';if(/^R\$/.test(e))return 'Valor';if(/DAS|Relat[óo]rio|Guia|DARE/i.test(e))return 'Documentos';if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e))return 'Empresa';return 'Informação '+v.i;}
+function modRotulo(v){const e=String(v.ex);if(v.eu)return 'Seu nome';if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return 'CNPJ';if(/^[a-zç]+\/\d{4}$/i.test(e))return 'Mês';if(/^\d{2}\/\d{2}\/\d{4}$/.test(e))return 'Vencimento';if(/^R\$/.test(e))return 'Valor';if(/DAS|Relat[óo]rio|Guia|DARE/i.test(e))return 'Documentos';if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e))return 'Empresa';return 'Informação '+v.i;}
 function modTexto(m,vals){const b=modParte(m,'BODY');return ((b&&b.text)||'').replace(/\{\{(\d+)\}\}/g,(_,i)=>vals[+i-1]||'{{'+i+'}}');}
 function modBolha(m,vals,doc){const h=modParte(m,'HEADER'),f=modParte(m,'FOOTER'),bt=modParte(m,'BUTTONS');
  return apBolha({d:'sai',cab:h&&h.format==='TEXT'?h.text:null,doc:h&&h.format==='DOCUMENT'?(doc?doc.name:'Documento.pdf'):null,t:modTexto(m,vals||[]),rod:f?f.text:null,btns:bt?bt.buttons.map(x=>x.text):null,dt:'',h:''});}
@@ -1542,7 +1542,6 @@ async function waEnviarArquivos(id,arquivos){
  const legenda=(el('wwin')||{}).value||'';if(el('wwin'))el('wwin').value='';
  for(const f of arquivos){
   const tipo=waTipoArquivo(f);const nome=f.name||'arquivo';
-  if(/\.(xml|zip)$/i.test(nome)){toast('A Meta não aceita XML nem ZIP: '+nome);continue;}
   const lim={imagem:5,video:16,audio:16,documento:100}[tipo]*1048576;
   if(f.size>lim){toast(nome+' passa do limite da Meta ('+(lim/1048576)+' MB).');continue;}
   await waEnviarMidia(c,f,tipo,nome,arquivos.length===1?legenda:'');
