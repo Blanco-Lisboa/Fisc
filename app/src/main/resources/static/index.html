@@ -1381,7 +1381,23 @@ function desenharClientes(){
 
 /* ---------- mapa do departamento ---------- */
 const ICO_CART='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h12v4M3 7v10a2 2 0 0 0 2 2h14V9H5a2 2 0 0 1-2-2zM16 14h.01"/></svg>';
-function carregarMapa(){return umaVez('mapa',async()=>{
+let cartSetor=null,cartCanal=null,clientesBrutos=null;
+async function cartSetorBl(){if(!cartSetor){const r=await sb.rpc('fiscal_setor_bl');if(!r.error)cartSetor=r.data;}return cartSetor;}
+function cartAssinar(){if(cartCanal)return;
+ cartCanal=sb.channel('fiscal-carteira').on('postgres_changes',{event:'*',schema:'public',table:'wa_rota_carteira'},()=>{
+  if(view!=='gestor'){mapaDados=null;clientesDados=null;centralDados=null;return;}
+  clientesBrutos=null;carregarMapa();carregarClientes();carregarCentralGestor();}).subscribe();}
+function cartNome(id){const u=(mapaDados||[]).find(x=>x.id===id);return (u&&u.nome)||waEquipe[id]||'';}
+const CART_SIT={pronto:'ok',ja_e_deste_dono:'ja_na_carteira',de_outro_dono:'em_outra_carteira',inativa:'inativo',nao_existe:'nao_encontrado',sem_vinculo_you:'sem_vinculo_you',repetido:'repetido',invalido:'invalido'};
+async function cartConferir(valores){
+ const setor=await cartSetorBl();if(!setor)return {erro:true};
+ const r=await blLogado().rpc('carteira_conferir',{p_setor_id:setor,p_cnpjs:valores,p_usuario_id:cartUsuario});
+ if(r.error)return {erro:true};
+ return {linhas:(r.data||[]).map(l=>{const dig=String(l.cnpj_digitado||'').replace(/\D/g,'');
+  return {linha:l.linha,original:l.cnpj_digitado,cnpj:l.cnpj,valido:l.situacao!=='invalido',zeros_completados:dig.length>0&&dig.length<14&&!!l.cnpj,
+   situacao:CART_SIT[l.situacao]||l.situacao,empresa_id:l.empresa_id,empresa:l.nome,dono_id:l.dono_atual,dono:l.dono_atual?cartNome(l.dono_atual):'',grupo:l.grupo_faltando||[]};})};}
+async function cartBrutos(){if(clientesBrutos)return clientesBrutos;const r=await blLogado().rpc('fiscal_painel_clientes');if(r.error)return null;clientesBrutos=r.data||[];return clientesBrutos;}
+function carregarMapa(){return umaVez('mapa',async()=>{cartAssinar();
  const r=await sb.rpc('fiscal_mapa_departamento');
  if(r.error){if(!mapaDados)toast('Não foi possível carregar o mapa do departamento.');return;}
  const novo=r.data||[];if(!mudou(mapaDados,novo))return;
@@ -1411,10 +1427,14 @@ async function abrirCarteira(id){
  modal=document.createElement('div');modal.className='modal';
  modal.innerHTML=`<div class="mcx" style="width:min(980px,96vw)"><div class="mcab">${ICO_CART}<b>Carteira · ${escH(u.nome)} · ${u.carteira} CNPJ</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="cartBody"></div></div>`;
  document.body.appendChild(modal);
- const r=await sb.rpc('fiscal_carteira_detalhe',{p_usuario:id});
+ const br=await cartBrutos();
  if(!el('cartBody'))return;
- if(r.error){el('cartBody').textContent='Não foi possível carregar a carteira.';return;}
- window._cart=r.data||[];renderCarteira();
+ if(!br){el('cartBody').textContent='Não foi possível carregar a carteira.';return;}
+ window._cart=br.filter(x=>x.dono_carteira_usuario_id===id).map(x=>({responsavel:x.quem_trata_nome,cnpj:x.cnpj,empresa:x.razao_social||x.nome_fantasia||'',
+  outras:x.quem_trata_id?br.filter(o=>o.quem_trata_id===x.quem_trata_id&&o.empresa_id!==x.empresa_id&&o.dono_carteira_usuario_id!==id)
+   .map(o=>({cnpj:o.cnpj,empresa:o.razao_social||o.nome_fantasia||'',carteira_de:o.dono_carteira_usuario_id?cartNome(o.dono_carteira_usuario_id):null})):[]}))
+  .sort((a,b)=>String(a.responsavel||'').localeCompare(String(b.responsavel||''))||a.empresa.localeCompare(b.empresa));
+ renderCarteira();
 }
 function togOutras(i){cartAberta.has(i)?cartAberta.delete(i):cartAberta.add(i);renderCarteira();}
 function renderCarteira(){
@@ -1440,9 +1460,9 @@ function cartMarcar(id,on){if(!cartBase)return;const e=cartBase.res.find(x=>x.em
 function cartMarcarTodos(){if(!cartBase)return;cartBase.res.forEach(e=>cartBase.sel.set(e.empresa_id,e));renderCartBase();}
 async function cartConferirBase(){if(!cartBase||!cartBase.sel.size)return;const col=[...cartBase.sel.values()].map(e=>String(e.cnpj||''));cartBase=null;
  plan={arquivo:'Escolhidos na base de clientes',linhas:[],ocupado:false};renderPlanilha(true);
- const r=await sb.rpc('fiscal_carteira_analisar',{p_usuario:cartUsuario,p_linhas:col});
- if(!plan)return;if(r.error){plan=null;toast('Não foi possível conferir os clientes.');renderCarteira();return;}
- plan.linhas=(r.data||[]).filter(l=>l.situacao!=='vazio').map(l=>({...l,transferir:false,descartado:false,editando:''}));renderPlanilha();}
+ const r=await cartConferir(col);
+ if(!plan)return;if(r.erro){plan=null;toast('Não foi possível conferir os clientes.');renderCarteira();return;}
+ plan.linhas=r.linhas.map(l=>({...l,transferir:false,descartado:false,editando:''}));renderPlanilha();}
 /* ---------- carteira por planilha ---------- */
 const ICO_PLAN='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h8"/></svg>';
 let cartUsuario=null,plan=null;
@@ -1475,10 +1495,11 @@ async function lerPlanilha(f){
  if(col.length>5000){toast('A planilha passa de 5000 linhas.');return;}
  plan={arquivo:f.name,linhas:[],ocupado:false};
  renderPlanilha(true);
- const r=await sb.rpc('fiscal_carteira_analisar',{p_usuario:cartUsuario,p_linhas:col});
+ const cheias=col.map((v,i)=>({v,linha:i+1+ini})).filter(x=>String(x.v||'').trim());
+ const r=await cartConferir(cheias.map(x=>x.v));
  if(!plan)return;
- if(r.error){plan=null;toast('Não foi possível conferir a planilha.');renderCarteira();return;}
- plan.linhas=(r.data||[]).filter(l=>l.situacao!=='vazio').map(l=>({...l,linha:l.linha+ini,transferir:false,descartado:false,editando:''}));
+ if(r.erro){plan=null;toast('Não foi possível conferir a planilha.');renderCarteira();return;}
+ plan.linhas=r.linhas.map((l,i)=>({...l,linha:cheias[i].linha,transferir:false,descartado:false,editando:''}));
  renderPlanilha();
 }
 function plContas(){
@@ -1512,6 +1533,7 @@ function plLinha(l,i){
  if(l.situacao==='em_outra_carteira')sit+=` <span style="font-size:11px;color:var(--apoio)">de ${escH(l.dono||'')}</span>`;
  if(l.situacao==='repetido')sit+=` <span style="font-size:11px;color:var(--apagado)">ignorado</span>`;
  if(l.zeros_completados)sit+=` <span style="font-size:11px;color:var(--apagado)">zeros completados</span>`;
+ if((l.situacao==='ok'||l.situacao==='em_outra_carteira')&&l.grupo&&l.grupo.length)sit+=` <span style="font-size:11px;color:var(--apoio)">leva junto ${l.grupo.length} ${l.grupo.length>1?'empresas':'empresa'} do mesmo cliente</span>`;
  let acao='';
  if(l.descartado)acao=`<button class="miniB" onclick="plDescartar(${i},false)">Desfazer</button>`;
  else if(PL_ERRO.includes(l.situacao))acao=`<div style="display:flex;gap:6px;align-items:center"><input placeholder="CNPJ correto" value="${escH(l.editando)}" oninput="plan.linhas[${i}].editando=this.value" onkeydown="if(event.key==='Enter')plCorrigir(${i})" style="width:130px;border:1px solid var(--borda);border-radius:8px;padding:5px 8px;font-size:11.5px;font-family:inherit;outline:0"><button class="miniB" onclick="plCorrigir(${i})">Conferir</button><button class="miniB" onclick="plDescartar(${i},true)">Descartar</button></div>`;
@@ -1521,22 +1543,26 @@ function plLinha(l,i){
 function plDescartar(i,v){plan.linhas[i].descartado=v;renderPlanilha();}
 async function plCorrigir(i){
  const l=plan.linhas[i];const v=(l.editando||'').trim();if(!v)return;
- const r=await sb.rpc('fiscal_carteira_analisar',{p_usuario:cartUsuario,p_linhas:[v]});
+ const r=await cartConferir([v]);
  if(!plan)return;
- if(r.error||!r.data||!r.data[0]){toast('Não foi possível conferir o CNPJ.');return;}
- const n=r.data[0];
+ if(r.erro||!r.linhas[0]){toast('Não foi possível conferir o CNPJ.');return;}
+ const n=r.linhas[0];
  if(n.valido&&plan.linhas.some((o,j)=>j!==i&&!o.descartado&&o.valido&&o.cnpj===n.cnpj&&o.situacao!=='repetido'))n.situacao='repetido';
- Object.assign(l,{original:n.original,cnpj:n.cnpj,valido:n.valido,zeros_completados:n.zeros_completados,situacao:n.situacao,empresa_id:n.empresa_id,empresa:n.empresa,dono:n.dono,dono_id:n.dono_id,editando:PL_ERRO.includes(n.situacao)?v:'',transferir:false});
+ Object.assign(l,{original:n.original,cnpj:n.cnpj,valido:n.valido,zeros_completados:n.zeros_completados,situacao:n.situacao,empresa_id:n.empresa_id,empresa:n.empresa,dono:n.dono,dono_id:n.dono_id,grupo:n.grupo,editando:PL_ERRO.includes(n.situacao)?v:'',transferir:false});
  renderPlanilha();
 }
 function plCancelar(){plan=null;renderCarteira();}
 async function plVincular(){
  const k=plContas();if(!k.vinc.length||plan.ocupado)return;
  plan.ocupado=true;renderPlanilha();
- const r=await sb.rpc('fiscal_carteira_vincular',{p_usuario:cartUsuario,p_empresas:k.vinc.map(l=>l.empresa_id),p_transferir:k.vinc.filter(l=>l.situacao==='em_outra_carteira').map(l=>l.empresa_id)});
- if(r.error||!r.data||r.data.ok!==true){plan.ocupado=false;renderPlanilha();toast('Nada foi vinculado: '+((r.error&&r.error.message)||'falha ao gravar'));return;}
- toast(`${r.data.vinculados} CNPJ vinculados${r.data.transferidos?` · ${r.data.transferidos} transferidos`:''}`);
- const id=cartUsuario;plan=null;await carregarMapa();abrirCarteira(id);
+ const setor=await cartSetorBl();
+ const ids=[...new Set(k.vinc.flatMap(l=>[l.empresa_id,...(l.grupo||[])]))];
+ const esperado=k.vinc.filter(l=>l.situacao==='em_outra_carteira').map(l=>({empresa_id:l.empresa_id,dono:l.dono_id}));
+ const r=setor?await blLogado().rpc('carteira_atribuir',{p_setor_id:setor,p_empresa_ids:ids,p_usuario_id:cartUsuario,p_motivo:'Painel do Gestor: '+plan.arquivo,p_dono_esperado:esperado.length?esperado:null}):{error:true};
+ if(r.error||!r.data||r.data.ok!==true){plan.ocupado=false;renderPlanilha();
+  const d=r.data||{};toast(d.conflito?'A carteira mudou enquanto você conferia. Confira de novo.':d.faltando_grupo?`Faltam ${d.faltando_grupo.length} empresas do mesmo cliente. Confira de novo.`:'Nada foi vinculado.');return;}
+ toast(`${(r.data.movidas||[]).length} CNPJ vinculados`);
+ const id=cartUsuario;plan=null;clientesBrutos=null;await carregarMapa();abrirCarteira(id);
 }
 function waPendentes(){return waEntrada.concat(waMeus).filter(c=>c.naoLidas>0).length;}
 function render(){
