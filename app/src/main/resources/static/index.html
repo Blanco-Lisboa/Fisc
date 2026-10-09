@@ -1218,10 +1218,14 @@ function cgInfo(btn,k){
 }
 function cgNum(v){return v==null?'—':Number(v).toLocaleString('pt-BR');}
 function cgDelta(v,maiorRuim){if(v==null||v===0)return '';const ruim=maiorRuim?v>0:v<0;return `<span class="cg-delta ${ruim?'ruim':'bom'}">${v>0?'+':'−'}${Math.abs(v)}</span>`;}
+async function equipeGarantir(){if(Object.keys(waEquipe).length)return;const r=await sb.rpc('fiscal_equipe');if(!r.error&&r.data)((r.data.pessoas)||[]).forEach(x=>waEquipe[x.id]=x.nome);}
 function carregarCentralGestor(){return umaVez('central',async()=>{
- const r=await sb.rpc('fiscal_central_gestor');
- if(r.error){if(!centralDados)toast('Não foi possível carregar a central.');return;}
- const novo=r.data||{};if(!mudou(centralDados,novo))return;
+ const [r,bl]=await Promise.all([sb.rpc('fiscal_central_gestor'),blLogado().rpc('fiscal_central_base'),equipeGarantir()]);
+ if(r.error||bl.error){if(!centralDados)toast('Não foi possível carregar a central.');return;}
+ const novo=r.data||{};const b=bl.data||{};const qtd={};(b.por_dono||[]).forEach(x=>qtd[x.usuario_id]=x.qtd);
+ novo.kpis=Object.assign({},novo.kpis,{total_clientes:(b.empresas_you||[]).length,sem_carteira:b.sem_dono});
+ novo.carga=Object.keys(waEquipe).map(id=>({usuario_id:id,nome:waEquipe[id],clientes:qtd[id]||0})).sort((x,y)=>y.clientes-x.clientes||x.nome.localeCompare(y.nome));
+ if(!mudou(centralDados,novo))return;
  centralDados=novo;if(view==='gestor'&&gestorAba==='central')renderCentralGestor();
 });}
 function renderCentralGestor(){
@@ -1267,10 +1271,15 @@ function abrirAlertaGestor(c){
  document.body.appendChild(modal);
 }
 /* ---------- clientes ---------- */
+function cliAgrupar(lin){const g={};
+ lin.forEach(x=>{const k=x.quem_trata_id||'';const a=g[k]||(g[k]={responsavel:x.quem_trata_nome||null,cpf:x.quem_trata_cpf||null,empresas:[]});
+  a.empresas.push({empresa_id:x.empresa_id,cnpj:x.cnpj,empresa:x.razao_social||x.nome_fantasia||'',carteira:x.dono_carteira_usuario_id?(waEquipe[x.dono_carteira_usuario_id]||''):null,apuracao:null});});
+ const out=Object.values(g);out.forEach(a=>a.empresas.sort((p,q)=>p.empresa.localeCompare(q.empresa)));
+ return out.sort((p,q)=>p.responsavel==null?1:q.responsavel==null?-1:p.responsavel.localeCompare(q.responsavel));}
 function carregarClientes(){return umaVez('clientes',async()=>{
- const r=await sb.rpc('fiscal_clientes_painel');
+ const [r]=await Promise.all([blLogado().rpc('fiscal_painel_clientes'),equipeGarantir()]);
  if(r.error){if(!clientesDados)toast('Não foi possível carregar os clientes.');return;}
- const novo=r.data||[];if(!mudou(clientesDados,novo))return;
+ const novo=cliAgrupar(r.data||[]);if(!mudou(clientesDados,novo))return;
  clientesDados=novo;if(view==='gestor'&&gestorAba==='clientes')renderClientes();
 });}
 let cliBusca='',cliApu='',cliPag=1,cliPorPag=0,cliObs=null,cliApuAberto=false;
