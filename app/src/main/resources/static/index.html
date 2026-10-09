@@ -1575,9 +1575,10 @@ const CF_ICO={
 const CF_COR={pessoa:'#3A5A8C',grafico:'#FE4901',casa:'#3A5A8C',prancheta:'#B25E09',sino:'#C0392B',fluxo:'#6D4AA0',modelo:'#52525B',brilho:'#6D4AA0',email:'#FE4901',equipe:'#2f6fed',whats:'#1B7A44',engrenagem:'#52525B',caixa:'#1B7A44',fixar:'#B25E09',grupo:'#1B7A44'};
 function cfIco(k,cl){return `<svg class="${cl||'i'}" viewBox="0 0 24 24">${CF_ICO[k]||CF_ICO.engrenagem}</svg>`;}
 function renderConfig(){
+ if(cfgAba==='info'&&!tem('config_info'))cfgAba='audio';
  el('conteudo').innerHTML=`
   <div class="aputabs">
-    <div class="aputabs-l">${[['info','Info'],['audio','Áudio']].map(([k,t])=>`<button class="${cfgAba===k?'on':''}" onclick="cfgAba='${k}';renderConfig()">${t}</button>`).join('')}</div>
+    <div class="aputabs-l">${[['info','Info'],['audio','Áudio']].filter(([k])=>k!=='info'||tem('config_info')).map(([k,t])=>`<button class="${cfgAba===k?'on':''}" onclick="cfgAba='${k}';renderConfig()">${t}</button>`).join('')}</div>
   </div>
   <div class="apuBody" id="cfgBody"></div>`;
  if(cfgAba==='audio'){renderCfgAudio();return;}
