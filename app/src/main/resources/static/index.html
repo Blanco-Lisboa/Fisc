@@ -3061,22 +3061,24 @@ function janelaWA(c){if(!c.janelaAte){c.janela=false;c.janelaLbl='fechada';retur
  c.janelaLbl=rest>0?Math.floor(rest/3600e3)+'h'+String(Math.floor(rest%3600e3/60e3)).padStart(2,'0'):'fechada';}
 function convWA(c){const ant=waConv(c.id);const ct=Array.isArray(c.wa_contato)?c.wa_contato[0]:c.wa_contato;
  const x={id:c.id,contatoId:c.contato_id,nome:c.contato_nome||fmtTel(c.contato_telefone)||'Contato',telefone:c.contato_telefone,plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
- dono:c.responsavel_id,wpp:waMsgs[c.id]||[],carregada:!!waMsgs[c.id],previa:c.ultima_previa,ultima:c.ultima_em,naoLidas:c.nao_lidas||0,janelaAte:c.janela_ate||null,
+ dono:null,wpp:waMsgs[c.id]||[],carregada:!!waMsgs[c.id],previa:c.ultima_previa,ultima:c.ultima_em,naoLidas:c.nao_lidas||0,janelaAte:c.janela_ate||null,
  arquivada:!!c.arquivada,fixada:c.fixada_em,silenciada:!!c.silenciada,marcadaNL:!!c.marcada_nao_lida,grupo:!!c.grupo_meta_id,grupoLink:c.grupo_link,grupoDesc:c.grupo_descricao,
  bloqueado:!!(ct&&ct.bloqueado)};
  if(ant&&ant._lendo)x._lendo=true;return x;}
 async function carregarConversas(){
  const todas=[];await waAcertarRelogio();
  for(let de=0;;de+=1000){
-  const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,responsavel_id,estado,ultima_em,ultima_previa,nao_lidas,janela_ate,arquivada,fixada_em,silenciada,marcada_nao_lida,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado),wa_numero!inner(provedor)')
+  const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,estado,ultima_em,ultima_previa,nao_lidas,janela_ate,arquivada,fixada_em,silenciada,marcada_nao_lida,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado),wa_numero!inner(provedor)')
    .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false,nullsFirst:false}).order('id').range(de,de+999);
   if(r.error){toast('Não foi possível carregar as conversas.');return;}
   todas.push(...r.data);if(r.data.length<1000)break;
  }
  const nv=todas.map(convWA);
+ await waCarregarPainel();
+ nv.forEach(c=>{const p=waPainel[c.id];c.dono=(p&&p.dono_id)||null;});
  waEntrada=nv.filter(c=>!c.dono);
  waMeus=nv.filter(c=>c.dono===eu.id);
- await waCarregarPainel();waAplicarPainel();
+ waAplicarPainel();
  waEntrada.concat(waMeus).forEach(c=>janelaWA(c));waAgendarJanela();
 }
 const WA_COLUNAS_MSG='id,id_local,id_whatsapp,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,autor_grupo,responder_a,reacao,reacao_nossa,encaminhada,favorita,dados,wa_midia(nome,caminho,estado,mimetype,transcricao,tamanho,duracao_s)';

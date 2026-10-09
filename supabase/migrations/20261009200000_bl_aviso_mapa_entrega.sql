@@ -128,7 +128,7 @@ begin
   perform 1 from fiscal_sync where destino = 'fiscal' for update;
   snap := fiscal_bl_rpc('rota_snapshot', jsonb_build_object('p_destino', 'fiscal'));
   v_seq := coalesce((snap->>'ultimo_seq')::bigint, 0);
-  delete from wa_rota_carteira;
+  delete from wa_rota_carteira where empresa_id is not null;
   insert into wa_rota_carteira (empresa_id, dono_id, seq, atualizado_em)
   select (x->>'empresa_id')::uuid, (x->>'usuario_id')::uuid, v_seq, now() from jsonb_array_elements(coalesce(snap->'carteira', '[]')) x
   on conflict (empresa_id) do update set dono_id = excluded.dono_id, seq = excluded.seq, atualizado_em = now();
@@ -217,3 +217,18 @@ do $$ begin
   begin alter publication supabase_realtime add table public.wa_rota_carteira; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.wa_rota_numero; exception when duplicate_object then null; end;
 end $$;
+
+create or replace function public.wa_rota_continuar()
+ returns boolean language plpgsql security definer set search_path to 'public', 'pg_temp'
+as $function$
+declare v_chave text;
+begin
+  if not fiscal_e_servidor() then raise exception 'so o servidor'; end if;
+  if not exists (select 1 from wa_rota_numero where resolvido_em is null) then return false; end if;
+  select decrypted_secret into v_chave from vault.decrypted_secrets where name = 'bl_aviso_chave_interna';
+  perform net.http_post(url := 'https://vvohwixeokxydmbhqklu.supabase.co/functions/v1/bl-aviso',
+    body := jsonb_build_object('acao', 'resolver'),
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-chave-interna', v_chave));
+  return true;
+end $function$;
+revoke all on function public.wa_rota_continuar() from public, anon, authenticated;
