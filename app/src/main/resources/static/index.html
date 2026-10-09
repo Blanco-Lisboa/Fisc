@@ -1263,11 +1263,11 @@ function cgNum(v){return v==null?'—':Number(v).toLocaleString('pt-BR');}
 function cgDelta(v,maiorRuim){if(v==null||v===0)return '';const ruim=maiorRuim?v>0:v<0;return `<span class="cg-delta ${ruim?'ruim':'bom'}">${v>0?'+':'−'}${Math.abs(v)}</span>`;}
 async function equipeGarantir(){if(Object.keys(waEquipe).length)return;const r=await sb.rpc('fiscal_equipe');if(!r.error&&r.data)((r.data.pessoas)||[]).forEach(x=>waEquipe[x.id]=x.nome);}
 function carregarCentralGestor(){return umaVez('central',async()=>{
- const [r,bl]=await Promise.all([sb.rpc('fiscal_central_gestor'),blLogado().rpc('fiscal_central_base'),equipeGarantir()]);
- if(r.error||bl.error){if(!centralDados)toast('Não foi possível carregar a central.');return;}
+ const [r,bl,us]=await Promise.all([sb.rpc('fiscal_central_gestor'),blLogado().rpc('fiscal_central_base'),sb.from('fiscal_usuario').select('id,nome').eq('ativo',true).order('nome')]);
+ if(r.error||bl.error||us.error){if(!centralDados)toast('Não foi possível carregar a central.');return;}
  const novo=r.data||{};const b=bl.data||{};const qtd={};(b.por_dono||[]).forEach(x=>qtd[x.usuario_id]=x.qtd);
  novo.kpis=Object.assign({},novo.kpis,{total_clientes:(b.empresas_you||[]).length,sem_carteira:b.sem_dono});
- novo.carga=Object.keys(waEquipe).map(id=>({usuario_id:id,nome:waEquipe[id],clientes:qtd[id]||0})).sort((x,y)=>y.clientes-x.clientes||x.nome.localeCompare(y.nome));
+ novo.carga=(us.data||[]).map(u=>({usuario_id:u.id,nome:u.nome,clientes:qtd[u.id]||0})).sort((x,y)=>y.clientes-x.clientes||x.nome.localeCompare(y.nome));
  if(!mudou(centralDados,novo))return;
  centralDados=novo;if(view==='gestor'&&gestorAba==='central')renderCentralGestor();
 });}
