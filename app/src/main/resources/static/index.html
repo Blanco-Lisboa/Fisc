@@ -392,6 +392,51 @@ tr.rnovo:hover{background:#ffe6d6}
 .cg-etapa .num{font-size:12px;text-align:right;font-variant-numeric:tabular-nums}.cg-etapa .num b{font-size:15px;font-family:var(--disp)}
 .cg-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--apoio)}
 .cg-leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.mt{display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.mt>*{flex-shrink:0}
+.mt .sp,.mt-conta .sp,.mt-cab .sp{flex:1}
+.cg-kpi .val small{font-size:15px;color:var(--apagado);font-weight:600}
+.mt-pl{display:inline-flex;align-items:center;font-size:11px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap;background:var(--superf2);color:var(--apagado)}
+.mt-pl.ok{background:var(--verdeSv);color:var(--verde)}
+.mt-pl.and{background:var(--ambarSv);color:var(--ambar)}
+.mt-pl.nao{background:var(--vermelhoSv);color:var(--vermelho)}
+.mt-conta{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.mt-ci{display:flex;flex-direction:column;gap:4px;min-width:0}
+.mt-ci>span{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--apagado)}
+.mt-ci b{font-size:13px}
+.mt-sec{display:flex;flex-direction:column;gap:10px;min-height:0}
+.mt-cab{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mt-lista{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding-right:2px}
+.mt-av{border:1px solid var(--borda);border-left:4px solid var(--nevoa);border-radius:12px;padding:10px 12px;background:var(--pagina)}
+.mt-av.nao{border-left-color:var(--vermelho)}
+.mt-av.and{border-left-color:var(--ambar)}
+.mt-av.visto{opacity:.65}
+.mt-avt{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mt-avt b{font-size:13px}
+.mt-avt em{margin-left:auto;font-style:normal;font-size:11px;color:var(--apagado);font-variant-numeric:tabular-nums}
+.mt-av p{margin:6px 0 0;font-size:12.5px;color:var(--grafite)}
+.mt-avr{display:flex;justify-content:flex-end;margin-top:8px;font-size:11px;color:var(--apagado)}
+.mt-ac{font-size:12.5px;padding:8px 2px;border-bottom:1px solid var(--superf2);display:flex;gap:6px;flex-wrap:wrap;align-items:baseline}
+.mt-ac span{color:var(--apoio)}
+.mt-ac em{margin-left:auto;font-style:normal;font-size:11px;color:var(--apagado);font-variant-numeric:tabular-nums}
+.mt-tr{cursor:pointer}
+.mt-tr:hover td{background:var(--superf)}
+.mt-tr td{vertical-align:middle}
+.mt-nm{font-size:11px;color:var(--apagado);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-sw{position:relative;display:inline-block;width:36px;height:20px;cursor:pointer}
+.mt-sw input{opacity:0;width:0;height:0;position:absolute}
+.mt-sw i{position:absolute;inset:0;border-radius:999px;background:var(--nevoa);transition:background .15s}
+.mt-sw i::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+.mt-sw input:checked+i{background:var(--verde)}
+.mt-sw input:checked+i::after{transform:translateX(16px)}
+.mt-det{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+.mt-prev{background:#efeae2;border-radius:14px;padding:16px;min-height:200px}
+.mt-info{font-size:13px}
+.mt-form{min-width:0}
+.mt-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mt-lac,.mt-bt{display:flex;gap:8px;align-items:center;margin-top:6px}
+.mt-lac span,.mt-bt span{font-size:11.5px;font-weight:700;color:var(--apoio);white-space:nowrap;flex:none;width:112px}
+.mt-erros{margin-top:12px;border:1px solid var(--vermelho);background:var(--vermelhoSv);color:var(--vermelho);border-radius:10px;padding:8px 12px;font-size:12.5px;display:flex;flex-direction:column;gap:3px}
 .cg-duas{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
 .cg-colunas{display:flex;align-items:flex-end;gap:16px;height:170px;padding-top:18px;border-bottom:1px solid var(--borda)}
 .cg-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
@@ -940,8 +985,7 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="lab">FLUXO</div>
   <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd">2</span></div>
   <div class="lab">APOIO</div>
-  <div class="it" data-view="templates" onclick="irView('templates')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h16v6H4zM4 14h16v6H4z"/></svg></span> Templates</div>
-  <div class="it" data-view="ia" onclick="irView('ia')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg></span> IA &amp; Meta</div>
+  <div class="it" data-view="ia" id="navIA" style="display:none" onclick="irView('ia')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg></span> IA &amp; Meta</div>
   <div class="lab">MENSAGENS</div>
   <div class="sub">
     <div class="it sem" data-view="email" onclick="irView('email')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></span> E-mail's <span class="bd" id="emBadge" style="display:none">0</span></div>
@@ -1159,14 +1203,14 @@ function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
 function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
 function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
-const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',templates:'Templates',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
+const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
 let acesso={perfil:'',tela_inicial:'apuracao',permissoes:[]};
 async function carregarAcesso(){const r=await sb.rpc('fiscal_minhas_permissoes');if(r.error){toast('Não foi possível ler as permissões.');return;}acesso=r.data||{perfil:'',tela_inicial:'apuracao',permissoes:[]};}
 function tem(p){return (acesso.permissoes||[]).includes(p);}
 function eGestor(){return acesso.perfil==='gestor';}
 function telaInicial(){return acesso.tela_inicial||'apuracao';}
-function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador')));}
-function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';}
+function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver')));}
+function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';}
 function irView(v){if(!podeVer(v))v=telaInicial();view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
 function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central',mapaDados=null,cartAberta=new Set();
@@ -1502,7 +1546,7 @@ function render(){
   el('crumbTitulo').textContent=TITULOS[view]||view;
   document.querySelector('.topo .crumb').style.display='none';
   document.querySelector('.topo').style.display='none';
-  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pessoal:renderPessoal,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,templates:renderTpl,ia:renderIA,email:renderEmail,config:renderConfig}[view])();
+  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pessoal:renderPessoal,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,ia:renderIA,email:renderEmail,config:renderConfig}[view])();
   document.querySelectorAll('.wa-msgs').forEach(m=>m.scrollTop=m.scrollHeight);
   teamsTela();
 }
@@ -1600,7 +1644,7 @@ function teamsTela(){if(window.TeamsIT)TeamsIT.tela({bolinhaAlta:view==='whatswe
 const MOD_TITULO={fiscal_solicitacao_xml:'Pedir XML do mês',fiscal_lembrete_urgente_xml:'Cobrar XML (urgente)',fiscal_confirmacao_movimento_mes:'Perguntar se teve notas no mês',fiscal_confirmacao_dados_apuracao:'Confirmar dados antes da apuração',fiscal_entrega_apuracao_mensal:'Enviar apuração e guia (DAS)',fiscal_aviso_declaracao_zerada:'Avisar declaração zerada',fiscal_aviso_vencimento_certificado:'Avisar vencimento do certificado',fiscal_boas_vindas_cliente:'Boas-vindas ao cliente novo',fiscal_difal_explicacao_decisao:'Explicar o ICMS DIFAL',fiscal_atualizacao_rotina_erp:'Avisar mudança na rotina do ERP',fiscal_aviso_alteracao_cadastral:'Avisar alteração cadastral',fiscal_pendencia_cadastral:'Cobrar pendência cadastral',fiscal_recibo_opcao_regime:'Enviar recibo da opção de regime',fiscal_reforma_tributaria_lembrete:'Lembrete da Reforma Tributária',fiscal_comunicado_institucional:'Comunicado da YOU',fiscal_divulgacao_servicos_grupo:'Divulgar serviços do grupo',fiscal_pesquisa_satisfacao:'Pesquisa de satisfação'};
 const MOD_CAT={UTILITY:['Utilidade','vd'],MARKETING:['Marketing','cz'],AUTHENTICATION:['Código','am']};
 let modLista=null,modCtx=null,modBusca='',modSel=null,modVals=[],modDoc=null;
-async function modCarregar(){const r=await sb.from('wa_modelo').select('nome,idioma,categoria,estado,componentes').eq('estado','APPROVED').order('nome');
+async function modCarregar(){const r=await sb.from('wa_modelo').select('nome,idioma,categoria,estado,componentes').eq('estado','APPROVED').eq('em_uso',true).order('nome');
  if(r.error){toast('Não foi possível carregar os modelos.');return [];}
  modLista=(r.data||[]).filter(m=>m.nome!=='hello_world'&&m.categoria!=='AUTHENTICATION');return modLista;}
 function modParte(m,t){return (m.componentes||[]).find(c=>c.type===t)||null;}
@@ -2265,25 +2309,169 @@ function estDemandas(){const cols=[['recebidas','Recebidas'],['andamento','Em an
 }
 let _drag=null;function dragEst(id){_drag=id;}function dropEst(col){if(_drag){esteira.find(e=>e.id===_drag).col=col;_drag=null;renderEst();}}
 function avancarEst(id){const o=['recebidas','andamento','validacao','concluidas'];const e=esteira.find(x=>x.id===id);const i=o.indexOf(e.col);if(i<3){e.col=o[i+1];toast('Avançado.');renderEst();}}
-/* templates & flows */
-function renderTpl(){el('conteudo').innerHTML=`<div class="tela"><h1>Templates &amp; Flows (modelos da Meta)</h1><p class="intro">Modelos Utility (grátis dentro da janela) e Flows (formulário no chat) usados na apuração. Clique pra testar no cliente ${cli().nome}.</p>
-  <div class="grade">${templates.map(t=>`<div class="cardP"><div class="top"><b class="disp" style="flex:1">${t.cod}</b><span class="tag t-util">${t.cat}</span></div><div class="corpo">${t.corpo.replace(/\{(\w+)\}/g,'<span class="var">{$1}</span>')}</div><div class="foot">${(t.btns||[]).map(b=>`<span class="tag" style="background:var(--superf2);color:var(--apoio)">${b}</span>`).join('')}${t.flow?'<span class="tag t-flow">→ Flow</span>':''}${t.doc?'<span class="tag" style="background:var(--superf2);color:var(--apoio)">+ PDF</span>':''}</div><div class="foot"><button class="miniB" style="border-color:var(--verde);color:var(--verde)" onclick="qaTpl('${t.cod}');irView('apuracao')">Testar no WhatsApp →</button></div></div>`).join('')}</div>
-  <h1 style="font-size:18px;margin-top:24px">Flows (formulário no chat)</h1>
-  <div class="grade">${flows.map(f=>`<div class="flowGrande"><b class="disp">${f.nome}</b> <span class="tag t-flow">Flow</span><div class="campos">${f.campos.map(c=>`<span class="cc">${c}</span>`).join('')}</div></div>`).join('')}</div></div>`;
-}
 /* IA & Meta */
-function renderIA(){el('conteudo').innerHTML=`<div class="tela"><h1>Montagem &amp; Automação</h1><p class="intro">Três coisas separadas: <b>1) Meta Tools (MCP)</b> — ferramenta usada <b>depois</b>, só pra <b>montar</b> o WhatsApp oficial (número, templates, webhook), uma vez. <b>2) API oficial</b> — envia e recebe as mensagens no dia a dia. <b>3) Agente IA (opcional)</b> — a IA de vocês, sobre os seus dados. <b>Não usamos o Meta AI</b>.</p>
-  <div class="grade"><div class="cardP"><b class="disp">Montagem com o Meta Tools (MCP)</b><div style="font-size:11.5px;color:var(--apagado);margin-top:2px">Passo de implantação — feito uma vez ao ligar a API.</div><div style="margin-top:8px">
-    <div class="passo"><div class="n">✓</div><div><b style="font-size:12.5px">Número oficial (WABA) verificado</b><div style="font-size:11.5px;color:var(--apoio)">Montado com o Meta Tools</div></div></div>
-    <div class="passo"><div class="n">✓</div><div><b style="font-size:12.5px">Templates Utility aprovados</b><div style="font-size:11.5px;color:var(--apoio)">envio_guia, solicitacao_xml, lembrete_vencimento, cobranca_movimento, boas_vindas</div></div></div>
-    <div class="passo"><div class="n">✓</div><div><b style="font-size:12.5px">Webhook configurado</b><div style="font-size:11.5px;color:var(--apoio)">mensagens + status de entrega</div></div></div>
-    <div class="passo"><div class="n pend">2</div><div><b style="font-size:12.5px">Flows em publicação</b><div style="font-size:11.5px;color:var(--apoio)">Enviar XMLs · Atualizar credencial</div></div></div>
-  </div></div>
-  <div class="cardP"><b class="disp">O que a IA faz (agente de IA · opcional)</b><div style="font-size:11.5px;color:var(--apagado);margin-top:2px">Só entra nas partes que valem a pena. Dá pra operar sem IA, só com templates/Flows.</div><div style="margin-top:10px">
-    ${[['🗂️','Triagem','classifica a mensagem que chega e roteia (2ª via, XML, dúvida, cobrança)'],['🗣️','Transcrição','áudios do cliente viram texto'],['✍️','Rascunho','sugere a resposta; humano aprova'],['🧮','Apuração','lê o Relatório e confere o RBA'],['🛡️','Guardião','detecta senha em texto e troca pelo Flow seguro'],['🚩','Prioridade','marca urgência (malha/intimação)']].map(([i,t,d])=>`<div class="logIA"><div class="ic">${i}</div><div><b style="font-size:12.5px">${t}</b><div style="font-size:11.5px;color:var(--apoio)">${d}</div></div></div>`).join('')}
-  </div></div></div>
-  <div class="cardP" style="margin-top:14px;background:var(--roxoSv);border-color:#e2d5f2"><b class="disp">Regra</b><p style="margin:6px 0 0;font-size:13px;color:var(--grafite)">Tudo que é enviado ao cliente passa por <b>revisão humana</b>. A IA acelera, não decide sozinha o sensível. Dados ficam no ambiente de vocês (LGPD).</p></div></div>`;
+let iaAba='meta',mtDados=null,mtCanal=null,mtFiltro='todos',mtBusca='',mtAvFiltro='nao_vistos',mtNovo=null,mtSinc=false;
+const MT_ESTADO={APPROVED:['Aprovado','ok'],PENDING:['Em análise','and'],IN_APPEAL:['Em recurso','and'],REJECTED:['Recusado','nao'],PAUSED:['Pausado','nao'],DISABLED:['Desativado','nao'],PENDING_DELETION:['Sendo apagado','neu'],ARCHIVED:['Arquivado','neu'],LIMIT_EXCEEDED:['Limite atingido','nao']};
+const MT_QUAL={GREEN:['Alta','ok'],YELLOW:['Média','and'],RED:['Baixa','nao'],UNKNOWN:['Sem nota','neu']};
+const MT_LIMITE={TIER_250:'250 clientes por dia',TIER_1K:'1 mil clientes por dia',TIER_2K:'2 mil clientes por dia',TIER_10K:'10 mil clientes por dia',TIER_100K:'100 mil clientes por dia',TIER_UNLIMITED:'Sem limite'};
+const MT_GRAV={critico:['Crítico','nao'],atencao:['Atenção','and'],info:['Informativo','neu']};
+const MT_ACAO={pedido:'pediu o modelo',pedido_recusado_meta:'teve o pedido recusado pela Meta',em_uso:'ligou o uso',fora_de_uso:'desligou o uso',sincronizado:'atualizou da Meta'};
+function mtPilula(par){const [t,c]=par||['—','neu'];return `<span class="mt-pl ${c}">${escH(t)}</span>`;}
+function mtData(d){return d?ddmm(d)+' '+hhmm(d):'—';}
+function renderIA(){
+ el('conteudo').innerHTML=`
+  <div class="aputabs">
+    <div class="aputabs-l">${[['ia','IA'],['meta','Meta']].map(([k,t])=>`<button class="${iaAba===k?'on':''}" onclick="iaAba='${k}';renderIA()">${t}</button>`).join('')}</div>
+  </div>
+  <div class="apuBody" id="iaBody"></div>`;
+ if(iaAba==='meta'){mtAssinar();renderMeta();if(!mtDados)mtCarregar();}
 }
+function mtCarregar(){return umaVez('meta',async()=>{
+ const r=await sb.rpc('wa_meta_painel');
+ if(r.error){if(!mtDados)toast('Não foi possível carregar os dados da Meta.');return;}
+ const novo=r.data||{};if(!mudou(mtDados,novo))return;mtDados=novo;
+ if(view==='ia'&&iaAba==='meta')renderMeta();});}
+function mtAssinar(){if(mtCanal)return;
+ const f=()=>{if(view==='ia')mtCarregar();else mtDados=null;};
+ mtCanal=sb.channel('fiscal-meta')
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo'},f)
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_meta_evento'},f)
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_numero_meta'},f)
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo_acao'},f)
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_saude'},f).subscribe();}
+async function mtSincronizar(){if(mtSinc)return;mtSinc=true;renderMeta();
+ const j=await waEdge('wa-meta-gestao',{acao:'sincronizar'});mtSinc=false;
+ if(!j.ok)toast(j.erro||'Não foi possível atualizar da Meta.');else toast('Atualizado da Meta.');
+ await mtCarregar();renderMeta();}
+function mtModelos(){const d=mtDados||{};const conta=d.numero&&d.numero.waba_id;
+ return (d.modelos||[]).filter(m=>!m.waba_id||!conta||m.waba_id===conta);}
+function renderMeta(){const b=el('iaBody');if(!b)return;
+ if(!mtDados){b.innerHTML='';return;}
+ const d=mtDados,n=d.numero||{},s=d.saude||{},ms=mtModelos(),av=d.avisos||[];
+ const aprov=ms.filter(m=>m.estado==='APPROVED').length,anal=ms.filter(m=>['PENDING','IN_APPEAL'].includes(m.estado)).length,rec=ms.filter(m=>m.estado==='REJECTED').length;
+ const naoVistos=av.filter(a=>!a.ciente_em),crit=naoVistos.filter(a=>a.gravidade==='critico').length;
+ const q=MT_QUAL[n.qualidade]||MT_QUAL.UNKNOWN;
+ const kpi=(rot,val,rod,cor)=>`<div class="cg-card cg-kpi"><div class="rot">${rot}</div><div class="val"${cor?` style="color:${cor}"`:''}>${val}</div><div class="rod">${rod}</div></div>`;
+ const corQ={ok:'var(--verde)',and:'var(--ambar)',nao:'var(--vermelho)',neu:''}[q[1]];
+ b.innerHTML=`<div class="tela mt">
+  <div class="cg-kpis">
+   ${kpi('Número',escH(n.nome_exibido||'—'),`${escH(n.telefone?fmtTel(n.telefone):'')}${n.situacao?' · '+mtPilula(n.situacao==='CONNECTED'?['Conectado','ok']:[n.situacao,'nao']):''}`)}
+   ${kpi('Qualidade do número',q[0],'nota que a Meta dá pelas respostas dos clientes',corQ)}
+   ${kpi('Limite de conversas',escH(MT_LIMITE[n.limite]||n.limite||'—'),'clientes novos que o número pode chamar em 24h')}
+   ${kpi('Modelos aprovados',`${aprov}<small> de ${ms.length}</small>`,`${anal} em análise · ${rec} recusados`)}
+   ${kpi('Avisos da Meta',naoVistos.length,crit?`<span style="color:var(--vermelho);font-weight:700">${crit} críticos</span>`:'nenhum crítico',naoVistos.length?'var(--laranjaTx)':'')}
+  </div>
+  <div class="cg-card mt-conta">
+   <div class="mt-ci"><span>Conta</span><b>${escH(n.waba_nome||'—')}</b></div>
+   <div class="mt-ci"><span>Análise da conta</span>${mtPilula(n.waba_revisao==='APPROVED'?['Aprovada','ok']:n.waba_revisao?[n.waba_revisao,'and']:null)}</div>
+   <div class="mt-ci"><span>Nome exibido</span>${mtPilula(n.nome_situacao==='APPROVED'?['Aprovado','ok']:n.nome_situacao?[n.nome_situacao,'and']:null)}</div>
+   <div class="mt-ci"><span>Selo oficial</span>${mtPilula(n.conta_oficial?['Sim','ok']:['Não','neu'])}</div>
+   <div class="mt-ci"><span>Envio</span>${mtPilula(s.bloqueia_envio?['Bloqueado','nao']:s.ultimo_evento==='token_recusado'?['Chave recusada','nao']:['Liberado','ok'])}</div>
+   <div class="mt-ci"><span>Atualizado</span><b>${mtData(n.atualizado_em)}</b></div>
+   <span class="sp"></span>
+   <button class="apubtn" ${mtSinc?'disabled':''} onclick="mtSincronizar()">${mtSinc?'Atualizando…':'Atualizar da Meta'}</button>
+  </div>
+  <section class="cg-duas">
+   <div class="cg-card mt-sec"><div class="mt-cab"><div class="cg-tit" style="margin:0">Avisos da Meta</div><span class="sp"></span>
+     ${[['nao_vistos','Não vistos',naoVistos.length],['criticos','Críticos',av.filter(a=>a.gravidade==='critico').length],['todos','Todos',av.length]].map(([k,t,c])=>`<button class="wz-chip${mtAvFiltro===k?' on':''}" onclick="mtAvFiltro='${k}';renderMeta()">${t} <b>${c}</b></button>`).join('')}</div>
+    <div class="mt-lista">${mtAvisos(av)}</div></div>
+   <div class="cg-card mt-sec"><div class="mt-cab"><div class="cg-tit" style="margin:0">Últimas ações</div></div>
+    <div class="mt-lista">${(d.acoes||[]).map(a=>`<div class="mt-ac"><b>${escH(a.por||'Sistema')}</b> ${escH(MT_ACAO[a.acao]||a.acao)} <span>${escH(a.nome||'')}</span><em>${mtData(a.em)}</em></div>`).join('')}</div></div>
+  </section>
+  <div class="cg-card mt-sec">
+   <div class="mt-cab"><div class="cg-tit" style="margin:0">Modelos de mensagem</div>
+    ${[['todos','Todos',ms.length],['APPROVED','Aprovados',aprov],['analise','Em análise',anal],['REJECTED','Recusados',rec],['parados','Pausados ou desativados',ms.filter(m=>['PAUSED','DISABLED'].includes(m.estado)).length]].map(([k,t,c])=>`<button class="wz-chip${mtFiltro===k?' on':''}" onclick="mtFiltro='${k}';renderMeta()">${t} <b>${c}</b></button>`).join('')}
+    <span class="sp"></span>
+    <div class="busca" style="margin:0;width:240px">🔎<input id="mtBuscaIn" placeholder="Buscar modelo" value="${escH(mtBusca)}" oninput="mtBusca=this.value;mtDesenharTabela()"></div>
+    ${d.pode_gerir?`<button class="bt-assumir" onclick="mtNovoAbrir()">Novo modelo</button>`:''}</div>
+   <div class="tbwrap" id="mtTabela"></div>
+  </div></div>`;
+ mtDesenharTabela();
+}
+function mtAvisos(av){
+ const l=av.filter(a=>mtAvFiltro==='todos'||(mtAvFiltro==='nao_vistos'?!a.ciente_em:a.gravidade==='critico'));
+ return l.map(a=>{const g=MT_GRAV[a.gravidade]||MT_GRAV.info;
+  return `<div class="mt-av ${g[1]}${a.ciente_em?' visto':''}"><div class="mt-avt">${mtPilula(g)}<b>${escH(a.titulo||'Aviso da Meta')}</b><em>${mtData(a.recebido_em)}</em></div>
+   <p>${escH(a.explicacao||'')}</p>
+   <div class="mt-avr">${a.ciente_em?`<span>Visto por ${escH(a.ciente_por||'')} em ${mtData(a.ciente_em)}</span>`:`<button class="miniB" onclick="mtCiente(${a.id})">Marcar como visto</button>`}</div></div>`;}).join('');}
+async function mtCiente(id){const r=await sb.rpc('wa_meta_evento_ciente',{p_evento:id});if(r.error){toast('Não foi possível marcar.');return;}await mtCarregar();}
+function mtFiltrados(){const t=mtBusca.trim().toLowerCase();
+ return mtModelos().filter(m=>{
+  if(mtFiltro==='APPROVED'&&m.estado!=='APPROVED')return false;if(mtFiltro==='REJECTED'&&m.estado!=='REJECTED')return false;
+  if(mtFiltro==='analise'&&!['PENDING','IN_APPEAL'].includes(m.estado))return false;if(mtFiltro==='parados'&&!['PAUSED','DISABLED'].includes(m.estado))return false;
+  return !t||(m.nome+' '+(MOD_TITULO[m.nome]||'')).toLowerCase().includes(t);});}
+function mtDesenharTabela(){const w=el('mtTabela');if(!w||!mtDados)return;const ger=!!mtDados.pode_gerir;
+ const th=t=>`<th style="background:var(--ink);color:#fff;font-weight:700;border-bottom:2px solid var(--laranja)">${t}</th>`;
+ w.innerHTML=`<table style="table-layout:fixed"><colgroup><col style="width:34%"><col style="width:12%"><col style="width:14%"><col style="width:11%"><col style="width:11%"><col style="width:18%"></colgroup>
+  <thead><tr>${th('Modelo')}${th('Categoria')}${th('Situação')}${th('Qualidade')}${th('Em uso')}${th('Atualizado')}</tr></thead><tbody>
+  ${mtFiltrados().map(m=>`<tr class="mt-tr" onclick="mtDetalhe('${m.id}')"><td style="overflow:hidden;text-overflow:ellipsis"><b>${escH(MOD_TITULO[m.nome]||m.nome)}</b><div class="mt-nm">${escH(m.nome)}</div></td>
+   <td>${escH((MOD_CAT[m.categoria]||[m.categoria])[0])}</td><td>${mtPilula(MT_ESTADO[m.estado]||[m.estado,'neu'])}</td><td>${mtPilula(MT_QUAL[m.qualidade]||MT_QUAL.UNKNOWN)}</td>
+   <td onclick="event.stopPropagation()">${ger?`<label class="mt-sw"><input type="checkbox" ${m.em_uso?'checked':''} onchange="mtUsar('${m.id}',this.checked,this)"><i></i></label>`:(m.em_uso?'Sim':'Não')}</td>
+   <td>${mtData(m.atualizado_em)}</td></tr>`).join('')}</tbody></table>`;}
+async function mtUsar(id,v,cx){const r=await sb.rpc('wa_modelo_usar',{p_modelo:id,p_em_uso:v});
+ if(r.error){cx.checked=!v;toast('Não foi possível mudar.');return;}await mtCarregar();}
+function mtDetalhe(id){const m=mtModelos().find(x=>x.id===id);if(!m)return;const vars=modVars(m);
+ waModal(MOD_TITULO[m.nome]||m.nome,`<div class="mt-det"><div class="mt-prev">${modBolha(m,vars.map(v=>v.ex))}</div><div class="mt-info">
+  <span class="fl" style="margin-top:0">Nome na Meta</span><div>${escH(m.nome)}</div>
+  <span class="fl">Situação</span><div>${mtPilula(MT_ESTADO[m.estado]||[m.estado,'neu'])}</div>
+  ${m.motivo?`<span class="fl">Motivo da recusa</span><div>${escH(m.motivo)}</div>`:''}
+  <span class="fl">Categoria</span><div>${escH((MOD_CAT[m.categoria]||[m.categoria])[0])}</div>
+  <span class="fl">Qualidade</span><div>${mtPilula(MT_QUAL[m.qualidade]||MT_QUAL.UNKNOWN)}</div>
+  ${vars.length?`<span class="fl">Lacunas</span><div>${vars.map(v=>`{{${v.i}}} ${escH(modRotulo(v))} · ex.: ${escH(v.ex)}`).join('<br>')}</div>`:''}
+  ${m.pedido_por?`<span class="fl">Pedido por</span><div>${escH(m.pedido_por)} em ${mtData(m.pedido_em)}</div>`:''}
+  ${mtDados.pode_gerir?`<div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="apubtn" onclick="mtNovoAbrir('${m.id}')">Duplicar como novo</button></div>`:''}
+ </div></div>`,760);}
+function mtNovoBase(id){const m=id&&mtModelos().find(x=>x.id===id);
+ if(m){const h=modParte(m,'HEADER'),bd=modParte(m,'BODY'),f=modParte(m,'FOOTER'),bt=modParte(m,'BUTTONS');
+  return {nome:m.nome+'_v2',categoria:m.categoria,idioma:m.idioma||'pt_BR',cabecalho:h&&h.format==='TEXT'?h.text:'',corpo:(bd&&bd.text)||'',
+   exemplos:(bd&&bd.example&&bd.example.body_text&&bd.example.body_text[0])||[],rodape:f?f.text:'',
+   botoes:bt?bt.buttons.map(x=>({tipo:x.type,texto:x.text,url:x.url||'',telefone:x.phone_number||''})):[]};}
+ return {nome:'fiscal_',categoria:'UTILITY',idioma:'pt_BR',cabecalho:'Departamento Fiscal',corpo:'Olá, aqui é {{1}}, do Departamento Fiscal da YOU Contabilidade.\n\n',
+  exemplos:['Larissa'],rodape:'Equipe Fiscal',botoes:[{tipo:'QUICK_REPLY',texto:'Ok, entendi',url:'',telefone:''}]};}
+function mtNovoAbrir(id){fecharModal();mtNovo=mtNovoBase(id);mtNovo.erros=[];
+ waModal('Novo modelo de mensagem','<div id="mtNovoCorpo"></div>',980);mtNovoDesenhar();}
+function mtLacunas(){return [...new Set((mtNovo.corpo.match(/\{\{(\d+)\}\}/g)||[]).map(x=>+x.replace(/\D/g,'')))].sort((a,b)=>a-b);}
+function mtNovoModelo(){const comp=[];if(mtNovo.cabecalho)comp.push({type:'HEADER',format:'TEXT',text:mtNovo.cabecalho});
+ comp.push({type:'BODY',text:mtNovo.corpo});if(mtNovo.rodape)comp.push({type:'FOOTER',text:mtNovo.rodape});
+ if(mtNovo.botoes.length)comp.push({type:'BUTTONS',buttons:mtNovo.botoes.map(b=>({type:b.tipo,text:b.texto}))});return {componentes:comp};}
+function mtNovoPrevia(){const p=el('mtPrev');if(p)p.innerHTML=modBolha(mtNovoModelo(),mtLacunas().map(i=>mtNovo.exemplos[i-1]||''));}
+function mtNovoDesenhar(){const c=el('mtNovoCorpo');if(!c||!mtNovo)return;const n=mtNovo;
+ const opt=(v,l)=>`<option value="${v}"${n.categoria===v?' selected':''}>${l}</option>`;
+ c.innerHTML=`<div class="mt-det"><div class="mt-form">
+  <span class="fl" style="margin-top:0">Nome na Meta</span><input class="fi" value="${escH(n.nome)}" oninput="mtNovo.nome=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'_');this.value=mtNovo.nome">
+  <div class="mt-2"><div><span class="fl">Categoria</span><select class="fi" onchange="mtNovo.categoria=this.value">${opt('UTILITY','Utilidade')}${opt('MARKETING','Marketing')}${opt('AUTHENTICATION','Código')}</select></div>
+   <div><span class="fl">Idioma</span><select class="fi" onchange="mtNovo.idioma=this.value"><option value="pt_BR">Português (Brasil)</option></select></div></div>
+  <span class="fl">Cabeçalho</span><input class="fi" maxlength="60" value="${escH(n.cabecalho)}" oninput="mtNovo.cabecalho=this.value;mtNovoPrevia()">
+  <span class="fl">Texto</span><textarea class="fi" id="mtCorpoIn" rows="7" maxlength="1024" oninput="mtNovo.corpo=this.value;mtNovoLacunas();mtNovoPrevia()">${escH(n.corpo)}</textarea>
+  <div style="display:flex;justify-content:flex-end;margin-top:6px"><button class="miniB" onclick="mtNovoLacuna()">+ Inserir lacuna</button></div>
+  <div id="mtLacunas"></div>
+  <span class="fl">Rodapé</span><input class="fi" maxlength="60" value="${escH(n.rodape)}" oninput="mtNovo.rodape=this.value;mtNovoPrevia()">
+  <span class="fl">Botões</span><div id="mtBotoes"></div>
+  <div style="display:flex;gap:6px;margin-top:6px">${n.botoes.length<10?`<button class="miniB" onclick="mtNovoBotao('QUICK_REPLY')">+ Resposta rápida</button><button class="miniB" onclick="mtNovoBotao('URL')">+ Abrir link</button><button class="miniB" onclick="mtNovoBotao('PHONE_NUMBER')">+ Ligar</button>`:''}</div>
+  ${n.erros.length?`<div class="mt-erros">${n.erros.map(e=>`<div>${escH(e)}</div>`).join('')}</div>`:''}
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="mtEnviar" onclick="mtNovoEnviar()">Enviar para análise</button></div>
+ </div><div class="mt-prev" id="mtPrev"></div></div>`;
+ mtNovoLacunas();mtNovoBotoes();mtNovoPrevia();}
+function mtNovoLacunas(){const box=el('mtLacunas');if(!box)return;const ls=mtLacunas();
+ box.innerHTML=ls.map(i=>`<div class="mt-lac"><span>{{${i}}}</span><input class="fi" placeholder="Exemplo da lacuna ${i}" value="${escH(mtNovo.exemplos[i-1]||'')}" oninput="mtNovo.exemplos[${i-1}]=this.value;mtNovoPrevia()"></div>`).join('');}
+function mtNovoLacuna(){const t=el('mtCorpoIn');if(!t)return;const prox=(mtLacunas().slice(-1)[0]||0)+1;const ins='{{'+prox+'}}';
+ const a=t.selectionStart??t.value.length,z=t.selectionEnd??a;t.value=t.value.slice(0,a)+ins+t.value.slice(z);mtNovo.corpo=t.value;
+ t.focus();t.selectionStart=t.selectionEnd=a+ins.length;mtNovoLacunas();mtNovoPrevia();}
+function mtNovoBotoes(){const box=el('mtBotoes');if(!box)return;const rot={QUICK_REPLY:'Resposta rápida',URL:'Abrir link',PHONE_NUMBER:'Ligar'};
+ box.innerHTML=mtNovo.botoes.map((b,k)=>`<div class="mt-bt"><span>${rot[b.tipo]||b.tipo}</span><input class="fi" maxlength="25" placeholder="Texto do botão" value="${escH(b.texto)}" oninput="mtNovo.botoes[${k}].texto=this.value;mtNovoPrevia()">
+  ${b.tipo==='URL'?`<input class="fi" placeholder="https://" value="${escH(b.url)}" oninput="mtNovo.botoes[${k}].url=this.value">`:''}${b.tipo==='PHONE_NUMBER'?`<input class="fi" placeholder="+5511999999999" value="${escH(b.telefone)}" oninput="mtNovo.botoes[${k}].telefone=this.value">`:''}
+  <button class="miniB" title="Tirar" onclick="mtNovo.botoes.splice(${k},1);mtNovoDesenhar()">✕</button></div>`).join('');}
+function mtNovoBotao(t){mtNovo.botoes.push({tipo:t,texto:'',url:'',telefone:''});mtNovoDesenhar();}
+function mtNovoPayload(){const ls=mtLacunas();return {nome:mtNovo.nome,categoria:mtNovo.categoria,idioma:mtNovo.idioma,cabecalho:mtNovo.cabecalho.trim(),corpo:mtNovo.corpo.trim(),
+ exemplos:ls.map(i=>(mtNovo.exemplos[i-1]||'').trim()),rodape:mtNovo.rodape.trim(),botoes:mtNovo.botoes.map(b=>({tipo:b.tipo,texto:b.texto.trim(),url:b.url.trim(),telefone:b.telefone.trim()}))};}
+async function mtNovoEnviar(){const p=mtNovoPayload();
+ const v=await sb.rpc('wa_modelo_validar',{p});if(v.error){toast('Não foi possível conferir o modelo.');return;}
+ mtNovo.erros=v.data||[];if(mtNovo.erros.length){mtNovoDesenhar();return;}
+ const guardado=mtNovo;
+ waConfirmar(`Enviar o modelo "${p.nome}" para a análise da Meta?`,'Enviar',async()=>{
+  const j=await waEdge('wa-meta-gestao',{acao:'pedir_modelo',modelo:p});
+  if(!j.ok){mtNovo=guardado;mtNovo.erros=j.erros||[j.erro||'A Meta recusou o pedido.'];waModal('Novo modelo de mensagem','<div id="mtNovoCorpo"></div>',980);mtNovoDesenhar();return;}
+  mtNovo=null;toast('Modelo enviado para análise.');await mtCarregar();});}
 
 /* ---------- WHATSAPP console ---------- */
 let waPainel={},waEmp={},waFicha={},waEquipe={},waNumOf=null,waFiltro='todas',waModTodos=null,waOndas={},waAudio=null,waRasc={},waTags=null,waEt=null;
