@@ -40,6 +40,32 @@ Deno.serve(async (req) => {
 
   let p: Pedido;
   try { p = await req.json(); } catch { return json({ ok: false, erro: "corpo invalido" }, 400); }
+  if (p.acao === "pedir") {
+    const pr = await usuario.rpc("wa_chamada_pedir_preparar", { p_conversa: p.conversa_id ?? null });
+    if (pr.error) return json({ ok: false, erro: "nao foi possivel preparar" }, 400);
+    if (pr.data?.ok !== true) return json(pr.data ?? { ok: false }, 403);
+    const eu = await usuario.auth.getUser();
+    const corpo = {
+      messaging_product: "whatsapp", recipient_type: "individual",
+      ...(pr.data.telefone ? { to: pr.data.telefone } : { recipient: pr.data.bsuid }),
+      type: "interactive",
+      interactive: { type: "call_permission_request", action: { name: "call_permission_request" },
+                     body: { text: "Podemos te ligar pelo WhatsApp para resolver mais rápido?" } },
+    };
+    let wamid: string | null = null, erro: string | null = null;
+    try {
+      const { token, base } = await credenciais();
+      const r = await fetch(`${base}/${pr.data.phone_number_id}/messages`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(corpo),
+      });
+      const j = await r.json().catch(() => ({}));
+      wamid = j?.messages?.[0]?.id ?? null;
+      if (!wamid) erro = `${j?.error?.code ?? r.status} ${j?.error?.error_data?.details ?? j?.error?.message ?? ""}`.trim();
+    } catch (e) { erro = String((e as Error).message); }
+    const fim = await sb.rpc("wa_chamada_pedido_resultado", { p_conversa: pr.data.conversa_id, p_autor: eu.data.user?.id ?? null, p_wamid: wamid, p_erro: erro });
+    if (fim.error) return json({ ok: false, erro: "nao gravou o pedido" }, 500);
+    return wamid ? json({ ok: true, wamid }) : json({ ok: false, erro }, 422);
+  }
   if (!["connect", "pre_accept", "accept", "reject", "terminate"].includes(p.acao)) return json({ ok: false, erro: "acao invalida" }, 400);
   if (["connect", "pre_accept", "accept"].includes(p.acao) && (!p.sdp || p.sdp.length > 20000)) return json({ ok: false, erro: "falta o sdp" }, 400);
 
