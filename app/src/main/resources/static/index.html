@@ -860,6 +860,14 @@ tr.rnovo:hover{background:#ffe6d6}
 .cf-lado.nao p{color:var(--apagado)}
 .cf-lado.muda .cf-pl{background:var(--ambarSv);color:var(--ambar)}
 @media (max-width:900px){.cf{padding:14px}.cf-hero{padding:18px}.cf-eu,.cf-kpis{flex-basis:100%}.cf-perfis{grid-template-columns:1fr}.cf-cab{display:none}.cf-row{grid-template-columns:minmax(0,1fr)}.cf-lado{margin:0}.cf-lado::before{display:block}}
+.wz-lreg{min-width:220px}
+.wz-lreg-c{display:flex;align-items:center;gap:10px;padding:2px 2px 0}
+.wz-lreg-i{width:36px;height:36px;border-radius:50%;background:var(--verdeSv);color:var(--verde);display:grid;place-items:center;flex:none}
+.wz-lreg-i svg.i{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.wz-lreg-i.x{background:var(--vermelhoSv);color:var(--vermelho)}
+.wz-lreg-c b{display:block;font-size:13px}
+.wz-lreg-c small{display:block;font-size:11.5px;color:var(--apagado)}
+.wz .wz-lreg-v,.wz-lreg-v{display:block;width:100%;margin-top:8px;border:0;border-top:1px solid var(--borda);background:transparent;color:var(--verde);font:inherit;font-size:12.5px;font-weight:600;padding:8px 0 2px;cursor:pointer}
 .wz-ch{position:fixed;z-index:9000;width:304px;background:#111b21;color:#e9edef;border-radius:18px;box-shadow:0 18px 48px rgba(0,0,0,.38);font-family:var(--corpo);overflow:hidden;user-select:none;touch-action:none}
 .wz-ch svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .wz-ch-top{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 0 16px;cursor:grab;font-size:11.5px;color:#8696a0}
@@ -2403,7 +2411,14 @@ function waModeloDe(nome){return (waModTodos||[]).find(x=>x.nome===nome)||null;}
 function waAudioHtml(m,u){const ond=waOndas[m.id]||waOndaFalsa(m.id);const dur=m.dur||0;
  return `<div class="wz-audio"><button class="wz-play" id="wzp-${m.id}" ${u?`onclick="waTocar('${m.id}')"`:'disabled'}>${waAudio&&waAudio.id===m.id&&!waAudio.el.paused?WZ.pausa:WZ.play}</button><div class="wz-onda" id="wzo-${m.id}" ${u?`onclick="waPular(event,'${m.id}')"`:''}>${ond.map(h=>`<i style="height:${Math.round(h*100)}%"></i>`).join('')}</div><small id="wzd-${m.id}">${dur?Math.floor(dur/60)+':'+String(Math.round(dur%60)).padStart(2,'0'):''}</small></div>`;}
 function waOndaFalsa(id){let h=0;for(const ch of String(id))h=(h*31+ch.charCodeAt(0))>>>0;const r=[];for(let i=0;i<28;i++){h=(h*1103515245+12345)>>>0;r.push(.25+((h>>>16)%70)/100);}return r;}
+function waLigBolha(c,m){const L=m.dados.ligacao;const sai=L.direcao==='empresa';const perdida=['nao_atendida','rejeitada','falhou'].includes(L.estado);
+ const d=Number(L.duracao_s)||0;const dur=d>=60?Math.floor(d/60)+' min '+(d%60)+' s':d>0?d+' s':'';
+ const tit=!sai&&perdida&&L.estado!=='rejeitada'?'Ligação de voz perdida':'Ligação de voz';
+ const sub=dur&&!perdida?dur:{nao_atendida:sai?'Sem resposta':'Não atendida',rejeitada:'Recusada',falhou:'Não completada'}[L.estado]||'';
+ const volta=perdida&&!c.grupo&&tem('wa_ligacao_fazer')?`<button class="wz-lreg-v" onclick="waLigar('${c.id}')">${sai?'Ligar de novo':'Ligar de volta'}</button>`:'';
+ return `<div class="wz-b ${sai?'s':'e'} wz-lreg">${sai&&m.autorNome?`<div class="wz-quem">${escH(m.autorNome)}</div>`:''}<div class="wz-lreg-c"><span class="wz-lreg-i${perdida?' x':''}">${WZ.fone}</span><div><b>${escH(tit)}</b><small>${escH(sub)}</small></div></div>${volta}<div class="wz-pe">${escH(m.h||'')}</div></div>`;}
 function bolhaReal(c,m){
+ if(m.tipo==='sistema'&&m.dados&&m.dados.ligacao)return waLigBolha(c,m);
  const cls=m.d==='sai'?'s':'e';const u=m.caminho?waUrls[m.caminho]:null;
  const q=m.respondeA?c.wpp.find(x=>x.idWa===m.respondeA):null;
  let h='';
@@ -2628,9 +2643,8 @@ async function waAudAbrir(){waModal('Microfone e alto-falante','<div style="font
 async function waAudMudar(k,v){const p=await waAudPref();const ant=p[k];p[k]=v;
  const r=await sb.from('fiscal_usuario_pref').upsert({usuario_id:eu.id,chave:'wa_ligacao_audio',valor:{mic:p.mic,fone:p.fone},atualizado_em:new Date().toISOString()}).select('chave');
  if(r.error||!r.data||!r.data.length){p[k]=ant;const s=el(k==='mic'?'waAudMic':'waAudFone');if(s)s.value=ant;toast('Não foi possível salvar a escolha.');return;}
- if(k==='mic'){waAudMedir();if(waLig&&waLig.pc&&waLig.mic){try{const novo=await waAudMic(v);const t=novo.getAudioTracks()[0];t.enabled=!waLig.mudo;
-   const sd=waLig.pc.getSenders().find(x=>x.track&&x.track.kind==='audio');if(sd)await sd.replaceTrack(t);waLig.mic.getTracks().forEach(x=>x.stop());waLig.mic=novo;}catch(e){toast('Não foi possível trocar o microfone.');}}}
- else if(waLig&&waLig.som)await waAudSaida(waLig.som,v);}
+ if(k==='mic'){if(!(waLig&&waLig.pc))waAudMedir();if(waLig&&waLig.pc&&waLig.mic){try{waLigTrocarMic(await waAudMic(v));}catch(e){toast('Não foi possível trocar o microfone.');}}}
+ else{if(waLig&&waLig.som)await waAudSaida(waLig.som,v);if(waLigToque&&waLigToque.a)await waAudSaida(waLigToque.a,v);}}
 function waAudPararTeste(){if(!waAudTeste)return;cancelAnimationFrame(waAudTeste.raf);try{waAudTeste.s.getTracks().forEach(t=>t.stop());}catch(e){}try{waAudTeste.ctx.close();}catch(e){}waAudTeste=null;}
 async function waAudMedir(){waAudPararTeste();const p=await waAudPref();let s;try{s=await waAudMic(p.mic);}catch(e){toast('Não foi possível usar o microfone.');return;}
  const ctx=new AudioContext();const an=ctx.createAnalyser();an.fftSize=512;ctx.createMediaStreamSource(s).connect(an);const buf=new Uint8Array(an.fftSize);
@@ -2667,9 +2681,12 @@ async function waLigar(cid){
  if(waLig){toast('Já existe uma ligação em andamento.');return;}
  const c=waConv(cid);if(!c)return;
  let x;try{x=await waLigConexao();}catch(e){toast('Não foi possível usar o microfone.');return;}
- waLig={id:null,conv:cid,nome:c.nome,estado:'chamando',saida:true,...x,mudo:false};waLigDesenhar();
+ const ss=(await sb.auth.getSession()).data.session;
+ const l={id:null,conv:cid,nome:c.nome,estado:'chamando',saida:true,...x,mudo:false,tk:ss?ss.access_token:''};waLig=l;waLigTrocarMic(x.mic);waLigDesenhar();waLigTocar('saida');
  const of=await x.pc.createOffer();await x.pc.setLocalDescription(of);await waLigIce(x.pc);
+ if(waLig!==l){try{x.pc.close();x.mic.getTracks().forEach(t=>t.stop());}catch(e){}return;}
  const j=await waLigEdge({acao:'connect',conversa_id:cid,sdp:waLigSdp(x.pc.localDescription.sdp)});
+ if(waLig!==l){if(j.ok&&j.chamada_id)await waLigEdge({acao:'terminate',chamada_id:j.chamada_id});return;}
  if(!j.ok){waLigFechar();
   if(/permiss/i.test(j.erro||'')&&!/Sem permissao/i.test(j.erro||'')){waConfirmar('O cliente ainda não autorizou ligações. Mandar o pedido de permissão pelo WhatsApp?','Pedir permissão',()=>waLigPedir(cid));}
   else toast(j.erro||'Não foi possível ligar.');return;}
@@ -2681,7 +2698,8 @@ async function waAtender(id){
  if(r.error||!r.data||!r.data.ok){toast((r.data&&r.data.erro)||'Não foi possível atender.');if(waLig&&waLig.id===id)waLigFechar();return;}
  waLigTocar(false);
  let x;try{x=await waLigConexao();}catch(e){toast('Não foi possível usar o microfone.');await waLigEdge({acao:'reject',chamada_id:id});return;}
- Object.assign(waLig||(waLig={id,conv:null,nome:'',saida:false,mudo:false}),x,{estado:'pre_aceita'});waLigDesenhar();
+ const ss=(await sb.auth.getSession()).data.session;
+ Object.assign(waLig||(waLig={id,conv:null,nome:'',saida:false,mudo:false}),x,{estado:'pre_aceita',tk:ss?ss.access_token:''});waLigTrocarMic(x.mic);waLigDesenhar();
  await x.pc.setRemoteDescription({type:'offer',sdp:r.data.oferta_sdp});
  const an=await x.pc.createAnswer();await x.pc.setLocalDescription(an);await waLigIce(x.pc);
  const sdp=waLigSdp(x.pc.localDescription.sdp);
@@ -2690,26 +2708,46 @@ async function waAtender(id){
  const b=await waLigEdge({acao:'accept',chamada_id:id,sdp});
  if(!b.ok){toast(b.erro||'Não foi possível atender.');waLigFechar();}}
 async function waRecusar(id){waLigTocar(false);const j=await waLigEdge({acao:'reject',chamada_id:id});if(!j.ok)toast(j.erro||'Não foi possível recusar.');if(waLig&&waLig.id===id)waLigFechar();}
-async function waDesligar(){if(!waLig)return;const id=waLig.id;await waLigDiag('fim');waLigFechar();if(id)await waLigEdge({acao:'terminate',chamada_id:id});}
+async function waDesligar(){if(!waLig)return;const id=waLig.id;await waLigDiag('fim');waLigFechar();waLigFimSom('fim');if(id)await waLigEdge({acao:'terminate',chamada_id:id});}
 function waLigMudo(){if(!waLig||!waLig.mic)return;waLig.mudo=!waLig.mudo;waLig.mic.getAudioTracks().forEach(t=>t.enabled=!waLig.mudo);waLigDesenhar();}
-function waLigTocar(on){if(!on){if(waLigToque){clearInterval(waLigToque.t);try{waLigToque.ctx.close();}catch(e){}waLigToque=null;}return;}
- if(waLigToque)return;try{const ctx=new AudioContext();const bip=()=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=440;g.gain.value=.08;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.4);};
- bip();waLigToque={ctx,t:setInterval(bip,1500)};}catch(e){}}
+async function waSom(){const ctx=new AudioContext();const d=ctx.createMediaStreamDestination();const a=new Audio();a.srcObject=d.stream;
+ const p=await waAudPref();await waAudSaida(a,p.fone);a.play().catch(()=>{});return {ctx,d,a};}
+function waSomFechar(s){try{s.a&&s.a.pause();}catch(e){}try{s.ctx&&s.ctx.close();}catch(e){}}
+function waTom(s,freqs,ini,dur,vol){const t=s.ctx.currentTime+ini;freqs.forEach(f=>{const o=s.ctx.createOscillator(),g=s.ctx.createGain();o.frequency.value=f;
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.02);g.gain.setValueAtTime(vol,t+dur-.03);g.gain.linearRampToValueAtTime(0,t+dur);o.connect(g);g.connect(s.d);o.start(t);o.stop(t+dur+.01);});}
+function waLigTocar(tipo){const ant=waLigToque;if(ant&&ant.tipo===tipo)return;if(ant){ant.fim=true;clearInterval(ant.t);waSomFechar(ant);waLigToque=null;}
+ if(!tipo)return;const tk={tipo,fim:false};waLigToque=tk;
+ waSom().then(s=>{if(tk.fim){waSomFechar(s);return;}Object.assign(tk,s);
+  const toca=()=>{if(tipo==='entrada'){waTom(s,[440,480],0,.4,.12);waTom(s,[440,480],.6,.4,.12);}else waTom(s,[425],0,1,.09);};
+  toca();tk.t=setInterval(toca,tipo==='entrada'?3000:5000);}).catch(()=>{});}
+function waLigFimSom(tipo){waSom().then(s=>{const n=tipo==='ocupado'?4:3,passo=tipo==='ocupado'?.5:.4;for(let i=0;i<n;i++)waTom(s,[425],i*passo,passo/2,.09);
+ setTimeout(()=>waSomFechar(s),n*passo*1000+400);}).catch(()=>{});}
+function waLigTrocarMic(novo){if(!waLig||!waLig.pc)return;const t=novo.getAudioTracks()[0];if(!t)return;t.enabled=!waLig.mudo;
+ t.onended=()=>{if(waLig&&waLig.mic===novo)waAudMic('').then(waLigTrocarMic).catch(()=>toast('O microfone foi desconectado.'));};
+ const sd=waLig.pc.getSenders().find(x=>x.track&&x.track.kind==='audio')||waLig.pc.getSenders()[0];if(sd)sd.replaceTrack(t);
+ if(waLig.mic&&waLig.mic!==novo)waLig.mic.getTracks().forEach(x=>x.stop());waLig.mic=novo;}
+window.addEventListener('beforeunload',()=>{if(!waLig||!waLig.id||!waLig.tk)return;
+ try{fetch(SB_URL+'/functions/v1/wa-meta-chamada',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+waLig.tk},body:JSON.stringify({acao:waLig.estado==='tocando'&&!waLig.pc?'reject':'terminate',chamada_id:waLig.id})});}catch(e){}});
 async function aoMudarChamada(p){const ch=p.new;if(!ch||!ch.id)return;
+ if(waLig&&waLig.saida&&!waLig.id&&ch.direcao==='empresa'&&ch.atendente_id===eu.id&&ch.conversa_id===waLig.conv&&!WA_LIG_FIM.includes(ch.estado))waLig.id=ch.id;
  if(waLig&&(waLig.id===ch.id)){
+  waLig.tocandoEm=ch.tocando_em||waLig.tocandoEm||null;
   if(!waLig.pc&&ch.atendente_id&&ch.atendente_id!==eu.id){waLigFechar();return;}
   waLig.estado=ch.estado;
   if(waLig.saida&&ch.resposta_sdp&&waLig.pc&&waLig.pc.signalingState==='have-local-offer'){try{await waLig.pc.setRemoteDescription({type:'answer',sdp:ch.resposta_sdp});waLigDiag('resposta_aplicada');}catch(e){waLigDiag('resposta_recusada');toast('Falha ao conectar o áudio.');}}
+  if(ch.estado==='em_curso')waLigTocar(false);
   if(ch.estado==='em_curso'&&!waLig.inicio){waLig.inicio=Date.now();waLig.relogio=setInterval(waLigTick,1000);}
-  if(WA_LIG_FIM.includes(ch.estado)){const t=WA_LIG_TXT[ch.estado];await waLigDiag('fim');waLigFechar();if(ch.estado!=='encerrada')toast(t);return;}
+  if(WA_LIG_FIM.includes(ch.estado)){const t=WA_LIG_TXT[ch.estado];const ativa=!!waLig.pc;await waLigDiag('fim');waLigFechar();if(ativa)waLigFimSom(ch.estado==='encerrada'?'fim':'ocupado');if(ch.estado!=='encerrada')toast(t);return;}
   waLigDesenhar();return;}
  if(p.eventType==='INSERT'&&ch.estado==='tocando'&&ch.direcao==='cliente'&&!waLig&&tem('wa_ligacao_atender')){
-  const c=waConv(ch.conversa_id);waLig={id:ch.id,conv:ch.conversa_id,nome:c?c.nome:'Cliente',estado:'tocando',saida:false,mudo:false};waLigTocar(true);waLigDesenhar();}
+  const c=waConv(ch.conversa_id);waLig={id:ch.id,conv:ch.conversa_id,nome:c?c.nome:'Cliente',estado:'tocando',saida:false,mudo:false};waLigTocar('entrada');waLigDesenhar();}
+ else if(p.eventType==='INSERT'&&ch.estado==='tocando'&&ch.direcao==='cliente'&&waLig&&tem('wa_ligacao_atender')){const c=waConv(ch.conversa_id);toast('Ligação de '+((c&&c.nome)||'cliente')+' chegando.');}
 }
 const waLigUi={min:false,painel:'',pos:null,chave:'',dig:''};
 function waLigNome(){const c=waLig.conv&&waConv(waLig.conv);return (c&&c.nome)||waLig.nome||'Cliente';}
 function waLigTel(){const c=waLig.conv&&waConv(waLig.conv);return c&&c.telefone?fmtTel(c.telefone):'';}
-function waLigStatus(){if(waLig.estado==='em_curso'&&waLig.inicio){const d=Math.floor((Date.now()-waLig.inicio)/1000),h=Math.floor(d/3600);
+function waLigStatus(){if(waLig.saida&&waLig.estado==='chamando')return waLig.tocandoEm?'Tocando…':'Chamando…';
+ if(waLig.estado==='em_curso'&&waLig.inicio){const d=Math.floor((Date.now()-waLig.inicio)/1000),h=Math.floor(d/3600);
  return (h?h+':':'')+String(Math.floor(d/60)%60).padStart(2,'0')+':'+String(d%60).padStart(2,'0');}
  return WA_LIG_TXT[waLig.estado]||(waLig.estado==='em_curso'?'Conectando…':'');}
 function waLigBt(cl,ic,rot,acao,on){return `<div class="wz-ch-bt"><button class="${cl}${on?' on':''}" title="${escH(rot)}" onclick="${acao}">${ic}</button><span>${escH(rot)}</span></div>`;}
@@ -2743,7 +2781,7 @@ window.addEventListener('resize',()=>{const b=el('wzLig');if(b)waLigPos(b);});
 function waLigDesenhar(){let b=el('wzLig');
  if(!waLig){if(b)b.remove();waLigUi.min=false;waLigUi.painel='';waLigUi.dig='';waLigUi.chave='';return;}
  const tocando=waLig.estado==='tocando'&&!waLig.pc;const nome=waLigNome();
- const chave=[waLig.id,waLig.estado,tocando,waLigUi.min,waLigUi.painel,waLig.mudo,nome].join('|');
+ const chave=[waLig.id,waLig.estado,tocando,waLigUi.min,waLigUi.painel,waLig.mudo,nome,!!waLig.tocandoEm].join('|');
  if(b&&waLigUi.chave===chave){waLigTick();return;}waLigUi.chave=chave;
  if(!b){b=document.createElement('div');b.id='wzLig';b.addEventListener('pointerdown',waLigArrastar);document.body.appendChild(b);}
  const av=`<div class="wz-ch-av" style="background:${waCorNome(nome)}">${escH(waIni(nome))}</div>`;
