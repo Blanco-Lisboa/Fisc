@@ -867,6 +867,12 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-lig-t span{font-size:12px;color:var(--apagado);font-variant-numeric:tabular-nums}
 .wz-lig-b{width:40px;height:40px;border-radius:50%;border:1px solid var(--borda);background:var(--superf);display:grid;place-items:center;color:var(--grafite);flex:none;cursor:pointer}
 .wz-lig-b svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.wz-aud-nivel{height:6px;border-radius:999px;background:var(--superf2);overflow:hidden;margin-top:8px}
+.wz-aud-nivel i{display:block;height:100%;width:0;background:var(--verde);transition:width .08s}
+.cf-aud{background:var(--pagina);border:1px solid var(--borda);border-radius:16px;padding:18px 20px}
+.cf-aud .fl{display:block;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin:12px 0 5px}
+.cf-aud .fi{width:100%;border:1px solid var(--borda);border-radius:9px;padding:9px 11px;font-size:12.5px;font-family:inherit;outline:0;background:var(--pagina);color:inherit}
+.cf-aud .fi:focus{border-color:var(--laranja)}
 .wz-lig-b.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .wz-lig-b.ok{background:var(--verde);border-color:var(--verde);color:#fff}
 .wz-lig-b.nao{background:var(--vermelho);border-color:var(--vermelho);color:#fff}
@@ -1478,12 +1484,15 @@ function cfIco(k,cl){return `<svg class="${cl||'i'}" viewBox="0 0 24 24">${CF_IC
 function renderConfig(){
  el('conteudo').innerHTML=`
   <div class="aputabs">
-    <div class="aputabs-l">${[['info','Info']].map(([k,t])=>`<button class="${cfgAba===k?'on':''}" onclick="cfgAba='${k}';renderConfig()">${t}</button>`).join('')}</div>
+    <div class="aputabs-l">${[['info','Info'],['audio','Áudio']].map(([k,t])=>`<button class="${cfgAba===k?'on':''}" onclick="cfgAba='${k}';renderConfig()">${t}</button>`).join('')}</div>
   </div>
   <div class="apuBody" id="cfgBody"></div>`;
+ if(cfgAba==='audio'){renderCfgAudio();return;}
  renderCfgInfo();
  if(!cfgInfo)carregarCfgInfo();
 }
+async function renderCfgAudio(){const b=el('cfgBody');if(!b)return;b.innerHTML='<div class="cf"></div>';const h=await waAudHtml(false);
+ if(view!=='config'||cfgAba!=='audio'||el('cfgBody')!==b)return;b.innerHTML=`<div class="cf"><div class="cf-in"><section class="cf-sec"><h3>Microfone e alto-falante</h3><div class="cf-aud">${h}</div></section></div></div>`;waAudMedir();}
 async function carregarCfgInfo(){if(cfgCarregando)return;cfgCarregando=true;
  const r=await sb.from('fiscal_info_item').select('id,grupo,ordem,icone,titulo,resumo,acesso,colaborador,gestor').order('ordem');
  cfgCarregando=false;if(r.error){toast('Não foi possível carregar as informações.');return;}
@@ -2251,6 +2260,7 @@ const WZ={
  fixar:'<svg class="i" viewBox="0 0 24 24"><path d="M12 17v5M5 3h14l-2 8H7zM9 11l-1 6h8l-1-6"/></svg>',
  fone:'<svg class="i" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>',
  desligar:'<svg class="i" viewBox="0 0 24 24"><path d="M10.7 13.3a16 16 0 0 0 3 2.3l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 3.1 6.2 2 2 0 0 1 5.1 4h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L9 11.8M22 2 2 22"/></svg>',
+ ajuste:'<svg class="i" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>',
  micOff:'<svg class="i" viewBox="0 0 24 24"><path d="M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V5a3 3 0 0 0-5.9-.6M17 16.9A7 7 0 0 1 5 12v-2M19 10v2a7 7 0 0 1-.1 1.2M12 19v4"/></svg>',
  arquivo:'<svg class="i" viewBox="0 0 24 24"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>',
  balao:'<svg class="i" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 8.5-8.5h.5a8.5 8.5 0 0 1 8 8z"/></svg>'};
@@ -2562,14 +2572,57 @@ function waLigSdp(sdp){const linhas=sdp.split(/\r?\n/).filter(l=>l);const tirar=
  return linhas.filter(l=>{if(/^a=(rtcp-xr|rtcp-rsize|candidate:|end-of-candidates)/.test(l))return false;
   const m=l.match(/^a=(rtpmap|fmtp|rtcp-fb):(\d+)/);return !(m&&tirar.has(m[2]));})
   .map(l=>l.startsWith('m=audio')?l.split(' ').filter((x,i)=>i<3||!tirar.has(x)).join(' '):l).join('\r\n')+'\r\n';}
+let waAud=null,waAudTeste=null;
+async function waAudPref(){if(waAud)return waAud;const r=await sb.from('fiscal_usuario_pref').select('valor').eq('chave','wa_ligacao_audio').maybeSingle();
+ const v=!r.error&&r.data&&r.data.valor&&typeof r.data.valor==='object'?r.data.valor:{};waAud={mic:String(v.mic||''),fone:String(v.fone||'')};return waAud;}
+function waAudBase(){return {echoCancellation:true,noiseSuppression:true,autoGainControl:true};}
+async function waAudMic(id){if(id){try{return await navigator.mediaDevices.getUserMedia({audio:{...waAudBase(),deviceId:{exact:id}}});}catch(e){}}
+ return navigator.mediaDevices.getUserMedia({audio:waAudBase()});}
+async function waAudSaida(som,id){if(!som||!som.setSinkId)return;try{await som.setSinkId(id||'');}catch(e){try{await som.setSinkId('');}catch(e2){}}}
+async function waAudLista(){let s=null;try{const d0=await navigator.mediaDevices.enumerateDevices();if(!d0.some(d=>d.kind==='audioinput'&&d.label))s=await navigator.mediaDevices.getUserMedia({audio:true});}catch(e){}
+ let d=[];try{d=await navigator.mediaDevices.enumerateDevices();}catch(e){}if(s)s.getTracks().forEach(t=>t.stop());
+ const f=k=>d.filter(x=>x.kind===k&&x.deviceId!=='default'&&x.deviceId!=='communications');return {mic:f('audioinput'),fone:f('audiooutput')};}
+function waAudOpcoes(lista,sel){return `<option value="">Padrão do Windows</option>${lista.map(x=>`<option value="${escH(x.deviceId)}"${x.deviceId===sel?' selected':''}>${escH(x.label||'Dispositivo')}</option>`).join('')}`;}
+async function waAudHtml(modal){const [p,l]=await Promise.all([waAudPref(),waAudLista()]);
+ return `<span class="fl" style="margin-top:0">Microfone</span><select class="fi" id="waAudMic" onchange="waAudMudar('mic',this.value)">${waAudOpcoes(l.mic,p.mic)}</select>
+  <div class="wz-aud-nivel"><i id="waAudBarra"></i></div>
+  <span class="fl">Alto-falante</span><select class="fi" id="waAudFone" onchange="waAudMudar('fone',this.value)">${waAudOpcoes(l.fone,p.fone)}</select>
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="waAudTocarTeste()">Testar alto-falante</button>${modal?'<button class="bt-assumir" onclick="fecharModal()">Pronto</button>':''}</div>`;}
+async function waAudAbrir(){waModal('Microfone e alto-falante','<div style="font-size:12.5px;color:var(--apagado)">…</div>',440);const h=await waAudHtml(true);const b=el('wamb');if(!b)return;b.innerHTML=h;waAudMedir();}
+async function waAudMudar(k,v){const p=await waAudPref();const ant=p[k];p[k]=v;
+ const r=await sb.from('fiscal_usuario_pref').upsert({usuario_id:eu.id,chave:'wa_ligacao_audio',valor:{mic:p.mic,fone:p.fone},atualizado_em:new Date().toISOString()}).select('chave');
+ if(r.error||!r.data||!r.data.length){p[k]=ant;const s=el(k==='mic'?'waAudMic':'waAudFone');if(s)s.value=ant;toast('Não foi possível salvar a escolha.');return;}
+ if(k==='mic'){waAudMedir();if(waLig&&waLig.pc&&waLig.mic){try{const novo=await waAudMic(v);const t=novo.getAudioTracks()[0];t.enabled=!waLig.mudo;
+   const sd=waLig.pc.getSenders().find(x=>x.track&&x.track.kind==='audio');if(sd)await sd.replaceTrack(t);waLig.mic.getTracks().forEach(x=>x.stop());waLig.mic=novo;}catch(e){toast('Não foi possível trocar o microfone.');}}}
+ else if(waLig&&waLig.som)await waAudSaida(waLig.som,v);}
+function waAudPararTeste(){if(!waAudTeste)return;cancelAnimationFrame(waAudTeste.raf);try{waAudTeste.s.getTracks().forEach(t=>t.stop());}catch(e){}try{waAudTeste.ctx.close();}catch(e){}waAudTeste=null;}
+async function waAudMedir(){waAudPararTeste();const p=await waAudPref();let s;try{s=await waAudMic(p.mic);}catch(e){toast('Não foi possível usar o microfone.');return;}
+ const ctx=new AudioContext();const an=ctx.createAnalyser();an.fftSize=512;ctx.createMediaStreamSource(s).connect(an);const buf=new Uint8Array(an.fftSize);
+ const t={s,ctx,raf:0};waAudTeste=t;
+ const passo=()=>{if(waAudTeste!==t)return;const b=el('waAudBarra');if(!b){waAudPararTeste();return;}an.getByteTimeDomainData(buf);let m=0;for(const x of buf)m=Math.max(m,Math.abs(x-128));
+  b.style.width=Math.min(100,Math.round(m/128*260))+'%';t.raf=requestAnimationFrame(passo);};passo();}
+async function waAudTocarTeste(){const p=await waAudPref();try{const ctx=new AudioContext();const d=ctx.createMediaStreamDestination();const o=ctx.createOscillator(),g=ctx.createGain();
+ o.frequency.value=660;g.gain.value=.15;o.connect(g);g.connect(d);const a=new Audio();a.srcObject=d.stream;await waAudSaida(a,p.fone);await a.play();o.start();o.stop(ctx.currentTime+.8);
+ setTimeout(()=>{try{a.pause();ctx.close();}catch(e){}},1200);}catch(e){toast('Não foi possível tocar o som de teste.');}}
+async function waLigDiag(etapa){const l=waLig;if(!l||!l.id||!l.pc)return;const d={etapa,conexao:l.pc.connectionState,ice:l.pc.iceConnectionState,sinal:l.pc.signalingState,mudo:!!l.mudo};
+ try{const t=l.mic&&l.mic.getAudioTracks()[0];if(t){d.mic=t.label.slice(0,80);d.mic_ativo=t.enabled&&t.readyState==='live'&&!t.muted;}
+  d.saida=(l.som&&l.som.sinkId)||'padrao';const st=await l.pc.getStats();
+  st.forEach(r=>{if(r.type==='outbound-rtp'&&r.kind==='audio'){d.enviados_bytes=r.bytesSent;d.enviados_pacotes=r.packetsSent;}
+   if(r.type==='media-source'&&r.kind==='audio'&&r.audioLevel!==undefined)d.nivel_mic=Math.round(r.audioLevel*1000)/1000;
+   if(r.type==='inbound-rtp'&&r.kind==='audio'){d.recebidos_bytes=r.bytesReceived;d.recebidos_pacotes=r.packetsReceived;d.perdidos=r.packetsLost;}
+   if(r.type==='candidate-pair'&&r.nominated&&r.state==='succeeded')d.par='ok';});}catch(e){d.falha=String(e&&e.message||e).slice(0,200);}
+ try{await sb.rpc('wa_chamada_diagnostico',{p_chamada:l.id,p_dados:d});}catch(e){}}
 function waLigIce(pc){return new Promise(ok=>{if(pc.iceGatheringState==='complete')return ok();const t=setTimeout(ok,6000);
  pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState==='complete'){clearTimeout(t);ok();}});});}
 async function waLigConexao(){
  const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
- const mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+ waAudPararTeste();const p=await waAudPref();
+ const mic=await waAudMic(p.mic);
  mic.getTracks().forEach(t=>pc.addTrack(t,mic));
- const som=new Audio();som.autoplay=true;pc.ontrack=e=>{som.srcObject=e.streams[0];som.play().catch(()=>{});};
- pc.onconnectionstatechange=()=>{if(waLig&&waLig.pc===pc&&pc.connectionState==='failed'){toast('A conexão de áudio caiu.');waDesligar();}};
+ const som=new Audio();som.autoplay=true;await waAudSaida(som,p.fone);pc.ontrack=e=>{som.srcObject=e.streams[0]||new MediaStream([e.track]);som.play().catch(()=>{});};
+ pc.onconnectionstatechange=()=>{if(!waLig||waLig.pc!==pc)return;waLigDiag('conexao_'+pc.connectionState);
+  if(pc.connectionState==='connected')setTimeout(()=>{if(waLig&&waLig.pc===pc)waLigDiag('conversando');},6000);
+  if(pc.connectionState==='failed'){toast('A conexão de áudio caiu.');waDesligar();}};
  return {pc,mic,som};}
 function waLigFechar(){if(!waLig)return;try{waLig.mic&&waLig.mic.getTracks().forEach(t=>t.stop());}catch(e){}try{waLig.pc&&waLig.pc.close();}catch(e){}
  clearInterval(waLig.relogio);waLig=null;waLigTocar(false);waLigDesenhar();}
@@ -2601,7 +2654,7 @@ async function waAtender(id){
  const b=await waLigEdge({acao:'accept',chamada_id:id,sdp});
  if(!b.ok){toast(b.erro||'Não foi possível atender.');waLigFechar();}}
 async function waRecusar(id){waLigTocar(false);const j=await waLigEdge({acao:'reject',chamada_id:id});if(!j.ok)toast(j.erro||'Não foi possível recusar.');if(waLig&&waLig.id===id)waLigFechar();}
-async function waDesligar(){if(!waLig)return;const id=waLig.id;waLigFechar();if(id)await waLigEdge({acao:'terminate',chamada_id:id});}
+async function waDesligar(){if(!waLig)return;const id=waLig.id;await waLigDiag('fim');waLigFechar();if(id)await waLigEdge({acao:'terminate',chamada_id:id});}
 function waLigMudo(){if(!waLig||!waLig.mic)return;waLig.mudo=!waLig.mudo;waLig.mic.getAudioTracks().forEach(t=>t.enabled=!waLig.mudo);waLigDesenhar();}
 function waLigTocar(on){if(!on){if(waLigToque){clearInterval(waLigToque.t);try{waLigToque.ctx.close();}catch(e){}waLigToque=null;}return;}
  if(waLigToque)return;try{const ctx=new AudioContext();const bip=()=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=440;g.gain.value=.08;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.4);};
@@ -2610,9 +2663,9 @@ async function aoMudarChamada(p){const ch=p.new;if(!ch||!ch.id)return;
  if(waLig&&(waLig.id===ch.id)){
   if(!waLig.pc&&ch.atendente_id&&ch.atendente_id!==eu.id){waLigFechar();return;}
   waLig.estado=ch.estado;
-  if(waLig.saida&&ch.resposta_sdp&&waLig.pc&&waLig.pc.signalingState==='have-local-offer'){try{await waLig.pc.setRemoteDescription({type:'answer',sdp:ch.resposta_sdp});}catch(e){toast('Falha ao conectar o áudio.');}}
+  if(waLig.saida&&ch.resposta_sdp&&waLig.pc&&waLig.pc.signalingState==='have-local-offer'){try{await waLig.pc.setRemoteDescription({type:'answer',sdp:ch.resposta_sdp});waLigDiag('resposta_aplicada');}catch(e){waLigDiag('resposta_recusada');toast('Falha ao conectar o áudio.');}}
   if(ch.estado==='em_curso'&&!waLig.inicio){waLig.inicio=Date.now();waLig.relogio=setInterval(waLigDesenhar,1000);}
-  if(WA_LIG_FIM.includes(ch.estado)){const t=WA_LIG_TXT[ch.estado];waLigFechar();if(ch.estado!=='encerrada')toast(t);return;}
+  if(WA_LIG_FIM.includes(ch.estado)){const t=WA_LIG_TXT[ch.estado];await waLigDiag('fim');waLigFechar();if(ch.estado!=='encerrada')toast(t);return;}
   waLigDesenhar();return;}
  if(p.eventType==='INSERT'&&ch.estado==='tocando'&&ch.direcao==='cliente'&&!waLig&&tem('wa_ligacao_atender')){
   const c=waConv(ch.conversa_id);waLig={id:ch.id,conv:ch.conversa_id,nome:c?c.nome:'Cliente',estado:'tocando',saida:false,mudo:false};waLigTocar(true);waLigDesenhar();}
@@ -2627,7 +2680,7 @@ function waLigDesenhar(){let b=el('wzLig');
  b.innerHTML=`<div class="wz-av" style="background:${waCorNome(nome)}">${escH(waIni(nome))}</div>
   <div class="wz-lig-t" ${waLig.conv?`onclick="waIrConversa('${waLig.conv}')"`:''}><b>${escH(nome)}</b><span>${escH(st)}</span></div>
   ${tocando?`<button class="wz-lig-b ok" title="Atender" onclick="waAtender('${waLig.id}')">${WZ.fone}</button><button class="wz-lig-b nao" title="Recusar" onclick="waRecusar('${waLig.id}')">${WZ.desligar}</button>`
-   :`<button class="wz-lig-b${waLig.mudo?' on':''}" title="${waLig.mudo?'Ligar microfone':'Desligar microfone'}" onclick="waLigMudo()">${waLig.mudo?WZ.micOff:WZ.mic}</button><button class="wz-lig-b nao" title="Desligar" onclick="waDesligar()">${WZ.desligar}</button>`}`;}
+   :`<button class="wz-lig-b" title="Microfone e alto-falante" onclick="waAudAbrir()">${WZ.ajuste}</button><button class="wz-lig-b${waLig.mudo?' on':''}" title="${waLig.mudo?'Ligar microfone':'Desligar microfone'}" onclick="waLigMudo()">${waLig.mudo?WZ.micOff:WZ.mic}</button><button class="wz-lig-b nao" title="Desligar" onclick="waDesligar()">${WZ.desligar}</button>`}`;}
 
 /* ---------- WHATSAPP atalhos e conversa compartilhada ---------- */
 let waSemSelecao=false,waEmojiAlvo=null;
