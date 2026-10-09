@@ -554,6 +554,19 @@ tr.rnovo:hover{background:#ffe6d6}
 .ap-abas{display:flex;gap:4px;border-bottom:1px solid var(--borda);margin:-2px -2px 4px}
 .ap-abas button{flex:1;text-align:center;border:0;background:none;font-family:var(--disp);font-size:14px;font-weight:700;color:var(--apagado);padding:4px 10px 9px;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer}
 .ap-abas button.on{color:var(--ink);border-bottom-color:var(--laranja)}
+.cad-mais{width:24px;height:24px;border-radius:7px;border:1px solid var(--borda);background:var(--pagina);font-size:15px;font-weight:700;line-height:1;color:var(--laranjaTx);cursor:pointer;flex:none}
+.cad-mais:hover{border-color:var(--laranja)}
+.cad-menu{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;padding:8px;border:1px dashed var(--bordaF);border-radius:10px;background:var(--superf)}
+.cad-menu button{border:1px solid var(--borda);background:var(--pagina);border-radius:999px;padding:4px 10px;font-size:11.5px;font-weight:600;color:var(--grafite);cursor:pointer}
+.cad-menu button:hover{border-color:var(--laranja);color:var(--laranjaTx)}
+.cad-lista{border:1px solid var(--borda);border-radius:12px;overflow:hidden}
+.cad-l{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--superf2);font-size:12.5px}
+.cad-l:last-child{border-bottom:0}
+.cad-l span{color:var(--apoio);flex:1;min-width:0}
+.cad-l b{font-weight:600;color:var(--ink)}
+.cad-x{border:0;background:none;color:var(--nevoa);cursor:pointer;font-size:11px;padding:0;width:16px;flex:none;text-align:center;visibility:hidden}
+.cad-mais:disabled{opacity:.35;cursor:default}
+.cad-l:hover .cad-x{visibility:visible}
 .ap-bloco small{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--apagado);font-weight:700;margin-bottom:6px}
 .ap-bloco select{margin-top:8px;width:100%;border:1px solid var(--borda);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit}
 .ap-prox{border-radius:12px;background:var(--roxoSv);padding:12px}
@@ -2263,7 +2276,16 @@ function enviarLivre(){const c=cli();const i=el('wppin');if(!i||!i.value.trim())
 /* IA rail — com escopo por cliente (ponto 4) */
 function apProxAcao(p){if(!p)return '';if(p.acao==='guia'||p.id==='e5')return 'abrirGuia()';if(p.acao==='flow_xml')return 'pedirXml()';return `avancarEtapa('${p.id}')`;}
 function apUsarRascunho(txt){const c=apConversaDe(cli());if(!c){toast('Cliente sem conversa no WhatsApp.');return;}if(waRestante(c)<=0){waModelos(c.id);return;}const i=el('wwin');if(i){i.value=txt;waRasc[c.id]=txt;waCresce(i);i.focus();}}
-let railAba='cadastro',railPref=null;
+let railAba='cadastro',railPref=null,cadCampos=null,cadMenu=null;
+const CAD_CAT=[['identificacao','Identificação'],['fiscal','Fiscal'],['acessos','Acessos'],['certificados','Certificados']];
+async function cadCarregar(){const r=await sb.rpc('fiscal_cadastro_campos');if(r.error){toast('Não foi possível carregar os campos.');return;}cadCampos=r.data||[];if(railAba==='cadastro')renderIaRail();}
+async function cadMarcar(chave,mostrar){cadMenu=null;const r=await sb.rpc('fiscal_cadastro_marcar',{p_chave:chave,p_mostrar:mostrar});
+ if(r.error||r.data!==true){toast('Não foi possível salvar.');renderIaRail();return;}await cadCarregar();}
+function cadHtml(){if(!cadCampos){cadCarregar();return '';}
+ return CAD_CAT.map(([k,t])=>{const meus=cadCampos.filter(c=>c.categoria===k&&c.meu);const livres=cadCampos.filter(c=>c.categoria===k&&!c.meu);
+  return `<div class="ap-bloco cad"><div class="ap-btit"><small>${t}</small><button class="cad-mais" title="Adicionar campo" ${livres.length?'':'disabled'} onclick="event.stopPropagation();cadMenu=cadMenu==='${k}'?null:'${k}';renderIaRail()">+</button></div>
+   ${cadMenu===k?`<div class="cad-menu">${livres.map(c=>`<button onclick="cadMarcar('${c.chave}',true)">${escH(c.rotulo)}</button>`).join('')}</div>`:''}
+   ${meus.length?`<div class="cad-lista">${meus.map(c=>`<div class="cad-l"><span>${escH(c.rotulo)}</span><b>—</b>${c.padrao?'<i class="cad-x"></i>':`<button class="cad-x" title="Tirar" onclick="cadMarcar('${c.chave}',false)">✕</button>`}</div>`).join('')}</div>`:''}</div>`;}).join('');}
 const RAIL_ITENS=['proximo','mensagem','audio','marcadores'];
 async function railCarregarPref(){if(railPref)return;railPref={};const r=await sb.from('fiscal_usuario_pref').select('valor').eq('chave','apu_assistente').maybeSingle();
  const v=!r.error&&r.data&&r.data.valor&&typeof r.data.valor==='object'?r.data.valor:{};RAIL_ITENS.forEach(k=>railPref[k]=v[k]==='off'?'off':'sugerir');}
@@ -2277,7 +2299,7 @@ function renderIaRail(){
  const c=cli();const prox=c.etapas.find(e=>e.status!=='concluido');
  const rasc=prox&&(prox.id==='e5'||prox.id==='e6')?`Olá! Seguem as guias de ${MESES[comp.mes].toLowerCase()}. O DAS vence dia ${apVenc()}.`:`Olá ${c.nome.split(' ')[0]}, para fechar ${mesTxt()} preciso dos XMLs${c.plats.length?' da '+c.plats.join(' e da '):''}. Pode enviar pelo formulário?`;
  const abas=`<div class="ap-abas">${[['assistente','Assistente'],['cadastro','Cadastro']].map(([k,t])=>`<button class="${railAba===k?'on':''}" onclick="railAba='${k}';renderIaRail()">${t}</button>`).join('')}</div>`;
- if(railAba==='cadastro'){el('iaRail').innerHTML=abas;return;}
+ if(railAba==='cadastro'){el('iaRail').innerHTML=abas+cadHtml();return;}
  el('iaRail').innerHTML=abas+
   railItem('proximo','Próximo passo',`<div class="ap-prox"><b>${escH(prox?(AP_NOME[prox.id]||prox.nome):'Apuração concluída')}</b><p>${escH(prox?(prox.ai||'Acompanhe esta etapa.'):'Nada pendente neste cliente.')}</p>${prox?`<button class="ap-bt p" onclick="${apProxAcao(prox)}">${prox.acao==='guia'||prox.id==='e5'?'Revisar agora':prox.acao==='flow_xml'?'Pedir XML':'Marcar como feita'}</button>`:''}</div>`)+
   railItem('mensagem','Mensagem sugerida',`<div class="ap-rasc">"${escH(rasc)}"<div style="display:flex;gap:6px;margin-top:8px"><button class="ap-bt" onclick="apUsarRascunho(${JSON.stringify(rasc).replace(/"/g,'&quot;')})">Usar</button><button class="ap-bt" onclick="toast('Editar mensagem (demo)')">Editar</button></div></div>`)+
