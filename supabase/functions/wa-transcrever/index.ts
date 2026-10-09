@@ -36,6 +36,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ ok: false }, 405);
   if (!CHAVE) return json({ ok: false, erro: "transcritor sem chave" }, 500);
+  const conf = await admin.rpc("wa_transcrever_chave_ok", { p_chave: req.headers.get("x-chave-interna") ?? "" });
+  if (conf.error || conf.data !== true) return json({ ok: false }, 401);
   let corpo: { midia_id?: string };
   try { corpo = await req.json(); } catch { return json({ ok: false }, 400); }
   const id = String(corpo.midia_id ?? "");
@@ -45,7 +47,7 @@ Deno.serve(async (req) => {
   if (m.error || !m.data) return json({ ok: false, erro: "midia nao encontrada" }, 404);
   const md = m.data;
   if (md.tipo !== "audio" || md.estado !== "guardado" || !md.caminho) return json({ ok: false, erro: "nao e audio guardado" }, 409);
-  if (md.transcricao) return json({ ok: true, repetida: true, texto: md.transcricao });
+  if (md.transcricao) return json({ ok: true, repetida: true });
 
   let audio: Blob;
   try {
@@ -82,5 +84,5 @@ Deno.serve(async (req) => {
     return json({ ok: false, erro: "transcritor falhou" }, 502);
   }
   await salvar(id, texto, null);
-  return json({ ok: true, texto });
+  return json({ ok: true });
 });
