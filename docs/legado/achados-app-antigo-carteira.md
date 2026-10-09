@@ -142,7 +142,7 @@ consertado. Quando algo não teve prova, está escrito.
 
 ### 9. Telefone: duas regras de limpeza e cada tela com a sua
 
-- **O que acontecia:** o sistema não entendia que "5519974220182", "(19) 97422-0182" e "1974220182" são o mesmo
+- **O que acontecia:** o sistema não entendia que "5511900000000", "(11) 90000-0000" e "1190000000" são o mesmo
   número. Etiqueta da 40% "nunca funcionou pra ninguém" (08/09).
 - **Causa:** `normalizar_telefone` (tira 55 e o nono dígito, 10 dígitos, usada por 49 funções) x `wa_norm_fone`
   (últimos 11, usada por 10 funções, entre elas o "Atender" do Fiscal). "99% dos numeros gravados fora de qualquer
