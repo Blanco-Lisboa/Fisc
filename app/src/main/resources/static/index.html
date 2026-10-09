@@ -2310,7 +2310,7 @@ function estDemandas(){const cols=[['recebidas','Recebidas'],['andamento','Em an
 let _drag=null;function dragEst(id){_drag=id;}function dropEst(col){if(_drag){esteira.find(e=>e.id===_drag).col=col;_drag=null;renderEst();}}
 function avancarEst(id){const o=['recebidas','andamento','validacao','concluidas'];const e=esteira.find(x=>x.id===id);const i=o.indexOf(e.col);if(i<3){e.col=o[i+1];toast('Avançado.');renderEst();}}
 /* IA & Meta */
-let iaAba='meta',mtDados=null,mtCanal=null,mtFiltro='todos',mtBusca='',mtAvFiltro='nao_vistos',mtNovo=null,mtSinc=false;
+let iaAba='meta',mtDados=null,mtCanal=null,mtFiltro='todos',mtBusca='',mtAvFiltro='nao_vistos',mtNovo=null;
 const MT_ESTADO={APPROVED:['Aprovado','ok'],PENDING:['Em análise','and'],IN_APPEAL:['Em recurso','and'],REJECTED:['Recusado','nao'],PAUSED:['Pausado','nao'],DISABLED:['Desativado','nao'],PENDING_DELETION:['Sendo apagado','neu'],ARCHIVED:['Arquivado','neu'],LIMIT_EXCEEDED:['Limite atingido','nao']};
 const MT_QUAL={GREEN:['Alta','ok'],YELLOW:['Média','and'],RED:['Baixa','nao'],UNKNOWN:['Sem nota','neu']};
 const MT_LIMITE={TIER_250:'250 clientes por dia',TIER_1K:'1 mil clientes por dia',TIER_2K:'2 mil clientes por dia',TIER_10K:'10 mil clientes por dia',TIER_100K:'100 mil clientes por dia',TIER_UNLIMITED:'Sem limite'};
@@ -2338,38 +2338,32 @@ function mtAssinar(){if(mtCanal)return;
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_meta_evento'},f)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_numero_meta'},f)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo_acao'},f)
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_conta_meta'},f)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_saude'},f).subscribe();}
-async function mtSincronizar(){if(mtSinc)return;mtSinc=true;renderMeta();
- const j=await waEdge('wa-meta-gestao',{acao:'sincronizar'});mtSinc=false;
- if(!j.ok)toast(j.erro||'Não foi possível atualizar da Meta.');else toast('Atualizado da Meta.');
- await mtCarregar();renderMeta();}
-function mtModelos(){const d=mtDados||{};const conta=d.numero&&d.numero.waba_id;
- return (d.modelos||[]).filter(m=>!m.waba_id||!conta||m.waba_id===conta);}
+function mtModelos(){return (mtDados&&mtDados.modelos)||[];}
 function renderMeta(){const b=el('iaBody');if(!b)return;
  if(!mtDados){b.innerHTML='';return;}
- const d=mtDados,n=d.numero||{},s=d.saude||{},ms=mtModelos(),av=d.avisos||[];
+ const d=mtDados,n=d.numero||{},cta=d.conta||{},s=d.saude,ms=mtModelos(),av=d.avisos||[];
  const aprov=ms.filter(m=>m.estado==='APPROVED').length,anal=ms.filter(m=>['PENDING','IN_APPEAL'].includes(m.estado)).length,rec=ms.filter(m=>m.estado==='REJECTED').length;
  const naoVistos=av.filter(a=>!a.ciente_em),crit=naoVistos.filter(a=>a.gravidade==='critico').length;
- const q=MT_QUAL[n.qualidade]||MT_QUAL.UNKNOWN;
+ const q=n.qualidade?(MT_QUAL[n.qualidade]||MT_QUAL.UNKNOWN):['—','neu'];
  const kpi=(rot,val,rod,cor)=>`<div class="cg-card cg-kpi"><div class="rot">${rot}</div><div class="val"${cor?` style="color:${cor}"`:''}>${val}</div><div class="rod">${rod}</div></div>`;
  const corQ={ok:'var(--verde)',and:'var(--ambar)',nao:'var(--vermelho)',neu:''}[q[1]];
  b.innerHTML=`<div class="tela mt">
   <div class="cg-kpis">
    ${kpi('Número',escH(n.nome_exibido||'—'),`${escH(n.telefone?fmtTel(n.telefone):'')}${n.situacao?' · '+mtPilula(n.situacao==='CONNECTED'?['Conectado','ok']:[n.situacao,'nao']):''}`)}
-   ${kpi('Qualidade do número',q[0],'nota que a Meta dá pelas respostas dos clientes',corQ)}
-   ${kpi('Limite de conversas',escH(MT_LIMITE[n.limite]||n.limite||'—'),'clientes novos que o número pode chamar em 24h')}
+   ${kpi('Qualidade do número',q[0],n.qualidade?'nota que a Meta dá pelas respostas dos clientes':'',corQ)}
+   ${kpi('Limite de conversas',escH(MT_LIMITE[n.limite]||n.limite||'—'),n.limite?'clientes novos que o número pode chamar em 24h':'')}
    ${kpi('Modelos aprovados',`${aprov}<small> de ${ms.length}</small>`,`${anal} em análise · ${rec} recusados`)}
    ${kpi('Avisos da Meta',naoVistos.length,crit?`<span style="color:var(--vermelho);font-weight:700">${crit} críticos</span>`:'nenhum crítico',naoVistos.length?'var(--laranjaTx)':'')}
   </div>
   <div class="cg-card mt-conta">
-   <div class="mt-ci"><span>Conta</span><b>${escH(n.waba_nome||'—')}</b></div>
-   <div class="mt-ci"><span>Análise da conta</span>${mtPilula(n.waba_revisao==='APPROVED'?['Aprovada','ok']:n.waba_revisao?[n.waba_revisao,'and']:null)}</div>
-   <div class="mt-ci"><span>Nome exibido</span>${mtPilula(n.nome_situacao==='APPROVED'?['Aprovado','ok']:n.nome_situacao?[n.nome_situacao,'and']:null)}</div>
-   <div class="mt-ci"><span>Selo oficial</span>${mtPilula(n.conta_oficial?['Sim','ok']:['Não','neu'])}</div>
-   <div class="mt-ci"><span>Envio</span>${mtPilula(s.bloqueia_envio?['Bloqueado','nao']:s.ultimo_evento==='token_recusado'?['Chave recusada','nao']:['Liberado','ok'])}</div>
-   <div class="mt-ci"><span>Atualizado</span><b>${mtData(n.atualizado_em)}</b></div>
-   <span class="sp"></span>
-   <button class="apubtn" ${mtSinc?'disabled':''} onclick="mtSincronizar()">${mtSinc?'Atualizando…':'Atualizar da Meta'}</button>
+   <div class="mt-ci"><span>Conta</span><b>${escH(cta.nome||'—')}</b></div>
+   <div class="mt-ci"><span>Análise da conta</span>${mtPilula(cta.revisao==='APPROVED'?['Aprovada','ok']:cta.revisao?[cta.revisao,'and']:null)}</div>
+   ${d.numero?`<div class="mt-ci"><span>Nome exibido</span>${mtPilula(n.nome_situacao==='APPROVED'?['Aprovado','ok']:n.nome_situacao?[n.nome_situacao,'and']:null)}</div>
+   <div class="mt-ci"><span>Selo oficial</span>${mtPilula(n.conta_oficial?['Sim','ok']:['Não','neu'])}</div>`:''}
+   ${s?`<div class="mt-ci"><span>Envio</span>${mtPilula(s.bloqueia_envio?['Bloqueado','nao']:s.ultimo_evento==='token_recusado'?['Chave recusada','nao']:['Liberado','ok'])}</div>`:''}
+   <div class="mt-ci"><span>Atualizado</span><b>${mtData(cta.atualizado_em)}</b></div>
   </div>
   <section class="cg-duas">
    <div class="cg-card mt-sec"><div class="mt-cab"><div class="cg-tit" style="margin:0">Avisos da Meta</div><span class="sp"></span>
