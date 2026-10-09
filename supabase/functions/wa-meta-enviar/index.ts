@@ -102,6 +102,7 @@ Deno.serve(async (req) => {
   };
   if (p.responder_a) corpo.context = { message_id: p.responder_a };
 
+  let saiu = false;
   try {
     if (p.tipo === "texto") {
       corpo.type = "text";
@@ -133,6 +134,7 @@ Deno.serve(async (req) => {
     }
 
     const { token, base } = await credenciais();
+    saiu = true;
     const r = await fetch(`${base}/${prep.data.phone_number_id}/messages`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -141,6 +143,10 @@ Deno.serve(async (req) => {
     const resp = await r.json().catch(() => ({}));
     const wamid: string | undefined = resp?.messages?.[0]?.id;
     const erro = resp?.error;
+    if (!wamid && r.ok && !erro) {
+      await sb.rpc("wa_meta_envio_incerto", { p_mensagem_id: msgId, p_erro: "resposta da Meta sem id" });
+      return json({ ok: false, mensagem_id: msgId, incerto: true, erro: "sem confirmacao da Meta: confira com o cliente antes de reenviar" }, 502);
+    }
 
     const fim = await sb.rpc("wa_meta_resultado_envio", {
       p_mensagem_id: msgId,
@@ -156,10 +162,17 @@ Deno.serve(async (req) => {
       console.error("meta", erro?.code, erro?.message);
       return json({ ok: false, mensagem_id: msgId, codigo: erro?.code, erro: erro?.code === 131047 ? "fora da janela de 24h" : "a Meta recusou a mensagem" }, 422);
     }
-    if (p.encaminhar_de) await sb.from("wa_mensagem").update({ encaminhada: true }).eq("id", msgId);
+    if (p.encaminhar_de) {
+      const enc = await sb.from("wa_mensagem").update({ encaminhada: true }).eq("id", msgId).select("id");
+      if (enc.error || !enc.data?.length) console.error("encaminhada", enc.error?.message ?? "nao marcou");
+    }
     return json({ ok: true, mensagem_id: msgId, wamid });
   } catch (e) {
     console.error("envio", (e as Error).message);
+    if (saiu) {
+      await sb.rpc("wa_meta_envio_incerto", { p_mensagem_id: msgId, p_erro: String((e as Error).message) });
+      return json({ ok: false, mensagem_id: msgId, incerto: true, erro: "sem confirmacao da Meta: confira com o cliente antes de reenviar" }, 502);
+    }
     await sb.rpc("wa_meta_resultado_envio", { p_mensagem_id: msgId, p_wamid: null, p_erro: String((e as Error).message) });
     return json({ ok: false, mensagem_id: msgId, erro: "falha ao enviar" }, 502);
   }

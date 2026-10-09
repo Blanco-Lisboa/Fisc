@@ -1586,7 +1586,7 @@ async function waEnviarModelo(c,m,vals,doc,previa){
  if(vals.length)comps.push({type:'body',parameters:vals.map(t=>({type:'text',text:t}))});
  c.wpp.push({id:'tmp-'+id_local,id_local,tipo:'texto',d:'sai',t:previa,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]});waDesenharMsgs();
  const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo:'template',template:{nome:m.nome,idioma:m.idioma||'pt_BR',componentes:comps,previa}});
- if(!j.ok){const x=c.wpp.find(y=>y.id_local===id_local);if(x)x.st='falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar o modelo.');return false;}
+ if(!j.ok){const x=c.wpp.find(y=>y.id_local===id_local);if(x)x.st=j.incerto?'incerto':'falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar o modelo.');return false;}
  toast('Modelo enviado.');return true;
 }
 async function waModelos(id,pref){
@@ -1738,7 +1738,7 @@ function waMenuConversa(ev,id){
   [c.fixada?'Desafixar conversa':'Fixar conversa',()=>waMarcar(c,'fixada',!c.fixada)],
   [c.silenciada?'Reativar notificações':'Silenciar notificações',()=>waMarcar(c,'silenciada',!c.silenciada)],
   [waNaoLidas(c)?'Marcar como lida':'Marcar como não lida',()=>waNaoLidas(c)?waMarcarLida(c,true):waMarcar(c,'nao_lida',true)],
-  !c.grupo?[c.bloqueado?'Desbloquear':'Bloquear',()=>waConfirmarBloqueio(c),!c.bloqueado]:null]);
+  !c.grupo&&tem('wa_bloquear')?[c.bloqueado?'Desbloquear':'Bloquear',()=>waConfirmarBloqueio(c),!c.bloqueado]:null]);
 }
 function waMenuChat(ev,id){
  const c=waConv(id);if(!c)return;const pode=waPodeAgir(c);
@@ -1752,7 +1752,7 @@ function waMenuChat(ev,id){
   pode&&c.grupo&&tem('wa_grupo_gerir')?['Pedidos para entrar',()=>waGrupoPedidos(id)]:null,
   pode&&c.grupo&&tem('wa_grupo_gerir')?['Editar grupo',()=>waGrupoEditar(id)]:null,
   pode&&c.grupo&&tem('wa_grupo_gerir')?['Apagar grupo',()=>waConfirmar('Apagar o grupo "'+c.nome+'"? Todos os participantes saem.','Apagar grupo',()=>waAcao('grupo_apagar',id)),true]:null,
-  pode&&!c.grupo?[c.bloqueado?'Desbloquear':'Bloquear',()=>waConfirmarBloqueio(c),!c.bloqueado]:null]);
+  pode&&!c.grupo&&tem('wa_bloquear')?[c.bloqueado?'Desbloquear':'Bloquear',()=>waConfirmarBloqueio(c),!c.bloqueado]:null]);
 }
 function waMenuMsg(ev,mid){
  const c=waConv(selWhats);const m=c&&c.wpp.find(x=>x.id===mid);if(!m)return;const pode=waPodeAgir(c)&&!m.id.startsWith('tmp-');
@@ -1911,7 +1911,7 @@ async function waEnviarMidia(c,blob,tipo,nome,legenda,ptmp){
  if(up.error){tmp.st='falhou';waDesenharMsgs();toast('Não foi possível subir '+nome+'.');return {ok:false};}
  const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo,legenda:legenda||undefined,arquivo:{caminho,nome},responder_a:waRespWamid(c)});
  waResp=null;
- if(!j.ok){tmp.st='falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar.');}
+ if(!j.ok){tmp.st=j.incerto?'incerto':'falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar.');}
  return j;
 }
 function waRespWamid(c){if(!waResp)return undefined;const r=c.wpp.find(m=>m.id===waResp);return r&&r.idWa?r.idWa:undefined;}
@@ -1932,7 +1932,7 @@ async function waEnviarSimples(c,tipo,arquivo,texto){
  const tmp={id:'tmp-'+id_local,id_local,tipo,d:'sai',t:texto,dados:arquivo,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]};
  c.wpp.push(tmp);waDesenharMsgs();
  const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo,arquivo,responder_a:waRespWamid(c)});waResp=null;
- if(!j.ok){tmp.st='falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar.');}
+ if(!j.ok){tmp.st=j.incerto?'incerto':'falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar.');}
 }
 function enviarWW(){const c=waConv(selWhats);const i=el('wwin');if(!c||!i)return;const t=i.value.trim();
  if(waBandejas[c.id]&&waBandejas[c.id].length){i.value='';waRasc[c.id]='';waCresce(i);waEnviarComArquivos(c,t);return;}
@@ -2259,7 +2259,7 @@ function waListaVisivel(){
   const emp=(x.empresas||[]).map(id=>waEmp[id]).filter(Boolean).map(e=>(e.razao_social||'')+' '+(e.nome_fantasia||'')+' '+(e.cnpj||'')).join(' ').toLowerCase();
   return x.nome.toLowerCase().includes(t)||emp.includes(t)||(td.length>=3&&(String(x.telefone||'').includes(td)||emp.replace(/\D/g,' ').includes(td)))||String(x.previa||'').toLowerCase().includes(t);}));}
 function waFiltrar(f){waFiltro=waFiltro===f&&f!=='todas'?'todas':f;waArq=waFiltro==='arquivadas';selWhats=null;render();}
-function waTiques(st){if(st==='lida')return `<span class="lida">${WZ.v2}</span>`;if(st==='entregue')return WZ.v2;if(st==='enviada')return WZ.v1;if(st==='falhou')return '<span class="falhou">!</span>';return WZ.relogio;}
+function waTiques(st){if(st==='lida')return `<span class="lida">${WZ.v2}</span>`;if(st==='entregue')return WZ.v2;if(st==='enviada')return WZ.v1;if(st==='falhou')return '<span class="falhou">!</span>';if(st==='incerto')return '<span class="falhou">?</span>';return WZ.relogio;}
 function waLinhaConv(x){const n=waNaoLidas(x),est=waEstadoJan(x);
  const dir=n?`<span class="wz-nl${x.silenciada?' mudo':''}">${x.marcadaNL&&!x.naoLidas?'':n}</span>`:(x.grupo?'':`<span class="wz-jan ${est}">${waJanCurta(x)}</span>`);
  const tiq=x.ultDir==='saida'?`<span style="display:flex;color:${x.ultSt==='lida'?'var(--azul)':'var(--apagado)'}">${x.ultSt==='lida'||x.ultSt==='entregue'?WZ.v2:x.ultSt==='enviada'?WZ.v1:''}</span>`:'';
@@ -2311,7 +2311,7 @@ function waCabecalho(c){
   <button class="wz-ibtn" title="Mais opções" onclick="waMenuChat(event,'${c.id}')">${WZ.mais}</button></header>`;}
 function waComposer(c,isEntrada){
  if(isEntrada&&!tem('wa_entrada_responder'))return '';
- if(c.bloqueado)return `<div class="wz-comp"><div class="wz-bloq"><span>Contato bloqueado</span><button class="wz-sec2" onclick="waAcao('desbloquear','${c.id}')">Desbloquear</button></div></div>`;
+ if(c.bloqueado)return `<div class="wz-comp"><div class="wz-bloq"><span>Contato bloqueado</span>${tem('wa_bloquear')?`<button class="wz-sec2" onclick="waAcao('desbloquear','${c.id}')">Desbloquear</button>`:''}</div></div>`;
  if(!c.grupo&&waRestante(c)<=0)return `<div class="wz-comp"><div class="wz-fechada">${waMedidor(c).replace('id="wzMed"','')}<span class="sp"></span><button class="wz-modbtn" onclick="waModelos('${c.id}')">${WZ.tpl}Enviar modelo</button></div></div>`;
  const r=waResp?c.wpp.find(m=>m.id===waResp):null;
  return `<div class="wz-comp">${r?`<div class="wz-respondendo"><div><b>Respondendo a ${escH(r.d==='sai'?(r.autorNome||'você'):(r.autorGrupo||c.nome))}</b><span>${escH(waResumo(r))}</span></div><button title="Cancelar" onclick="waResp=null;render()">✕</button></div>`:''}
@@ -2354,7 +2354,7 @@ function bolhaReal(c,m){
  else if(m.tipo==='local'&&m.dados&&m.dados.latitude!=null)h+=`<div class="wz-doc" style="cursor:pointer" onclick="window.open('https://www.google.com/maps?q=${Number(m.dados.latitude)},${Number(m.dados.longitude)}')"><span class="wz-ext img">MAPA</span><div class="dn"><b>${escH(m.dados.name||'Localização')}</b><span>${escH(m.dados.address||'')}</span></div></div>`;
  else if(m.tipo==='contato')h+=`<div class="wz-doc"><span class="wz-ext doc">👤</span><div class="dn"><b>${escH(m.t||'Contato')}</b><span>${m.dados&&m.dados.telefone?escH(fmtTel(m.dados.telefone)):''}</span></div></div>`;
  else h+=`<div class="wz-txt">${escH(m.t||'')}</div>`;
- const st=m.d==='sai'?(m.st==='lida'?' · Lida':m.st==='falhou'?' · Falhou':m.st==='enviando'?'':''):'';
+ const st=m.d==='sai'?(m.st==='lida'?' · Lida':m.st==='falhou'?' · Falhou':m.st==='incerto'?' · Sem confirmação':m.st==='enviando'?'':''):'';
  const reac=[m.reacao,m.reacaoNossa].filter(Boolean);
  h+=`<div class="wz-pe">${m.favorita?'★ ':''}${escH(m.h||'')}${escH(st)}${m.d==='sai'?waTiques(m.st):''}</div>`;
  if(reac.length)h+=`<span class="wz-reac">${reac.map(escH).join(' ')}</span>`;
@@ -2370,7 +2370,7 @@ function waDesenharMsgs(){
   const d=waDiaRotulo(m.em);if(d!==ult){html+=`<span class="wz-dia">${escH(d)}</span>`;ult=d;}
   html+=bolhaReal(c,m);});
  box.innerHTML=html;
- if(!t)box.scrollTop=box.scrollHeight;
+ if(!t){if(waRolar!=null){box.scrollTop=box.scrollHeight-waRolar;waRolar=null;}else box.scrollTop=box.scrollHeight;}
  waAssinarMidias(c);waPrepararOndas(c);
 }
 async function waPrepararOndas(c){
@@ -2501,7 +2501,7 @@ function waBandejaTirar(id,k){waBandejaLerLegendas();const it=waBandejas[id];con
 function waBandejaLimpar(id){(waBandejas[id]||[]).forEach(x=>{if(x.url)URL.revokeObjectURL(x.url);});delete waBandejas[id];waBandejaRedesenhar();}
 function waItemSolta(ev,id,k){if(waArrastoItem===null)return;ev.preventDefault();ev.stopPropagation();waBandejaLerLegendas();const it=waBandejas[id];const de=waArrastoItem;waArrastoItem=null;if(!it||de===k)return;const [x]=it.splice(de,1);it.splice(k,0,x);waBandejaRedesenhar();}
 function waEsperarStatus(c,mid,ms){
- const m=(c.wpp||[]).find(x=>x.id===mid);if(m&&['enviada','entregue','lida','falhou'].includes(m.st))return Promise.resolve(m.st);
+ const m=(c.wpp||[]).find(x=>x.id===mid);if(m&&['enviada','entregue','lida','falhou','incerto'].includes(m.st))return Promise.resolve(m.st);
  return new Promise(ok=>{const t=setTimeout(()=>{delete waEsperas[mid];ok('tempo');},ms);waEsperas[mid]=st=>{clearTimeout(t);delete waEsperas[mid];ok(st);};});}
 async function waEnviarComArquivos(c,texto){
  waBandejaLerLegendas();const itens=(waBandejas[c.id]||[]).slice();if(!itens.length)return false;
@@ -2519,7 +2519,7 @@ async function waEnviarComArquivos(c,texto){
   if(p.x){p.tmp.st='enviando';if(selWhats===c.id)waDesenharMsgs();j=await waEnviarMidia(c,p.x.f,p.x.tipo,p.x.nome,p.x.tipo==='audio'?'':p.x.leg.trim(),p.tmp);if(p.x.url)URL.revokeObjectURL(p.x.url);}
   else j=await enviarTextoWA(c,p.texto);
   const st=j&&j.ok?await waEsperarStatus(c,j.mensagem_id,120000):'falhou';
-  if(st==='falhou'){const resto=passos.slice(i+1);resto.forEach(r=>{if(r.tmp)r.tmp.st='falhou';});if(selWhats===c.id)waDesenharMsgs();
+  if(st==='falhou'||st==='incerto'){const resto=passos.slice(i+1);resto.forEach(r=>{if(r.tmp)r.tmp.st='falhou';});if(selWhats===c.id)waDesenharMsgs();
    waModal('Envio interrompido',`<div style="font-size:12.5px;line-height:1.55">${p.x?`O arquivo <b>${escH(p.x.nome)}</b>`:'O texto'} não foi enviado${resto.length?`, e ${resto.length>1?'os '+resto.length+' itens seguintes ficaram parados':'o item seguinte ficou parado'} para não chegar fora de ordem`:''}.</div><div style="display:flex;justify-content:flex-end;margin-top:14px"><button class="bt-assumir" onclick="fecharModal()">Entendi</button></div>`,440);return true;}}
  return true;}
 function waTemArquivos(ev){return !!(ev.dataTransfer&&[...ev.dataTransfer.types].includes('Files'));}
@@ -2572,7 +2572,7 @@ document.addEventListener('keydown',e=>{
  if(cod==='Ae'||cod==='e'){if(c)fazer(()=>waEmojiPainel(waCampoTexto(t)?t:null));return;}
 },true);
 /* ---------- dados reais ---------- */
-const ST_WA={enviando:'enviando',aguardando:'na fila',enviada:'enviada',entregue:'entregue',lida:'lida',falhou:'falhou'};
+const ST_WA={enviando:'enviando',aguardando:'na fila',enviada:'enviada',entregue:'entregue',lida:'lida',falhou:'falhou',incerto:'sem confirmação'};
 let sb=null,eu=null,waEntrada=[],waMeus=[],waMsgs={};
 function waConv(id){return waEntrada.find(x=>x.id===id)||waMeus.find(x=>x.id===id);}
 function hhmm(d){const x=new Date(d);return String(x.getHours()).padStart(2,'0')+':'+String(x.getMinutes()).padStart(2,'0');}
@@ -2596,26 +2596,46 @@ function convWA(c){const ant=waConv(c.id);const ct=Array.isArray(c.wa_contato)?c
  bloqueado:!!(ct&&ct.bloqueado)};
  if(ant&&ant._lendo)x._lendo=true;return x;}
 async function carregarConversas(){
- const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,responsavel_id,estado,ultima_em,ultima_previa,nao_lidas,arquivada,fixada_em,silenciada,marcada_nao_lida,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado),wa_numero!inner(provedor)')
-  .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false,nullsFirst:false}).limit(500);
- if(r.error){toast('Não foi possível carregar as conversas.');return;}
- const nv=r.data.map(convWA);
+ const todas=[];
+ for(let de=0;;de+=1000){
+  const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,responsavel_id,estado,ultima_em,ultima_previa,nao_lidas,arquivada,fixada_em,silenciada,marcada_nao_lida,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado),wa_numero!inner(provedor)')
+   .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false,nullsFirst:false}).order('id').range(de,de+999);
+  if(r.error){toast('Não foi possível carregar as conversas.');return;}
+  todas.push(...r.data);if(r.data.length<1000)break;
+ }
+ const nv=todas.map(convWA);
  waEntrada=nv.filter(c=>!c.dono);
  waMeus=nv.filter(c=>c.dono===eu.id);
  await waCarregarPainel();waAplicarPainel();
  waEntrada.concat(waMeus).forEach(c=>{if(c.carregada)janelaWA(c);});
 }
+const WA_COLUNAS_MSG='id,id_local,id_whatsapp,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,autor_grupo,responder_a,reacao,reacao_nossa,encaminhada,favorita,dados,wa_midia(nome,caminho,estado,mimetype,transcricao,tamanho,duracao_s)';
+const WA_PAGINA=300;let waRolar=null;const waAntigasIndo={};
 async function carregarMensagens(id){
- const r=await sb.from('wa_mensagem').select('id,id_local,id_whatsapp,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,autor_grupo,responder_a,reacao,reacao_nossa,encaminhada,favorita,dados,wa_midia(nome,caminho,estado,mimetype,transcricao,tamanho,duracao_s)')
-  .eq('conversa_id',id).is('apagada_em',null).order('ocorrido_em',{ascending:true}).limit(1000);
+ const r=await sb.from('wa_mensagem').select(WA_COLUNAS_MSG)
+  .eq('conversa_id',id).is('apagada_em',null).order('ocorrido_em',{ascending:false}).order('id',{ascending:false}).limit(WA_PAGINA);
  if(r.error){toast('Não foi possível carregar as mensagens.');return;}
- waMsgs[id]=r.data.map(msgWA);const c=waConv(id);if(c){c.wpp=waMsgs[id];c.carregada=true;janelaWA(c);}
+ waMsgs[id]=r.data.reverse().map(msgWA);const c=waConv(id);if(c){c.wpp=waMsgs[id];c.carregada=true;c.temAntigas=r.data.length===WA_PAGINA;janelaWA(c);}
  if(waChatAberto())render();
 }
+async function waMaisAntigas(id){
+ const c=waConv(id);if(!c||!c.temAntigas||waAntigasIndo[id]||!c.wpp.length)return;
+ waAntigasIndo[id]=true;
+ const r=await sb.from('wa_mensagem').select(WA_COLUNAS_MSG)
+  .eq('conversa_id',id).is('apagada_em',null).lte('ocorrido_em',c.wpp[0].em).order('ocorrido_em',{ascending:false}).order('id',{ascending:false}).limit(WA_PAGINA);
+ waAntigasIndo[id]=false;
+ if(r.error){toast('Não foi possível carregar as mensagens.');return;}
+ c.temAntigas=r.data.length===WA_PAGINA;
+ if(!r.data.length)return;
+ const ja=new Set(c.wpp.map(m=>m.id));
+ waMsgs[id]=r.data.reverse().map(msgWA).filter(m=>!ja.has(m.id)).concat(c.wpp);c.wpp=waMsgs[id];
+ const box=el('wwms');if(box&&selWhats===id){waRolar=box.scrollHeight-box.scrollTop;waDesenharMsgs();}
+}
+document.addEventListener('scroll',e=>{const b=e.target;if(b&&b.id==='wwms'&&b.scrollTop<120&&selWhats)waMaisAntigas(selWhats);},true);
 function aoMudarMidia(p){const md=p.new;if(!md||!md.mensagem_id)return;for(const k in waMsgs){const m=waMsgs[k].find(x=>x.id===md.mensagem_id);if(m){
   if(md.transcricao)m.transcricao=md.transcricao;if(md.estado==='guardado'&&md.caminho)m.caminho=md.caminho;if(md.nome)m.nomeArq=md.nome;
   if(waChatAberto()&&selWhats===k)waDesenharMsgs();return;}}}
-function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;if(waEsperas[m.id]&&['enviada','entregue','lida','falhou'].includes(m.status)){const r=waEsperas[m.id];setTimeout(()=>r(m.status),0);}const lista=waMsgs[m.conversa_id];
+function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;if(waEsperas[m.id]&&['enviada','entregue','lida','falhou','incerto'].includes(m.status)){const r=waEsperas[m.id];setTimeout(()=>r(m.status),0);}const lista=waMsgs[m.conversa_id];
  if(lista){if(m.apagada_em){waMsgs[m.conversa_id]=lista.filter(x=>x.id!==m.id);const c=waConv(m.conversa_id);if(c)c.wpp=waMsgs[m.conversa_id];}
   else{const i=lista.findIndex(x=>x.id===m.id||(m.id_local&&x.id_local===m.id_local));const ant=i>=0?lista[i]:null;const nova=msgWA(m);
    if(ant){nova.caminho=ant.caminho;nova.nomeArq=nova.nomeArq||ant.nomeArq;nova.transcricao=nova.transcricao||ant.transcricao;nova.midiaEstado=ant.midiaEstado;lista[i]=nova;}else lista.push(nova);
@@ -2626,7 +2646,7 @@ async function aoMudarConversa(){await carregarConversas();if(view==='whatsweb')
 async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=waRespWamid(c);waResp=null;
  c.wpp.push({id:'tmp-'+id_local,id_local,tipo:'texto',d:'sai',t,respondeA:resp||null,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]});render();
  const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo:'texto',texto:t,responder_a:resp});
- if(!j.ok){const m=c.wpp.find(x=>x.id_local===id_local);if(m)m.st='falhou';toast(j.erro||'Não foi possível enviar.');render();}
+ if(!j.ok){const m=c.wpp.find(x=>x.id_local===id_local);if(m)m.st=j.incerto?'incerto':'falhou';toast(j.erro||'Não foi possível enviar.');render();}
  return j;}
 
 /* ---------- entrada ---------- */
