@@ -552,7 +552,7 @@ tr.rnovo:hover{background:#ffe6d6}
 .ap-btit{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
 .ap-btit small{margin-bottom:0}
 .ap-abas{display:flex;gap:4px;border-bottom:1px solid var(--borda);margin:-2px -2px 4px}
-.ap-abas button{border:0;background:none;font-family:var(--disp);font-size:14px;font-weight:700;color:var(--apagado);padding:4px 10px 9px;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer}
+.ap-abas button{flex:1;text-align:center;border:0;background:none;font-family:var(--disp);font-size:14px;font-weight:700;color:var(--apagado);padding:4px 10px 9px;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer}
 .ap-abas button.on{color:var(--ink);border-bottom-color:var(--laranja)}
 .ap-bloco small{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--apagado);font-weight:700;margin-bottom:6px}
 .ap-bloco select{margin-top:8px;width:100%;border:1px solid var(--borda);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit}
@@ -1217,7 +1217,7 @@ function eGestor(){return acesso.perfil==='gestor';}
 function telaInicial(){return acesso.tela_inicial||'apuracao';}
 function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver')));}
 function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';}
-function irView(v){if(!podeVer(v))v=telaInicial();view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
+function irView(v){if(!podeVer(v))v=telaInicial();if(v==='apuracao'&&view!=='apuracao')railAba='cadastro';view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
 function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central',mapaDados=null,cartAberta=new Set();
 function escH(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -2263,7 +2263,7 @@ function enviarLivre(){const c=cli();const i=el('wppin');if(!i||!i.value.trim())
 /* IA rail — com escopo por cliente (ponto 4) */
 function apProxAcao(p){if(!p)return '';if(p.acao==='guia'||p.id==='e5')return 'abrirGuia()';if(p.acao==='flow_xml')return 'pedirXml()';return `avancarEtapa('${p.id}')`;}
 function apUsarRascunho(txt){const c=apConversaDe(cli());if(!c){toast('Cliente sem conversa no WhatsApp.');return;}if(waRestante(c)<=0){waModelos(c.id);return;}const i=el('wwin');if(i){i.value=txt;waRasc[c.id]=txt;waCresce(i);i.focus();}}
-let railAba='assistente',railPref=null;
+let railAba='cadastro',railPref=null;
 const RAIL_ITENS=['proximo','mensagem','audio','marcadores'];
 async function railCarregarPref(){if(railPref)return;railPref={};const r=await sb.from('fiscal_usuario_pref').select('valor').eq('chave','apu_assistente').maybeSingle();
  const v=!r.error&&r.data&&r.data.valor&&typeof r.data.valor==='object'?r.data.valor:{};RAIL_ITENS.forEach(k=>railPref[k]=v[k]==='off'?'off':'sugerir');}
