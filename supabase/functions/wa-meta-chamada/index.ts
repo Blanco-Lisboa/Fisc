@@ -100,9 +100,10 @@ Deno.serve(async (req) => {
   }
   const ok = r.ok && !j?.error && (j?.success === true || Array.isArray(j?.calls));
   const wacid = j?.calls?.[0]?.id ?? null;
-  const erro = ok ? null : `${j?.error?.code ?? r.status} ${j?.error?.error_data?.details ?? j?.error?.message ?? ""}`.trim();
+  const erro = ok ? null : [j?.error?.code ?? r.status, j?.error?.error_subcode, j?.error?.title, j?.error?.message, j?.error?.error_data?.details]
+    .filter((x) => x !== undefined && x !== null && String(x).trim() !== "").join(" | ").slice(0, 480) + (ok ? "" : " || " + JSON.stringify(j?.error ?? j).slice(0, 1500));
   const fim = await sb.rpc("wa_chamada_resultado", { p_chamada: d.chamada_id, p_acao: p.acao, p_ok: ok, p_wacid: wacid, p_erro: erro });
   if (fim.error || fim.data !== true) return json({ ok: false, erro: "nao gravou o resultado" }, 500);
-  if (!ok) return json({ ok: false, codigo: j?.error?.code, erro: erro }, 422);
+  if (!ok) return json({ ok: false, codigo: j?.error?.code, erro: (erro ?? "").split(" || ")[0] }, 422);
   return json({ ok: true, chamada_id: d.chamada_id, wacid });
 });

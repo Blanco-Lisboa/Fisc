@@ -2557,11 +2557,11 @@ document.addEventListener('paste',e=>{if(!waChatAberto()||!selWhats)return;const
 let waLig=null,waLigToque=null;
 const WA_LIG_FIM=['encerrada','nao_atendida','rejeitada','falhou'];
 const WA_LIG_TXT={chamando:'Chamando…',tocando:'Ligação recebida',pre_aceita:'Conectando…',em_curso:'',encerrada:'Ligação encerrada',nao_atendida:'Não atendida',rejeitada:'Recusada',falhou:'A ligação falhou'};
-function waLigSdp(sdp){const linhas=sdp.split('\r\n');const tirar=new Set();
- linhas.forEach(l=>{const m=l.match(/^a=rtpmap:(\d+) telephone-event\/48000/);if(m)tirar.add(m[1]);});
- if(!tirar.size)return sdp;
- return linhas.filter(l=>{const m=l.match(/^a=(rtpmap|fmtp|rtcp-fb):(\d+)/);return !(m&&tirar.has(m[2]));})
-  .map(l=>l.startsWith('m=audio')?l.split(' ').filter((x,i)=>i<3||!tirar.has(x)).join(' '):l).join('\r\n');}
+function waLigSdp(sdp){const linhas=sdp.split(/\r?\n/).filter(l=>l);const tirar=new Set();
+ linhas.forEach(l=>{const m=l.match(/^a=rtpmap:(\d+) CN\//);if(m)tirar.add(m[1]);});
+ return linhas.filter(l=>{if(/^a=(rtcp-xr|rtcp-rsize|candidate:|end-of-candidates)/.test(l))return false;
+  const m=l.match(/^a=(rtpmap|fmtp|rtcp-fb):(\d+)/);return !(m&&tirar.has(m[2]));})
+  .map(l=>l.startsWith('m=audio')?l.split(' ').filter((x,i)=>i<3||!tirar.has(x)).join(' '):l).join('\r\n')+'\r\n';}
 function waLigIce(pc){return new Promise(ok=>{if(pc.iceGatheringState==='complete')return ok();const t=setTimeout(ok,6000);
  pc.addEventListener('icegatheringstatechange',()=>{if(pc.iceGatheringState==='complete'){clearTimeout(t);ok();}});});}
 async function waLigConexao(){
