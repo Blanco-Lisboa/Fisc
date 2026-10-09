@@ -89,7 +89,10 @@ Deno.serve(async (req) => {
 
   if (req.method !== "POST") return new Response("", { status: 405 });
 
+  const tam = Number(req.headers.get("content-length") ?? "0");
+  if (tam > 1024 * 1024) return new Response("", { status: 413 });
   const corpo = await req.text();
+  if (corpo.length > 1024 * 1024) return new Response("", { status: 413 });
   const assinatura = req.headers.get("x-hub-signature-256");
   const conf = await sb.rpc("fiscal_meta_assinatura_ok", { p_corpo: corpo, p_assinatura: assinatura });
   if (conf.error) return new Response("", { status: 500 });
@@ -101,7 +104,7 @@ Deno.serve(async (req) => {
   const fila: Midia[] = rec.data.baixar ?? [];
   if (fila.length) {
     // @ts-ignore
-    EdgeRuntime.waitUntil(Promise.all(fila.map(baixar)));
+    EdgeRuntime.waitUntil((async () => { for (const m of fila) await baixar(m); })());
   }
   return new Response("ok", { status: 200 });
 });
