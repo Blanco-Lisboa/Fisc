@@ -515,7 +515,19 @@ tr.rnovo:hover{background:#ffe6d6}
 .ap-chat{display:flex;flex-direction:column;overflow:hidden}
 .ap-chat .hd{background:#0B3D2E;color:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px;flex:none}
 .ap-chat .hd .avc{width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:11px;font-weight:700;flex:none}
-.ap-chat .hd .nm{flex:1;min-width:0}.ap-chat .hd b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ap-chat .hd span{font-size:11px;opacity:.85;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ap-chat .hd .nm{flex:1;min-width:0}
+.ap-chat{position:relative}
+.ap-wsel{flex:1;min-width:0;display:flex;align-items:center;gap:6px}
+.ap-wsel-b{flex:1;min-width:0;border:0;background:transparent;color:#fff;text-align:left;padding:0;cursor:pointer;font-family:inherit}
+.ap-wsel-s{font-style:normal;font-size:12px;opacity:.85;cursor:pointer}
+.ap-wsel-m{position:absolute;left:12px;right:12px;top:54px;z-index:6;background:var(--pagina);color:var(--ink);border:1px solid var(--borda);border-radius:12px;box-shadow:var(--md);padding:5px;max-height:320px;overflow-y:auto}
+.ap-wsel-i{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.ap-wsel-i:hover,.ap-wsel-i.on{background:var(--superf)}
+.ap-wsel-i>div{flex:1;min-width:0}
+.ap-chat .hd .ap-wsel-i b{color:var(--ink)}
+.ap-chat .hd .ap-wsel-i span{color:var(--apoio);opacity:1}
+.ap-wsel-f{border:0;background:transparent;font-size:17px;line-height:1;color:var(--nevoa);cursor:pointer;padding:2px 4px}
+.ap-wsel-f.on{color:#E8A317}.ap-chat .hd b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ap-chat .hd span{font-size:11px;opacity:.85;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ap-jan{font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 9px;flex:none;white-space:nowrap}
 .ap-jan.ab{background:#25D366;color:#0B3D2E}.ap-jan.fe{background:rgba(255,255,255,.18);color:#fff}
 .ap-msgs{flex:1;min-height:0;background:#EFEAE2;padding:14px;display:flex;flex-direction:column;gap:4px;overflow-y:auto}
@@ -3033,10 +3045,26 @@ const WA_EMOJIS_PAINEL='😀 😃 😄 😁 😊 🙂 😉 😍 😘 🤗 🤔 �
 function waChatAberto(){return view==='whatsweb'||(view==='apuracao'&&apuAba==='apuracao'&&!!el('wwms'));}
 function apConversaDe(cl){const d=String(cl&&cl.cnpj||'').replace(/\D/g,'');if(!d)return null;
  return waOrdenar(waTodas().filter(x=>!x.grupo&&(x.empresas||[]).some(id=>waEmp[id]&&String(waEmp[id].cnpj||'').replace(/\D/g,'')===d)))[0]||null;}
-function renderWpp(cl){const c=apConversaDe(cl);
- if(!c)return `<div class="hd"><div class="avc">${escH(iniciais(cl.nome))}</div><div class="nm"><b>${escH(cl.nome)}</b><span>${escH(cl.tel||'')}</span></div></div><div class="wz-emb"><div class="wz-vazio">${WZ.balao}</div></div>`;
+let apWaCont={},apWaSel={},apWaAberto=false;
+function apWaCarregar(id){return umaVez('apwa'+id,async()=>{const r=await sb.rpc('fiscal_apuracao_wa_contatos',{p_empresa:id});
+ if(r.error){toast('Não foi possível carregar os contatos da empresa.');apWaCont[id]=[];}else apWaCont[id]=r.data||[];
+ if(view==='apuracao'&&selCli===id)renderWs();});}
+function apWaAtual(cl){const l=apWaCont[cl.id]||[];return l.find(x=>x.pessoa_id===apWaSel[cl.id])||l[0]||null;}
+function apWaEscolher(pid){apWaSel[selCli]=pid;apWaAberto=false;renderWs();}
+async function apWaFavoritar(ev,pid,fav){ev.stopPropagation();const id=selCli;
+ const r=await sb.rpc('fiscal_apuracao_wa_favoritar',{p_empresa:id,p_pessoa:fav?pid:null});
+ if(r.error||r.data!==true){toast('Não foi possível salvar o favorito.');return;}
+ if(fav)apWaSel[id]=pid;delete apWaCont[id];await apWaCarregar(id);}
+function apWaSeletor(cl,p){const l=apWaCont[cl.id]||[];
+ const fone=x=>x.telefone?fmtTel(x.telefone):'sem WhatsApp';
+ return `<div class="ap-wsel"><button class="ap-wsel-b" onclick="event.stopPropagation();apWaAberto=!apWaAberto;renderWs()"><b>${escH(p?p.nome:cl.nome)}</b><span>${escH(p?(p.rotulo+' · '+fone(p)):'')}</span></button>${l.length>1||p?'<i class="ap-wsel-s">▾</i>':''}
+  ${apWaAberto?`<div class="ap-wsel-m">${l.map(x=>`<div class="ap-wsel-i${p&&x.pessoa_id===p.pessoa_id?' on':''}" onclick="apWaEscolher('${x.pessoa_id}')"><div><b>${escH(x.nome)}</b><span>${escH(x.rotulo+' · '+fone(x))}</span></div><button class="ap-wsel-f${x.favorito?' on':''}" title="${x.favorito?'Tirar favorito':'Favoritar'}" onclick="apWaFavoritar(event,'${x.pessoa_id}',${!x.favorito})">${x.favorito?'★':'☆'}</button></div>`).join('')}</div>`:''}</div>`;}
+function renderWpp(cl){
+ if(!apWaCont[cl.id]){apWaCarregar(cl.id);return `<div class="hd"><div class="avc">${escH(iniciais(cl.nome))}</div><div class="nm"><b>${escH(cl.nome)}</b></div></div><div class="wz-emb"><div class="wz-vazio">${WZ.balao}</div></div>`;}
+ const p=apWaAtual(cl);const c=p&&p.conversa_id?waConv(p.conversa_id):null;
+ if(!c)return `<div class="hd"><div class="avc">${escH(iniciais(p?p.nome:cl.nome))}</div>${apWaSeletor(cl,p)}</div><div class="wz-emb"><div class="wz-vazio">${WZ.balao}</div></div>`;
  selWhats=c.id;waSemSelecao=false;if(!c.carregada)carregarMensagens(c.id);const est=waEstadoJan(c);
- return `<div class="hd"><div class="avc">${escH(waIni(c.nome))}</div><div class="nm"><b>${escH(c.nome)}</b><span>${escH(fmtTel(c.telefone))}</span></div><span class="ap-jan ${est==='off'?'fe':'ab'}">${est==='off'?'Só com modelo':'Pode conversar · '+escH(waJanCurta(c))}</span></div>
+ return `<div class="hd"><div class="avc">${escH(waIni(p.nome))}</div>${apWaSeletor(cl,p)}<span class="ap-jan ${est==='off'?'fe':'ab'}">${est==='off'?'Só com modelo':'Pode conversar · '+escH(waJanCurta(c))}</span></div>
   <div class="wz-emb"><section class="wz-conversa" ondragover="waSobreConversa(event)" ondragleave="if(!this.contains(event.relatedTarget))this.classList.remove('solta')" ondrop="waSoltaConversa(event)"><div class="wz-msgs" id="wwms"></div>${waComposer(c,waEntrada.includes(c))}</section></div>`;}
 function apChatPos(){if(!el('wwms')||!selWhats)return;waDesenharMsgs();const t=el('wwin');if(t){t.value=waRasc[selWhats]||'';waCresce(t);}}
 function pedirXml(){const c=apConversaDe(cli());if(!c){toast('Cliente sem conversa no WhatsApp.');return;}waModelos(c.id,'fiscal_solicitacao_xml');}
