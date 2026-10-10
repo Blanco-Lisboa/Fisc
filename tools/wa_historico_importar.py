@@ -165,10 +165,12 @@ def montar():
             d['dados'] = {k: v for k, v in dados.items() if v is not None}
             msgs.append(d)
         if msgs or conv['e_grupo']:
+            if conv['e_grupo'] and not conv.get('criado_ms'):
+                conv['criado_ms'] = msgs[0]['ts_ms'] if msgs else int(time.time() * 1000)
             conv['_n'] = ch['_id']
             conv['mensagens'] = msgs
-            chats.append(conv)
-    return chats, pulos
+            yield conv
+    log('pulados', pulos)
 
 def fase_mensagens(chats, tam=400):
     feitos = {r[0] for r in st.execute('select chave from lote')}
@@ -188,7 +190,7 @@ def fase_mensagens(chats, tam=400):
                     st.execute('insert or ignore into midia (midia_id, arquivo, caminho) values (?,?,?)', (md['midia_id'], md['chave'], md['caminho']))
                 st.execute('insert into lote values (?)', (ch,))
                 st.commit()
-        if i % 25 == 0: log(f'conversa {i + 1}/{len(chats)} novas={tot_n} repetidas={tot_r}')
+        if i % 25 == 0: log(f'conversa {i + 1}/1053 novas={tot_n} repetidas={tot_r}')
     log(f'mensagens fim novas={tot_n} repetidas={tot_r}')
 
 def subir(url, arquivo, mime):
@@ -263,16 +265,8 @@ def fase_midias(paralelo=8):
 
 if __name__ == '__main__':
     fase = sys.argv[1]
-    if fase in ('teste', 'mensagens'):
-        chats, pulos = montar()
-        n = sum(len(c['mensagens']) for c in chats)
-        log(f'conversas={len(chats)} grupos={sum(1 for c in chats if c["e_grupo"])} mensagens={n} pulados={pulos}')
-        if fase == 'teste':
-            alvo = [c for c in chats if not c['e_grupo'] and len(c['mensagens']) > 20][:1]
-            alvo[0]['mensagens'] = alvo[0]['mensagens'][:30]
-            fase_mensagens(alvo, tam=30)
-        else:
-            fase_mensagens(chats)
+    if fase == 'mensagens':
+        fase_mensagens(montar())
     elif fase == 'midias':
         fase_midias(int(sys.argv[2]) if len(sys.argv) > 2 else 8)
     elif fase == 'finalizar':
