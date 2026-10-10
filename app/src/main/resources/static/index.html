@@ -1883,7 +1883,8 @@ function waMenuChat(ev,id){
   pode&&c.grupo&&tem('wa_grupo_gerir')?['Apagar grupo',()=>waConfirmar('Apagar o grupo "'+c.nome+'"? Todos os participantes saem.','Apagar grupo',()=>waAcao('grupo_apagar',id)),true]:null,
   pode&&!c.grupo&&tem('wa_bloquear')?[c.bloqueado?'Desbloquear':'Bloquear',()=>waConfirmarBloqueio(c),!c.bloqueado]:null]);
 }
-function waMenuMsg(ev,mid){
+let waMsgAncora=null;
+function waMenuMsg(ev,mid){{const b=(ev.currentTarget||ev.target).closest?(ev.currentTarget||ev.target).closest('.wz-b'):null;waMsgAncora=(b||ev.currentTarget||ev.target).getBoundingClientRect();}
  const c=waConv(selWhats);const m=c&&c.wpp.find(x=>x.id===mid);if(!m)return;const pode=waPodeAgir(c)&&!m.id.startsWith('tmp-');
  waMenu(ev,[
   pode&&m.idWa&&!c.bloqueado?['Responder',()=>{waResp=m.id;render();setTimeout(()=>{const i=el('wwin');if(i)i.focus();},0);}]:null,
@@ -1897,8 +1898,9 @@ function waEscolherReacao(ev,m){
  WA_EMOJIS.forEach(e=>{const b=document.createElement('button');b.textContent=e;if(m.reacaoNossa===e)b.className='on';b.onclick=x=>{x.stopPropagation();waFecharMenus();waReagir(m,m.reacaoNossa===e?'':e);};bar.appendChild(b);});
  if(m.reacaoNossa&&!WA_EMOJIS.includes(m.reacaoNossa)){const b=document.createElement('button');b.textContent=m.reacaoNossa;b.className='on';b.onclick=x=>{x.stopPropagation();waFecharMenus();waReagir(m,'');};bar.appendChild(b);}
  const mais=document.createElement('button');mais.className='wa-reac-mais';mais.textContent='+';mais.title='Mais emojis';mais.onclick=x=>{x.stopPropagation();waFecharMenus();waReacaoPainel(m);};bar.appendChild(mais);
- document.body.appendChild(bar);const r=ev.target.getBoundingClientRect?ev.target.getBoundingClientRect():{left:200,bottom:200,top:200};
- bar.style.left=Math.max(8,Math.min(window.innerWidth-bar.offsetWidth-8,r.left-120))+'px';bar.style.top=Math.max(8,r.top-bar.offsetHeight-6)+'px';
+ document.body.appendChild(bar);const r=waMsgAncora||{left:200,right:200,top:200,bottom:200};const ent=m.d==='ent';
+ const x=ent?r.left:r.right-bar.offsetWidth;const y=r.top-bar.offsetHeight-6>=8?r.top-bar.offsetHeight-6:r.bottom+6;
+ bar.style.left=Math.max(8,Math.min(window.innerWidth-bar.offsetWidth-8,x))+'px';bar.style.top=Math.max(8,Math.min(window.innerHeight-bar.offsetHeight-8,y))+'px';
  setTimeout(()=>document.addEventListener('click',waFecharMenus,{once:true}),0);
 }
 let waEmojiDados=null,waEmojiGrupo=0,waEmojiTom=-1,waEmojiBusca='',waEmojiMsg=null;
