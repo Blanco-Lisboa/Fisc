@@ -1048,93 +1048,31 @@ tr.rnovo:hover{background:#ffe6d6}
 <script src="email/email.js"></script>
 <script>
 const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-let comp={mes:8,ano:2026};
+let comp=(()=>{const d=new Date();return {mes:(d.getMonth()+11)%12,ano:d.getMonth()===0?d.getFullYear()-1:d.getFullYear()};})();
 function et(id,nome,icone,status,ai,acao,docs){return{id,nome,icone,status,ai,acao,docs};}
 // Esteira REAL do Fiscal (modelos_tarefa "MODELO V2 — XML CLIENTE-PREFEITURA-SIEG-DOMINIO"):
 // Solicitar XML → Prefeitura (SP) → SIEG → Apuração no Domínio → gerar pacote de guias/docs → Enviar Guia → confirmar.
 // Pacote de documentos reais (tickets do modelo "Enviar Guia"):
 function pack(marc){return ['DAS (guia do Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Guia de ISS','DARE ICMS DIFAL','DARE ICMS ST','Recibo de Declaração'].map((n,i)=>({n,ok:i<marc}));}
-const clientes=[
- {id:'c1',nome:'Mix Imports ME',cnpj:'12.345.678/0001-90',regime:'Simples',plats:['Shopee','TikTok'],erp:'Bling',optin:true,janela:true,janelaLbl:'22h48',
-  etapas:[
-   et('e1','Solicitar XML ao Cliente','📥','aguardando','Vendeu na Shopee e TikTok — pedir os XMLs. Rascunho pronto (Flow).','flow_xml'),
-   et('e2','Prefeitura (SP) — NFS-e','🏛️','a_fazer','Baixo as notas de serviço no portal de SP assim que liberar.',null),
-   et('e3','SIEG — importar XMLs','🗂️','a_fazer','Importo os XMLs no SIEG e concilio com o movimento.',null),
-   et('e4','Apuração no Sistema Domínio','🧮','a_fazer',null,null),
-   et('e5','Gerar guias e documentos','📄','a_fazer',null,null,pack(0)),
-   et('e6','Enviar Guia ao cliente','📤','a_fazer','Monto o pacote e envio pelo template envio_guia.','guia'),
-   et('e7','Confirmar pagamento','✅','a_fazer',null,null),
-  ],
-  wpp:[{d:'sai',t:'Bom dia! Vou precisar dos XMLs de setembro pra fechar a apuração.',h:'09:10'},{d:'ent',t:'Bom dia! Vendi na Shopee e no TikTok esse mês',h:'09:32'}],
-  demCeo:{origem:'ceo',t:'Confirmar faturamento p/ relatório do Adrian',prazo:'21/09'}},
- {id:'c2',nome:'Jecksson Store',cnpj:'98.765.432/0001-10',regime:'Simples',plats:['Mercado Livre'],erp:'Upseller',optin:true,janela:false,janelaLbl:'fechada',
-  etapas:[
-   et('e1','Solicitar XML ao Cliente','📥','concluido',null,null),
-   et('e2','Prefeitura (SP) — NFS-e','🏛️','concluido',null,null),
-   et('e3','SIEG — importar XMLs','🗂️','concluido',null,null),
-   et('e4','Apuração no Sistema Domínio','🧮','concluido','DAS calculado: R$ 348,20. Relatório de Apuração (RBA) conferido pela IA.',null),
-   et('e5','Gerar guias e documentos','📄','em_andamento','Pacote pronto: DAS + Relatório de Apuração + Guia de ISS. Falta revisar antes de enviar.',null,pack(6)),
-   et('e6','Enviar Guia ao cliente','📤','a_fazer','Guia pronta. Template envio_guia + PDFs já anexados — é só revisar e mandar.','guia'),
-   et('e7','Confirmar pagamento','✅','a_fazer',null,null),
-  ],
-  wpp:[{d:'sai',tpl:'Pedir XML do mês',t:'Olá Jecksson, envie os XMLs das vendas de agosto.',flow:true},{d:'ent',t:'Enviei pelo formulário ✅',h:'seg'}],
-  demCeo:null},
- {id:'c3',nome:'Studio Bela Arte ME',cnpj:'44.555.666/0001-77',regime:'Simples',plats:['Loja física'],erp:'—',optin:true,janela:true,janelaLbl:'5h10',
-  etapas:[
-   et('e1','Solicitar XML ao Cliente','📥','concluido',null,null),
-   et('e2','Prefeitura (SP) — NFS-e','🏛️','concluido',null,null),
-   et('e3','SIEG — importar XMLs','🗂️','concluido',null,null),
-   et('e4','Apuração no Sistema Domínio (zerada)','🧮','concluido','IA detectou "não tive movimento" → sugeriu declarar zerada. Confirmado.',null),
-   et('e5','Gerar guias e documentos','📄','concluido',null,null,pack(2)),
-   et('e6','Avisar cliente (zerada)','📤','concluido',null,null),
-   et('e7','Confirmar','✅','concluido',null,null),
-  ],
-  wpp:[{d:'ent',t:'Não tive movimento esse mês',h:'ontem'},{d:'sai',t:'Tudo certo, apuração zerada. Abraço!',h:'ontem'}],
-  demCeo:null},
- {id:'c4',nome:'Gamer Zone Periféricos',cnpj:'33.444.555/0001-66',regime:'Simples',plats:['Amazon','Mercado Livre','Shopee'],erp:'Tiny',optin:true,janela:true,janelaLbl:'12h30',
-  etapas:[
-   et('e1','Solicitar XML ao Cliente','📥','concluido',null,null),
-   et('e2','Prefeitura (SP) — NFS-e','🏛️','concluido',null,null),
-   et('e3','SIEG — importar XMLs','🗂️','concluido',null,null),
-   et('e4','Apuração no Sistema Domínio','🧮','em_andamento','⚠ Caiu na malha: diferença de ICMS-ST entre canais. Revisando antes de gerar as guias.',null),
-   et('e5','Gerar guias e documentos','📄','a_fazer',null,null,pack(0)),
-   et('e6','Enviar Guia ao cliente','📤','a_fazer',null,'guia'),
-   et('e7','Confirmar pagamento','✅','a_fazer',null,null),
-  ],
-  wpp:[{d:'ent',t:'Oi, esse mês vendi bastante na Amazon também',h:'10:02'},{d:'sai',t:'Anotado! Estou conferindo o ICMS-ST entre os canais antes de fechar.',h:'10:15'}],
-  demCeo:null},
- {id:'c5',nome:'TransLog Cargas LTDA',cnpj:'55.666.777/0001-22',regime:'Lucro Presumido',plats:['Site próprio'],erp:'Tiny',optin:false,janela:false,janelaLbl:'fechada',
-  etapas:[
-   et('e1','Solicitar XML ao Cliente','📥','a_fazer','⚠ Cliente sem opt-in — preciso do aceite antes de enviar template.',null),
-   et('e2','Prefeitura (SP) — NFS-e','🏛️','a_fazer',null,null),
-   et('e3','SIEG — importar XMLs','🗂️','a_fazer',null,null),
-   et('e4','Apuração no Sistema Domínio (PIS/COFINS/ISS)','🧮','a_fazer',null,null),
-   et('e5','Gerar guias e documentos','📄','a_fazer',null,null,pack(0)),
-   et('e6','Enviar Guia ao cliente','📤','a_fazer',null,'guia'),
-   et('e7','Confirmar','✅','a_fazer',null,null),
-  ],
-  wpp:[],demCeo:{origem:'cupula',t:'Subir empresa filial no sistema (Legal)',prazo:'19/09'}},
-];
-const docsCliente={
- c2:[{id:'d1',nome:'DAS-092026.pdf',tam:'82 KB',guia:true},{id:'d2',nome:'Relatório de Apuração 09-2026.pdf',tam:'140 KB',rba:true},{id:'d3',nome:'Guia de ISS 09-2026.pdf',tam:'54 KB',guia:true}],
- c1:[{id:'d1',nome:'DAS-092026.pdf',tam:'80 KB',guia:true}],
- c4:[{id:'d1',nome:'DAS-092026.pdf',tam:'88 KB',guia:true},{id:'d2',nome:'DARE ICMS ST 09-2026.pdf',tam:'61 KB',guia:true},{id:'d3',nome:'Demonstrativo ICMS ST.pdf',tam:'70 KB'}],
- c5:[{id:'d1',nome:'DARF-PIS.pdf',tam:'58 KB',guia:true},{id:'d2',nome:'Guia de ISS.pdf',tam:'60 KB',guia:true}]};
-// carteira: todos os clientes acima são do Pedro; a "Entrada" são contatos sem dono
-clientes.forEach(c=>c.dono='Pedro H. S. Almeida');
-const AP_TEL={c1:'+55 11 9 7654-3210',c2:'+55 11 9 8765-4321',c3:'+55 11 9 6543-2109',c4:'+55 21 9 9876-5432',c5:'+55 11 9 5432-1098'};
-clientes.forEach(c=>{if(c.ia&&c.ia.modo==='tudo')c.ia.modo='limite';if(AP_TEL[c.id])c.tel=AP_TEL[c.id];if(c.id==='c4')c.atraso='DAS atrasado';});
+const clientes=[];
+const docsCliente={};
+let apCarregado=false;
+function apCarregar(){return umaVez('apclientes',async()=>{
+ const r=await blLogado().rpc('fiscal_painel_clientes');
+ if(r.error){toast('Não foi possível carregar os clientes.');return;}
+ const novos=(r.data||[]).map(x=>({id:x.empresa_id,nome:x.razao_social||x.nome_fantasia||fmtCnpj(x.cnpj),cnpj:fmtCnpj(x.cnpj),regime:'',plats:[],erp:'',optin:true,janela:false,janelaLbl:'',
+  dono:x.dono_carteira_usuario_id?(waEquipe[x.dono_carteira_usuario_id]||''):'',wpp:[],demCeo:null,ia:{modo:'limite',ate:'rascunho'},etapas:makeEtapas()}))
+  .sort((a,b)=>a.nome.localeCompare(b.nome));
+ clientes.splice(0,clientes.length,...novos);apCarregado=true;
+ if(!clientes.find(c=>c.id===selCli))selCli=clientes[0]?clientes[0].id:null;
+ if(view==='apuracao')render();});}
 const PASSOS_TPL=[['e1','Solicitar XML ao Cliente','📥','flow_xml'],['e2','Prefeitura (SP) — NFS-e','🏛️'],['e3','SIEG — importar XMLs','🗂️'],['e4','Apuração no Sistema Domínio','🧮'],['e5','Gerar guias e documentos','📄'],['e6','Enviar Guia ao cliente','📤','guia'],['e7','Confirmar pagamento','✅']];
-function makeEtapas(){return PASSOS_TPL.map(p=>et(p[0],p[1],p[2],'a_fazer',null,p[3]||null,p[0]==='e5'?pack(0):null));}
+function makeEtapas(){return PASSOS_TPL.map(p=>et(p[0],p[1],p[2],null,null,p[3]||null,null));}
 // contatos que chegaram no WhatsApp e ainda não estão na carteira de ninguém
-const entrada=[
- {id:'n1',nome:'Ótica Vision Web',plats:['Shopee'],optin:true,janela:true,janelaLbl:'3h20',wpp:[{d:'ent',t:'Oi! Vendo óculos na Shopee e preciso de contador pra e-commerce. Vocês atendem?',h:'08:40'}]},
- {id:'n2',nome:'Doce Lar Enxovais',plats:['Mercado Livre'],optin:false,janela:true,janelaLbl:'19h10',wpp:[{d:'ent',t:'Bom dia! Vocês fazem apuração de quem vende no Mercado Livre?',h:'ontem'}]},
- {id:'n3',nome:'+55 11 9 8•••-•••• (novo)',plats:[],optin:false,janela:true,janelaLbl:'1h05',wpp:[{d:'ent',t:'Oi, boa tarde',h:'agora'}]},
-];
+const entrada=[];
 function convById(id){return clientes.find(x=>x.id===id)||entrada.find(x=>x.id===id);}
 function assumir(id){const i=entrada.findIndex(e=>e.id===id);if(i<0)return;const n=entrada.splice(i,1)[0];
- clientes.push({id:n.id,nome:n.nome,cnpj:'—',regime:'Simples',plats:n.plats,erp:'—',optin:n.optin,janela:n.janela,janelaLbl:n.janelaLbl,dono:'Pedro H. S. Almeida',wpp:n.wpp,demCeo:null,etapas:makeEtapas()});
+ clientes.push({id:n.id,nome:n.nome,cnpj:'—',regime:'Simples',plats:n.plats,erp:'—',optin:n.optin,janela:n.janela,janelaLbl:n.janelaLbl,dono:'',wpp:n.wpp,demCeo:null,etapas:makeEtapas()});
  waAba='meus';selWhats=n.id;toast(n.nome+' entrou na sua carteira.');render();}
 const templates=[
  {cod:'solicitacao_xml',cat:'Utility',flow:true,corpo:'Olá {cliente}, chegou a hora da apuração de {mes}. Envie os XMLs das suas vendas por aqui.',btn:'📎 Enviar XMLs'},
@@ -1147,33 +1085,16 @@ const flows=[
  {nome:'Enviar XMLs / notas',campos:['Competência (mês/ano)','Plataforma: Shopee/TikTok/ML/Shein','Upload dos XMLs (vários)','Observações']},
  {nome:'Atualizar acesso / credencial',campos:['Portal/sistema','Login','Senha (protegida)','Certificado (upload)','Validade']},
 ];
-const esteira=[
- {id:'x1',origem:'ceo',titulo:'Planejamento tributário — migrar p/ Lucro Real',cliente:'Heverton E-commerce',prazo:'25/09',prio:'crit',col:'recebidas'},
- {id:'x2',origem:'cupula',titulo:'Emitir 2ª via + CND p/ licitação',cliente:'Farmácia Vida Leve',prazo:'22/09',prio:'alta',col:'recebidas'},
- {id:'x3',origem:'ceo',titulo:'Revisar redução de alíquota — todas as lojas',cliente:'Noelma Multi-lojas',prazo:'30/09',prio:'alta',col:'andamento'},
- {id:'x4',origem:'cupula',titulo:'Subir empresa nova no sistema',cliente:'AXP Importação',prazo:'19/09',prio:'normal',col:'andamento'},
- {id:'x5',origem:'ceo',titulo:'Confirmar faturamento p/ relatório do CEO',cliente:'Mix Imports ME',prazo:'21/09',prio:'normal',col:'validacao'},
-];
+const esteira=[];
 
 // escopo da IA por cliente (opcional, ponto 4): off = não trata nada · limite = trata até certo ponto · tudo = trata tudo
-clientes.forEach(c=>{if(!c.ia)c.ia={modo:'limite',ate:'rascunho'};});
-(clientes.find(c=>c.id==='c3')||{}).ia={modo:'tudo'};           // zerada automática liberada
-(clientes.find(c=>c.id==='c5')||{}).ia={modo:'off'};            // cliente delicado — IA não age
-(clientes.find(c=>c.id==='c4')||{}).ia={modo:'limite',ate:'apuracao'};
 const IA_LIMITES=[['triagem','Só ler/triar e transcrever'],['rascunho','Até sugerir rascunho (não envia)'],['apuracao','Até conferir a apuração (RBA)']];
 function iaModoTxt(c){if(c.ia.modo==='off')return 'Desativada — você trata tudo manualmente neste cliente.';if(c.ia.modo==='tudo')return 'Liberada — pode executar as ações permitidas (ex.: pedir XML, declarar zerada).';const l=IA_LIMITES.find(x=>x[0]===(c.ia.ate||'rascunho'));return 'Trata até certo ponto: '+(l?l[1].toLowerCase():'sugerir rascunho')+'. O envio é sempre seu.';}
 function setIaModo(m){if(m!=='off')m='limite';cli().ia.modo=m;toast('Assistente neste cliente: '+(m==='off'?'não ajudar':'só sugerir'));renderApuracao();}
 function setIaAte(v){cli().ia.ate=v;renderApuracao();}
 
 // Radar de XML (ponto 1) — com indicador de "novos" que some ao visualizar
-const RADAR=[
- {c:'Mix Imports ME',cli:'c1',sh:'pend',tk:'pend',ml:'-',s:'Aguardando',quando:'—',novo:false},
- {c:'Jecksson Store',cli:'c2',sh:'-',tk:'-',ml:'ok',s:'Coletado',quando:'hoje 08:12',novo:true},
- {c:'Gamer Zone Periféricos',cli:'c4',sh:'ok',tk:'-',ml:'ok',s:'Coletado',quando:'hoje 09:40',novo:true},
- {c:'Studio Bela Arte ME',cli:'c3',sh:'-',tk:'-',ml:'-',s:'Zerada',quando:'ontem',novo:false},
- {c:'TransLog Cargas LTDA',cli:'c5',sh:'-',tk:'-',ml:'-',s:'Sem movimento',quando:'—',novo:false},
- {c:'Ótica Vision Web',cli:'',sh:'ok',tk:'-',ml:'-',s:'Coletado · contato novo',quando:'agora',novo:true},
-];
+const RADAR=[];
 function radarNovos(){return RADAR.filter(r=>r.novo).length;}
 function cell(v){return v==='ok'?'<span class="pill ok">recebido</span>':v==='pend'?'<span class="pill falta">pendente</span>':'<span style="color:var(--nevoa)">—</span>';}
 function radarVisto(i){if(RADAR[i]&&RADAR[i].novo){RADAR[i].novo=false;renderApuracao();}}
@@ -1181,16 +1102,12 @@ function radarVerTudo(){RADAR.forEach(r=>r.novo=false);renderApuracao();}
 
 // Meu espaço (igual ao sistema real): modelos pessoais + tags pessoais do usuário
 let espacoAba='modelos';
-let meusModelos=[
- {nome:'Fechamento e-commerce (meu jeito)',classe:'rotineira'},
- {nome:'Conferência rápida de ICMS-ST',classe:'unica'},
-];
+let meusModelos=[];
 const PALETA_TAG=['#FE4901','#FF6A1F','#2E6B9C','#1E6B4A','#7C3AAD','#B42318','#8A4B12','#5B5F66'];
-let minhasTags=[{nome:'Prioridade alta',cor:'#B42318'},{nome:'Espera cliente',cor:'#8A4B12'}];
+let minhasTags=[];
 let novaTagCor=PALETA_TAG[0];
 function addModelo(){const i=el('mmNome');const cl=el('mmClasse');if(!i||!i.value.trim())return;meusModelos.unshift({nome:i.value.trim(),classe:cl.value});renderEspacoModal();}
 function delModelo(i){meusModelos.splice(i,1);renderEspacoModal();}
-function aplicarModelo(i){toast('"'+meusModelos[i].nome+'" aplicado em '+cli().nome+' (demo).');}
 function pegarTarefas(){meusModelos.unshift({nome:'Demanda de '+cli().nome+' (copiada)',classe:'rotineira'});toast('Tarefas de '+cli().nome+' salvas como modelo pessoal.');renderEspacoModal();}
 function setNovaTagCor(c){novaTagCor=c;renderEspacoModal();}
 function addTag(){const i=el('tgNome');if(!i||!i.value.trim())return;minhasTags.unshift({nome:i.value.trim(),cor:novaTagCor});renderEspacoModal();}
@@ -1227,16 +1144,15 @@ function salvarNovaTarefa(){const c=cli();const nome=(el('ntNome').value||'').tr
  nova.custom=true;nova.escopo=el('ntEsc').value;c.etapas.push(nova);fecharModal();toast('Tarefa adicionada a este cliente.');render();}
 function delTarefa(id){const c=cli();c.etapas=c.etapas.filter(e=>e.id!==id);toast('Tarefa removida.');render();}
 
-let view='apuracao',selCli='c1',selWhats=null,waAba='entrada',modal=null,pendSub='xml',apuAba='apuracao';
+let view='apuracao',selCli=null,selWhats=null,waAba='entrada',modal=null,pendSub='xml',apuAba='apuracao';
 function setApuAba(a){apuAba=a;renderApuracao();}
-function editarEstrutura(){toast('Editar estrutura do modelo do escritório — demo.');}
 const el=id=>document.getElementById(id);
 function toast(t){const w=el('toasts');const d=document.createElement('div');d.className='toast';d.textContent=t;w.appendChild(d);setTimeout(()=>d.remove(),2600);}
 function cli(){return clientes.find(c=>c.id===selCli);}
 function iniciais(n){return n.split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
 function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
 function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
-function prog(c){const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
+function prog(c){if(!c.etapas.some(e=>e.status))return null;const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
 const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
 let acesso={perfil:'',tela_inicial:'apuracao',permissoes:[]};
@@ -1805,6 +1721,7 @@ function renderApuMesa(){
    <div class="ap-centro" id="ws"></div>
    <div class="ap-card ap-ia" id="iaRail"></div>
   </div>`;
+ if(!apCarregado)apCarregar();
  renderLista();renderWs();renderIaRail();
 }
 /* Radar XML como aba */
@@ -1859,10 +1776,9 @@ function renderEspacoModal(){
    <div class="loteBar"><input id="mmNome" placeholder="Nome do modelo pessoal..." style="flex:1;border:1px solid var(--borda);border-radius:9px;padding:9px 12px;font-size:12.5px;outline:0" onkeydown="if(event.key==='Enter')addModelo()">
      <select id="mmClasse" style="border:1px solid var(--borda);border-radius:9px;padding:9px;font-size:12.5px"><option value="rotineira">Rotineira</option><option value="unica">Única</option></select>
      <button class="bwpp" onclick="addModelo()">Criar</button></div>
-   <div style="display:flex;justify-content:flex-end;margin:-6px 0 10px"><button class="miniB" onclick="pegarTarefas()">＋ Pegar tarefas de ${cli().nome}</button></div>
+   
    <div class="lista2" style="max-width:100%">${meusModelos.length?meusModelos.map((m,i)=>`<div class="itemE"><span style="width:26px;height:26px;border-radius:8px;background:var(--roxoSv);color:var(--roxo);display:grid;place-items:center;flex:none;font-size:12px">▤</span>
      <div style="flex:1"><div style="font-weight:600">${m.nome}</div><div style="font-size:10.5px;color:var(--apagado)">${m.classe==='rotineira'?'rotineira (repete todo mês)':'única (só quando aplicar)'}</div></div>
-     <button class="miniB" style="border-color:var(--verde);color:var(--verde)" onclick="aplicarModelo(${i})">Aplicar em ${cli().nome.split(' ')[0]}</button>
      <button class="xdel" onclick="delModelo(${i})">✕</button></div>`).join(''):'<p style="color:var(--apagado)">Nenhum modelo pessoal ainda.</p>'}</div>`;
  } else {
   el('espBody').innerHTML=`
@@ -2168,6 +2084,7 @@ let apBusca='',apFiltro='todos';
 const AP_NOME={e1:'Pedir XML ao cliente',e2:'Prefeitura — notas de serviço',e3:'Importar no SIEG',e4:'Apurar no Domínio',e5:'Gerar guias e documentos',e6:'Enviar ao cliente',e7:'Confirmar pagamento'};
 const AP_CURTO={e1:'Pedir XML',e2:'Prefeitura',e3:'Importar no SIEG',e4:'Apurar no Domínio',e5:'Gerar guias',e6:'Enviar ao cliente',e7:'Confirmar pagamento'};
 function apSituacao(c){
+ if(!c.etapas.some(e=>e.status))return ['—','cz','sem'];
  const cur=c.etapas.find(e=>e.status!=='concluido');
  if(!cur)return ['Concluído','vd','concluidos'];
  if(!c.optin)return ['Sem autorização no WhatsApp','vm','semaut'];
@@ -2184,30 +2101,31 @@ function renderLista(){
  const kp=(k,r,cl)=>`<button class="wz-kpi ${cl}${apFiltro===k?' on':''}" onclick="apFiltro=apFiltro==='${k}'?'todos':'${k}';renderLista()"><span>${r}</span><b>${cont(k)}</b></button>`;
  const ke=el('apKpis');if(ke)ke.innerHTML=kp('aguardando','Aguardando','av')+kp('atrasados','Atrasados','al')+kp('concluidos','Concluídos','vd');
  const lista=base.filter(c=>apFiltro==='todos'||apSituacao(c)[2]===apFiltro);
- el('listaCli').innerHTML=lista.map(c=>{const pct=prog(c);const cor=pct===100?'var(--verde)':pct>0?'var(--laranja)':'var(--nevoa)';const s=apSituacao(c);
+ el('listaCli').innerHTML=lista.map(c=>{const pct=prog(c);const cor=pct===100?'var(--verde)':pct>0?'var(--laranja)':'var(--nevoa)';const s=apSituacao(c);const cemp=[c.regime,c.plats.join(', ')].filter(Boolean).join(' · ')||c.cnpj;
   return `<div class="apz-cli${c.id===selCli?' sel':''}" onclick="selCli='${c.id}';render()"><div class="wz-av" style="background:${waCorNome(c.nome)}">${escH(iniciais(c.nome))}</div>
-   <div class="wz-cm"><span class="wz-nome">${escH(c.nome)}</span><span class="wz-cemp">${escH(c.regime)}${c.plats.length?' · '+escH(c.plats.join(', ')):''}</span>
-    <div class="apz-prog"><div class="b"><i style="width:${pct}%;background:${cor}"></i></div><span>${pct}%</span></div>
+   <div class="wz-cm"><span class="wz-nome">${escH(c.nome)}</span><span class="wz-cemp">${escH(cemp)}</span>
+    <div class="apz-prog"><div class="b"><i style="width:${pct||0}%;background:${cor}"></i></div><span>${pct==null?'—':pct+'%'}</span></div>
     <span class="ap-st ${s[1]}">${escH(s[0])}</span></div></div>`;
  }).join('');
 }
 function apHoras(l){const m=String(l||'').match(/^(\d+)h/);return m?m[1]+'h':String(l||'');}
 function apVenc(){const m=comp.mes+2>12?1:comp.mes+2;return '20/'+String(m).padStart(2,'0');}
 function renderWs(){
- const c=cli();const idxCur=c.etapas.findIndex(e=>e.status!=='concluido');
+ const c=cli();if(!c){el('ws').innerHTML='';return;}
+ const temSt=c.etapas.some(e=>e.status);const idxCur=temSt?c.etapas.findIndex(e=>e.status!=='concluido'):-1;
+ const cv=apConversaDe(c);const jan=cv?waEstadoJan(cv):null;
  el('ws').innerHTML=`
   <div class="ap-card ap-cab"><div class="ap-av">${iniciais(c.nome)}</div>
-    <div class="tx"><h1>${escH(c.nome)}</h1><div class="sb">${escH(c.cnpj)} · ${escH(c.regime)} · ERP ${escH(c.erp)}${c.plats.length?' · '+escH(c.plats.join(', ')):''}</div></div>
+    <div class="tx"><h1>${escH(c.nome)}</h1><div class="sb">${escH([c.cnpj,c.regime,c.erp?'ERP '+c.erp:'',c.plats.join(', ')].filter(Boolean).join(' · '))}</div></div>
     <div class="ap-mini">
-      <div><small>Etapa atual</small><b>${idxCur<0?'concluída':(idxCur+1)+' de '+c.etapas.length}</b></div>
-      <div><small>Vence o DAS</small><b>${apVenc()}</b></div>
-      <div><small>Conversa</small><b style="color:${c.janela?'var(--verde)':'var(--apagado)'}">${c.janela?'aberta · '+apHoras(c.janelaLbl):'fechada'}</b></div>
+      <div><small>Etapa atual</small><b>${!temSt?'—':idxCur<0?'concluída':(idxCur+1)+' de '+c.etapas.length}</b></div>
+      <div><small>Vence o DAS</small><b>—</b></div>
+      <div><small>Conversa</small><b style="color:${jan&&jan!=='off'?'var(--verde)':'var(--apagado)'}">${!cv?'—':jan==='off'?'só com modelo':'aberta · '+escH(waJanCurta(cv))}</b></div>
     </div></div>
   <div class="ap-duas">
     <div class="ap-card ap-chat">${renderWpp(c)}</div>
     <div class="ap-card ap-etapas"><div class="ap-h2">Etapas do mês <span>${mesTxt()}</span></div>
-      ${c.etapas.map((e,i)=>renderStage(e,i,idxCur)).join('')}
-      <button class="ap-add" onclick="modalNovaTarefa()">+ Adicionar tarefa deste cliente</button></div>
+      ${c.etapas.map((e,i)=>renderStage(e,i,idxCur)).join('')}</div>
   </div>`;
  apChatPos();
 }
@@ -2312,15 +2230,13 @@ function railItem(k,titulo,corpo){const m=(railPref&&railPref[k])||'sugerir';
  return `<div class="ap-bloco"><div class="ap-btit"><small>${titulo}</small><div class="ap-seg mini"><button class="${m==='off'?'on':''}" onclick="railMudar('${k}','off')">Não ajudar</button><button class="${m==='sugerir'?'on':''}" onclick="railMudar('${k}','sugerir')">Sugerir</button></div></div>${m==='off'?'':corpo}</div>`;}
 function renderIaRail(){
  if(!railPref){railCarregarPref().then(renderIaRail);}
- const c=cli();const prox=c.etapas.find(e=>e.status!=='concluido');
- const rasc=prox&&(prox.id==='e5'||prox.id==='e6')?`Olá! Seguem as guias de ${MESES[comp.mes].toLowerCase()}. O DAS vence dia ${apVenc()}.`:`Olá ${c.nome.split(' ')[0]}, para fechar ${mesTxt()} preciso dos XMLs${c.plats.length?' da '+c.plats.join(' e da '):''}. Pode enviar pelo formulário?`;
  const abas=`<div class="ap-abas">${[['assistente','Assistente'],['cadastro','Cadastro']].map(([k,t])=>`<button class="${railAba===k?'on':''}" onclick="railAba='${k}';renderIaRail()">${t}</button>`).join('')}</div>`;
  if(railAba==='cadastro'){el('iaRail').innerHTML=abas+cadHtml();return;}
  el('iaRail').innerHTML=abas+
-  railItem('proximo','Próximo passo',`<div class="ap-prox"><b>${escH(prox?(AP_NOME[prox.id]||prox.nome):'Apuração concluída')}</b><p>${escH(prox?(prox.ai||'Acompanhe esta etapa.'):'Nada pendente neste cliente.')}</p>${prox?`<button class="ap-bt p" onclick="${apProxAcao(prox)}">${prox.acao==='guia'||prox.id==='e5'?'Revisar agora':prox.acao==='flow_xml'?'Pedir XML':'Marcar como feita'}</button>`:''}</div>`)+
-  railItem('mensagem','Mensagem sugerida',`<div class="ap-rasc">"${escH(rasc)}"<div style="display:flex;gap:6px;margin-top:8px"><button class="ap-bt" onclick="apUsarRascunho(${JSON.stringify(rasc).replace(/"/g,'&quot;')})">Usar</button><button class="ap-bt" onclick="toast('Editar mensagem (demo)')">Editar</button></div></div>`)+
-  railItem('audio','Último áudio do cliente',`<div class="ap-rasc">Perguntou se precisa enviar as notas da Shein de julho também.</div>`)+
-  railItem('marcadores','Marcadores',`<div class="ap-tags"><span class="ap-tg">apuração</span><span class="ap-tg">e-commerce</span>${prox&&prox.status==='aguardando'?'<span class="ap-tg">aguardando cliente</span>':''}</div>`);
+  railItem('proximo','Próximo passo','<div class="ap-rasc">—</div>')+
+  railItem('mensagem','Mensagem sugerida','<div class="ap-rasc">—</div>')+
+  railItem('audio','Último áudio do cliente','<div class="ap-rasc">—</div>')+
+  railItem('marcadores','Marcadores','<div class="ap-rasc">—</div>');
 }
 /* modal enviar guia */
 let guiaSel=new Set(),guiaVinc={};
@@ -2340,15 +2256,15 @@ function enviarGuia(){const c=cli();const docs=docsCliente[c.id]||[];let concl=0
 function fecharModal(){if(modal){modal.remove();modal=null;}}
 
 /* pendências */
-function renderPend(alvo){const cats=[['xml','XML pendente',2],['guias','Guias a enviar',3],['aguardando','Aguardando cliente',1],['outras','Outras',1]];
- const dados={xml:[{c:'Mix Imports ME',d:'Faltam XMLs Shopee/TikTok de '+mesTxt(),cli:'c1'},{c:'TransLog Cargas LTDA',d:'Sem movimento + opt-in pendente',cli:'c4'}],guias:[{c:'Jecksson Store',d:'DAS apurado, guia pronta',cli:'c2'},{c:'TransLog Cargas LTDA',d:'2 guias a enviar',cli:'c4'},{c:'Mix Imports ME',d:'Guia após apurar',cli:'c1'}],aguardando:[{c:'Mix Imports ME',d:'Aguardando XMLs há 1h20',cli:'c1'}],outras:[{c:'Studio Bela Arte ME',d:'Confirmar zerada',cli:'c3'}]};
+function renderPend(alvo){const cats=[['xml','XML pendente',0],['guias','Guias a enviar',0],['aguardando','Aguardando cliente',0],['outras','Outras',0]];
+ const dados={xml:[],guias:[],aguardando:[],outras:[]};
  (alvo||el('conteudo')).innerHTML=`<div class="tela"><h1>Minhas pendências</h1><p class="intro">O que falta tratar nesta competência (${mesTxt()}).</p>
   <div class="subtabs">${cats.map(([k,l,n])=>`<button class="${pendSub===k?'on':''}" onclick="pendSub='${k}';render()">${l} <span class="c">${n}</span></button>`).join('')}</div>
   <div class="grade">${(dados[pendSub]||[]).map(x=>`<div class="cardP"><div class="top"><div class="av">${iniciais(x.c)}</div><div class="nm">${x.c}</div></div><div style="font-size:12.5px;color:var(--apoio)">${x.d}</div><div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="selCli='${x.cli}';irView('apuracao')">Abrir na Apuração →</button></div></div>`).join('')}</div></div>`;
 }
 function renderPessoal(){el('conteudo').innerHTML='';}
 /* radar xml */
-function renderXml(){const linhas=[{c:'Mix Imports ME',sh:'pend',tk:'pend',ml:'-',s:'Aguardando'},{c:'Jecksson Store',sh:'-',tk:'-',ml:'ok',s:'Coletado'},{c:'Studio Bela Arte ME',sh:'-',tk:'-',ml:'-',s:'Zerada'},{c:'TransLog Cargas LTDA',sh:'-',tk:'-',ml:'-',s:'Sem movimento'}];
+function renderXml(){const linhas=[];
  const cell=v=>v==='ok'?'<span class="pill ok">recebido</span>':v==='pend'?'<span class="pill falta">pendente</span>':'<span style="color:var(--nevoa)">—</span>';
  el('conteudo').innerHTML=`<div class="tela"><h1>Radar de XML</h1><p class="intro">Chegada dos XMLs por plataforma na competência ${mesTxt()}. Pendente vira pedido (Flow) no WhatsApp.</p>
   <div class="tbwrap"><table><thead><tr><th>Cliente</th><th>Shopee</th><th>TikTok</th><th>Mercado Livre</th><th>Status</th><th></th></tr></thead><tbody>${linhas.map(l=>`<tr><td style="font-weight:600">${l.c}</td><td>${cell(l.sh)}</td><td>${cell(l.tk)}</td><td>${cell(l.ml)}</td><td>${l.s}</td><td><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="toast('Pedir XML (Flow) — demo')">Pedir XML</button></td></tr>`).join('')}</tbody></table></div></div>`;
