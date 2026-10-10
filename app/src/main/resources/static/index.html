@@ -423,7 +423,13 @@ tr.rnovo:hover{background:#ffe6d6}
 .mt-tr:hover td{background:var(--superf)}
 .mt-tr td{vertical-align:middle}
 .mt-nm{font-size:11px;color:var(--apagado);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mt-cfg{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--borda);border-radius:12px;font-size:13px;font-weight:600;color:var(--ink)}
+.mt-cfg{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--borda);border-radius:12px;font-size:13px;color:var(--ink)}
+.mt-cfg-t{flex:1;min-width:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mt-cfg-t b{font-weight:700}
+.mt-cfg-v{display:inline-flex;color:var(--azul)}
+.mt-cfg-v svg{width:17px;height:17px}
+.mt-cfg-st{font-size:12px;font-weight:600;white-space:nowrap}
+.mt-cfg-st.ok{color:var(--verde)}.mt-cfg-st.and{color:var(--ambar)}.mt-cfg-st.nao{color:var(--vermelho)}.mt-cfg-st.neu{color:var(--apagado)}
 .mt-sw{position:relative;display:inline-block;width:36px;height:20px;cursor:pointer}
 .mt-sw input{opacity:0;width:0;height:0;position:absolute}
 .mt-sw i{position:absolute;inset:0;border-radius:999px;background:var(--nevoa);transition:background .15s}
@@ -2375,7 +2381,7 @@ function estDemandas(){const cols=[['recebidas','Recebidas'],['andamento','Em an
 let _drag=null;function dragEst(id){_drag=id;}function dropEst(col){if(_drag){esteira.find(e=>e.id===_drag).col=col;_drag=null;renderEst();}}
 function avancarEst(id){const o=['recebidas','andamento','validacao','concluidas'];const e=esteira.find(x=>x.id===id);const i=o.indexOf(e.col);if(i<3){e.col=o[i+1];toast('Avançado.');renderEst();}}
 /* IA & Meta */
-let iaAba='meta',mtDados=null,mtCfg=null,mtCanal=null,mtFiltro='todos',mtBusca='',mtAvFiltro='nao_vistos',mtNovo=null;
+let iaAba='meta',mtDados=null,mtCfgMsg=null,mtCfgTimer=null,mtCanal=null,mtFiltro='todos',mtBusca='',mtAvFiltro='nao_vistos',mtNovo=null;
 const MT_ESTADO={APPROVED:['Aprovado','ok'],PENDING:['Em análise','and'],IN_APPEAL:['Em recurso','and'],REJECTED:['Recusado','nao'],PAUSED:['Pausado','nao'],DISABLED:['Desativado','nao'],PENDING_DELETION:['Sendo apagado','neu'],ARCHIVED:['Arquivado','neu'],LIMIT_EXCEEDED:['Limite atingido','nao']};
 const MT_QUAL={GREEN:['Alta','ok'],YELLOW:['Média','and'],RED:['Baixa','nao'],UNKNOWN:['Sem nota','neu']};
 const MT_LIMITE={TIER_250:'250 clientes por dia',TIER_1K:'1 mil clientes por dia',TIER_2K:'2 mil clientes por dia',TIER_10K:'10 mil clientes por dia',TIER_100K:'100 mil clientes por dia',TIER_UNLIMITED:'Sem limite'};
@@ -2406,8 +2412,15 @@ function mtAssinar(){if(mtCanal)return;
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conta_meta'},f)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_saude'},f)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_config'},f).subscribe();}
-async function mtConfigLeitura(v,cx){const r=await sb.rpc('wa_config_gravar',{p_confirmar_leitura:v});
- if(r.error||!r.data||r.data.confirmar_leitura!==v){cx.checked=!v;toast('Não foi possível salvar.');return;}await mtCarregar();}
+function mtCfgAviso(t,c){mtCfgMsg={t,c};clearTimeout(mtCfgTimer);const st=el('mtCfgSt');if(st){st.className='mt-cfg-st '+c;st.textContent=t;}
+ if(c==='ok')mtCfgTimer=setTimeout(()=>{mtCfgMsg=null;if(view==='ia'&&iaAba==='meta')renderMeta();},6000);}
+async function mtConfigLeitura(v,cx){cx.disabled=true;mtCfgAviso('Salvando…','and');
+ const r=await sb.rpc('wa_config_gravar',{p_confirmar_leitura:v});
+ const cf=r.error?null:await sb.rpc('wa_config_ler');
+ cx.disabled=false;
+ if(r.error||!r.data||r.data.confirmar_leitura!==v||!cf||cf.error||!cf.data||cf.data.confirmar_leitura!==v){
+  cx.checked=!v;mtCfgAviso('Falhou: '+((r.error&&r.error.message)||(cf&&cf.error&&cf.error.message)||'o banco não confirmou a mudança'),'nao');return;}
+ mtCfgAviso(v?'Ativado e confirmado':'Desativado e confirmado','ok');await mtCarregar();}
 function mtModelos(){return (mtDados&&mtDados.modelos)||[];}
 function renderMeta(){const b=el('iaBody');if(!b)return;
  if(!mtDados){b.innerHTML='';return;}
@@ -2434,7 +2447,8 @@ function renderMeta(){const b=el('iaBody');if(!b)return;
    <div class="mt-ci"><span>Atualizado</span><b>${mtData(cta.atualizado_em)}</b></div>
   </div>
   ${d.config?`<div class="cg-card mt-sec"><div class="mt-cab"><div class="cg-tit" style="margin:0">Configurações do WhatsApp</div></div>
-   <div class="mt-cfg"><span>Mostrar ao cliente que a mensagem foi vista</span><label class="mt-sw"><input type="checkbox" ${d.config.confirmar_leitura?'checked':''} ${d.config.pode_mudar?'':'disabled'} onchange="mtConfigLeitura(this.checked,this)"><i></i></label></div></div>`:''}
+   <div class="mt-cfg"><span class="mt-cfg-t"><b>CONFIRMAÇÃO DE LEITURA</b> - Mostrar ao cliente que a mensagem foi vista <i class="mt-cfg-v">${WZ.v2}</i></span>
+    <span class="mt-cfg-st ${mtCfgMsg?mtCfgMsg.c:(d.config.confirmar_leitura?'ok':'neu')}" id="mtCfgSt">${escH(mtCfgMsg?mtCfgMsg.t:(d.config.confirmar_leitura?'Ativado':'Desativado')+' · '+mtData(d.config.atualizado_em))}</span><label class="mt-sw"><input type="checkbox" ${d.config.confirmar_leitura?'checked':''} ${d.config.pode_mudar?'':'disabled'} onchange="mtConfigLeitura(this.checked,this)"><i></i></label></div></div>`:''}
   <section class="cg-duas">
    <div class="cg-card mt-sec"><div class="mt-cab"><div class="cg-tit" style="margin:0">Avisos da Meta</div><span class="sp"></span>
      ${[['nao_vistos','Não vistos',naoVistos.length],['criticos','Críticos',av.filter(a=>a.gravidade==='critico').length],['todos','Todos',av.length]].map(([k,t,c])=>`<button class="wz-chip${mtAvFiltro===k?' on':''}" onclick="mtAvFiltro='${k}';renderMeta()">${t} <b>${c}</b></button>`).join('')}</div>
