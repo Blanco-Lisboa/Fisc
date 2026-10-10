@@ -292,7 +292,18 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .wz-ext.ico{background:transparent}
 .wz-ext.ico .ico8{width:100%;height:100%;object-fit:contain}.wa-menu button.perigo{color:var(--vermelho)}
 .wa-menu.wa-emojis{flex-direction:row;min-width:0;border-radius:999px;padding:4px 6px}
-.wa-menu.wa-emojis button{font-size:20px;padding:4px 6px;border-radius:999px}.wa-menu.wa-emojis button.on{background:var(--laranjaSv)}
+.wa-menu.wa-emojis button{font-size:20px;padding:4px 6px;border-radius:999px}
+.wa-menu.wa-emojis button.wa-reac-mais{font-size:17px;font-weight:700;color:var(--apoio);width:34px}
+.wa-emo{width:min(420px,94vw)}
+.wa-emo-abas{display:flex;gap:2px;margin:10px 0 6px;border-bottom:1px solid var(--borda)}
+.wa-emo-abas button{flex:1;border:0;background:none;font-size:18px;padding:5px 0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.wa-emo-abas button.on{border-bottom-color:var(--laranja)}
+.wa-emo-tons{display:flex;gap:4px;margin-bottom:6px}
+.wa-emo-tons button{border:1px solid transparent;background:none;border-radius:8px;font-size:16px;padding:2px 5px;cursor:pointer}
+.wa-emo-tons button.on{border-color:var(--laranja);background:var(--laranjaSv)}
+.wa-emo-grade{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-height:300px;overflow-y:auto}
+.wa-emo-grade button{border:0;background:none;font-size:22px;padding:4px 0;border-radius:8px;cursor:pointer;line-height:1.2}
+.wa-emo-grade button:hover,.wa-emo-grade button.on{background:var(--superf)}.wa-menu.wa-emojis button.on{background:var(--laranjaSv)}
 .toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:85}
 .toast{background:var(--ink);color:#fff;padding:9px 15px;border-radius:999px;font-size:12.5px;box-shadow:var(--md)}
 .modal{position:fixed;inset:0;background:rgba(17,17,20,.45);display:grid;place-items:center;z-index:75;padding:16px}
@@ -1876,7 +1887,7 @@ function waMenuMsg(ev,mid){
  const c=waConv(selWhats);const m=c&&c.wpp.find(x=>x.id===mid);if(!m)return;const pode=waPodeAgir(c)&&!m.id.startsWith('tmp-');
  waMenu(ev,[
   pode&&m.idWa&&!c.bloqueado?['Responder',()=>{waResp=m.id;render();setTimeout(()=>{const i=el('wwin');if(i)i.focus();},0);}]:null,
-  pode&&m.idWa&&m.d==='ent'?['Reagir',()=>waEscolherReacao(ev,m)]:null,
+  pode&&m.idWa&&!String(m.idWa).startsWith('imp:')&&m.d==='ent'&&m.tipo!=='sistema'&&m.tipo!=='reacao'&&Date.now()-new Date(m.em).getTime()<30*864e5?['Reagir',()=>waEscolherReacao(ev,m)]:null,
   m.t&&!['imagem','video','audio','figurinha'].includes(m.tipo)?['Copiar',()=>{navigator.clipboard.writeText(m.tipo==='contato'&&m.dados?m.t+' '+fmtTel(m.dados.telefone):m.t).then(()=>toast('Copiado.'),()=>toast('Não foi possível copiar.'));}]:null,
   !m.id.startsWith('tmp-')&&m.tipo!=='figurinha'&&m.tipo!=='sistema'?['Encaminhar',()=>waEncaminhar(m.id)]:null,
   pode?[m.favorita?'Desfavoritar':'Favoritar',()=>waMarcarMsg(m,'favorita',!m.favorita)]:null]);
@@ -1884,10 +1895,26 @@ function waMenuMsg(ev,mid){
 function waEscolherReacao(ev,m){
  waFecharMenus();const bar=document.createElement('div');bar.className='wa-menu wa-emojis';
  WA_EMOJIS.forEach(e=>{const b=document.createElement('button');b.textContent=e;if(m.reacaoNossa===e)b.className='on';b.onclick=x=>{x.stopPropagation();waFecharMenus();waReagir(m,m.reacaoNossa===e?'':e);};bar.appendChild(b);});
+ if(m.reacaoNossa&&!WA_EMOJIS.includes(m.reacaoNossa)){const b=document.createElement('button');b.textContent=m.reacaoNossa;b.className='on';b.onclick=x=>{x.stopPropagation();waFecharMenus();waReagir(m,'');};bar.appendChild(b);}
+ const mais=document.createElement('button');mais.className='wa-reac-mais';mais.textContent='+';mais.title='Mais emojis';mais.onclick=x=>{x.stopPropagation();waFecharMenus();waReacaoPainel(m);};bar.appendChild(mais);
  document.body.appendChild(bar);const r=ev.target.getBoundingClientRect?ev.target.getBoundingClientRect():{left:200,bottom:200,top:200};
  bar.style.left=Math.max(8,Math.min(window.innerWidth-bar.offsetWidth-8,r.left-120))+'px';bar.style.top=Math.max(8,r.top-bar.offsetHeight-6)+'px';
  setTimeout(()=>document.addEventListener('click',waFecharMenus,{once:true}),0);
 }
+let waEmojiDados=null,waEmojiGrupo=0,waEmojiTom=-1,waEmojiBusca='',waEmojiMsg=null;
+async function waEmojiCarregar(){if(waEmojiDados)return waEmojiDados;try{waEmojiDados=await (await fetch('vendor/emojis.json')).json();}catch(e){waEmojiDados=[];toast('Não foi possível carregar os emojis.');}return waEmojiDados;}
+async function waReacaoPainel(m){waEmojiMsg=m;waEmojiBusca='';await waEmojiCarregar();
+ fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx wa-emo"><div class="mcab"><b>Reagir</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody"><input class="fi" id="waEmoBusca" placeholder="Buscar emoji (em inglês)" oninput="waEmojiBusca=this.value;waEmoGrade()"><div class="wa-emo-abas" id="waEmoAbas"></div><div class="wa-emo-tons" id="waEmoTons"></div><div class="wa-emo-grade" id="waEmoGrade"></div></div></div>`;
+ document.body.appendChild(modal);waEmoGrade();setTimeout(()=>{const i=el('waEmoBusca');if(i)i.focus();},30);}
+function waEmoTom(it){return waEmojiTom>=0&&it.t&&it.t[waEmojiTom]?it.t[waEmojiTom]:it.c;}
+function waEmoGrade(){const g=el('waEmoGrade');if(!g||!waEmojiDados)return;const m=waEmojiMsg;
+ el('waEmoAbas').innerHTML=waEmojiDados.map((x,i)=>`<button class="${i===waEmojiGrupo&&!waEmojiBusca.trim()?'on':''}" title="${escH(x.g)}" onclick="waEmojiGrupo=${i};waEmojiBusca='';el('waEmoBusca').value='';waEmoGrade()">${x.e[0]?x.e[0].c:''}</button>`).join('');
+ el('waEmoTons').innerHTML=['✋','✋🏻','✋🏼','✋🏽','✋🏾','✋🏿'].map((e,i)=>`<button class="${waEmojiTom===i-1?'on':''}" onclick="waEmojiTom=${i-1};waEmoGrade()">${e}</button>`).join('');
+ const t=waEmojiBusca.trim().toLowerCase();
+ const itens=t?waEmojiDados.flatMap(x=>x.e).filter(x=>x.n.toLowerCase().includes(t)).slice(0,400):(waEmojiDados[waEmojiGrupo]||{e:[]}).e;
+ g.innerHTML=itens.map(x=>{const e=waEmoTom(x);return `<button class="${m&&m.reacaoNossa===e?'on':''}" title="${escH(x.n)}" data-e="${escH(e)}" onclick="waEmoEscolher(this.dataset.e)">${e}</button>`;}).join('');}
+function waEmoEscolher(e){const m=waEmojiMsg;if(!m)return;fecharModal();waReagir(m,m.reacaoNossa===e?'':e);}
 async function waReagir(m,emoji){const ant=m.reacaoNossa;m.reacaoNossa=emoji||null;waDesenharMsgs();
  const j=await waEdge('wa-meta-acao',{acao:'reagir',conversa_id:selWhats,mensagem_id:m.id,emoji});
  if(!j.ok){m.reacaoNossa=ant;waDesenharMsgs();toast(j.erro||'Não foi possível reagir.');}}

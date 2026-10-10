@@ -42,6 +42,7 @@ async function graph(metodo: string, caminho: string, corpo?: unknown) {
 
 function erroMeta(j: Record<string, any>) {
   const e = j?.error ?? {};
+  if (e.code === 131009) return "Não dá para reagir a esta mensagem: ela tem mais de 30 dias, foi apagada ou não existe mais na conversa.";
   if (e.code === 131047) return "A Meta só permite isto com quem escreveu nas últimas 24 horas.";
   if (e.code === 131021) return "Não é possível bloquear o próprio número.";
   if (e.code === 139101) return "A lista de bloqueados chegou ao limite.";
@@ -137,7 +138,7 @@ Deno.serve(async (req) => {
       }
       case "reagir": {
         const emoji = String(p.emoji ?? "");
-        if ([...emoji].length > 8) return json({ ok: false, erro: "emoji invalido" }, 400);
+        if ([...emoji].length > 16) return json({ ok: false, erro: "emoji invalido" }, 400);
         const destino = gid ?? d.telefone;
         if (!destino) return json({ ok: false, erro: "Conversa sem telefone." }, 400);
         r = await graph("POST", `${pid}/messages`, {
