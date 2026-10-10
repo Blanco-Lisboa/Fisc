@@ -1162,7 +1162,7 @@ function eGestor(){return acesso.perfil==='gestor';}
 function telaInicial(){return acesso.tela_inicial||'apuracao';}
 function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver')));}
 function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';}
-function irView(v){if(!podeVer(v))v=telaInicial();if(v==='apuracao'&&view!=='apuracao')railAba='cadastro';view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
+function irView(v){if(!podeVer(v))v=telaInicial();if(v==='apuracao'&&view!=='apuracao')railAba='cadastro';if(v==='whatsweb'&&view!=='whatsweb'){selWhats=null;waSemSelecao=true;}view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
 function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central',mapaDados=null,cartAberta=new Set();
 function escH(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -2557,7 +2557,6 @@ function waAbrir(id){waSemSelecao=false;const ii=el('wwin');if(ii&&selWhats)waRa
 function renderWhatsWeb(){
  const lista=waListaVisivel();
  if(selWhats&&!waTodas().find(x=>x.id===selWhats))selWhats=null;
- if(!selWhats&&lista.length&&!waSemSelecao)selWhats=lista[0].id;
  const c=selWhats?waConv(selWhats):null;
  const isEntrada=c&&!c.grupo&&waEntrada.includes(c);
  if(c&&!c.carregada)carregarMensagens(c.id);
