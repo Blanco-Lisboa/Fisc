@@ -683,6 +683,14 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-b.reac{margin-bottom:10px}
 .wz-quem{font-size:11px;font-weight:700;color:var(--laranjaTx);margin-bottom:2px}
 .wz-b.e .wz-quem{color:var(--azul)}
+.wz-edt{position:relative;display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--apagado);font-style:italic;margin-bottom:2px;cursor:pointer;outline:none}
+.wz-edt-s{position:relative;align-self:center;font-size:11px;font-weight:600;color:var(--apoio);background:var(--pagina);border:1px solid var(--borda);border-radius:999px;padding:3px 12px;margin:4px 0;cursor:pointer;outline:none}
+.wz-edt-b{display:none;position:absolute;left:0;bottom:calc(100% + 6px);z-index:5;width:260px;padding:10px 12px;background:var(--pagina);border:1px solid var(--borda);border-radius:12px;box-shadow:var(--sm);font-size:12px;font-style:normal;font-weight:400;line-height:1.45;color:var(--ink);white-space:normal;cursor:default}
+.wz-edt-s .wz-edt-b{left:50%;transform:translateX(-50%)}
+.wz-edt-b b{display:block;font-weight:700;margin-bottom:3px}
+.wz-edt-b button{display:block;margin-top:8px;border:1px solid var(--borda);background:var(--superf);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:600;color:var(--ink);cursor:pointer}
+.wz-edt-b button:hover{border-color:var(--laranja)}
+.wz-edt:hover .wz-edt-b,.wz-edt:focus-within .wz-edt-b,.wz-edt-s:hover .wz-edt-b,.wz-edt-s:focus-within .wz-edt-b{display:block}
 .wz-enc{font-size:11px;color:var(--apagado);font-style:italic;margin-bottom:2px}
 .wz-txt{font-size:13.5px;white-space:pre-line;overflow-wrap:anywhere}
 .wz-pe{display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:10.5px;color:var(--apagado);margin-top:3px;font-variant-numeric:tabular-nums}
@@ -2699,14 +2707,26 @@ function waLigBolha(c,m){const L=m.dados.ligacao;const sai=L.direcao==='empresa'
  const sub=dur&&!perdida?dur:{nao_atendida:sai?'Sem resposta':'Não atendida',rejeitada:'Recusada',falhou:'Não completada'}[L.estado]||'';
  const volta=perdida&&!c.grupo&&tem('wa_ligacao_fazer')?`<button class="wz-lreg-v" onclick="waLigar('${c.id}')">${sai?'Ligar de novo':'Ligar de volta'}</button>`:'';
  return `<div class="wz-b ${sai?'s':'e'} wz-lreg">${sai&&m.autorNome?`<div class="wz-quem">${escH(m.autorNome)}</div>`:''}<div class="wz-lreg-c"><span class="wz-lreg-i${perdida?' x':''}">${WZ.fone}</span><div><b>${escH(tit)}</b><small>${escH(sub)}</small></div></div>${volta}<div class="wz-pe">${escH(m.h||'')}</div></div>`;}
+const WA_REENVIO='Olá! Vimos que você editou uma mensagem, mas a alteração não chegou até nós. Recebemos só a versão anterior. Se for algo importante, pode enviar de novo, por favor?';
+function waEdicaoHtml(em,solto){const q=ddmm(em)+' às '+hhmm(em);
+ const bal=`<span class="wz-edt-b"><b>${solto?'Editada pelo contato':'Editada pelo contato em '+q}</b>A Meta não repassa a edição.${solto?'':' Aqui aparece o texto original.'}<button onclick="event.stopPropagation();waPedirReenvio()">Pedir reenvio ao contato</button></span>`;
+ return solto?`<div class="wz-edt-s" tabindex="0">✎ O contato editou uma mensagem · ${q}${bal}</div>`:`<span class="wz-edt" tabindex="0">✎ Editada${bal}</span>`;}
+function waPedirReenvio(){const c=waConv(selWhats);if(!c)return;
+ fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx"><div class="mcab"><b>Pedir reenvio ao contato</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody"><textarea class="fi" id="wareenv" rows="4" maxlength="1024">${escH(WA_REENVIO)}</textarea><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="wareenvbt">Enviar</button></div></div></div>`;
+ document.body.appendChild(modal);
+ el('wareenvbt').onclick=()=>{const t=el('wareenv').value.trim();if(!t){toast('Escreva a mensagem.');return;}
+  waConfirmar('Enviar esta mensagem para o contato? "'+t+'"','Confirmar envio',()=>enviarTextoWA(c,t));};}
 function bolhaReal(c,m){
  if(m.tipo==='sistema'&&m.dados&&m.dados.ligacao)return waLigBolha(c,m);
+ if(m.tipo==='sistema'&&m.dados&&m.dados.nao_suportada==='edit')return waEdicaoHtml(m.em,true);
  const cls=m.d==='sai'?'s':'e';const u=m.caminho?waUrls[m.caminho]:null;
  const q=m.respondeA?c.wpp.find(x=>x.idWa===m.respondeA):null;
  let h='';
  if(m.d==='sai')h+=`<div class="wz-quem">${escH(m.autorNome||'Fiscal')}</div>`;
  else if(c.grupo&&m.autorGrupo)h+=`<div class="wz-quem">${escH(m.autorGrupo)}</div>`;
  if(m.encaminhada)h+=`<div class="wz-enc">↪ Encaminhada</div>`;
+ if(m.d==='ent'&&m.editadaEm)h+=waEdicaoHtml(m.editadaEm,false);
  if(m.respondeA)h+=`<div class="wz-cit"><b>${q?escH(q.d==='sai'?(q.autorNome||'Fiscal'):(q.autorGrupo||c.nome)):'Mensagem'}</b><span>${q?escH(waResumo(q)):''}</span></div>`;
  const md=m.modelo?waModeloDe(m.modelo):null;
  if(m.modelo){const hd=md?modParte(md,'HEADER'):null,ft=md?modParte(md,'FOOTER'):null,bt=md?modParte(md,'BUTTONS'):null;
@@ -3137,7 +3157,7 @@ function midiaWA(m){const md=Array.isArray(m.wa_midia)?m.wa_midia[0]:m.wa_midia;
 function msgWA(m){const tr=m.tipo==='audio'?transcWA(m):'';const md=midiaWA(m);
  return {id:m.id,id_local:m.id_local,idWa:m.id_whatsapp||null,tipo:m.tipo,transcricao:tr,d:m.direcao==='entrada'?'ent':'sai',
   t:m.texto||'',legenda:m.legenda||'',nomeArq:md.nome||(m.tipo==='documento'?m.texto:'')||'',caminho:md.estado==='guardado'?md.caminho:null,midiaEstado:md.estado||null,
-  dados:m.dados||null,respondeA:m.responder_a||null,reacao:m.reacao||null,reacaoNossa:m.reacao_nossa||null,encaminhada:!!m.encaminhada,favorita:!!m.favorita,autorGrupo:m.autor_grupo||'',
+  dados:m.dados||null,respondeA:m.responder_a||null,reacao:m.reacao||null,reacaoNossa:m.reacao_nossa||null,encaminhada:!!m.encaminhada,favorita:!!m.favorita,editadaEm:m.editada_em||null,autorGrupo:m.autor_grupo||'',
   h:hhmm(m.ocorrido_em),dt:ddmm(m.ocorrido_em),em:m.ocorrido_em,st:m.status,autor:m.autor_id&&eu&&m.autor_id===eu.id?eu.nome.split(' ')[0]:'',
   autorNome:waAssinatura(m.autor_id?(eu&&m.autor_id===eu.id?eu.nome:(waEquipe[m.autor_id]||'')):''),tam:md.tamanho||0,dur:md.duracao_s||0,modelo:m.dados&&m.dados.modelo||null};}
 function janelaWA(c){if(!c.janelaAte){c.janela=false;c.janelaLbl='fechada';return;}
@@ -3165,7 +3185,7 @@ async function carregarConversas(){
  waAplicarPainel();
  waEntrada.concat(waMeus).forEach(c=>janelaWA(c));waAgendarJanela();
 }
-const WA_COLUNAS_MSG='id,id_local,id_whatsapp,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,autor_grupo,responder_a,reacao,reacao_nossa,encaminhada,favorita,dados,wa_midia(nome,caminho,estado,mimetype,transcricao,tamanho,duracao_s)';
+const WA_COLUNAS_MSG='id,id_local,id_whatsapp,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,autor_grupo,responder_a,reacao,reacao_nossa,encaminhada,favorita,editada_em,dados,wa_midia(nome,caminho,estado,mimetype,transcricao,tamanho,duracao_s)';
 const WA_PAGINA=300;let waRolar=null;const waAntigasIndo={};
 async function carregarMensagens(id){
  const r=await sb.from('wa_mensagem').select(WA_COLUNAS_MSG)
