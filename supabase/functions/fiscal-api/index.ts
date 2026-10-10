@@ -20,23 +20,28 @@ const bloqueado = (n: unknown) =>
   typeof n !== "string" || !NOME.test(n) || PROIBIDO.test(n) || FIXOS.has(n) || n.startsWith("fiscal_api_bl_");
 const OPS = new Set(["eq", "neq", "gt", "gte", "lt", "lte", "like", "ilike", "in", "is"]);
 
-const cache = new Map<string, { id: string; ate: number }>();
+type Quem = { id: string; nivel: string | null; ativo: boolean };
+const cache = new Map<string, Quem & { ate: number }>();
 
 // identidade
-async function quem(req: Request): Promise<string | null> {
+async function quem(req: Request): Promise<Quem | null> {
   const tk = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
   if (!tk) return null;
   const h = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(tk))))
     .map((b) => b.toString(16).padStart(2, "0")).join("");
   const c = cache.get(h);
-  if (c && c.ate > Date.now()) return c.id;
-  const r = await fetch(`${BL_URL}/auth/v1/user`, { headers: { apikey: BL_CHAVE_PUBLICA, Authorization: `Bearer ${tk}` } });
+  if (c && c.ate > Date.now()) return c;
+  const cab = { apikey: BL_CHAVE_PUBLICA, Authorization: `Bearer ${tk}` };
+  const r = await fetch(`${BL_URL}/auth/v1/user`, { headers: cab });
   if (!r.ok) return null;
   const u = await r.json().catch(() => null);
   if (!u?.id) return null;
-  cache.set(h, { id: u.id, ate: Date.now() + 60_000 });
+  const p = await fetch(`${BL_URL}/rest/v1/usuarios_internos?id=eq.${u.id}&select=nivel,ativo`, { headers: cab });
+  const linha = p.ok ? (await p.json().catch(() => []))?.[0] : null;
+  const q: Quem = { id: u.id, nivel: linha?.nivel ?? null, ativo: linha?.ativo === true };
+  cache.set(h, { ...q, ate: Date.now() + 60_000 });
   if (cache.size > 500) cache.delete(cache.keys().next().value!);
-  return u.id as string;
+  return q;
 }
 
 type Filtro = [string, string, unknown];
@@ -61,9 +66,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ ok: false, erro: "metodo" }, 405);
 
-  const usuario = await quem(req);
-  if (!usuario) return json({ ok: false, erro: "login da BL invalido" }, 401);
-  const pode = await admin.rpc("fiscal_api_bl_pode", { p_usuario: usuario });
+  const eu = await quem(req);
+  if (!eu) return json({ ok: false, erro: "login da BL invalido" }, 401);
+  const usuario = eu.id;
+  const pode = await admin.rpc("fiscal_api_bl_pode", { p_usuario: eu.id, p_nivel: eu.nivel, p_ativo: eu.ativo });
   if (pode.error || pode.data !== true) return json({ ok: false, erro: "sem acesso" }, 403);
 
   let p: Pedido;

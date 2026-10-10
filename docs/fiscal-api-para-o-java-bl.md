@@ -3,7 +3,7 @@
 Endereço: `POST https://vvohwixeokxydmbhqklu.supabase.co/functions/v1/fiscal-api`
 Cabeçalho: `Authorization: Bearer <token de login da BL>` (o mesmo login do Java BL).
 
-Quem pode: só contas da BL cadastradas em `fiscal_api_bl_acesso` (banco do Fiscal). Toda chamada fica em `fiscal_api_bl_log`.
+Quem pode: login da BL com nível listado em `fiscal_api_bl_nivel` (hoje: ceo), conferido na BL a cada chamada; exceções em `fiscal_api_bl_acesso`. Toda chamada fica em `fiscal_api_bl_log`.
 Bloqueado: qualquer tabela ou função com segredo/chave/senha/token no nome e as próprias tabelas de acesso da API.
 
 ## Operações (corpo JSON)
