@@ -7,7 +7,7 @@ const sb = createClient(URL_SB, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { au
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Max-Age": "86400",
 };
 
@@ -48,6 +48,7 @@ type Pedido = {
 // envio
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method === "GET") { const c = await credenciais().catch(() => null); return json({ ok: !!c }); }
   if (req.method !== "POST") return json({ ok: false, erro: "metodo" }, 405);
 
   const auth = req.headers.get("Authorization") ?? "";

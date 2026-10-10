@@ -885,7 +885,7 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-emb .wz-env svg{width:17px;height:17px}
 .wz-emb .wz-acab{gap:6px}
 .wz-emb .wz-doc{min-width:0}
-.wz-emb .wz-audio{min-width:min(250px,100%)}
+.wz-emb .wz-audio{min-width:240px}
 .wz-emb .wz-b{max-width:88%}
 .wz-emb svg.i{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .wz-emb button{font-family:inherit;cursor:pointer;color:inherit}
@@ -1926,6 +1926,9 @@ function waEmoEscolher(e){const m=waEmojiMsg;if(!m)return;fecharModal();waReagir
 async function waReagir(m,emoji){const ant=m.reacaoNossa;m.reacaoNossa=emoji||null;waDesenharMsgs();
  const j=await waEdge('wa-meta-acao',{acao:'reagir',conversa_id:selWhats,mensagem_id:m.id,emoji});
  if(!j.ok){m.reacaoNossa=ant;waDesenharMsgs();toast(j.erro||'Não foi possível reagir.');}}
+let waAquecidoEm=0;
+async function waAquecer(){if(Date.now()-waAquecidoEm<120000)return;waAquecidoEm=Date.now();
+ try{const se=(await sb.auth.getSession()).data.session;fetch(SB_URL+'/functions/v1/wa-meta-enviar',{method:'GET',headers:{apikey:SB_KEY,Authorization:'Bearer '+(se?se.access_token:'')}}).catch(()=>{});}catch(e){}}
 async function waEdge(nome,corpo){
  const s=(await sb.auth.getSession()).data.session;
  const r=await fetch(SB_URL+'/functions/v1/'+nome,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+(s?s.access_token:'')},body:JSON.stringify(corpo)});
@@ -1946,7 +1949,7 @@ async function waMarcarLida(c,manual){
  if(j.ok){c.naoLidas=0;c.marcadaNL=false;const b=el('waBadge');if(b)b.textContent=waPendentes();const i=el('wwin');if(manual||!i||!i.value)render();}
  else if(manual)toast(j.erro||'Não foi possível marcar como lida.');
 }
-function waDigitando(){const c=waConv(selWhats);if(!c||c.grupo||Date.now()-waDigitandoEm<20000)return;waDigitandoEm=Date.now();waEdge('wa-meta-acao',{acao:'digitando',conversa_id:c.id});}
+function waDigitando(){waAquecer();const c=waConv(selWhats);if(!c||c.grupo||Date.now()-waDigitandoEm<20000)return;waDigitandoEm=Date.now();waEdge('wa-meta-acao',{acao:'digitando',conversa_id:c.id});}
 async function waMarcarMsg(m,campo,valor){
  const r=await sb.rpc('wa_mensagem_marcar',{p_mensagem:m.id,p_campo:campo,p_valor:valor});
  if(r.error||r.data!==true){toast('Não foi possível alterar a mensagem.');return;}
@@ -2090,7 +2093,7 @@ async function waEnviarSimples(c,tipo,arquivo,texto){
 function enviarWW(){const c=waConv(selWhats);const i=el('wwin');if(!c||!i)return;const t=i.value.trim();
  if(waBandejas[c.id]&&waBandejas[c.id].length){i.value='';waRasc[c.id]='';waCresce(i);waEnviarComArquivos(c,t);return;}
  if(!t)return;i.value='';waRasc[c.id]='';waCresce(i);enviarTextoWA(c,t);}
-async function waGravar(){
+async function waGravar(){waAquecer();
  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Este computador não permite gravar áudio.');return;}
  let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true});}catch(e){toast('Sem acesso ao microfone.');return;}
  const tipo=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'';
@@ -2619,7 +2622,7 @@ function waLinhaConv(x){const n=waNaoLidas(x),est=waEstadoJan(x);
 function waSecoes(lista){let html='',ult=null;
  lista.forEach(x=>{const s=x.fixada&&waFiltro!=='fixadas'?'Fixadas':(()=>{const r=waDiaRotulo(x.ultima);return r==='Hoje'||r==='Ontem'?r:'Anteriores';})();
   if(s!==ult){html+=`<div class="wz-sec">${s}</div>`;ult=s;}html+=waLinhaConv(x);});return html;}
-function waAbrir(id){waSemSelecao=false;const ii=el('wwin');if(ii&&selWhats)waRasc[selWhats]=ii.value;selWhats=id;waResp=null;waBuscaMsg=null;render();}
+function waAbrir(id){waAquecer();waSemSelecao=false;const ii=el('wwin');if(ii&&selWhats)waRasc[selWhats]=ii.value;selWhats=id;waResp=null;waBuscaMsg=null;render();}
 function renderWhatsWeb(){
  const lista=waListaVisivel();
  if(selWhats&&!waTodas().find(x=>x.id===selWhats))selWhats=null;
@@ -3098,7 +3101,7 @@ function apWaCarregar(id){return umaVez('apwa'+id,async()=>{const r=await sb.rpc
  if(r.error){toast('Não foi possível carregar os contatos da empresa.');apWaCont[id]=[];}else apWaCont[id]=r.data||[];
  if(view==='apuracao'&&selCli===id)renderWs();});}
 function apWaAtual(cl){const l=apWaCont[cl.id]||[];return l.find(x=>x.pessoa_id===apWaSel[cl.id])||l[0]||null;}
-function apWaEscolher(pid){apWaSel[selCli]=pid;apWaAberto=false;renderWs();}
+function apWaEscolher(pid){waAquecer();apWaSel[selCli]=pid;apWaAberto=false;renderWs();}
 async function apWaFavoritar(ev,pid,fav){ev.stopPropagation();const id=selCli;
  const r=await sb.rpc('fiscal_apuracao_wa_favoritar',{p_empresa:id,p_pessoa:fav?pid:null});
  if(r.error||r.data!==true){toast('Não foi possível salvar o favorito.');return;}
@@ -3109,7 +3112,7 @@ function apWaSeletor(cl,p){const l=apWaCont[cl.id]||[];
   ${apWaAberto?`<div class="ap-wsel-m">${l.map(x=>`<div class="ap-wsel-i${p&&x.pessoa_id===p.pessoa_id?' on':''}" onclick="apWaEscolher('${x.pessoa_id}')"><div><b>${escH(x.nome)}</b><span>${escH(x.rotulo+' · '+fone(x))}</span></div><button class="ap-wsel-f${x.favorito?' on':''}" title="${x.favorito?'Tirar favorito':'Favoritar'}" onclick="apWaFavoritar(event,'${x.pessoa_id}',${!x.favorito})">${x.favorito?'★':'☆'}</button></div>`).join('')}</div>`:''}</div>`;}
 function renderWpp(cl){
  if(!apWaCont[cl.id]){apWaCarregar(cl.id);return `<div class="hd"><div class="avc">${escH(iniciais(cl.nome))}</div><div class="nm"><b>${escH(cl.nome)}</b></div></div><div class="wz-emb"><div class="wz-vazio">${WZ.balao}</div></div>`;}
- const p=apWaAtual(cl);const c=p&&p.conversa_id?waConv(p.conversa_id):null;
+ const p=apWaAtual(cl);const c=p&&p.conversa_id?waConv(p.conversa_id):null;if(c)waAquecer();
  if(!c)return `<div class="hd"><div class="avc">${escH(iniciais(p?p.nome:cl.nome))}</div>${apWaSeletor(cl,p)}</div><div class="wz-emb"><div class="wz-vazio">${WZ.balao}</div></div>`;
  selWhats=c.id;waSemSelecao=false;if(!c.carregada)carregarMensagens(c.id);
  if(c.carregada&&waNaoLidas(c)&&waPodeAgir(c)&&!waLidaTentada.has(c.id+':'+c.naoLidas)){waLidaTentada.add(c.id+':'+c.naoLidas);waMarcarLida(c);}
