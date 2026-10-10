@@ -15,8 +15,28 @@ import java.io.File;
 @SpringBootApplication
 public class FiscalApplication {
 
+    static volatile JFrame janela;
+    static volatile CefApp cef;
+
+    static void encerrar() {
+        try { if (cef != null) cef.dispose(); } catch (Throwable ignorado) { }
+        System.exit(0);
+    }
+
+    static void trocarLancador() {
+        String novo = System.getProperty("fiscal.lancador.novo");
+        String alvo = System.getProperty("fiscal.lancador.jar");
+        if (novo == null || alvo == null) return;
+        try {
+            java.nio.file.Path tmp = java.nio.file.Paths.get(alvo + ".novo");
+            java.nio.file.Files.copy(java.nio.file.Paths.get(novo), tmp, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            java.nio.file.Files.move(tmp, java.nio.file.Paths.get(alvo), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception ignorado) { }
+    }
+
     public static void main(String[] args) throws Exception {
         System.setProperty("java.awt.headless", "false");
+        new Thread(FiscalApplication::trocarLancador).start();
 
         ConfigurableApplicationContext ctx = SpringApplication.run(FiscalApplication.class, args);
         String porta = ctx.getEnvironment().getProperty("local.server.port");
@@ -34,6 +54,7 @@ public class FiscalApplication {
                 "--disk-cache-size=1", "--enable-media-stream", "--user-data-dir=" + perfil.getAbsolutePath());
 
         CefApp cefApp = builder.build();
+        cef = cefApp;
         CefClient client = cefApp.createClient();
         CefBrowser browser = client.createBrowser(url, false, false);
 
@@ -53,6 +74,7 @@ public class FiscalApplication {
             frame.setLocationRelativeTo(null);
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
             frame.setVisible(true);
+            janela = frame;
         });
     }
 }

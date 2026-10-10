@@ -4,3 +4,4 @@ app/cp.txt
 *.log
 .idea/
 *.iml
+build/

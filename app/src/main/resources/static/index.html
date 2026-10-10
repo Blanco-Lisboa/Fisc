@@ -306,6 +306,7 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .wa-emo-grade button:hover,.wa-emo-grade button.on{background:var(--superf)}.wa-menu.wa-emojis button.on{background:var(--laranjaSv)}
 .toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:85}
 .toast{background:var(--ink);color:#fff;padding:9px 15px;border-radius:999px;font-size:12.5px;box-shadow:var(--md)}
+.toast.fixo{display:flex;align-items:center;gap:10px;padding:7px 8px 7px 16px}.toast.fixo button{border:0;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;color:var(--ink);font-family:inherit}.toast.fixo button.sec{background:transparent;color:#fff;opacity:.75}
 .modal{position:fixed;inset:0;background:rgba(17,17,20,.45);display:grid;place-items:center;z-index:75;padding:16px}
 .mcx{background:var(--pagina);border-radius:16px;width:min(460px,96vw);max-height:88vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--md)}
 .mcab{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--borda)}
@@ -1181,6 +1182,15 @@ function delTarefa(id){const c=cli();c.etapas=c.etapas.filter(e=>e.id!==id);toas
 let view='apuracao',selCli=null,selWhats=null,waAba='entrada',modal=null,pendSub='xml',apuAba='apuracao';
 function setApuAba(a){apuAba=a;renderApuracao();}
 const el=id=>document.getElementById(id);
+let APP_VERSAO=null;
+async function appVersaoIniciar(){try{const j=await (await fetch('/sistema/versao')).json();if(!j.atualizavel)return;APP_VERSAO=j.versao;
+ const {data}=await sb.from('fiscal_app_versao').select('versao').eq('aplicativo','fiscal').maybeSingle();if(data)appVersaoVer(data.versao);
+ sb.channel('fiscal-app').on('postgres_changes',{event:'*',schema:'public',table:'fiscal_app_versao',filter:'aplicativo=eq.fiscal'},p=>appVersaoVer((p.new||{}).versao)).subscribe();}catch(e){}}
+function appVersaoVer(v){if(!v||!APP_VERSAO||v===APP_VERSAO||el('appAtualizar'))return;const d=document.createElement('div');d.className='toast fixo';d.id='appAtualizar';
+ d.innerHTML='<span>Nova versão do Fiscal</span><button>Atualizar agora</button><button class="sec">Depois</button>';
+ const [b1,b2]=d.querySelectorAll('button');
+ b1.onclick=async()=>{b1.disabled=true;b2.remove();b1.textContent='Atualizando…';try{await fetch('/sistema/atualizar',{method:'POST',headers:{'X-Fiscal':'1'}});}catch(e){}};
+ b2.onclick=()=>d.remove();el('toasts').appendChild(d);}
 function toast(t){const w=el('toasts');const d=document.createElement('div');d.className='toast';d.textContent=t;w.appendChild(d);setTimeout(()=>d.remove(),2600);}
 function cli(){return clientes.find(c=>c.id===selCli);}
 function iniciais(n){return n.split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0]).join('').toUpperCase();}
@@ -3241,6 +3251,7 @@ async function iniciarDados(){
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
   .on('postgres_changes',{event:'UPDATE',schema:'public',table:'wa_midia'},aoMudarMidia).subscribe();
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).on('postgres_changes',{event:'*',schema:'public',table:'fiscal_nivel_permissao'},()=>aoMudarEu({new:{ativo:true,nivel:eu.nivel}})).subscribe();
+ appVersaoIniciar();
  view=telaInicial();render();}
 async function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}const era=tem('painel_gestor');eu.nivel=n.nivel;await carregarAcesso();el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();if(!era)preCarregarGestor();if(!podeVer(view))view=telaInicial();render();}
 (async()=>{const s=await fiscalSessaoAtual();if(!s){location.href='login.html';return;}
