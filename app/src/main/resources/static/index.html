@@ -423,6 +423,7 @@ tr.rnovo:hover{background:#ffe6d6}
 .mt-tr:hover td{background:var(--superf)}
 .mt-tr td{vertical-align:middle}
 .mt-nm{font-size:11px;color:var(--apagado);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-cfg{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid var(--borda);border-radius:12px;font-size:13px;font-weight:600;color:var(--ink)}
 .mt-sw{position:relative;display:inline-block;width:36px;height:20px;cursor:pointer}
 .mt-sw input{opacity:0;width:0;height:0;position:absolute}
 .mt-sw i{position:absolute;inset:0;border-radius:999px;background:var(--nevoa);transition:background .15s}
@@ -2374,7 +2375,7 @@ function estDemandas(){const cols=[['recebidas','Recebidas'],['andamento','Em an
 let _drag=null;function dragEst(id){_drag=id;}function dropEst(col){if(_drag){esteira.find(e=>e.id===_drag).col=col;_drag=null;renderEst();}}
 function avancarEst(id){const o=['recebidas','andamento','validacao','concluidas'];const e=esteira.find(x=>x.id===id);const i=o.indexOf(e.col);if(i<3){e.col=o[i+1];toast('Avançado.');renderEst();}}
 /* IA & Meta */
-let iaAba='meta',mtDados=null,mtCanal=null,mtFiltro='todos',mtBusca='',mtAvFiltro='nao_vistos',mtNovo=null;
+let iaAba='meta',mtDados=null,mtCfg=null,mtCanal=null,mtFiltro='todos',mtBusca='',mtAvFiltro='nao_vistos',mtNovo=null;
 const MT_ESTADO={APPROVED:['Aprovado','ok'],PENDING:['Em análise','and'],IN_APPEAL:['Em recurso','and'],REJECTED:['Recusado','nao'],PAUSED:['Pausado','nao'],DISABLED:['Desativado','nao'],PENDING_DELETION:['Sendo apagado','neu'],ARCHIVED:['Arquivado','neu'],LIMIT_EXCEEDED:['Limite atingido','nao']};
 const MT_QUAL={GREEN:['Alta','ok'],YELLOW:['Média','and'],RED:['Baixa','nao'],UNKNOWN:['Sem nota','neu']};
 const MT_LIMITE={TIER_250:'250 clientes por dia',TIER_1K:'1 mil clientes por dia',TIER_2K:'2 mil clientes por dia',TIER_10K:'10 mil clientes por dia',TIER_100K:'100 mil clientes por dia',TIER_UNLIMITED:'Sem limite'};
@@ -2391,9 +2392,9 @@ function renderIA(){
  if(iaAba==='meta'){mtAssinar();renderMeta();if(!mtDados)mtCarregar();}
 }
 function mtCarregar(){return umaVez('meta',async()=>{
- const r=await sb.rpc('wa_meta_painel');
+ const [r,cf]=await Promise.all([sb.rpc('wa_meta_painel'),sb.rpc('wa_config_ler')]);
  if(r.error){if(!mtDados)toast('Não foi possível carregar os dados da Meta.');return;}
- const novo=r.data||{};if(!mudou(mtDados,novo))return;mtDados=novo;
+ const novo=Object.assign({},r.data||{},{config:cf.error?null:cf.data});if(!mudou(mtDados,novo))return;mtDados=novo;
  if(view==='ia'&&iaAba==='meta')renderMeta();});}
 function mtAssinar(){if(mtCanal)return;
  const f=()=>{if(view==='ia')mtCarregar();else mtDados=null;};
@@ -2403,7 +2404,10 @@ function mtAssinar(){if(mtCanal)return;
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_numero_meta'},f)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo_acao'},f)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conta_meta'},f)
-  .on('postgres_changes',{event:'*',schema:'public',table:'wa_saude'},f).subscribe();}
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_saude'},f)
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_config'},f).subscribe();}
+async function mtConfigLeitura(v,cx){const r=await sb.rpc('wa_config_gravar',{p_confirmar_leitura:v});
+ if(r.error||!r.data||r.data.confirmar_leitura!==v){cx.checked=!v;toast('Não foi possível salvar.');return;}await mtCarregar();}
 function mtModelos(){return (mtDados&&mtDados.modelos)||[];}
 function renderMeta(){const b=el('iaBody');if(!b)return;
  if(!mtDados){b.innerHTML='';return;}
@@ -2429,6 +2433,8 @@ function renderMeta(){const b=el('iaBody');if(!b)return;
    ${s?`<div class="mt-ci"><span>Envio</span>${mtPilula(s.bloqueia_envio?['Bloqueado','nao']:s.ultimo_evento==='token_recusado'?['Chave recusada','nao']:['Liberado','ok'])}</div>`:''}
    <div class="mt-ci"><span>Atualizado</span><b>${mtData(cta.atualizado_em)}</b></div>
   </div>
+  ${d.config?`<div class="cg-card mt-sec"><div class="mt-cab"><div class="cg-tit" style="margin:0">Configurações do WhatsApp</div></div>
+   <div class="mt-cfg"><span>Mostrar ao cliente que a mensagem foi vista</span><label class="mt-sw"><input type="checkbox" ${d.config.confirmar_leitura?'checked':''} ${d.config.pode_mudar?'':'disabled'} onchange="mtConfigLeitura(this.checked,this)"><i></i></label></div></div>`:''}
   <section class="cg-duas">
    <div class="cg-card mt-sec"><div class="mt-cab"><div class="cg-tit" style="margin:0">Avisos da Meta</div><span class="sp"></span>
      ${[['nao_vistos','Não vistos',naoVistos.length],['criticos','Críticos',av.filter(a=>a.gravidade==='critico').length],['todos','Todos',av.length]].map(([k,t,c])=>`<button class="wz-chip${mtAvFiltro===k?' on':''}" onclick="mtAvFiltro='${k}';renderMeta()">${t} <b>${c}</b></button>`).join('')}</div>

@@ -126,6 +126,7 @@ Deno.serve(async (req) => {
       case "lida":
       case "digitando": {
         if (!d.ultima_recebida) { if (p.acao === "lida") await fim(); return json({ ok: true, sem_mensagem: true }); }
+        if (d.confirmar_leitura !== true) { if (p.acao === "lida") await fim(); return json({ ok: true, sem_aviso: true }); }
         r = await graph("POST", `${pid}/messages`, {
           messaging_product: "whatsapp", status: "read", message_id: d.ultima_recebida,
           ...(p.acao === "digitando" ? { typing_indicator: { type: "text" } } : {}),
