@@ -3063,9 +3063,10 @@ function renderWpp(cl){
  if(!apWaCont[cl.id]){apWaCarregar(cl.id);return `<div class="hd"><div class="avc">${escH(iniciais(cl.nome))}</div><div class="nm"><b>${escH(cl.nome)}</b></div></div><div class="wz-emb"><div class="wz-vazio">${WZ.balao}</div></div>`;}
  const p=apWaAtual(cl);const c=p&&p.conversa_id?waConv(p.conversa_id):null;
  if(!c)return `<div class="hd"><div class="avc">${escH(iniciais(p?p.nome:cl.nome))}</div>${apWaSeletor(cl,p)}</div><div class="wz-emb"><div class="wz-vazio">${WZ.balao}</div></div>`;
- selWhats=c.id;waSemSelecao=false;if(!c.carregada)carregarMensagens(c.id);const est=waEstadoJan(c);
- return `<div class="hd"><div class="avc">${escH(waIni(p.nome))}</div>${apWaSeletor(cl,p)}<span class="ap-jan ${est==='off'?'fe':'ab'}">${est==='off'?'Só com modelo':'Pode conversar · '+escH(waJanCurta(c))}</span></div>
-  <div class="wz-emb"><section class="wz-conversa" ondragover="waSobreConversa(event)" ondragleave="if(!this.contains(event.relatedTarget))this.classList.remove('solta')" ondrop="waSoltaConversa(event)"><div class="wz-msgs" id="wwms"></div>${waComposer(c,waEntrada.includes(c))}</section></div>`;}
+ selWhats=c.id;waSemSelecao=false;if(!c.carregada)carregarMensagens(c.id);
+ if(c.carregada&&waNaoLidas(c)&&waPodeAgir(c)&&!waLidaTentada.has(c.id+':'+c.naoLidas)){waLidaTentada.add(c.id+':'+c.naoLidas);waMarcarLida(c);}
+ return `<div class="hd"><div class="avc">${escH(waIni(p.nome))}</div>${apWaSeletor(cl,p)}</div>
+  <div class="wz-emb"><section class="wz-conversa" ondragover="waSobreConversa(event)" ondragleave="if(!this.contains(event.relatedTarget))this.classList.remove('solta')" ondrop="waSoltaConversa(event)">${waCabecalho(c)}${waBuscaMsg!==null?`<div class="wz-bbusca"><input id="wwbmsg" placeholder="Buscar na conversa" value="${escH(waBuscaMsg)}" oninput="waBuscaMsg=this.value;waDesenharMsgs()"><button class="wz-sec2" onclick="waBuscaMsg=null;render()">Fechar</button></div>`:''}<div class="wz-msgs" id="wwms"></div>${waComposer(c,waEntrada.includes(c))}</section></div>`;}
 function apChatPos(){if(!el('wwms')||!selWhats)return;waDesenharMsgs();const t=el('wwin');if(t){t.value=waRasc[selWhats]||'';waCresce(t);}}
 function pedirXml(){const c=apConversaDe(cli());if(!c){toast('Cliente sem conversa no WhatsApp.');return;}waModelos(c.id,'fiscal_solicitacao_xml');}
 function waFormatar(t,m){const a=t.selectionStart,b=t.selectionEnd,v=t.value;t.value=v.slice(0,a)+m+v.slice(a,b)+m+v.slice(b);t.setSelectionRange(a+m.length,b+m.length);t.dispatchEvent(new Event('input',{bubbles:true}));t.focus();}
