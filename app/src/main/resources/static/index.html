@@ -771,7 +771,12 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-dica{display:flex;gap:14px;font-size:11px;color:var(--apagado);padding-left:4px;flex-wrap:wrap}
 .wz-dica kbd{font-family:var(--corpo);font-size:10.5px;border:1px solid var(--borda);border-bottom-width:2px;border-radius:5px;padding:0 5px;background:var(--superf)}
 .wz-grav{display:flex;align-items:center;gap:10px;border:1px solid var(--vermelhoSv);background:#FFF8F7;border-radius:14px;padding:6px 6px 6px 14px}
-.wz-grav b{color:var(--vermelho);font-size:12.5px;flex:1;font-variant-numeric:tabular-nums}
+.wz-grav b{color:var(--vermelho);font-size:12.5px;flex:none;min-width:38px;font-variant-numeric:tabular-nums}
+.wz-grav.pausado b{color:var(--apoio)}.wz-grav.pausado b::before{background:var(--nevoa)}
+.wz-grav-onda{flex:1;min-width:0;height:28px;color:var(--vermelho)}
+.wz-grav-x,.wz-grav-p{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--borda);background:var(--pagina);display:grid;place-items:center;cursor:pointer;padding:0}
+.wz-grav-x .ico8{width:20px;height:20px}
+.wz-grav-p svg{width:16px;height:16px;fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round}
 .wz-grav b::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--vermelho);margin-right:8px;vertical-align:1px}
 .wz-sec2{height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--borda);background:var(--pagina);font-weight:600}
 .wz-fechada{display:flex;align-items:center;gap:12px;border:1px dashed var(--bordaF);border-radius:14px;padding:10px 10px 10px 14px;background:var(--superf)}
@@ -879,7 +884,8 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-emb .wz-env{font-size:0;padding:0 11px;gap:0}
 .wz-emb .wz-env svg{width:17px;height:17px}
 .wz-emb .wz-acab{gap:6px}
-.wz-emb .wz-doc,.wz-emb .wz-audio{min-width:0}
+.wz-emb .wz-doc{min-width:0}
+.wz-emb .wz-audio{min-width:min(250px,100%)}
 .wz-emb .wz-b{max-width:88%}
 .wz-emb svg.i{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .wz-emb button{font-family:inherit;cursor:pointer;color:inherit}
@@ -2091,15 +2097,28 @@ async function waGravar(){
  if(!tipo){st.getTracks().forEach(t=>t.stop());toast('Este computador não grava áudio em formato aceito.');return;}
  const rec=new MediaRecorder(st,{mimeType:tipo,audioBitsPerSecond:32000});const partes=[];
  rec.ondataavailable=e=>{if(e.data.size)partes.push(e.data);};
- waGrav={rec,st,partes,seg:0,conv:selWhats,cancelado:false};
- waGrav.timer=setInterval(()=>{if(!waGrav)return;waGrav.seg++;const s=document.querySelector('.wa-rec');if(s)s.textContent='Gravando '+waGrav.seg+'s';if(waGrav.seg>=900)waGravarParar();},1000);
- rec.onstop=async()=>{const g=waGrav;waGrav=null;clearInterval(g.timer);g.st.getTracks().forEach(t=>t.stop());render();
+ waGrav={rec,st,partes,seg:0,conv:selWhats,cancelado:false,pausado:false,niveis:[]};
+ try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const an=ctx.createAnalyser();an.fftSize=1024;ctx.createMediaStreamSource(st).connect(an);waGrav.ctx=ctx;waGrav.an=an;waGrav.buf=new Uint8Array(an.fftSize);}catch(e){}
+ waGrav.timer=setInterval(()=>{if(!waGrav||waGrav.pausado)return;waGrav.seg++;const s=document.querySelector('.wa-rec');if(s)s.textContent=waGravTempo();if(waGrav.seg>=900)waGravarParar();},1000);
+ waGravDesenhar();
+ rec.onstop=async()=>{const g=waGrav;waGrav=null;clearInterval(g.timer);cancelAnimationFrame(g.raf);if(g.ctx)g.ctx.close();g.st.getTracks().forEach(t=>t.stop());render();
   if(g.cancelado||!g.partes.length)return;
   try{const ogg=webmParaOgg(new Uint8Array(await new Blob(g.partes).arrayBuffer()));
    const c=waConv(g.conv);if(c)await waEnviarMidia(c,new Blob([ogg],{type:'audio/ogg'}),'audio','audio.ogg','');}
   catch(e){toast('Não foi possível preparar o áudio.');}};
  rec.start(250);render();
 }
+function waGravTempo(){const s=waGrav?waGrav.seg:0;return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function waGravDesenhar(){const g=waGrav;if(!g)return;g.raf=requestAnimationFrame(waGravDesenhar);
+ if(g.an&&!g.pausado){g.an.getByteTimeDomainData(g.buf);let q=0;for(let i=0;i<g.buf.length;i+=4){const v=(g.buf[i]-128)/128;q+=v*v;}
+  const n=Math.min(1,Math.sqrt(q/(g.buf.length/4))*3.2);g.quadro=(g.quadro||0)+1;if(g.quadro%3===0){g.niveis.push(n);if(g.niveis.length>200)g.niveis.shift();}}
+ const cv=document.getElementById('wzGravOnda');if(!cv)return;const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
+ if(cv.width!==w*2){cv.width=w*2;cv.height=h*2;}const x=cv.getContext('2d');x.setTransform(2,0,0,2,0,0);x.clearRect(0,0,w,h);
+ const larg=3,esp=2,qtd=Math.floor(w/(larg+esp)),ult=g.niveis.slice(-qtd);
+ x.fillStyle=g.pausado?'#B9B9BE':getComputedStyle(cv).color;
+ ult.forEach((v,i)=>{const a=Math.max(2,v*h*.92);x.fillRect(w-(ult.length-i)*(larg+esp),(h-a)/2,larg,a);});}
+function waGravPausar(){const g=waGrav;if(!g)return;
+ if(g.pausado){g.rec.resume();g.pausado=false;}else{g.rec.pause();g.pausado=true;}render();}
 function waGravarParar(){if(waGrav&&waGrav.rec.state!=='inactive')waGrav.rec.stop();}
 function waGravarCancelar(){if(waGrav){waGrav.cancelado=true;waGravarParar();}}
 function webmParaOgg(b){
@@ -2646,7 +2665,7 @@ function waComposer(c,isEntrada){
  if(!c.grupo&&waRestante(c)<=0)return `<div class="wz-comp"><div class="wz-fechada">${waMedidor(c).replace('id="wzMed"','')}<span class="sp"></span><button class="wz-modbtn" onclick="waModelos('${c.id}')">${WZ.tpl}Enviar modelo</button></div></div>`;
  const r=waResp?c.wpp.find(m=>m.id===waResp):null;
  return `<div class="wz-comp">${r?`<div class="wz-respondendo"><div><b>Respondendo a ${escH(r.d==='sai'?(r.autorNome||'você'):(r.autorGrupo||c.nome))}</b><span>${escH(waResumo(r))}</span></div><button title="Cancelar" onclick="waResp=null;render()">✕</button></div>`:''}
-  ${waGrav?`<div class="wz-grav"><b class="wa-rec">Gravando ${waGrav.seg||0}s</b><button class="wz-sec2" onclick="waGravarCancelar()">Cancelar</button><button class="wz-env" onclick="waGravarParar()">Enviar ${WZ.env}</button></div>`
+  ${waGrav?`<div class="wz-grav${waGrav.pausado?' pausado':''}"><button class="wz-grav-x" title="Cancelar" onclick="waGravarCancelar()">${icone('excluir')}</button><b class="wa-rec">${waGravTempo()}</b><canvas id="wzGravOnda" class="wz-grav-onda"></canvas><button class="wz-grav-p" title="${waGrav.pausado?'Continuar':'Pausar'}" onclick="waGravPausar()">${waGrav.pausado?'<svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM6 11a6 6 0 0 0 12 0M12 17v4"/></svg>':'<svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>'}</button><button class="wz-env" title="Enviar" onclick="waGravarParar()">${WZ.env}</button></div>`
   :`${waBandejaHtml(c)}<div class="wz-caixa"><div class="wz-ferr"><button title="Modelos" onclick="waModelos('${c.id}')">${WZ.tpl}</button><button title="Anexar" onclick="waMenuAnexo(event,'${c.id}')">${WZ.clipe}</button><button title="Gravar áudio" onclick="waGravar()">${WZ.mic}</button></div>
    <textarea id="wwin" rows="1" placeholder="Escreva para ${escH(c.nome.split(' ')[0])}…" oninput="waRasc['${c.id}']=this.value;waDigitando();waCresce(this)" onkeydown="waTecla(event,'${c.id}')"></textarea>
    <button class="wz-env" onclick="enviarWW()">Enviar ${WZ.env}</button></div>

@@ -8,6 +8,7 @@ const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Max-Age": "86400",
 };
 
 const json = (b: unknown, status = 200) =>
@@ -26,7 +27,7 @@ async function credenciais() {
   if (c.error) throw new Error(`config: ${c.error.message}`);
   const raiz = (c.data.base_url || "https://graph.facebook.com").replace(/\/+$/, "");
   const base = /\/v\d+(\.\d+)?$/.test(raiz) ? raiz : `${raiz}/${c.data.versao}`;
-  cache = { token: t.data as string, base, ate: Date.now() + 5 * 60 * 1000 };
+  cache = { token: t.data as string, base, ate: Date.now() + 50 * 60 * 1000 };
   return cache as { token: string; base: string };
 }
 
@@ -55,6 +56,7 @@ Deno.serve(async (req) => {
   let p: Pedido;
   try { p = await req.json(); } catch { return json({ ok: false, erro: "corpo invalido" }, 400); }
   if (p.tipo === "template" && !p.template?.nome) return json({ ok: false, erro: "falta o modelo" }, 400);
+  const credPromessa = credenciais().catch((e) => e as Error);
 
   if (p.encaminhar_de) {
     const enc = await usuario.rpc("wa_encaminhar_preparar", { p_mensagem: p.encaminhar_de, p_destino: p.conversa_id });
@@ -133,7 +135,9 @@ Deno.serve(async (req) => {
       corpo[tm] = midia;
     }
 
-    const { token, base } = await credenciais();
+    const cred = await credPromessa;
+    if (cred instanceof Error) throw cred;
+    const { token, base } = cred;
     saiu = true;
     const r = await fetch(`${base}/${prep.data.phone_number_id}/messages`, {
       method: "POST",

@@ -8,6 +8,7 @@ const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Max-Age": "86400",
 };
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...CORS, "Content-Type": "application/json" } });
@@ -25,7 +26,7 @@ async function credenciais() {
   if (c.error) throw new Error(`config: ${c.error.message}`);
   const raiz = (c.data.base_url || "https://graph.facebook.com").replace(/\/+$/, "");
   const base = /\/v\d+(\.\d+)?$/.test(raiz) ? raiz : `${raiz}/${c.data.versao}`;
-  cache = { token: t.data as string, base, ate: Date.now() + 5 * 60 * 1000 };
+  cache = { token: t.data as string, base, ate: Date.now() + 50 * 60 * 1000 };
   return cache as { token: string; base: string };
 }
 
