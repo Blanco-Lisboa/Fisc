@@ -286,7 +286,11 @@ th{background:var(--superf);font-size:10px;letter-spacing:.05em;text-transform:u
 .wa-rec{color:var(--vermelho);font-weight:700;font-size:12.5px}
 .wa-menu{position:fixed;z-index:80;background:#fff;border:1px solid var(--borda);border-radius:10px;box-shadow:var(--md);padding:5px;display:flex;flex-direction:column;min-width:190px}
 .wa-menu button{border:0;background:transparent;text-align:left;padding:8px 11px;font-size:12.5px;border-radius:7px;color:var(--ink);font-family:inherit}
-.wa-menu button:hover{background:var(--superf)}.wa-menu button.perigo{color:var(--vermelho)}
+.wa-menu button:hover{background:var(--superf)}
+.wa-menu button.ic{display:flex;align-items:center;gap:9px}
+.wa-menu button.ic .ico8{width:22px;height:22px;flex:none}
+.wz-ext.ico{background:transparent}
+.wz-ext.ico .ico8{width:100%;height:100%;object-fit:contain}.wa-menu button.perigo{color:var(--vermelho)}
 .wa-menu.wa-emojis{flex-direction:row;min-width:0;border-radius:999px;padding:4px 6px}
 .wa-menu.wa-emojis button{font-size:20px;padding:4px 6px;border-radius:999px}.wa-menu.wa-emojis button.on{background:var(--laranjaSv)}
 .toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:85}
@@ -1811,7 +1815,7 @@ function waFecharMenus(){document.querySelectorAll('.wa-menu').forEach(m=>m.remo
 function waMenu(ev,itens,esquerda){
  ev.stopPropagation();waFecharMenus();
  const m=document.createElement('div');m.className='wa-menu';
- itens.filter(Boolean).forEach(([t,fn,perigo])=>{const b=document.createElement('button');b.textContent=t;if(perigo)b.className='perigo';b.onclick=e=>{e.stopPropagation();waFecharMenus();fn();};m.appendChild(b);});
+ itens.filter(Boolean).forEach(([t,fn,perigo,ic])=>{const b=document.createElement('button');b.textContent=t;if(perigo)b.className='perigo';if(ic){b.classList.add('ic');b.insertAdjacentHTML('afterbegin',icone(ic));}b.onclick=e=>{e.stopPropagation();waFecharMenus();fn();};m.appendChild(b);});
  document.body.appendChild(m);
  let r=ev.currentTarget?ev.currentTarget.getBoundingClientRect():null;if(!r||!r.width)r={left:ev.clientX,right:ev.clientX,top:ev.clientY,bottom:ev.clientY};
  let x=esquerda?r.left:r.right-m.offsetWidth,y=r.bottom+4;if(x+m.offsetWidth>window.innerWidth-8)x=window.innerWidth-m.offsetWidth-8;
@@ -1985,7 +1989,7 @@ async function waEncaminharPara(mid,destino){
  toast('Mensagem encaminhada.');const d=waConv(destino);if(d){d.carregada=false;}
 }
 function waMenuAnexo(ev,id){
- waMenu(ev,[['Documento',()=>waEscolherArquivo(id,'*/*')],['Fotos e vídeos',()=>waEscolherArquivo(id,'image/jpeg,image/png,video/mp4,video/3gpp')],['Áudio',()=>waEscolherArquivo(id,'audio/ogg,audio/mpeg,audio/mp4,audio/aac,audio/amr,.ogg,.mp3,.m4a,.aac,.amr')],['Contato',()=>waContatoForm(id)],['Localização',()=>waLocalForm(id)]],true);
+ waMenu(ev,[['Documento',()=>waEscolherArquivo(id,'*/*'),false,'documento'],['Fotos e vídeos',()=>waEscolherArquivo(id,'image/jpeg,image/png,video/mp4,video/3gpp'),false,'ficheiro-de-imagem'],['Áudio',()=>waEscolherArquivo(id,'audio/ogg,audio/mpeg,audio/mp4,audio/aac,audio/amr,.ogg,.mp3,.m4a,.aac,.amr'),false,'ficheiro-de-audio'],['Contato',()=>waContatoForm(id)],['Localização',()=>waLocalForm(id)]],true);
 }
 function waTipoArquivo(f){const t=(f.type||'').toLowerCase();
  if(['image/jpeg','image/png'].includes(t))return 'imagem';if(['video/mp4','video/3gpp'].includes(t))return 'video';
@@ -2606,6 +2610,10 @@ function waComposer(c,isEntrada){
   <div class="wz-dica"><span><kbd>Enter</kbd> envia</span><span><kbd>Shift</kbd>+<kbd>Enter</kbd> nova linha</span><span><kbd>/</kbd> abre modelos</span></div>`}</div>`;}
 function waCresce(t){t.style.height='auto';t.style.height=Math.min(120,t.scrollHeight)+'px';}
 function waTecla(ev,id){if(ev.key==='Enter'&&!ev.shiftKey&&!ev.isComposing){ev.preventDefault();enviarWW();return;}if(ev.key==='/'&&!ev.target.value){ev.preventDefault();waModelos(id);}}
+const ICO_EXT={xml:'xml',pdf:'pdf',zip:'zip',rar:'zip','7z':'zip',xls:'xls',xlsx:'xls',ods:'xls',csv:'csv',doc:'word',docx:'word',odt:'word',rtf:'doc',txt:'txt',ppt:'ppt',pptx:'ppt',html:'html',htm:'html',jpg:'jpg',jpeg:'jpg',png:'png',gif:'gif',json:'arquivo-de-codigo',js:'arquivo-de-codigo'};
+function icone(n){return `<img class="ico8" src="icones/${n}.png" alt="">`;}
+function waIco(nome,tipo){const e=String(nome||'').split('.').pop().toLowerCase();
+ if(ICO_EXT[e])return ICO_EXT[e];if(tipo==='imagem'||tipo==='figurinha')return 'ficheiro-de-imagem';if(tipo==='video')return 'arquivo-de-video';if(tipo==='audio')return 'ficheiro-de-audio';return 'documento';}
 function waExt(nome,tipo){const e=String(nome||'').split('.').pop().toLowerCase();
  if(tipo==='imagem')return ['img','IMG'];if(tipo==='video')return ['vid','VÍD'];if(tipo==='audio')return ['aud','ÁUD'];
  if(e==='xml')return ['xml','XML'];if(e==='pdf')return ['pdf','PDF'];if(['zip','rar','7z'].includes(e))return ['zip',e.toUpperCase()];
@@ -2664,7 +2672,7 @@ function bolhaReal(c,m){
  h+=`<button class="wz-bseta" title="Opções" onclick="waMenuMsg(event,'${m.id}')">${ICO_SETA}</button>`;
  return `<div class="wz-b ${cls}${reac.length?' reac':''}">${h}</div>`;}
 function waDocHtml(m,u){const [k,r]=waExt(m.nomeArq,m.tipo);const nome=m.nomeArq||({imagem:'Foto',video:'Vídeo',audio:'Áudio'}[m.tipo]||'Documento');
- return `<div class="wz-doc"><span class="wz-ext ${k}">${escH(r)}</span><div class="dn"><b>${escH(nome)}</b><span>${escH([r,waTam(m.tam)].filter(Boolean).join(' · '))}${u?'':m.midiaEstado&&m.midiaEstado!=='guardado'?' · baixando':''}</span></div><button class="wz-baixar" title="Baixar" ${u?`data-u="${escH(u)}" onclick="window.open(this.dataset.u)"`:'disabled'}>${WZ.baixar}</button></div>`;}
+ return `<div class="wz-doc"><span class="wz-ext ico">${icone(waIco(m.nomeArq,m.tipo))}</span><div class="dn"><b>${escH(nome)}</b><span>${escH([r,waTam(m.tam)].filter(Boolean).join(' · '))}${u?'':m.midiaEstado&&m.midiaEstado!=='guardado'?' · baixando':''}</span></div><button class="wz-baixar" title="Baixar" ${u?`data-u="${escH(u)}" onclick="window.open(this.dataset.u)"`:'disabled'}>${WZ.baixar}</button></div>`;}
 function waDesenharMsgs(){
  const c=waConv(selWhats);const box=el('wwms');if(!c||!box)return;
  const t=(waBuscaMsg||'').trim().toLowerCase();
@@ -2710,7 +2718,7 @@ function waFichaHtml(c){const f=waFicha[c.id];
   <div class="wz-fsec"><h3>Atendimento</h3><dl class="wz-kv">${c.grupo?'':`<dt>Carteira</dt><dd>${escH(cart||'—')}</dd>`}<dt>Primeiro contato</dt><dd>${f&&f.primeiro_em?escH(ddmm(f.primeiro_em)+'/'+new Date(f.primeiro_em).getFullYear()):'—'}</dd><dt>Mensagens no mês</dt><dd>${f?Number(f.msgs_mes||0):'—'}</dd></dl></div>
   <div class="wz-fsec"><h3>Arquivos da conversa ${arqs.length?`<em onclick="waArquivos('${c.id}')">Ver todos</em>`:''}</h3>${arqs.length?`<div class="wz-arqs">${arqs.map(m=>waArqLinha(m)).join('')}</div>`:'<span class="wz-traco">—</span>'}</div>`;}
 function waArqLinha(m){const [k,r]=waExt(m.nomeArq,m.tipo);const u=waUrls[m.caminho];
- return `<div class="wz-arq" ${u?`data-u="${escH(u)}" onclick="window.open(this.dataset.u)"`:''}><span class="wz-ext ${k}">${escH(r)}</span><div><b>${escH(m.nomeArq||({imagem:'Foto',video:'Vídeo',audio:'Áudio'}[m.tipo]||'Arquivo'))}</b><span>${escH(waDiaRotulo(m.em)+(m.tam?' · '+waTam(m.tam):''))}</span></div></div>`;}
+ return `<div class="wz-arq" ${u?`data-u="${escH(u)}" onclick="window.open(this.dataset.u)"`:''}><span class="wz-ext ico">${icone(waIco(m.nomeArq,m.tipo))}</span><div><b>${escH(m.nomeArq||({imagem:'Foto',video:'Vídeo',audio:'Áudio'}[m.tipo]||'Arquivo'))}</b><span>${escH(waDiaRotulo(m.em)+(m.tam?' · '+waTam(m.tam):''))}</span></div></div>`;}
 function waArquivos(id){const c=waConv(id);if(!c)return;const l=c.wpp.filter(m=>m.caminho&&['documento','imagem','video','audio'].includes(m.tipo)).reverse();
  waModal('Arquivos da conversa',`<div class="wz wz-arqs" style="display:flex;max-height:60vh;overflow-y:auto">${l.map(waArqLinha).join('')}</div>`,480);}
 function waRedesenharFicha(id){if(view!=='whatsweb'||selWhats!==id)return;const b=el('wzFicha');const c=waConv(id);if(b&&c)b.innerHTML=waFichaHtml(c);}
@@ -2792,7 +2800,7 @@ function waBandejaHtml(c){const b=waBandejas[c.id];if(!b||!b.length)return '';co
    <span class="sp"></span><button class="wz-alnk" onclick="waEscolherArquivo('${c.id}','*/*')">+ Adicionar</button><button class="wz-alnk" onclick="waBandejaLimpar('${c.id}')">Limpar</button></div>
   <div class="wz-alista">${b.map((x,k)=>{const [ek,er]=waExt(x.nome,x.tipo);return `<div class="wz-ai" draggable="true" ondragstart="waArrastoItem=${k};this.classList.add('arr')" ondragend="this.classList.remove('arr');waArrastoItem=null" ondragover="if(waArrastoItem!==null){event.preventDefault();event.stopPropagation()}" ondrop="waItemSolta(event,'${c.id}',${k})">
    <span class="wz-grip" title="Arrastar para mudar a ordem">⋮⋮</span><span class="wz-ord">${k+1}</span>
-   ${x.url?`<img class="wz-athumb" src="${escH(x.url)}" alt="">`:`<span class="wz-ext ${ek}">${escH(er)}</span>`}
+   ${x.url?`<img class="wz-athumb" src="${escH(x.url)}" alt="">`:`<span class="wz-ext ico">${icone(waIco(x.nome,x.tipo))}</span>`}
    <div class="wz-am"><b title="${escH(x.nome)}">${escH(x.nome)}</b><span>${escH(WA_TIPO_ROT[x.tipo])} · ${escH(waTam(x.f.size))}</span></div>
    <textarea class="wz-aleg" id="wzal-${k}" rows="1" maxlength="970" placeholder="${x.tipo==='audio'?'Texto logo depois do áudio':'Texto deste arquivo'}" oninput="waBandejas['${c.id}'][${k}].leg=this.value;waCresce(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();enviarWW();}">${escH(x.leg)}</textarea>
    <div class="wz-aord"><button title="Subir" ${k?'':'disabled'} onclick="waBandejaMover('${c.id}',${k},-1)">↑</button><button title="Descer" ${k<b.length-1?'':'disabled'} onclick="waBandejaMover('${c.id}',${k},1)">↓</button><button title="Tirar" onclick="waBandejaTirar('${c.id}',${k})">✕</button></div></div>`;}).join('')}</div></div>`;}
