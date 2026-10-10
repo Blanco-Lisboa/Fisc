@@ -1061,10 +1061,11 @@ function pack(marc){return ['DAS (guia do Simples)','Relatório de Apuração','
 const clientes=[];
 const docsCliente={};
 let apCarregado=false;
-function apCarregar(){return umaVez('apclientes',async()=>{
- const r=await blLogado().rpc('fiscal_painel_clientes');
- if(r.error){toast('Não foi possível carregar os clientes.');return;}
- const novos=(r.data||[]).map(x=>({id:x.empresa_id,nome:x.razao_social||x.nome_fantasia||fmtCnpj(x.cnpj),cnpj:fmtCnpj(x.cnpj),regime:'',plats:[],erp:'',optin:true,janela:false,janelaLbl:'',
+function apCarregar(){return umaVez('apclientes',async()=>{cartAssinar();
+ const [r,mc]=await Promise.all([blLogado().rpc('fiscal_painel_clientes'),sb.rpc('fiscal_apuracao_carteira')]);
+ if(r.error||mc.error){toast('Não foi possível carregar os clientes.');return;}
+ const minhas=new Set((mc.data||[]).map(x=>typeof x==='string'?x:x.fiscal_apuracao_carteira));
+ const novos=(r.data||[]).filter(x=>minhas.has(x.empresa_id)).map(x=>({id:x.empresa_id,nome:x.razao_social||x.nome_fantasia||fmtCnpj(x.cnpj),cnpj:fmtCnpj(x.cnpj),regime:'',plats:[],erp:'',optin:true,janela:false,janelaLbl:'',
   dono:x.dono_carteira_usuario_id?(waEquipe[x.dono_carteira_usuario_id]||''):'',wpp:[],demCeo:null,ia:{modo:'limite',ate:'rascunho'},etapas:makeEtapas()}))
   .sort((a,b)=>a.nome.localeCompare(b.nome));
  clientes.splice(0,clientes.length,...novos);apCarregado=true;
@@ -1341,6 +1342,7 @@ let cartSetor=null,cartCanal=null,clientesBrutos=null;
 async function cartSetorBl(){if(!cartSetor){const r=await sb.rpc('fiscal_setor_bl');if(!r.error)cartSetor=r.data;}return cartSetor;}
 function cartAssinar(){if(cartCanal)return;
  cartCanal=sb.channel('fiscal-carteira').on('postgres_changes',{event:'*',schema:'public',table:'wa_rota_carteira'},()=>{
+  apCarregado=false;if(view==='apuracao')apCarregar();
   if(view!=='gestor'){mapaDados=null;clientesDados=null;centralDados=null;return;}
   clientesBrutos=null;carregarMapa();carregarClientes();carregarCentralGestor();}).subscribe();}
 function cartNome(id){const u=(mapaDados||[]).find(x=>x.id===id);return (u&&u.nome)||waEquipe[id]||'';}
