@@ -2844,7 +2844,7 @@ async function waAtualizarContato(id){await Promise.all([waCarregarPainel(),waCa
 function waErroBanco(t){t=String(t||'');const m={'so assistente':'Só assistente ou gerente pode vincular contato.','so faz sentido dizendo de qual pessoa':'Essa etiqueta precisa da pessoa dona do número.','sem a pessoa, e preciso dizer de qual empresa':'Escolha a empresa ou a pessoa.','exige dizer de qual empresa':'Essa etiqueta precisa da empresa.','vale para uma empresa so':'Essa etiqueta vale para uma empresa só.','nao e do titular':'A empresa escolhida não é dessa pessoa.','nao liberou nenhum assunto':'Escolha pelo menos uma empresa.'};
  for(const k in m)if(t.includes(k))return m[k];return 'Não foi possível salvar.';}
 function waAplicarPainel(){waTodas().forEach(x=>{const p=waPainel[x.id];if(!p)return;
- x.empresas=p.empresas||[];x.natureza=p.natureza;x.principal=!!p.principal;x.respNome=p.responsavel_nome||'';x.ultDir=p.ultima_direcao;x.ultSt=p.ultima_status;
+ if(p.nome_provisorio)x.nome=p.nome_provisorio;x.empresas=p.empresas||[];x.natureza=p.natureza;x.principal=!!p.principal;x.respNome=p.responsavel_nome||'';x.ultDir=p.ultima_direcao;x.ultSt=p.ultima_status;
 });}
 setInterval(()=>{if(view!=='whatsweb')return;const c=selWhats&&waConv(selWhats);const m=el('wzMed');if(c&&m){const t=document.createElement('div');t.innerHTML=waMedidor(c);if(t.firstElementChild)m.replaceWith(t.firstElementChild);}},60000);
 /* ---------- WHATSAPP bandeja de arquivos ---------- */
@@ -3179,7 +3179,7 @@ function janelaWA(c){if(!c.janelaAte){c.janela=false;c.janelaLbl='fechada';retur
  const rest=waRestante(c);c.janela=rest>0;c.optin=true;
  c.janelaLbl=rest>0?Math.floor(rest/3600e3)+'h'+String(Math.floor(rest%3600e3/60e3)).padStart(2,'0'):'fechada';}
 function convWA(c){const ant=waConv(c.id);const ct=Array.isArray(c.wa_contato)?c.wa_contato[0]:c.wa_contato;
- const x={id:c.id,contatoId:c.contato_id,nome:c.contato_nome||fmtTel(c.contato_telefone)||'Contato',telefone:c.contato_telefone,plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
+ const x={id:c.id,contatoId:c.contato_id,nome:(waPainel[c.id]&&waPainel[c.id].nome_provisorio)||c.contato_nome||fmtTel(c.contato_telefone)||'Contato',telefone:c.contato_telefone,plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
  dono:null,wpp:waMsgs[c.id]||[],carregada:!!waMsgs[c.id],previa:c.ultima_previa,ultima:c.ultima_em,naoLidas:c.nao_lidas||0,janelaAte:c.janela_ate||null,
  arquivada:!!c.arquivada,fixada:c.fixada_em,silenciada:!!c.silenciada,marcadaNL:!!c.marcada_nao_lida,grupo:!!c.grupo_meta_id,grupoLink:c.grupo_link,grupoDesc:c.grupo_descricao,
  bloqueado:!!(ct&&ct.bloqueado)};
@@ -3194,7 +3194,7 @@ async function carregarConversas(){
  }
  const nv=todas.map(convWA);
  await waCarregarPainel();
- nv.forEach(c=>{const p=waPainel[c.id];c.dono=(p&&p.dono_id)||null;});
+ nv.forEach(c=>{const p=waPainel[c.id];c.dono=(p&&p.dono_id)||null;if(p&&p.nome_provisorio)c.nome=p.nome_provisorio;});
  waEntrada=nv.filter(c=>!c.dono);
  waMeus=nv.filter(c=>c.dono===eu.id);
  waAplicarPainel();
