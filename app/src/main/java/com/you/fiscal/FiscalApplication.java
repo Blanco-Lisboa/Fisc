@@ -116,6 +116,20 @@ public class FiscalApplication {
         CefApp cefApp = builder.build();
         cef = cefApp;
         CefClient client = cefApp.createClient();
+        client.addDownloadHandler(new org.cef.handler.CefDownloadHandler() {
+            @Override
+            public boolean onBeforeDownload(CefBrowser b, org.cef.callback.CefDownloadItem item, String nome,
+                                            org.cef.callback.CefBeforeDownloadCallback cb) {
+                String n = (nome == null || nome.isBlank()) ? "arquivo" : nome.replaceAll("[\\\\/:*?\"<>|]", "_");
+                cb.Continue(new File(new File(System.getProperty("user.home"), "Downloads"), n).getAbsolutePath(), true);
+                return true;
+            }
+
+            @Override
+            public void onDownloadUpdated(CefBrowser b, org.cef.callback.CefDownloadItem item, org.cef.callback.CefDownloadItemCallback cb) {
+                if (item != null && item.isComplete()) js("typeof toast==='function'&&toast('Arquivo salvo.')");
+            }
+        });
         CefBrowser browser = client.createBrowser(url, false, false);
         navegador = browser;
 

@@ -1910,6 +1910,7 @@ let waMsgAncora=null;
 function waMenuMsg(ev,mid){{const b=(ev.currentTarget||ev.target).closest?(ev.currentTarget||ev.target).closest('.wz-b'):null;waMsgAncora=(b||ev.currentTarget||ev.target).getBoundingClientRect();}
  const c=waConv(selWhats);const m=c&&c.wpp.find(x=>x.id===mid);if(!m)return;const pode=waPodeAgir(c)&&!m.id.startsWith('tmp-');
  waMenu(ev,[
+  m.caminho&&waUrls[m.caminho]?['Baixar',()=>waBaixarArq(waUrls[m.caminho],m.nomeArq||({imagem:'foto.jpg',video:'video.mp4',audio:'audio.ogg'}[m.tipo])||'arquivo')]:null,
   pode&&m.idWa&&!c.bloqueado?['Responder',()=>{waResp=m.id;render();setTimeout(()=>{const i=el('wwin');if(i)i.focus();},0);}]:null,
   pode&&m.idWa&&!String(m.idWa).startsWith('imp:')&&m.d==='ent'&&m.tipo!=='sistema'&&m.tipo!=='reacao'&&Date.now()-new Date(m.em).getTime()<30*864e5?['Reagir',()=>waEscolherReacao(ev,m)]:null,
   m.t&&!['imagem','video','audio','figurinha'].includes(m.tipo)?['Copiar',()=>{navigator.clipboard.writeText(m.tipo==='contato'&&m.dados?m.t+' '+fmtTel(m.dados.telefone):m.t).then(()=>toast('Copiado.'),()=>toast('Não foi possível copiar.'));}]:null,
@@ -2782,7 +2783,8 @@ function bolhaReal(c,m){
  h+=`<button class="wz-bseta" title="Opções" onclick="waMenuMsg(event,'${m.id}')">${ICO_SETA}</button>`;
  return `<div class="wz-b ${cls}${reac.length?' reac':''}">${h}</div>`;}
 function waDocHtml(m,u){const [k,r]=waExt(m.nomeArq,m.tipo);const nome=m.nomeArq||({imagem:'Foto',video:'Vídeo',audio:'Áudio'}[m.tipo]||'Documento');
- return `<div class="wz-doc"><span class="wz-ext ico">${icone(waIco(m.nomeArq,m.tipo))}</span><div class="dn"><b>${escH(nome)}</b><span>${escH([r,waTam(m.tam)].filter(Boolean).join(' · '))}${u?'':m.midiaEstado&&m.midiaEstado!=='guardado'?' · baixando':''}</span></div><button class="wz-baixar" title="Baixar" ${u?`data-u="${escH(u)}" onclick="window.open(this.dataset.u)"`:'disabled'}>${WZ.baixar}</button></div>`;}
+ return `<div class="wz-doc"><span class="wz-ext ico">${icone(waIco(m.nomeArq,m.tipo))}</span><div class="dn"><b>${escH(nome)}</b><span>${escH([r,waTam(m.tam)].filter(Boolean).join(' · '))}${u?'':m.midiaEstado&&m.midiaEstado!=='guardado'?' · baixando':''}</span></div><button class="wz-baixar" title="Baixar" ${u?`data-u="${escH(u)}" data-n="${escH(nome)}" onclick="waBaixarArq(this.dataset.u,this.dataset.n)"`:'disabled'}>${WZ.baixar}</button></div>`;}
+function waBaixarArq(u,n){if(!u)return;const a=document.createElement('a');a.href=u+(u.includes('?')?'&':'?')+'download='+encodeURIComponent(n||'arquivo');a.rel='noopener';document.body.appendChild(a);a.click();a.remove();}
 function waDesenharMsgs(){
  const c=waConv(selWhats);const box=el('wwms');if(!c||!box)return;
  const t=(waBuscaMsg||'').trim().toLowerCase();
@@ -3268,7 +3270,7 @@ async function waMaisAntigas(id){
 }
 document.addEventListener('scroll',e=>{const b=e.target;if(b&&b.id==='wwms'&&b.scrollTop<120&&selWhats)waMaisAntigas(selWhats);},true);
 function aoMudarMidia(p){const md=p.new;if(!md||!md.mensagem_id)return;if(md.estado==='guardado'&&md.caminho&&avisoMidia[md.mensagem_id]){avisoMidia[md.mensagem_id](md.caminho);delete avisoMidia[md.mensagem_id];}for(const k in waMsgs){const m=waMsgs[k].find(x=>x.id===md.mensagem_id);if(m){
-  if(md.transcricao)m.transcricao=md.transcricao;if(md.estado==='guardado'&&md.caminho)m.caminho=md.caminho;if(md.nome)m.nomeArq=md.nome;
+  if(md.transcricao)m.transcricao=md.transcricao;if(md.estado==='guardado'&&md.caminho)m.caminho=md.caminho;if(md.estado)m.midiaEstado=md.estado;if(md.tamanho)m.tam=md.tamanho;if(md.duracao_s)m.dur=md.duracao_s;if(md.nome)m.nomeArq=md.nome;
   if(waChatAberto()&&selWhats===k)waDesenharMsgs();return;}}}
 function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;if(p.eventType==='INSERT')waAvisar(m);if(waEsperas[m.id]&&['enviada','entregue','lida','falhou','incerto'].includes(m.status)){const r=waEsperas[m.id];setTimeout(()=>r(m.status),0);}const lista=waMsgs[m.conversa_id];
  if(lista){if(m.apagada_em){waMsgs[m.conversa_id]=lista.filter(x=>x.id!==m.id);const c=waConv(m.conversa_id);if(c)c.wpp=waMsgs[m.conversa_id];}
@@ -3325,7 +3327,7 @@ async function iniciarDados(){
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_chamada'},aoMudarChamada)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
-  .on('postgres_changes',{event:'UPDATE',schema:'public',table:'wa_midia'},aoMudarMidia)
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_midia'},aoMudarMidia)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo'},()=>{modLista=null;}).subscribe();
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).on('postgres_changes',{event:'*',schema:'public',table:'fiscal_nivel_permissao'},()=>aoMudarEu({new:{ativo:true,nivel:eu.nivel}})).subscribe();
  appVersaoIniciar();
