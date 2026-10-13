@@ -2589,7 +2589,7 @@ const WZ={
 function waAssinatura(n){const p=String(n||'').trim().split(/\s+/)[0];return p?p.charAt(0).toUpperCase()+p.slice(1).toLowerCase()+' - Fiscal You':'';}
 function waCorNome(t){let h=0;for(const ch of String(t||''))h=(h*31+ch.charCodeAt(0))>>>0;return WA_CORES[h%WA_CORES.length];}
 function waIni(n){const p=String(n||'').replace(/[^A-Za-zÀ-ÿ\s]/g,' ').trim().split(/\s+/).filter(Boolean);if(!p.length)return String(n||'').replace(/\D/g,'').slice(-2)||'?';return (p[0][0]+(p.length>1?p[p.length-1][0]:'')).toUpperCase();}
-function waAvatar(x,extra){return x.grupo?`<div class="wz-av g" style="background:#0E7490">${WZ.grupo}${extra||''}</div>`:`<div class="wz-av" style="background:${waCorNome(x.nome)}">${escH(waIni(x.nome))}${extra||''}</div>`;}
+function waAvatar(x,extra){const fu=!x.grupo&&x.foto&&waFoto[x.foto]&&waFoto[x.foto].u;if(fu)return `<div class="wz-av" style="background:${waCorNome(x.nome)}"><img src="${escH(fu)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">${extra||''}</div>`;return x.grupo?`<div class="wz-av g" style="background:#0E7490">${WZ.grupo}${extra||''}</div>`:`<div class="wz-av" style="background:${waCorNome(x.nome)}">${escH(waIni(x.nome))}${extra||''}</div>`;}
 let waRelDif=0,waRelEm=0,waJanTimer=null;
 function waAgora(){return Date.now()+waRelDif;}
 async function waAcertarRelogio(){if(Date.now()-waRelEm<600000)return;const t0=Date.now();const r=await sb.rpc('fiscal_agora');const t1=Date.now();
@@ -3164,7 +3164,10 @@ document.addEventListener('keydown',e=>{
 },true);
 /* ---------- dados reais ---------- */
 const ST_WA={enviando:'enviando',aguardando:'na fila',enviada:'enviada',entregue:'entregue',lida:'lida',falhou:'falhou',incerto:'sem confirmação'};
-let sb=null,eu=null,waEntrada=[],waMeus=[],waMsgs={};
+let sb=null,eu=null,waEntrada=[],waMeus=[],waMsgs={},waFoto={};
+async function waAssinarFotos(lista){const ag=Date.now();const f=[...new Set(lista.map(x=>x.foto).filter(p=>p&&!(waFoto[p]&&waFoto[p].ate>ag)))];if(!f.length)return false;let mudou=false;
+ for(let i=0;i<f.length;i+=500){const r=await sb.storage.from('wa-midia').createSignedUrls(f.slice(i,i+500),3600);if(r.error||!r.data)continue;r.data.forEach(x=>{if(x.signedUrl){waFoto[x.path]={u:x.signedUrl,ate:ag+3300e3};mudou=true;}});}
+ return mudou;}
 function waConv(id){return waEntrada.find(x=>x.id===id)||waMeus.find(x=>x.id===id);}
 function hhmm(d){const x=new Date(d);return String(x.getHours()).padStart(2,'0')+':'+String(x.getMinutes()).padStart(2,'0');}
 function ddmm(d){const x=new Date(d);return String(x.getDate()).padStart(2,'0')+'/'+String(x.getMonth()+1).padStart(2,'0');}
@@ -3184,12 +3187,12 @@ function convWA(c){const ant=waConv(c.id);const ct=Array.isArray(c.wa_contato)?c
  const x={id:c.id,contatoId:c.contato_id,nome:(waPainel[c.id]&&waPainel[c.id].nome_provisorio)||c.contato_nome||fmtTel(c.contato_telefone)||'Contato',telefone:c.contato_telefone,plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
  dono:null,wpp:waMsgs[c.id]||[],carregada:!!waMsgs[c.id],previa:c.ultima_previa,ultima:c.ultima_em,naoLidas:c.nao_lidas||0,janelaAte:c.janela_ate||null,
  arquivada:!!c.arquivada,fixada:c.fixada_em,silenciada:!!c.silenciada,marcadaNL:!!c.marcada_nao_lida,grupo:!!(c.e_grupo||c.grupo_meta_id),grupoAntigo:!!c.e_grupo&&!c.grupo_meta_id,grupoLink:c.grupo_link,grupoDesc:c.grupo_descricao,
- bloqueado:!!(ct&&ct.bloqueado)};
+ bloqueado:!!(ct&&ct.bloqueado),foto:(ct&&ct.foto_url)||null};
  if(ant&&ant._lendo)x._lendo=true;return x;}
 async function carregarConversas(){
  const todas=[];await waAcertarRelogio();
  for(let de=0;;de+=1000){
-  const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,estado,ultima_em,ultima_previa,nao_lidas,janela_ate,arquivada,fixada_em,silenciada,marcada_nao_lida,e_grupo,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado),wa_numero!inner(provedor)')
+  const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,estado,ultima_em,ultima_previa,nao_lidas,janela_ate,arquivada,fixada_em,silenciada,marcada_nao_lida,e_grupo,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado,foto_url),wa_numero!inner(provedor)')
    .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false,nullsFirst:false}).order('id').range(de,de+999);
   if(r.error){toast('Não foi possível carregar as conversas.');return;}
   todas.push(...r.data);if(r.data.length<1000)break;
@@ -3201,6 +3204,7 @@ async function carregarConversas(){
  waMeus=nv.filter(c=>c.dono===eu.id);
  waAplicarPainel();
  waEntrada.concat(waMeus).forEach(c=>janelaWA(c));waAgendarJanela();
+ waAssinarFotos(nv).then(m=>{if(!m||view!=='whatsweb')return;const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'||a.id==='wwbusca'))return;render();});
 }
 const WA_COLUNAS_MSG='id,id_local,id_whatsapp,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,autor_grupo,responder_a,reacao,reacao_nossa,encaminhada,favorita,editada_em,dados,wa_midia(nome,caminho,estado,mimetype,transcricao,tamanho,duracao_s)';
 const WA_PAGINA=300;let waRolar=null;const waAntigasIndo={};
