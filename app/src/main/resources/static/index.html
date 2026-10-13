@@ -1660,6 +1660,7 @@ function teamsIniciar(){return teamsCarregar().then(ok=>ok&&TeamsIT.iniciar({ori
  buscarClientes:t=>sb.rpc('fiscal_buscar_clientes',{p_texto:t}),
  clientes:ids=>sb.rpc('fiscal_empresas',{p_ids:ids}),
  abrirModulo:()=>irView('teams'),
+ baixar:(u,n)=>fiscalBaixar(u,n),
  aoMensagem:x=>teamsAvisar(x),
  aoContar:n=>{const b=el('tmBadge');if(b){b.textContent=n;b.style.display=n?'':'none';}},
  toast:t=>toast(t)}));}
@@ -1715,7 +1716,7 @@ function modDesenharForm(){
  const emps=modCtx.empresas||[];const escolhe=emps.length&&modEmpresaCampos(vs).length;
  box.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><button class="miniB" onclick="modSel=null;modDesenharLista()">‹ Modelos</button><b style="font-size:13px">${escH(MOD_TITULO[m.nome]||m.nome)}</b></div>
   <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start">
-   <div style="display:flex;flex-direction:column;gap:2px">${escolhe?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Empresa do contato${emps.length>1?' ('+emps.length+')':''}</span><select class="fi" style="border:1px solid var(--laranjaCl);background:var(--laranjaSv);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" onchange="modEscolherEmpresa(this.value)">${emps.map(e=>`<option value="${escH(e.empresa_id)}"${e.empresa_id===modCtx.empresaId?' selected':''}>${escH((e.razao_social||e.nome_fantasia||'')+' — '+fmtCnpj(e.cnpj||''))}</option>`).join('')}</select>`:''}${vs.map(v=>`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">${escH(modRotulo(v))}</span><input class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" value="${escH(modVals[v.i-1]||'')}" oninput="modVals[${v.i-1}]=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDoc)">`).join('')}
+   <div style="display:flex;flex-direction:column;gap:2px">${escolhe?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Empresa do contato${emps.length>1?' ('+emps.length+')':''}</span><select class="fi" style="border:1px solid var(--laranjaCl);background:var(--laranjaSv);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" onchange="modEscolherEmpresa(this.value)">${modCtx.empresaId?'':'<option value="" disabled selected>Escolha a empresa…</option>'}${emps.map(e=>`<option value="${escH(e.empresa_id)}"${e.empresa_id===modCtx.empresaId?' selected':''}>${escH((e.razao_social||e.nome_fantasia||'')+' — '+fmtCnpj(e.cnpj||''))}</option>`).join('')}</select>`:''}${vs.map(v=>`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">${escH(modRotulo(v))}</span><input class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" value="${escH(modVals[v.i-1]||'')}" oninput="modVals[${v.i-1}]=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDoc)">`).join('')}
    ${h&&h.format==='DOCUMENT'?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Documento (PDF)</span><button class="apubtn" onclick="modEscolherDoc()">📎 ${modDoc?escH(modDoc.name):'Anexar PDF'}</button>`:''}</div>
    <div class="ap-prev" id="modPrev">${modBolha(m,modVals,modDoc)}</div></div>
   <div style="display:flex;justify-content:flex-end;gap:8px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="modEnv" onclick="modEnviar()">Enviar</button></div>`;
@@ -1745,7 +1746,7 @@ async function waEnviarModelo(c,m,vals,doc,previa){
 async function waModelos(id,pref){
  const c=waConv(id);if(!c)return;const ctx={nome:c.nome,empresa:'',cnpj:'',enviar:(m,v,d,p)=>waEnviarModelo(c,m,v,d,p)};
  if(!c.grupo){const r=await sb.rpc('wa_conversa_empresas',{p_conversa:c.id});ctx.empresas=(!r.error&&Array.isArray(r.data))?r.data:[];
-  const x=ctx.empresas[0];if(x){ctx.empresa=x.razao_social||x.nome_fantasia||'';ctx.cnpj=x.cnpj||'';ctx.empresaId=x.empresa_id;}}
+  const x=ctx.empresas.length===1?ctx.empresas[0]:null;if(x){ctx.empresa=x.razao_social||x.nome_fantasia||'';ctx.cnpj=x.cnpj||'';ctx.empresaId=x.empresa_id;}}
  modAbrir(ctx,pref);
 }
 /* ---------- APURAÇÃO (com abas: Apuração · Radar XML · Demanda em lote · Meu espaço) ---------- */
@@ -1872,14 +1873,15 @@ function waMenu(ev,itens,esquerda){
  setTimeout(()=>document.addEventListener('click',waFecharMenus,{once:true}),0);
 }
 function waResumo(m){if(!m)return '';if(m.tipo==='imagem')return '📷 '+(m.t&&!m.t.startsWith('[')?m.t:'Foto');if(m.tipo==='video')return '🎥 Vídeo';if(m.tipo==='audio')return '🎤 Áudio';if(m.tipo==='documento')return '📄 '+(m.nomeArq||'Documento');if(m.tipo==='local')return '📍 '+(m.t||'Localização');if(m.tipo==='contato')return '👤 '+(m.t||'Contato');return m.t||'';}
+const waUrlsAte={};
 async function waAssinarMidias(c){
- const faltam=[...new Set(c.wpp.filter(m=>m.caminho&&!waUrls[m.caminho]&&!/^https?:/i.test(m.caminho)).map(m=>m.caminho))];
+ const ag=Date.now();const faltam=[...new Set(c.wpp.filter(m=>m.caminho&&!/^https?:/i.test(m.caminho)&&(!waUrls[m.caminho]||(waUrlsAte[m.caminho]||0)<ag)).map(m=>m.caminho))];
  c.wpp.forEach(m=>{if(m.caminho&&/^https?:/i.test(m.caminho))waUrls[m.caminho]=m.caminho;});
  if(!faltam.length)return;
  faltam.forEach(p=>waUrls[p]=waUrls[p]||null);
  const r=await sb.storage.from('wa-midia').createSignedUrls(faltam,3600);
  if(r.error||!r.data)return;
- let mudou=false;r.data.forEach(x=>{if(x.signedUrl){waUrls[x.path]=x.signedUrl;mudou=true;}});
+ let mudou=false;r.data.forEach(x=>{if(x.signedUrl){waUrls[x.path]=x.signedUrl;waUrlsAte[x.path]=ag+50*60e3;mudou=true;}});
  if(mudou&&waChatAberto()&&selWhats===c.id)waDesenharMsgs();
 }
 function waMenuConversa(ev,id){
@@ -1910,7 +1912,7 @@ let waMsgAncora=null;
 function waMenuMsg(ev,mid){{const b=(ev.currentTarget||ev.target).closest?(ev.currentTarget||ev.target).closest('.wz-b'):null;waMsgAncora=(b||ev.currentTarget||ev.target).getBoundingClientRect();}
  const c=waConv(selWhats);const m=c&&c.wpp.find(x=>x.id===mid);if(!m)return;const pode=waPodeAgir(c)&&!m.id.startsWith('tmp-');
  waMenu(ev,[
-  m.caminho&&waUrls[m.caminho]?['Baixar',()=>waBaixarArq(waUrls[m.caminho],m.nomeArq||({imagem:'foto.jpg',video:'video.mp4',audio:'audio.ogg'}[m.tipo])||'arquivo')]:null,
+  m.caminho?['Baixar',()=>waBaixarArq(m.caminho,m.nomeArq||({imagem:'foto.jpg',video:'video.mp4',audio:'audio.ogg'}[m.tipo])||'arquivo')]:null,
   pode&&m.idWa&&!c.bloqueado?['Responder',()=>{waResp=m.id;render();setTimeout(()=>{const i=el('wwin');if(i)i.focus();},0);}]:null,
   pode&&m.idWa&&!String(m.idWa).startsWith('imp:')&&m.d==='ent'&&m.tipo!=='sistema'&&m.tipo!=='reacao'&&Date.now()-new Date(m.em).getTime()<30*864e5?['Reagir',()=>waEscolherReacao(ev,m)]:null,
   m.t&&!['imagem','video','audio','figurinha'].includes(m.tipo)?['Copiar',()=>{navigator.clipboard.writeText(m.tipo==='contato'&&m.dados?m.t+' '+fmtTel(m.dados.telefone):m.t).then(()=>toast('Copiado.'),()=>toast('Não foi possível copiar.'));}]:null,
@@ -2769,7 +2771,7 @@ function bolhaReal(c,m){
   h+=`<div class="wz-txt">${escH(m.t&&!/^\[modelo /.test(m.t)?m.t:'')}</div>`;
   if(ft)h+=`<div class="wz-mrod">${escH(ft.text)}</div>`;
   if(bt&&bt.buttons)h+=`<div class="wz-mbts">${bt.buttons.map(b=>`<span>${escH(b.text)}</span>`).join('')}</div>`;}
- else if(m.tipo==='imagem'||m.tipo==='figurinha'){h+=u?`<img class="wz-img" src="${escH(u)}" alt="" onclick="window.open(this.src)">`:waDocHtml(m,null);if(m.legenda)h+=`<div class="wz-txt">${escH(m.legenda)}</div>`;}
+ else if(m.tipo==='imagem'||m.tipo==='figurinha'){h+=u?`<img class="wz-img" src="${escH(u)}" alt="" data-p="${escH(m.caminho||'')}" data-n="${escH(m.nomeArq||'foto.jpg')}" onclick="waVerImagem(this.src,this.dataset.n,this.dataset.p)">`:waDocHtml(m,null);if(m.legenda)h+=`<div class="wz-txt">${escH(m.legenda)}</div>`;}
  else if(m.tipo==='video'){h+=u?`<video class="wz-img" src="${escH(u)}" controls></video>`:waDocHtml(m,null);if(m.legenda)h+=`<div class="wz-txt">${escH(m.legenda)}</div>`;}
  else if(m.tipo==='audio'){h+=waAudioHtml(m,u);if(m.transcricao)h+=`<div class="wz-transc">${WZ.mic.replace('class="i"','')}<span>${escH(m.transcricao)}</span></div>`;}
  else if(m.tipo==='documento'){h+=waDocHtml(m,u);if(m.legenda)h+=`<div class="wz-txt" style="margin-top:5px">${escH(m.legenda)}</div>`;}
@@ -2783,8 +2785,12 @@ function bolhaReal(c,m){
  h+=`<button class="wz-bseta" title="Opções" onclick="waMenuMsg(event,'${m.id}')">${ICO_SETA}</button>`;
  return `<div class="wz-b ${cls}${reac.length?' reac':''}">${h}</div>`;}
 function waDocHtml(m,u){const [k,r]=waExt(m.nomeArq,m.tipo);const nome=m.nomeArq||({imagem:'Foto',video:'Vídeo',audio:'Áudio'}[m.tipo]||'Documento');
- return `<div class="wz-doc"><span class="wz-ext ico">${icone(waIco(m.nomeArq,m.tipo))}</span><div class="dn"><b>${escH(nome)}</b><span>${escH([r,waTam(m.tam)].filter(Boolean).join(' · '))}${u?'':m.midiaEstado&&m.midiaEstado!=='guardado'?' · baixando':''}</span></div><button class="wz-baixar" title="Baixar" ${u?`data-u="${escH(u)}" data-n="${escH(nome)}" onclick="waBaixarArq(this.dataset.u,this.dataset.n)"`:'disabled'}>${WZ.baixar}</button></div>`;}
-function waBaixarArq(u,n){if(!u)return;const a=document.createElement('a');a.href=u+(u.includes('?')?'&':'?')+'download='+encodeURIComponent(n||'arquivo');a.rel='noopener';document.body.appendChild(a);a.click();a.remove();}
+ return `<div class="wz-doc"><span class="wz-ext ico">${icone(waIco(m.nomeArq,m.tipo))}</span><div class="dn"><b>${escH(nome)}</b><span>${escH([r,waTam(m.tam)].filter(Boolean).join(' · '))}${u?'':m.midiaEstado&&m.midiaEstado!=='guardado'?' · baixando':''}</span></div><button class="wz-baixar" title="Baixar" ${m.caminho?`data-p="${escH(m.caminho)}" data-n="${escH(nome)}" onclick="waBaixarArq(this.dataset.p,this.dataset.n)"`:'disabled'}>${WZ.baixar}</button></div>`;}
+function waVerImagem(u,n,p){waModal('Foto',`<img src="${escH(u)}" alt="" style="display:block;max-width:100%;max-height:68vh;margin:0 auto;border-radius:10px"><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px"><button class="apubtn" onclick="fecharModal()">Fechar</button><button class="bt-assumir" data-p="${escH(p||u)}" data-n="${escH(n||'foto.jpg')}" onclick="waBaixarArq(this.dataset.p,this.dataset.n)">Baixar</button></div>`,760);}
+async function fiscalBaixar(u,n){toast('Baixando '+(n||'arquivo')+'…');const r=await fetch('/sistema/baixar',{method:'POST',headers:{'Content-Type':'application/json','X-Fiscal':'1'},body:JSON.stringify({url:u,nome:n||'arquivo'})}).then(x=>x.json()).catch(()=>null);
+ toast(r&&r.ok?'Salvo em Downloads: '+r.arquivo:'Não foi possível baixar o arquivo.');}
+async function waBaixarArq(p,n){if(!p)return;let u=p;if(!/^https?:/i.test(p)){const r=await sb.storage.from('wa-midia').createSignedUrl(p,600);if(r.error||!r.data){toast('Não foi possível baixar o arquivo.');return;}u=r.data.signedUrl;}
+ await fiscalBaixar(u,n);}
 function waDesenharMsgs(){
  const c=waConv(selWhats);const box=el('wwms');if(!c||!box)return;
  const t=(waBuscaMsg||'').trim().toLowerCase();
@@ -3178,6 +3184,7 @@ function waEmojiPainel(alvo){waFecharMenus();const t=alvo||el('wwin');if(!t)retu
  document.body.appendChild(m);const r=t.getBoundingClientRect();m.style.left=Math.max(8,Math.min(window.innerWidth-m.offsetWidth-8,r.left))+'px';m.style.top=Math.max(8,r.top-m.offsetHeight-8)+'px';
  setTimeout(()=>document.addEventListener('click',ev=>{if(!m.contains(ev.target))waFecharMenus();},{once:true}),0);}
 function waIrConversa(d){const l=waListaVisivel();if(!l.length)return;const i=l.findIndex(x=>x.id===selWhats);const n=l[(i+d+l.length)%l.length];if(n)waAbrir(n.id);}
+document.addEventListener('focusin',e=>{const a=e.composedPath?e.composedPath()[0]:e.target;if(a&&(a.tagName==='TEXTAREA'||a.tagName==='INPUT'||a.isContentEditable))a.spellcheck=false;},true);
 document.addEventListener('keydown',e=>{const a=e.target;if(e.key!=='Enter'||!e.ctrlKey||!e.shiftKey||!a||a.tagName!=='TEXTAREA')return;
  e.preventDefault();e.stopPropagation();const i=a.selectionStart,f=a.selectionEnd;a.value=a.value.slice(0,i)+'\n'+a.value.slice(f);a.selectionStart=a.selectionEnd=i+1;a.dispatchEvent(new Event('input',{bubbles:true}));},true);
 document.addEventListener('keydown',e=>{

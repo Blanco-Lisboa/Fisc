@@ -19,6 +19,7 @@ public class FiscalApplication {
     static volatile CefApp cef;
     static volatile CefBrowser navegador;
     static volatile TrayIcon bandeja;
+    static final java.util.Set<Integer> baixados = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     static void mostrar() {
         SwingUtilities.invokeLater(() -> {
@@ -112,6 +113,8 @@ public class FiscalApplication {
         builder.addJcefArgs("--disable-gpu", "--disable-gpu-compositing", "--disable-http-cache",
                 "--disk-cache-size=1", "--enable-media-stream", "--user-data-dir=" + perfil.getAbsolutePath(),
                 "--disable-background-timer-throttling", "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows");
+        String depurar = System.getProperty("fiscal.depurar");
+        if (depurar != null && depurar.matches("\\d{4,5}")) builder.addJcefArgs("--remote-debugging-port=" + depurar, "--remote-allow-origins=*");
 
         CefApp cefApp = builder.build();
         cef = cefApp;
@@ -121,13 +124,36 @@ public class FiscalApplication {
             public boolean onBeforeDownload(CefBrowser b, org.cef.callback.CefDownloadItem item, String nome,
                                             org.cef.callback.CefBeforeDownloadCallback cb) {
                 String n = (nome == null || nome.isBlank()) ? "arquivo" : nome.replaceAll("[\\\\/:*?\"<>|]", "_");
-                cb.Continue(new File(new File(System.getProperty("user.home"), "Downloads"), n).getAbsolutePath(), true);
+                File pasta = new File(System.getProperty("user.home"), "Downloads");
+                pasta.mkdirs();
+                File alvo = new File(pasta, n);
+                int ponto = n.lastIndexOf('.');
+                String base = ponto > 0 ? n.substring(0, ponto) : n, ext = ponto > 0 ? n.substring(ponto) : "";
+                for (int i = 1; alvo.exists(); i++) alvo = new File(pasta, base + " (" + i + ")" + ext);
+                cb.Continue(alvo.getAbsolutePath(), false);
                 return true;
             }
 
             @Override
             public void onDownloadUpdated(CefBrowser b, org.cef.callback.CefDownloadItem item, org.cef.callback.CefDownloadItemCallback cb) {
-                if (item != null && item.isComplete()) js("typeof toast==='function'&&toast('Arquivo salvo.')");
+                if (item == null || !item.isComplete() || !baixados.add(item.getId())) return;
+                File arq = new File(String.valueOf(item.getFullPath()));
+                String nome = arq.getName().replace("\\", "").replace("'", "\\'");
+                js("typeof toast==='function'&&toast('Salvo em Downloads: " + nome + "')");
+                new Thread(() -> {
+                    try { if (Desktop.isDesktopSupported()) Desktop.getDesktop().open(arq); } catch (Exception ignorado) { }
+                }, "abrir-arquivo").start();
+            }
+        });
+        client.addLifeSpanHandler(new org.cef.handler.CefLifeSpanHandlerAdapter() {
+            @Override
+            public boolean onBeforePopup(CefBrowser b, org.cef.browser.CefFrame f, String endereco, String nome) {
+                if (endereco != null && endereco.startsWith("https://")) {
+                    new Thread(() -> {
+                        try { if (Desktop.isDesktopSupported()) Desktop.getDesktop().browse(java.net.URI.create(endereco)); } catch (Exception ignorado) { }
+                    }, "abrir-link").start();
+                }
+                return true;
             }
         });
         CefBrowser browser = client.createBrowser(url, false, false);
