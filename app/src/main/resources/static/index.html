@@ -1667,7 +1667,7 @@ function teamsIniciar(){return teamsCarregar().then(ok=>ok&&TeamsIT.iniciar({ori
 function teamsModulo(){const c=el('conteudo');if(window.TeamsIT){TeamsIT.abrirModulo(c);return;}c.innerHTML='';teamsCarregar().then(ok=>{if(ok&&view==='teams')TeamsIT.abrirModulo(el('conteudo'));});}
 function teamsTela(){if(window.TeamsIT)TeamsIT.tela({bolinhaAlta:view==='whatsweb'});}
 /* ---------- modelos da Meta (WhatsApp e Apuração) ---------- */
-const MOD_TITULO={fiscal_solicitacao_xml:'Pedir XML do mês',fiscal_lembrete_urgente_xml:'Cobrar XML (urgente)',fiscal_confirmacao_movimento_mes:'Perguntar se teve notas no mês',fiscal_confirmacao_dados_apuracao:'Confirmar dados antes da apuração',fiscal_entrega_apuracao_mensal:'Enviar apuração e guia (DAS)',fiscal_aviso_declaracao_zerada:'Avisar declaração zerada',fiscal_aviso_vencimento_certificado:'Avisar vencimento do certificado',fiscal_boas_vindas_cliente:'Boas-vindas ao cliente novo',fiscal_difal_explicacao_decisao:'Explicar o ICMS DIFAL',fiscal_atualizacao_rotina_erp:'Avisar mudança na rotina do ERP',fiscal_aviso_alteracao_cadastral:'Avisar alteração cadastral',fiscal_pendencia_cadastral:'Cobrar pendência cadastral',fiscal_recibo_opcao_regime:'Enviar recibo da opção de regime',fiscal_reforma_tributaria_lembrete:'Lembrete da Reforma Tributária',fiscal_comunicado_institucional:'Comunicado da YOU',fiscal_divulgacao_servicos_grupo:'Divulgar serviços do grupo',fiscal_pesquisa_satisfacao:'Pesquisa de satisfação',fiscal_codigo_verificacao:'Código de verificação'};
+const MOD_TITULO={fiscal_solicitacao_xml:'Pedir XML do mês',fiscal_lembrete_urgente_xml:'Cobrar XML (urgente)',fiscal_confirmacao_movimento_mes:'Perguntar se teve notas no mês',fiscal_confirmacao_dados_apuracao:'Confirmar dados antes da apuração',fiscal_entrega_apuracao_mensal:'Enviar apuração e guia (DAS)',fiscal_aviso_declaracao_zerada:'Avisar declaração zerada',fiscal_aviso_vencimento_certificado:'Avisar vencimento do certificado',fiscal_boas_vindas_cliente:'Boas-vindas ao cliente novo',fiscal_difal_explicacao_decisao:'Explicar o ICMS DIFAL',fiscal_atualizacao_rotina_erp:'Avisar mudança na rotina do ERP',fiscal_aviso_alteracao_cadastral:'Avisar alteração cadastral',fiscal_pendencia_cadastral:'Cobrar pendência cadastral',fiscal_recibo_opcao_regime:'Enviar recibo da opção de regime',fiscal_reforma_tributaria_lembrete:'Lembrete da Reforma Tributária',fiscal_comunicado_institucional:'Comunicado da YOU',fiscal_divulgacao_servicos_grupo:'Divulgar serviços do grupo',fiscal_pesquisa_satisfacao:'Pesquisa de satisfação',fiscal_codigo_verificacao:'Código de verificação',fiscal_retomar_atendimento:'Retomar atendimento',fiscal_confirmar_envio_apuracao:'Confirmar envio da apuração',fiscal_xml_ou_sem_emissao:'Pedir XML ou informar sem emissão'};
 const MOD_CAT={UTILITY:['Utilidade','vd'],MARKETING:['Marketing','cz'],AUTHENTICATION:['Código','am']};
 let modLista=null,modCtx=null,modBusca='',modSel=null,modVals=[],modDoc=null;
 async function modCarregar(){const r=await sb.from('wa_modelo').select('nome,idioma,categoria,estado,componentes').eq('estado','APPROVED').eq('em_uso',true).order('nome');
@@ -1675,7 +1675,7 @@ async function modCarregar(){const r=await sb.from('wa_modelo').select('nome,idi
  modLista=(r.data||[]).filter(m=>m.nome!=='hello_world');return modLista;}
 function modParte(m,t){return (m.componentes||[]).find(c=>c.type===t)||null;}
 function modVars(m){const b=modParte(m,'BODY');const ex=(b&&b.example&&b.example.body_text&&b.example.body_text[0])||[];const n=((b&&b.text)||'').match(/\{\{\d+\}\}/g)||[];
- return [...new Set(n)].map(x=>+x.replace(/\D/g,'')).sort((a,b)=>a-b).map(i=>({i,ex:ex[i-1]||'',cod:m.categoria==='AUTHENTICATION',eu:['aqui é','Sou','realizado por'].some(w=>((b&&b.text)||'').includes(w+' {{'+i+'}}'))}));}
+ return [...new Set(n)].map(x=>+x.replace(/\D/g,'')).sort((a,b)=>a-b).map(i=>({i,ex:ex[i-1]||'',cod:m.categoria==='AUTHENTICATION',eu:['aqui é','sou','realizado por'].some(w=>((b&&b.text)||'').toLowerCase().includes(w+' {{'+i+'}}'))}));}
 function modPalpite(v,ctx){const e=String(v.ex);
  if(v.eu)return ((eu&&eu.nome)||'').split(' ')[0];
  if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return ctx.cnpj?fmtCnpj(ctx.cnpj):'';
@@ -1683,7 +1683,7 @@ function modPalpite(v,ctx){const e=String(v.ex);
  if(/^\d{2}\/\d{2}\/\d{4}$/.test(e)){const m=comp.mes+2>12?1:comp.mes+2,a=comp.mes+2>12?comp.ano+1:comp.ano;return '20/'+String(m).padStart(2,'0')+'/'+a;}
  if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e)&&ctx.empresa)return ctx.empresa;
  return '';}
-function modRotulo(v){const e=String(v.ex);if(v.cod)return 'Código';if(v.eu)return 'Seu nome';if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return 'CNPJ';if(/^[a-zç]+\/\d{4}$/i.test(e))return 'Mês';if(/^\d{2}\/\d{2}\/\d{4}$/.test(e))return 'Vencimento';if(/^R\$/.test(e))return 'Valor';if(/DAS|Relat[óo]rio|Guia|DARE/i.test(e))return 'Documentos';if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e))return 'Empresa';return 'Informação '+v.i;}
+function modRotulo(v){const e=String(v.ex);if(v.cod)return 'Código';if(v.eu)return 'Seu nome';if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return 'CNPJ';if(/^[a-zç]+\/\d{4}$/i.test(e))return 'Mês';if(/^\d{2}\/\d{2}\/\d{4}$/.test(e))return 'Vencimento';if(/^R\$/.test(e))return 'Valor';if(/DAS|Relat[óo]rio|Guia|DARE/i.test(e))return 'Documentos';if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e))return 'Empresa';if(/^(o|a|os|as) /i.test(e))return 'Assunto';if(v.i===1&&/^[A-ZÀ-Ú][a-zà-ú]+$/.test(e))return 'Nome do cliente';return 'Informação '+v.i;}
 function modTexto(m,vals){const b=modParte(m,'BODY');return ((b&&b.text)||'').replace(/\{\{(\d+)\}\}/g,(_,i)=>vals[+i-1]||'{{'+i+'}}');}
 function modBolha(m,vals,doc){const h=modParte(m,'HEADER'),f=modParte(m,'FOOTER'),bt=modParte(m,'BUTTONS');
  return apBolha({d:'sai',cab:h&&h.format==='TEXT'?h.text:null,doc:h&&h.format==='DOCUMENT'?(doc?doc.name:'Documento.pdf'):null,t:modTexto(m,vals||[]),rod:f?f.text:null,btns:bt?bt.buttons.map(x=>x.text):null,dt:'',h:''});}
@@ -2382,34 +2382,121 @@ function renderXml(){const linhas=[];
  el('conteudo').innerHTML=`<div class="tela"><h1>Radar de XML</h1><p class="intro">Chegada dos XMLs por plataforma na competência ${mesTxt()}. Pendente vira pedido (Flow) no WhatsApp.</p>
   <div class="tbwrap"><table><thead><tr><th>Cliente</th><th>Shopee</th><th>TikTok</th><th>Mercado Livre</th><th>Status</th><th></th></tr></thead><tbody>${linhas.map(l=>`<tr><td style="font-weight:600">${l.c}</td><td>${cell(l.sh)}</td><td>${cell(l.tk)}</td><td>${cell(l.ml)}</td><td>${l.s}</td><td><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="toast('Pedir XML (Flow) — demo')">Pedir XML</button></td></tr>`).join('')}</tbody></table></div></div>`;
 }
-/* esteiras — modelos reais de apuração + demandas CEO/Cúpula */
-const MODELOS_REAIS=[
- {nome:'MODELO PADRÃO V1',sub:'ERP · Prefeitura · SIEG · Domínio',qt:21,uso:'usado na maioria das lojas',passos:['Demonstrativo de ST','Recibo de Declaração','UPSELLER (ERP)','São Paulo (Prefeitura)','SIEG','Apuração no Sistema Domínio','DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST']},
- {nome:'MODELO V2',sub:'XML do cliente · Prefeitura · SIEG · Domínio',qt:21,uso:'quando o cliente manda o XML',passos:['Solicitar XML ao Cliente','São Paulo (Prefeitura)','SIEG','Apuração no Sistema Domínio','DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST','Demonstrativo de ST','Recibo de Declaração']},
- {nome:'Enviar Guia',sub:'pacote enviado ao cliente',qt:17,uso:'só o envio dos documentos',passos:['DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST','Demonstrativo de ST','Recibo de Declaração']},
- {nome:'Solicitar XML ao Cliente',sub:'tarefa única',qt:0,uso:'cobrar o XML',passos:[]},
- {nome:'SIEG',sub:'tarefa única',qt:0,uso:'importar XMLs',passos:[]},
- {nome:'Apuração no Sistema Domínio',sub:'tarefa única',qt:0,uso:'calcular no Domínio',passos:[]},
- {nome:'ICMS — GERAR DIFAL',sub:'tarefa única',qt:0,uso:'diferencial de alíquota',passos:[]},
- {nome:'DeSTDA',sub:'tarefa única',qt:0,uso:'obrigação ST mensal',passos:[]},
- {nome:'RBA',sub:'tarefa única',qt:0,uso:'conferir Relatório de Apuração',passos:[]},
-];
-let estAba='modelos',estOpen=null;
+/* esteiras */
+let estAba='modelos',estMods=[],estTar=[],estArv={},estEmp={},estUsu={},estMes=new Date().toISOString().slice(0,7),estEdit=null,estAp=null,estCanal=null,estCarregado=false,estTm=null,estBuscaTm=null;
+async function estCarregar(){
+ const m=await sb.from('modelos').select('id,nome,descricao,dono_tipo,status,criado_por').order('nome');
+ if(m.error){toast('Não foi possível ler os modelos.');return;}
+ estMods=m.data||[];
+ const t=await sb.from('apu_tarefa').select('id,empresa_id,etapa_id,modelo_id,ciclo_referencia,status_id,responsavel_id').eq('ciclo_referencia',estMes+'-01');
+ if(t.error){toast('Não foi possível ler as demandas.');return;}
+ estTar=t.data||[];
+ const ids=[...new Set([...estMods.map(x=>x.id),...estTar.map(x=>x.modelo_id)])];
+ const arv={};await Promise.all(ids.map(async id=>{const r=await sb.rpc('apu_modelo_arvore',{p_modelo:id});if(!r.error&&r.data)arv[id]=r.data;}));estArv=arv;
+ const faltam=[...new Set(estTar.map(x=>x.empresa_id))].filter(id=>!estEmp[id]);
+ if(faltam.length){const r=await sb.rpc('fiscal_empresas',{p_ids:faltam});(r.data||[]).forEach(e=>estEmp[e.empresa_id]=e);}
+ if(!Object.keys(estUsu).length){const u=await sb.from('fiscal_usuario').select('id,nome');(u.data||[]).forEach(x=>estUsu[x.id]=x.nome);}
+ estCarregado=true;
+ if(!estCanal)estCanal=sb.channel('fiscal-esteira').on('postgres_changes',{event:'*',schema:'public',table:'modelos'},estRecarregar).on('postgres_changes',{event:'*',schema:'public',table:'apu_tarefa'},estRecarregar).subscribe();
+}
+function estRecarregar(){clearTimeout(estTm);estTm=setTimeout(async()=>{await estCarregar();if(view==='esteiras'&&!modal)renderEst();},300);}
 function renderEst(){
- el('conteudo').innerHTML=`<div class="tela"><h1>Esteiras do Fiscal</h1><p class="intro">Os <b>modelos reais</b> que a equipe usa na apuração (vindos dos modelos de tarefa do escritório) e as demandas que chegam do CEO/Cúpula.</p>
-  <div class="subtabs"><button class="${estAba==='modelos'?'on':''}" onclick="estAba='modelos';render()">Modelos de apuração <span class="c">${MODELOS_REAIS.length}</span></button><button class="${estAba==='demandas'?'on':''}" onclick="estAba='demandas';render()">Demandas CEO/Cúpula <span class="c">${esteira.length}</span></button></div>
+ if(!estCarregado){el('conteudo').innerHTML='<div class="tela"><h1>Esteiras do Fiscal</h1></div>';estCarregar().then(()=>{if(view==='esteiras')renderEst();});return;}
+ el('conteudo').innerHTML=`<div class="tela"><h1>Esteiras do Fiscal</h1><p class="intro">Modelos de demanda do departamento e as demandas de cada cliente no mês.</p>
+  <div class="subtabs"><button class="${estAba==='modelos'?'on':''}" onclick="estAba='modelos';render()">Modelos de apuração <span class="c">${estMods.length}</span></button><button class="${estAba==='mes'?'on':''}" onclick="estAba='mes';render()">Demandas do mês <span class="c">${estTar.length}</span></button><button class="${estAba==='demandas'?'on':''}" onclick="estAba='demandas';render()">Demandas CEO/Cúpula <span class="c">${esteira.length}</span></button></div>
   <div id="estBody"></div></div>`;
- el('estBody').innerHTML = estAba==='modelos'? estModelos() : estDemandas();
+ el('estBody').innerHTML=estAba==='modelos'?estModelos():estAba==='mes'?estMesHtml():estDemandas();
 }
 function estModelos(){
- return `<div class="grade">${MODELOS_REAIS.map((m,i)=>`<div class="cardP" style="cursor:pointer" onclick="estOpen=estOpen===${i}?null:${i};render()">
-   <div class="top"><b class="disp" style="flex:1">${m.nome}</b>${m.qt?`<span class="tag t-util">${m.qt} tickets</span>`:'<span class="tag" style="background:var(--superf2);color:var(--apoio)">tarefa única</span>'}</div>
-   <div style="font-size:11.5px;color:var(--apoio)">${m.sub}</div>
-   <div style="font-size:11px;color:var(--apagado);margin-top:4px">${m.uso}</div>
-   ${estOpen===i&&m.passos.length?`<div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">${m.passos.map((p,j)=>`<div style="display:flex;gap:8px;align-items:center;font-size:11.5px"><span style="width:20px;height:20px;border-radius:999px;background:var(--superf2);color:var(--apoio);display:grid;place-items:center;font-size:10px;font-weight:700;flex:none">${j+1}</span>${p}</div>`).join('')}</div>`:''}
-   <div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="event.stopPropagation();estOpen=${estOpen===i?'null':i};render()">${estOpen===i?'Ocultar passos':'Ver passos'}</button>${m.qt?'<button class="miniB" onclick="event.stopPropagation();toast(\'Editar molde — só gestor (demo)\')">Editar molde 🔒</button>':''}</div>
-  </div>`).join('')}</div>`;
+ return `<div class="loteBar"><label>Modelos</label><button class="bwpp" onclick="estNovo()">Novo modelo</button></div>
+ <div class="grade">${estMods.map(m=>{const a=estArv[m.id]||{etapas:[]};const n=estTar.filter(t=>t.modelo_id===m.id).length;const of=m.dono_tipo==='oficial';
+  const edita=of?tem('editar_modelo_oficial'):a.meu;
+  return `<div class="cardP"><div class="top"><b class="disp" style="flex:1">${escH(m.nome)}</b><span class="tag ${of?'t-util':''}" ${of?'':'style="background:var(--superf2);color:var(--apoio)"'}>${of?'Oficial':'Pessoal'}</span></div>
+   ${m.descricao?`<div style="font-size:11.5px;color:var(--apoio)">${escH(m.descricao)}</div>`:''}
+   <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${a.etapas.map((e,j)=>`<div style="display:flex;gap:8px;align-items:flex-start;font-size:11.5px"><span style="width:20px;height:20px;border-radius:999px;background:var(--superf2);color:var(--apoio);display:grid;place-items:center;font-size:10px;font-weight:700;flex:none">${j+1}</span><div><div style="font-weight:600">${escH(e.titulo)}</div><div style="color:var(--apagado)">${e.fases.map(f=>escH(f.nome)).join(' → ')}</div></div></div>`).join('')}</div>
+   <div class="foot">${edita?`<button class="miniB" onclick="estEditar('${m.id}')">Editar</button>`:''}${tem('aplicar_modelo_cliente')?`<button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="estAplicarAbrir('${m.id}')">Aplicar em cliente</button>`:''}${n?`<span class="tag t-util">${n} no mês</span>`:''}</div></div>`;}).join('')}</div>`;
 }
+function estEtapaNova(){return {titulo:'',mensagem_envio:'',dias_mes:[],checklist:[],opcoes:[],fases:[{nome:'',exigir_justificativa:false,acoes:[]}]};}
+function estNovo(){estEdit={nome:'',descricao:'',dono_tipo:tem('criar_modelo_oficial')?'oficial':'pessoal',etapas:[estEtapaNova()]};estEditorAbrir();}
+function estEditar(id){const a=estArv[id];if(!a)return;estEdit=JSON.parse(JSON.stringify(a));estEditorAbrir();}
+function estEditorAbrir(){fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(880px,96vw)"><div class="mcab"><b>${estEdit.id?'Editar modelo':'Novo modelo'}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="estEdBody"></div><div class="mrod"><span></span><button class="bwpp" id="estSalvarB" onclick="estSalvar()">Salvar modelo</button></div></div>`;
+ document.body.appendChild(modal);estEditorRender();}
+function estV(p,v){const k=p.split('.');let o=estEdit;for(let i=0;i<k.length-1;i++)o=o[k[i]];o[k[k.length-1]]=v;}
+function estLinhas(s){return String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);}
+function estMover(i,d){const E=estEdit.etapas;[E[i],E[i+d]]=[E[i+d],E[i]];estEditorRender();}
+function estFaseRemover(i,j){const e=estEdit.etapas[i];e.fases.splice(j,1);e.fases.forEach(f=>(f.acoes||[]).forEach(a=>{if(a.mudar_para===j+1)a.mudar_para=null;else if(a.mudar_para>j+1)a.mudar_para--;}));estEditorRender();}
+function estEditorRender(){const E=estEdit;
+ el('estEdBody').innerHTML=`<label class="fl">Nome do modelo</label><input class="fi" value="${escH(E.nome)}" oninput="estV('nome',this.value)">
+ <label class="fl">Descrição</label><input class="fi" value="${escH(E.descricao)}" oninput="estV('descricao',this.value)">
+ ${E.id?'':`<label class="fl">Tipo</label><select class="fi" onchange="estV('dono_tipo',this.value)">${tem('criar_modelo_oficial')?`<option value="oficial" ${E.dono_tipo==='oficial'?'selected':''}>Oficial do departamento</option>`:''}<option value="pessoal" ${E.dono_tipo==='pessoal'?'selected':''}>Pessoal</option></select>`}
+ ${E.etapas.map((e,i)=>`<div class="cardP" style="margin-top:14px"><div class="top"><b class="disp" style="flex:1">Etapa ${i+1}</b>${i?`<button class="miniB" onclick="estMover(${i},-1)">↑</button>`:''}${i<E.etapas.length-1?`<button class="miniB" onclick="estMover(${i},1)">↓</button>`:''}${E.etapas.length>1?`<button class="miniB" onclick="estEdit.etapas.splice(${i},1);estEditorRender()">Remover</button>`:''}</div>
+  <div style="display:grid;grid-template-columns:1fr 140px;gap:10px"><div><label class="fl">Título</label><input class="fi" value="${escH(e.titulo)}" oninput="estV('etapas.${i}.titulo',this.value)"></div><div><label class="fl">Dia do mês</label><input class="fi" type="number" min="1" max="31" value="${(e.dias_mes||[])[0]||''}" oninput="estV('etapas.${i}.dias_mes',this.value?[+this.value]:[])"></div></div>
+  <label class="fl">Mensagem ao cliente</label><textarea class="fi" rows="2" oninput="estV('etapas.${i}.mensagem_envio',this.value)">${escH(e.mensagem_envio)}</textarea>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label class="fl">Checklist (um por linha)</label><textarea class="fi" rows="3" oninput="estV('etapas.${i}.checklist',estLinhas(this.value))">${escH((e.checklist||[]).join('\n'))}</textarea></div><div><label class="fl">Opções de escolha (uma por linha)</label><textarea class="fi" rows="3" oninput="estV('etapas.${i}.opcoes',estLinhas(this.value))">${escH((e.opcoes||[]).join('\n'))}</textarea></div></div>
+  <label class="fl">Fases</label>
+  ${e.fases.map((f,j)=>`<div style="border:1px solid var(--borda);border-radius:9px;padding:9px;margin-bottom:8px">
+    <div style="display:flex;gap:8px;align-items:center"><span class="tag" style="background:var(--superf2);color:var(--apoio)">${j+1}</span><input class="fi" style="flex:1" placeholder="Nome da fase" value="${escH(f.nome)}" oninput="estV('etapas.${i}.fases.${j}.nome',this.value)"><label style="font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap"><input type="checkbox" ${f.exigir_justificativa?'checked':''} onchange="estV('etapas.${i}.fases.${j}.exigir_justificativa',this.checked)">Pede justificativa</label>${e.fases.length>1?`<button class="miniB" onclick="estFaseRemover(${i},${j})">Remover</button>`:''}</div>
+    ${(f.acoes||[]).map((a,k)=>`<div style="display:flex;gap:6px;margin-top:6px;align-items:center"><input class="fi" style="flex:1" placeholder="Ação rápida" value="${escH(a.nome)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.nome',this.value)"><input class="fi" style="flex:2" placeholder="Mensagem" value="${escH(a.mensagem_texto)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.mensagem_texto',this.value)"><select class="fi" style="width:170px" onchange="estV('etapas.${i}.fases.${j}.acoes.${k}.mudar_para',this.value?+this.value:null)"><option value="">Fica na fase</option>${e.fases.map((g,x)=>`<option value="${x+1}" ${a.mudar_para===x+1?'selected':''}>Vai para ${x+1}${g.nome?' · '+escH(g.nome):''}</option>`).join('')}</select><button class="miniB" onclick="estEdit.etapas[${i}].fases[${j}].acoes.splice(${k},1);estEditorRender()">✕</button></div>`).join('')}
+    <button class="miniB" style="margin-top:6px" onclick="(estEdit.etapas[${i}].fases[${j}].acoes=estEdit.etapas[${i}].fases[${j}].acoes||[]).push({nome:'',mensagem_texto:'',mudar_para:null});estEditorRender()">+ Ação rápida</button></div>`).join('')}
+  <button class="miniB" onclick="estEdit.etapas[${i}].fases.push({nome:'',exigir_justificativa:false,acoes:[]});estEditorRender()">+ Fase</button></div>`).join('')}
+ <button class="miniB" style="margin-top:12px" onclick="estEdit.etapas.push(estEtapaNova());estEditorRender()">+ Etapa</button>`;}
+async function estSalvar(){const b=el('estSalvarB');b.disabled=true;
+ const r=await sb.rpc('apu_modelo_salvar',{p:estEdit});b.disabled=false;
+ if(r.error){toast(r.error.message);return;}
+ fecharModal();toast('Modelo salvo.');await estCarregar();render();}
+function estAplicarAbrir(id){const m=estMods.find(x=>x.id===id);estAp={modelo:id,sel:new Map(),achados:[]};fecharModal();
+ modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(640px,96vw)"><div class="mcab"><b>Aplicar — ${escH(m?m.nome:'')}</b><button class="x" onclick="fecharModal()">✕</button></div>
+  <div class="mbody"><label class="fl">Mês de referência</label><input class="fi" type="month" id="estApMes" oninput="estApRender()">
+   <label class="fl">Cliente</label><input class="fi" id="estApBusca" placeholder="Razão social, nome fantasia ou CNPJ" oninput="estApBuscar(this.value)"><div id="estApLista" style="margin-top:10px"></div></div>
+  <div class="mrod"><span id="estApQt" style="font-size:11.5px;color:var(--apagado)"></span><button class="bwpp" id="estApB" disabled onclick="estAplicarConfirmar()">Aplicar</button></div></div>`;
+ document.body.appendChild(modal);estApRender();setTimeout(()=>{const b=el('estApBusca');if(b)b.focus();},50);}
+function estApBuscar(v){clearTimeout(estBuscaTm);estBuscaTm=setTimeout(async()=>{if(String(v).trim().length<2){estAp.achados=[];estApRender();return;}
+ const r=await sb.rpc('fiscal_buscar_clientes',{p_texto:v});if(r.error){toast(r.error.message);return;}estAp.achados=r.data||[];estApRender();},300);}
+function estApTog(id){if(estAp.sel.has(id))estAp.sel.delete(id);else{if(!tem('aplicar_modelo_lote'))estAp.sel.clear();const e=estAp.achados.find(x=>x.empresa_id===id);if(e)estAp.sel.set(id,e);}estApRender();}
+function estApRender(){if(!el('estApLista'))return;
+ const sel=[...estAp.sel.values()];const outros=estAp.achados.filter(x=>!estAp.sel.has(x.empresa_id));
+ const card=(e,on)=>`<div class="cardP loteCard ${on?'sel':''}" style="cursor:pointer;margin-bottom:8px" onclick="estApTog('${e.empresa_id}')"><div class="top" style="margin:0"><span class="ckq">${on?'✓':''}</span><div style="flex:1"><div class="nm">${escH(e.razao_social||e.nome_fantasia||'')}</div><div style="font-size:11px;color:var(--apagado)">${escH(fmtCnpj(e.cnpj||''))}${e.nome_fantasia&&e.razao_social?' · '+escH(e.nome_fantasia):''}</div></div></div></div>`;
+ el('estApLista').innerHTML=sel.map(e=>card(e,true)).join('')+outros.map(e=>card(e,false)).join('');
+ const mes=(el('estApMes')||{}).value;const n=estAp.sel.size;
+ el('estApQt').textContent=n?n+(n>1?' clientes selecionados':' cliente selecionado'):'';
+ el('estApB').disabled=!n||!mes;}
+async function estAplicarConfirmar(){const mes=el('estApMes').value;const b=el('estApB');b.disabled=true;
+ const r=await sb.rpc('apu_modelo_aplicar',{p_modelo:estAp.modelo,p_empresas:[...estAp.sel.keys()],p_ciclo:mes+'-01'});
+ if(r.error){b.disabled=false;toast(r.error.message);return;}
+ fecharModal();toast((r.data.criadas||0)+' demanda(s) criada(s)'+(r.data.ja_existiam?' · '+r.data.ja_existiam+' já existia(m)':''));
+ estMes=mes;estAba='mes';await estCarregar();render();}
+function estLinhasMes(){return estTar.map(t=>{const a=estArv[t.modelo_id];const e=a&&a.etapas.find(x=>x.id===t.etapa_id);const f=e&&e.fases.find(x=>x.id===t.status_id);return {t,a,e,f,emp:estEmp[t.empresa_id]||{}};})
+ .sort((x,y)=>(x.emp.razao_social||'').localeCompare(y.emp.razao_social||'')||((x.a&&x.a.nome)||'').localeCompare((y.a&&y.a.nome)||''));}
+function estMesHtml(){
+ return `<div class="loteBar"><label>Mês</label><input type="month" value="${estMes}" onchange="if(this.value){estMes=this.value;estCarregar().then(render);}" style="border:1px solid var(--borda);border-radius:9px;padding:8px 11px;font-size:12.5px;font-family:inherit"></div>
+ <div class="tbwrap"><table><thead><tr><th>Cliente</th><th>Modelo</th><th>Etapa</th><th>Fase</th><th>Ações rápidas</th><th>Responsável</th><th></th></tr></thead><tbody>${estLinhasMes().map(({t,a,e,f,emp})=>`<tr>
+  <td style="font-weight:600">${escH(emp.razao_social||emp.nome_fantasia||'')}<div style="font-size:11px;color:var(--apagado);font-weight:400">${escH(fmtCnpj(emp.cnpj||''))}</div></td>
+  <td>${escH(a?a.nome:'')}</td><td>${escH(e?e.titulo:'')}</td>
+  <td>${e?`<select class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:6px 9px;font-size:12px;font-family:inherit" onchange="estFase('${t.id}',this.value)">${e.fases.map(x=>`<option value="${x.id}" ${x.id===t.status_id?'selected':''}>${escH(x.nome)}</option>`).join('')}</select>`:''}</td>
+  <td>${((f&&f.acoes)||[]).map(ac=>`<button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx);margin:2px" onclick="estAcao('${t.id}','${ac.id}')">${escH(ac.nome)}</button>`).join('')}</td>
+  <td>${escH(estUsu[t.responsavel_id]||'')}</td>
+  <td><button class="miniB" onclick="estHistorico('${t.id}')">Histórico</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function estFaseDe(tid,fid){const t=estTar.find(x=>x.id===tid);const a=t&&estArv[t.modelo_id];const e=a&&a.etapas.find(x=>x.id===t.etapa_id);return e&&e.fases.find(x=>x.id===fid);}
+async function estFase(tid,fid){const f=estFaseDe(tid,fid);
+ if(f&&f.exigir_justificativa){fecharModal();modal=document.createElement('div');modal.className='modal';
+  modal.innerHTML=`<div class="mcx"><div class="mcab"><b>${escH(f.nome)}</b><button class="x" onclick="fecharModal();renderEst()">✕</button></div><div class="mbody"><label class="fl">Justificativa</label><textarea class="fi" rows="3" id="estJust"></textarea></div><div class="mrod"><span></span><button class="bwpp" onclick="estFaseGravar('${tid}','${fid}',el('estJust').value)">Confirmar</button></div></div>`;
+  document.body.appendChild(modal);setTimeout(()=>el('estJust').focus(),50);return;}
+ estFaseGravar(tid,fid,null);}
+async function estFaseGravar(tid,fid,just){if(just!==null&&!String(just).trim()){toast('Escreva a justificativa.');return;}
+ const r=await sb.rpc('apu_tarefa_mudar_fase',{p_tarefa:tid,p_fase:fid,p_justificativa:just});
+ if(r.error){toast(r.error.message);renderEst();return;}
+ fecharModal();toast('Fase: '+r.data.fase);await estCarregar();renderEst();}
+async function estAcao(tid,aid){const r=await sb.rpc('apu_tarefa_mudar_fase',{p_tarefa:tid,p_fase:null,p_justificativa:null,p_acao:aid});
+ if(r.error){toast(r.error.message);return;}
+ toast('Fase: '+r.data.fase);await estCarregar();renderEst();}
+async function estHistorico(tid){const r=await sb.from('apu_tarefa_historico').select('descricao,justificativa,usuario_id,origem,created_at').eq('tarefa_id',tid).order('created_at',{ascending:false});
+ if(r.error){toast('Não foi possível ler o histórico.');return;}
+ fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(560px,96vw)"><div class="mcab"><b>Histórico</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody">${(r.data||[]).map(h=>`<div style="border-bottom:1px solid var(--borda);padding:8px 0;font-size:12.5px"><div style="font-weight:600">${escH(h.descricao||'')}</div>${h.justificativa?`<div style="color:var(--apoio)">${escH(h.justificativa)}</div>`:''}<div style="font-size:11px;color:var(--apagado)">${new Date(h.created_at).toLocaleString('pt-BR')} · ${escH(h.origem==='automatico'?'Automático':(estUsu[h.usuario_id]||''))}</div></div>`).join('')}</div></div>`;
+ document.body.appendChild(modal);}
 function estDemandas(){const cols=[['recebidas','Recebidas'],['andamento','Em andamento'],['validacao','Aguardando validação'],['concluidas','Concluídas']];
  return `<p class="intro" style="margin-top:-4px">Demandas dos CEOs (Adrian/Lucas/William) e da Cúpula, atreladas a um cliente. A IA sugere e resume, o humano decide.</p>
   <div class="kanban">${cols.map(([k,l])=>{const it=esteira.filter(e=>e.col===k);return `<div class="kcol" ondragover="event.preventDefault()" ondrop="dropEst('${k}')"><div class="kh">${l} <span class="pill" style="background:var(--superf2);color:var(--apoio)">${it.length}</span></div>
