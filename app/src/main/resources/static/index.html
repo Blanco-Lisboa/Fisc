@@ -1093,6 +1093,7 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="it" data-view="pessoal" onclick="irView('pessoal')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 4a6 6 0 0 1 6 6v3l1.5 3h-15L6 13v-3a6 6 0 0 1 6-6zM10 19a2 2 0 0 0 4 0"/></svg></span> <span id="navPessoal"></span></div>
   <div class="lab">FLUXO</div>
   <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd" id="estBadge" style="display:none"></span></div>
+  <div class="it" data-view="envios" id="navEnvios" style="display:none" onclick="irView('envios')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span> Envios Programados</div>
   <div class="lab">MENSAGENS</div>
   <div class="sub">
     <div class="it sem" data-view="email" onclick="irView('email')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></span> E-mail's <span class="bd" id="emBadge" style="display:none">0</span></div>
@@ -1239,14 +1240,14 @@ function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
 function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
 function prog(c){if(!c.etapas.some(e=>e.status))return null;const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
-const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
+const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',envios:'Envios Programados',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
 let acesso={perfil:'',tela_inicial:'apuracao',permissoes:[]};
 async function carregarAcesso(){const r=await sb.rpc('fiscal_minhas_permissoes');if(r.error){toast('Não foi possível ler as permissões.');return;}acesso=r.data||{perfil:'',tela_inicial:'apuracao',permissoes:[]};}
 function tem(p){return (acesso.permissoes||[]).includes(p);}
 function eGestor(){return acesso.perfil==='gestor';}
 function telaInicial(){return acesso.tela_inicial||'apuracao';}
-function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver')));}
-function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';}
+function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver'))||(v==='envios'&&!tem('wa_lote_gerir')));}
+function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';el('navEnvios').style.display=tem('wa_lote_gerir')?'':'none';}
 function irView(v){if(!podeVer(v))v=telaInicial();if(v==='apuracao'&&view!=='apuracao')railAba='cadastro';if(v==='whatsweb'&&view!=='whatsweb'){selWhats=null;waSemSelecao=true;}view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
 function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central',mapaDados=null,cartAberta=new Set();
@@ -1609,7 +1610,7 @@ function render(){
   el('crumbTitulo').textContent=TITULOS[view]||view;
   document.querySelector('.topo .crumb').style.display='none';
   document.querySelector('.topo').style.display='none';
-  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pessoal:renderPessoal,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,ia:renderIA,email:renderEmail,config:renderConfig}[view])();
+  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pessoal:renderPessoal,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,envios:renderEnvios,ia:renderIA,email:renderEmail,config:renderConfig}[view])();
   document.querySelectorAll('.wa-msgs').forEach(m=>m.scrollTop=m.scrollHeight);
   teamsTela();
 }
@@ -2617,6 +2618,126 @@ async function estHistorico(tid){const r=await sb.from('apu_tarefa_historico').s
  fecharModal();modal=document.createElement('div');modal.className='modal';
  modal.innerHTML=`<div class="mcx" style="width:min(560px,96vw)"><div class="mcab"><b>Histórico</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody">${(r.data||[]).map(h=>`<div style="border-bottom:1px solid var(--borda);padding:8px 0;font-size:12.5px"><div style="font-weight:600">${escH(h.descricao||'')}</div>${h.justificativa?`<div style="color:var(--apoio)">${escH(h.justificativa)}</div>`:''}<div style="font-size:11px;color:var(--apagado)">${new Date(h.created_at).toLocaleString('pt-BR')} · ${escH(h.origem==='automatico'?'Automático':(estUsu[h.usuario_id]||''))}</div></div>`).join('')}</div></div>`;
  document.body.appendChild(modal);}
+/* envios programados */
+let envQuandoGuardado='',envAba='envios',envLotes=[],envListas=[],envSaude=null,envModelos=[],envCarregado=false,envCanal=null,envTm=null,envEd=null,envLista=null,envListaItens=[];
+const ENV_ESTADO={rascunho:['Rascunho','neu'],agendado:['Agendado','and'],enviando:['Enviando','and'],aguardando_vaga:['Aguardando vaga','and'],aguardando_horario:['Fora do horário','and'],pausado:['Pausado','nao'],freio:['Parado por segurança','nao'],concluido:['Concluído','ok'],cancelado:['Cancelado','neu']};
+const ENV_FONTES=[['fixo','Valor fixo'],['quem_confirma','Quem confirmar o envio'],['responsavel_nome','Responsável da carteira'],['empresa_nome','Nome da empresa'],['empresa_cnpj','CNPJ da empresa'],['pessoa_nome','Nome do destinatário'],['pessoa_primeiro_nome','Primeiro nome do destinatário'],['mes_referencia','Mês de referência']];
+const ENV_SIT={ok:['Pronto','ok'],escolher:['Escolher destinatário','and'],sem_whatsapp:['Sem WhatsApp','nao'],empresa_inativa:['Empresa inativa','neu']};
+const ENV_PAPEL={quem_trata:'Quem trata',representante_legal:'Representante legal',titular:'Titular',socio:'Sócio',responsavel:'Responsável',familiar:'Familiar',funcionario:'Funcionário',terceiro:'Terceiro'};
+function envPill(e){const x=ENV_ESTADO[e]||[e,'neu'];return `<span class="mt-pl ${x[1]}">${escH(x[0])}</span>`;}
+function envMes(d){if(!d)return '';const [a,m]=String(d).split('-');return MESES[+m-1]+'/'+a;}
+function envData(d){return d?new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';}
+function envTitulo(nome){return (typeof MOD_TITULO!=='undefined'&&MOD_TITULO[nome])||String(nome||'').replace(/_/g,' ');}
+async function envCarregar(){
+ const [a,b,c]=await Promise.all([sb.rpc('wa_lotes'),sb.rpc('wa_listas'),sb.rpc('wa_lote_saude')]);
+ if(a.error||b.error){toast((a.error||b.error).message);return;}
+ envLotes=a.data||[];envListas=b.data||[];envSaude=c.data||null;envCarregado=true;
+ if(!envCanal)envCanal=sb.channel('fiscal-envios').on('postgres_changes',{event:'*',schema:'public',table:'wa_lote'},envRecarregar).on('postgres_changes',{event:'*',schema:'public',table:'wa_fila_saida'},envRecarregar).subscribe();}
+function envRecarregar(){clearTimeout(envTm);envTm=setTimeout(async()=>{await envCarregar();if(view==='envios'&&!modal)renderEnvios();},400);}
+function envSaudeHtml(){const s=envSaude||{};const q={GREEN:['Boa','ok'],YELLOW:['Média','and'],RED:['Baixa','nao']}[s.qualidade]||['Sem nota','neu'];
+ const lim={TIER_250:'250',TIER_1K:'1 mil',TIER_2K:'2 mil',TIER_10K:'10 mil',TIER_100K:'100 mil',TIER_UNLIMITED:'Sem limite'}[s.limite]||'—';
+ const dias=(s.dias||[]).length===5&&String(s.dias)==='1,2,3,4,5'?'seg a sex':(s.dias||[]).map(d=>['dom','seg','ter','qua','qui','sex','sáb'][d%7]).join(', ');
+ const c=(r,v,sub,cls)=>`<div class="cardP" style="padding:12px 14px"><div style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700">${r}</div><div style="font-size:18px;font-weight:700;margin-top:4px;font-family:var(--disp)">${v}</div>${sub?`<div style="font-size:11px;color:var(--apoio);margin-top:2px">${sub}</div>`:''}</div>`;
+ return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px">
+  ${c('Saúde do número',`<span class="mt-pl ${q[1]}">${q[0]}</span>`,s.bloqueado?'<span style="color:var(--vermelho)">Envios bloqueados</span>':(s.situacao==='CONNECTED'?'Conectado':escH(s.situacao||'')))}
+  ${c('Vagas nas últimas 24h',`${s.vagas??'—'} <span style="font-size:12px;color:var(--apagado);font-weight:500">de ${s.teto_24h??'—'}</span>`,`${s.usadas_24h??0} pessoas já receberam modelo`)}
+  ${c('Limite da Meta',lim+' por dia','')}
+  ${c('Horário de envio',escH(s.horario||'—'),dias)}</div>`;}
+function renderEnvios(){
+ if(!envCarregado){el('conteudo').innerHTML='<div class="tela"><h1>Envios Programados</h1></div>';envCarregar().then(()=>{if(view==='envios')renderEnvios();});return;}
+ const ativos=envLotes.filter(l=>!['rascunho','concluido','cancelado'].includes(l.estado)),rasc=envLotes.filter(l=>l.estado==='rascunho'),hist=envLotes.filter(l=>['concluido','cancelado'].includes(l.estado));
+ el('conteudo').innerHTML=`<div class="tela"><h1>Envios Programados</h1><p class="intro">Envio de modelos do WhatsApp para várias empresas de uma vez, com agendamento e acompanhamento.</p>
+  ${envSaudeHtml()}
+  <div class="subtabs"><button class="${envAba==='envios'?'on':''}" onclick="envAba='envios';render()">Envios <span class="c">${envLotes.length}</span></button><button class="${envAba==='listas'?'on':''}" onclick="envAba='listas';render()">Listas <span class="c">${envListas.length}</span></button></div>
+  <div id="envBody"></div></div>`;
+ el('envBody').innerHTML=envAba==='envios'?`<div class="loteBar"><label>Envios</label><button class="bwpp" onclick="envNovo()">Novo envio</button></div>
+   ${envSecao('Em andamento e agendados',ativos)}${envSecao('Rascunhos',rasc)}${envSecao('Histórico',hist)}`:envListasHtml();}
+function envSecao(t,l){if(!l.length)return '';return `<div style="font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin:18px 0 8px">${t}</div><div style="display:flex;flex-direction:column;gap:10px">${l.map(envCard).join('')}</div>`;}
+function envCard(l){const n=l.n||{};const tot=(n.aguardando||0)+(n.processando||0)+(n.enviado||0)+(n.erro||0);const pct=x=>tot?Math.round(100*x/tot):0;
+ const bar=tot?`<div style="display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--superf2);margin:10px 0 6px"><span style="width:${pct(n.lido)}%;background:var(--verde)"></span><span style="width:${pct((n.entregue||0)-(n.lido||0))}%;background:#7fc8a0"></span><span style="width:${pct((n.enviado||0)-(n.entregue||0))}%;background:var(--laranja)"></span><span style="width:${pct(n.erro)}%;background:var(--vermelho)"></span></div>`:'';
+ const num=(r,v,cor)=>`<span style="display:inline-flex;gap:4px;align-items:baseline;margin-right:14px;font-size:11.5px;color:var(--apoio)"><b style="font-size:13px;color:${cor||'var(--ink)'}">${v||0}</b>${r}</span>`;
+ const ac=[];if(l.estado==='rascunho'){ac.push(`<button class="miniB" onclick="envEditar('${l.id}')">Editar</button>`,`<button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="envConferir('${l.id}')">Conferir e confirmar</button>`,`<button class="miniB" onclick="envAcao('${l.id}','excluir_rascunho')">Apagar</button>`);}
+ else{ac.push(`<button class="miniB" onclick="envDetalhe('${l.id}')">Acompanhar</button>`);if(['agendado','enviando','aguardando_vaga','aguardando_horario'].includes(l.estado))ac.push(`<button class="miniB" onclick="envAcao('${l.id}','pausar')">Pausar</button>`);if(['pausado','freio'].includes(l.estado))ac.push(`<button class="miniB" onclick="envAcao('${l.id}','retomar')">Retomar</button>`);if(!['concluido','cancelado'].includes(l.estado))ac.push(`<button class="miniB" onclick="envAcao('${l.id}','cancelar')">Cancelar</button>`);}
+ return `<div class="cardP"><div class="top" style="margin-bottom:4px"><b class="disp" style="flex:1;font-size:14px">${escH(l.nome)}</b>${envPill(l.estado)}</div>
+  <div style="font-size:12px;color:var(--apoio)">${escH(envTitulo(l.modelo))} · lista <b>${escH(l.lista)}</b> · ${escH(envMes(l.referencia))}${l.agendado_para?' · '+(l.estado==='agendado'?'agendado para ':'início ')+escH(envData(l.agendado_para)):''}</div>
+  ${l.motivo?`<div style="font-size:11.5px;color:var(--vermelho);margin-top:4px">${escH(l.motivo)}</div>`:''}
+  ${bar}${l.estado!=='rascunho'?`<div>${num('na fila',n.aguardando)}${num('enviados',n.enviado,'var(--laranjaTx)')}${num('entregues',n.entregue,'#3d9a6b')}${num('lidos',n.lido,'var(--verde)')}${num('responderam',n.respondeu)}${num('falharam',n.erro,'var(--vermelho)')}${num('fora',n.fora,'var(--apagado)')}</div>`:''}
+  <div class="foot">${ac.join('')}<span style="margin-left:auto;font-size:11px;color:var(--apagado)">${escH(l.criado_por||'')} · ${escH(envData(l.criado_em))}</span></div></div>`;}
+async function envAcao(id,a,ok){if(a==='cancelar'&&!ok){waConfirmar('Cancelar este envio? O que já saiu não volta.','Cancelar envio',()=>envAcao(id,a,true));return;}
+ const r=await sb.rpc('wa_lote_acao',{p_lote:id,p_acao:a});if(r.error){toast(r.error.message);return;}toast({pausado:'Envio pausado.',agendado:'Envio retomado.',cancelado:'Envio cancelado.',apagado:'Rascunho apagado.'}[r.data]||'Feito.');await envCarregar();renderEnvios();}
+async function envModelosCarregar(){if(envModelos.length)return;const r=await sb.from('wa_modelo').select('id,nome,categoria,estado,em_uso,componentes').eq('estado','APPROVED').eq('em_uso',true).eq('categoria','UTILITY').order('nome');
+ envModelos=(r.data||[]).filter(m=>!(m.componentes||[]).some(c=>c.type==='HEADER'&&['IMAGE','VIDEO','DOCUMENT'].includes(c.format)));}
+function envVarsDe(m){const b=(m&&(m.componentes||[]).find(c=>c.type==='BODY'))||{};return [...new Set([...(b.text||'').matchAll(/\{\{(\d+)\}\}/g)].map(x=>+x[1]))].sort((a,b)=>a-b);}
+function envCorpo(m){const b=(m&&(m.componentes||[]).find(c=>c.type==='BODY'))||{};return b.text||'';}
+async function envNovo(){await envModelosCarregar();envEd={nome:'',lista_id:'',modelo_id:'',referencia:'',variaveis:{},um_por_telefone:true};envEditorAbrir();}
+async function envEditar(id){await envModelosCarregar();const l=envLotes.find(x=>x.id===id);if(!l)return;envEd={id:l.id,nome:l.nome,lista_id:l.lista_id,modelo_id:l.modelo_id,referencia:String(l.referencia).slice(0,7),variaveis:JSON.parse(JSON.stringify(l.variaveis||{})),um_por_telefone:l.um_por_telefone};envEditorAbrir();}
+function envEditorAbrir(){fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(940px,96vw)"><div class="mcab"><b>${envEd.id?'Editar envio':'Novo envio'}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="envEdBody"></div><div class="mrod"><span></span><div style="display:flex;gap:8px"><button class="miniB" onclick="envSalvar(false)">Salvar rascunho</button><button class="bwpp" onclick="envSalvar(true)">Salvar e conferir</button></div></div></div>`;
+ document.body.appendChild(modal);envEditorRender();}
+function envEditorRender(){const E=envEd;const m=envModelos.find(x=>x.id===E.modelo_id);const vs=envVarsDe(m);
+ let prev=escH(envCorpo(m));vs.forEach(k=>{const f=(E.variaveis[k]||{});const rot=f.fonte==='fixo'?(f.valor||'valor fixo'):(ENV_FONTES.find(x=>x[0]===f.fonte)||[0,'?'])[1];prev=prev.split('{{'+k+'}}').join(`<b style="background:var(--laranjaSv);color:var(--laranjaTx);border-radius:4px;padding:0 3px">${escH(rot)}</b>`);});
+ el('envEdBody').innerHTML=`<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px">
+  <div><label class="fl">Nome do envio</label><input class="fi" value="${escH(E.nome)}" placeholder="Ex.: Pedido de XML — outubro" oninput="envEd.nome=this.value">
+   <label class="fl">Lista de empresas</label><select class="fi" onchange="envEd.lista_id=this.value"><option value="">Escolha a lista…</option>${envListas.map(l=>`<option value="${l.id}" ${l.id===E.lista_id?'selected':''}>${escH(l.nome)} (${l.empresas})</option>`).join('')}</select>
+   <label class="fl">Modelo do WhatsApp</label><select class="fi" onchange="envEd.modelo_id=this.value;envEd.variaveis={};envEditorRender()"><option value="">Escolha o modelo…</option>${envModelos.map(x=>`<option value="${x.id}" ${x.id===E.modelo_id?'selected':''}>${escH(envTitulo(x.nome))}</option>`).join('')}</select>
+   <label class="fl">Mês de referência</label><input class="fi" type="month" value="${escH(E.referencia)}" oninput="envEd.referencia=this.value">
+   <label style="display:flex;gap:7px;align-items:center;font-size:12.5px;margin-top:12px"><input type="checkbox" ${E.um_por_telefone?'checked':''} onchange="envEd.um_por_telefone=this.checked">Uma mensagem por telefone (se o mesmo número cuida de várias empresas)</label></div>
+  <div>${m?`<label class="fl">O que vai em cada campo do modelo</label>${vs.map(k=>{const f=E.variaveis[k]||{};return `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><span class="tag" style="background:var(--superf2);color:var(--apoio);flex:none">{{${k}}}</span><select class="fi" style="flex:1" onchange="envEd.variaveis[${k}]={fonte:this.value,valor:''};envEditorRender()"><option value="">Escolha…</option>${ENV_FONTES.map(x=>`<option value="${x[0]}" ${f.fonte===x[0]?'selected':''}>${x[1]}</option>`).join('')}</select>${f.fonte==='fixo'?`<input class="fi" style="flex:1" value="${escH(f.valor||'')}" placeholder="Valor" oninput="envEd.variaveis[${k}].valor=this.value">`:''}</div>`;}).join('')}
+   <label class="fl">Como fica a mensagem</label><div class="cardP" style="white-space:pre-wrap;font-size:12.5px;background:#e7f7dc;border-color:#cfe9bf">${prev}</div>`:''}</div></div>`;}
+async function envSalvar(conferir){const E=envEd;const p={...E,referencia:E.referencia?E.referencia+'-01':''};
+ const r=await sb.rpc('wa_lote_salvar',{p});if(r.error){toast(r.error.message);return;}envEd.id=r.data;await envCarregar();
+ if(conferir)envConferir(r.data);else{fecharModal();toast('Rascunho salvo.');renderEnvios();}}
+async function envConferir(id){fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(820px,96vw)"><div class="mcab"><b>Conferir envio</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="envCfBody" style="min-height:120px"></div><div class="mrod"><button class="miniB" onclick="envEditar('${id}')">Voltar e editar</button><div style="display:flex;gap:8px;align-items:center"><label style="font-size:11.5px;color:var(--apoio)">Agendar para</label><input type="datetime-local" id="envQuando" class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:7px 9px;font-size:12px;font-family:inherit"><button class="bwpp" id="envCfB" disabled onclick="envConfirmar('${id}')">Confirmar envio</button></div></div></div>`;
+ document.body.appendChild(modal);
+ const r=await sb.rpc('wa_lote_previa',{p_lote:id});const b=el('envCfBody');if(!b)return;if(r.error){b.innerHTML='';toast(r.error.message);return;}
+ const v=r.data,f=v.fora||{};const fora=[['sem destinatário',f.sem_destinatario],['sem WhatsApp',f.sem_whatsapp],['mesmo telefone',f.mesmo_telefone],['empresa inativa',f.empresa_inativa]].filter(x=>x[1]);
+ b.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+   <div class="cardP" style="padding:12px"><div class="fl" style="margin:0">Empresas na lista</div><div style="font-size:22px;font-weight:700">${v.total}</div></div>
+   <div class="cardP" style="padding:12px;border-color:var(--verde)"><div class="fl" style="margin:0">Vão receber</div><div style="font-size:22px;font-weight:700;color:var(--verde)">${v.entram}</div></div>
+   <div class="cardP" style="padding:12px"><div class="fl" style="margin:0">Ficam de fora</div><div style="font-size:22px;font-weight:700;color:var(--apagado)">${v.total-v.entram}</div><div style="font-size:11px;color:var(--apoio)">${fora.map(x=>x[1]+' '+x[0]).join(' · ')}</div></div></div>
+  <label class="fl">Exemplos da mensagem</label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${(v.exemplos||[]).map(x=>`<div class="cardP" style="background:#e7f7dc;border-color:#cfe9bf;font-size:12px;white-space:pre-wrap"><div style="font-size:10.5px;font-weight:700;color:var(--apoio);margin-bottom:4px">${escH(x.empresa||'')}</div>${escH(x.texto||'')}</div>`).join('')}</div>`;
+ const bt=el('envCfB');if(bt)bt.disabled=!v.entram;}
+async function envConfirmar(id,ok){const q=el('envQuando')?el('envQuando').value:envQuandoGuardado;const quando=q?new Date(q).toISOString():null;
+ if(!ok){envQuandoGuardado=q;waConfirmar(quando?'Agendar este envio para '+envData(quando)+'?':'Confirmar este envio agora?',quando?'Agendar envio':'Confirmar envio',()=>envConfirmar(id,true));return;}
+ const r=await sb.rpc('wa_lote_confirmar',{p_lote:id,p_quando:quando});if(r.error){toast(r.error.message);return;}
+ fecharModal();toast(r.data.entram+' empresa(s) na fila de envio.');envAba='envios';await envCarregar();renderEnvios();}
+async function envDetalhe(id){const l=envLotes.find(x=>x.id===id);fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(940px,96vw)"><div class="mcab"><b>${escH(l?l.nome:'Envio')}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="envDtBody" style="min-height:120px">${l?envCard(l).replace(/<div class="foot">[\s\S]*<\/div><\/div>$/,'</div>'):''}<div id="envItens" style="margin-top:12px"></div></div></div>`;
+ document.body.appendChild(modal);
+ const r=await sb.rpc('wa_lote_itens',{p_lote:id});const b=el('envItens');if(!b)return;if(r.error){toast(r.error.message);return;}
+ const st={aguardando:['Na fila','and'],processando:['Enviando','and'],enviado:['Enviado','ok'],erro:['Falhou','nao'],cancelado:['Cancelado','neu'],fora:['Fora','neu']};
+ const ms={enviada:'Enviada',entregue:'Entregue',lida:'Lida',falhou:'Falhou'};
+ b.innerHTML=`<div class="tbwrap"><table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Situação</th><th>Motivo</th><th>Enviado em</th></tr></thead><tbody>${(r.data||[]).map(x=>{const s=st[x.estado]||[x.estado,'neu'];return `<tr><td style="font-weight:600">${escH(x.empresa||'')}</td><td>${escH(fmtCnpj(x.cnpj||''))}</td><td><span class="mt-pl ${s[1]}">${escH(ms[x.status]||s[0])}</span></td><td style="font-size:11.5px;color:var(--apoio)">${escH(x.motivo||'')}</td><td style="font-size:11.5px">${escH(envData(x.enviado_em))}</td></tr>`;}).join('')}</tbody></table></div>`;}
+function envListasHtml(){return `<div class="loteBar"><label>Listas</label><button class="bwpp" onclick="envListaNova()">Nova lista</button></div>
+ <div class="grade">${envListas.map(l=>`<div class="cardP" style="cursor:pointer" onclick="envListaAbrir('${l.id}')"><div class="top"><b class="disp" style="flex:1">${escH(l.nome)}</b><span class="tag t-util">${l.empresas} empresa${l.empresas===1?'':'s'}</span></div><div style="font-size:11.5px;color:var(--apoio)">${l.ultimo_envio?'Último envio '+escH(envData(l.ultimo_envio)):'Ainda sem envio'}</div></div>`).join('')}</div>`;}
+function envNomeModal(titulo,valor,fn){fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx"><div class="mcab"><b>${escH(titulo)}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody"><label class="fl">Nome</label><input class="fi" id="envNomeIn" value="${escH(valor||'')}"></div><div class="mrod"><span></span><button class="bwpp" id="envNomeOk">Salvar</button></div></div>`;
+ document.body.appendChild(modal);const i=el('envNomeIn');i.focus();i.onkeydown=ev=>{if(ev.key==='Enter')el('envNomeOk').click();};el('envNomeOk').onclick=()=>fn(i.value);}
+function envListaNova(){envNomeModal('Nova lista','',async n=>{const r=await sb.rpc('wa_lista_salvar',{p_id:null,p_nome:n});if(r.error){toast(r.error.message);return;}await envCarregar();envListaAbrir(r.data);});}
+async function envListaAbrir(id){envLista=envListas.find(x=>x.id===id)||{id,nome:''};fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(1000px,96vw);height:88vh"><div class="mcab"><b id="envLsTit">${escH(envLista.nome)}</b><button class="miniB" onclick="envListaRenomear()">Renomear</button><button class="miniB" onclick="envListaArquivar()">Arquivar</button><button class="x" onclick="fecharModal();renderEnvios()">✕</button></div>
+  <div class="mbody" style="flex:1"><div style="display:flex;gap:8px;align-items:flex-start"><textarea class="fi" id="envLsCnpjs" rows="2" style="flex:1" placeholder="Cole aqui os CNPJs (um por linha, ou separados por vírgula)"></textarea><button class="bwpp" onclick="envListaIncluir()">Incluir</button></div>
+  <div id="envLsCorpo" style="margin-top:12px"></div></div></div>`;
+ document.body.appendChild(modal);envListaCarregar();}
+async function envListaCarregar(){const b=el('envLsCorpo');if(!b)return;b.innerHTML='<div style="height:80px;border-radius:10px;background:var(--superf2)"></div>';
+ const r=await sb.rpc('wa_lista_ver',{p_lista:envLista.id});if(r.error){toast(r.error.message);return;}envListaItens=r.data||[];envListaRender();}
+function envListaRender(){const b=el('envLsCorpo');if(!b)return;const L=envListaItens;const esc=L.filter(x=>x.situacao==='escolher').length;
+ const cont=Object.keys(ENV_SIT).map(k=>[k,L.filter(x=>x.situacao===k).length]).filter(x=>x[1]);
+ b.innerHTML=`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">${cont.map(([k,n])=>`<span class="mt-pl ${ENV_SIT[k][1]}">${n} ${ENV_SIT[k][0].toLowerCase()}</span>`).join('')}${esc?`<span style="margin-left:auto;font-size:12px;color:var(--apoio)">Nas que faltam destinatário, usar</span><select class="fi" id="envLsPapel" style="width:190px"><option value="titular">o Titular</option><option value="representante_legal">o Representante legal</option><option value="socio">o Sócio</option><option value="responsavel">o Responsável</option></select><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="envListaPapelFaltam()">Aplicar</button>`:''}</div>
+ <div class="tbwrap"><table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Quem recebe</th><th>Telefone</th><th>Situação</th><th></th></tr></thead><tbody>${L.map(x=>{const s=ENV_SIT[x.situacao]||[x.situacao,'neu'];
+  const ops=(x.opcoes||[]).map((o,i)=>`<option value="${i}" ${o.pessoa_id&&o.pessoa_id===x.pessoa_id?'selected':''} ${o.tem_whatsapp?'':'disabled'}>${escH(o.nome)} · ${escH(ENV_PAPEL[o.papel]||o.papel)}${o.tem_whatsapp?'':' (sem WhatsApp)'}</option>`).join('');
+  return `<tr><td style="font-weight:600">${escH(x.razao_social||'')}</td><td>${escH(fmtCnpj(x.cnpj||''))}</td><td><select class="fi" style="min-width:240px;border:1px solid var(--borda);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit" onchange="envListaDestino('${x.empresa_id}',this.value)"><option value="" ${x.pessoa_id?'':'selected'}>${x.situacao==='escolher'?'Escolher…':'Padrão (quem trata)'}</option>${ops}</select></td><td style="font-size:12px">${escH(x.telefone||'')}</td><td><span class="mt-pl ${s[1]}">${escH(s[0])}</span></td><td><button class="miniB" onclick="envListaRemover('${x.empresa_id}')">✕</button></td></tr>`;}).join('')}</tbody></table></div>`;}
+async function envListaIncluir(){const t=el('envLsCnpjs').value;if(!t.trim())return;const r=await sb.rpc('wa_lista_incluir',{p_lista:envLista.id,p_texto:t,p_empresas:null});if(r.error){toast(r.error.message);return;}
+ el('envLsCnpjs').value='';const d=r.data;toast(`${d.incluidas} incluída(s)${d.ja_estavam?' · '+d.ja_estavam+' já estavam':''}${(d.nao_achados||[]).length?' · não achados: '+d.nao_achados.map(fmtCnpj).join(', '):''}`);envListaCarregar();}
+async function envListaDestino(emp,i){const x=envListaItens.find(y=>y.empresa_id===emp);const o=i===''?null:x.opcoes[+i];
+ const r=await sb.rpc('wa_lista_destino',{p_lista:envLista.id,p_empresas:[emp],p_papel:o?o.papel:null,p_pessoa:o?o.pessoa_id:null});if(r.error){toast(r.error.message);return;}envListaCarregar();}
+async function envListaPapelFaltam(){const papel=el('envLsPapel').value;const ids=envListaItens.filter(x=>x.situacao==='escolher').map(x=>x.empresa_id);
+ const r=await sb.rpc('wa_lista_destino',{p_lista:envLista.id,p_empresas:ids,p_papel:papel,p_pessoa:null});if(r.error){toast(r.error.message);return;}toast(r.data+' empresa(s) atualizada(s).');envListaCarregar();}
+async function envListaRemover(emp){const r=await sb.rpc('wa_lista_remover',{p_lista:envLista.id,p_empresas:[emp]});if(r.error){toast(r.error.message);return;}envListaItens=envListaItens.filter(x=>x.empresa_id!==emp);envListaRender();}
+function envListaRenomear(){const L=envLista;envNomeModal('Renomear lista',L.nome,async n=>{const r=await sb.rpc('wa_lista_salvar',{p_id:L.id,p_nome:n});if(r.error){toast(r.error.message);return;}await envCarregar();envListaAbrir(L.id);});}
+async function envListaArquivar(ok){if(!ok){waConfirmar('Arquivar esta lista? Ela some das listas, mas o histórico dos envios continua.','Arquivar lista',()=>envListaArquivar(true));return;}const r=await sb.rpc('wa_lista_arquivar',{p_id:envLista.id});if(r.error){toast(r.error.message);return;}fecharModal();await envCarregar();renderEnvios();}
+
 function estDemandas(){const cols=[['recebidas','Recebidas'],['andamento','Em andamento'],['validacao','Aguardando validação'],['concluidas','Concluídas']];
  return `<p class="intro" style="margin-top:-4px">Demandas dos CEOs (Adrian/Lucas/William) e da Cúpula, atreladas a um cliente. A IA sugere e resume, o humano decide.</p>
   <div class="kanban">${cols.map(([k,l])=>{const it=esteira.filter(e=>e.col===k);return `<div class="kcol" ondragover="event.preventDefault()" ondrop="dropEst('${k}')"><div class="kh">${l} <span class="pill" style="background:var(--superf2);color:var(--apoio)">${it.length}</span></div>
