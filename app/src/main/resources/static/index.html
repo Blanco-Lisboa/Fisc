@@ -1730,17 +1730,17 @@ async function modEnviar(){
  if(ok)fecharModal();else if(b)b.disabled=false;
 }
 async function waEnviarModelo(c,m,vals,doc,previa){
- const id_local=crypto.randomUUID();const comps=[];
- if(doc){const caminho=`${c.id}/saida/${id_local}.pdf`;const up=await sb.storage.from('wa-midia').upload(caminho,doc,{contentType:'application/pdf'});
+ const id_local=crypto.randomUUID();const comps=[];let arquivo;
+ if(doc){const caminho=`${c.id}/saida/${id_local}.pdf`;arquivo={caminho,nome:doc.name};const up=await sb.storage.from('wa-midia').upload(caminho,doc,{contentType:'application/pdf'});
   if(up.error){toast('Não foi possível subir o PDF.');return false;}
   const sg=await sb.storage.from('wa-midia').createSignedUrl(caminho,1800);if(sg.error){toast('Não foi possível preparar o PDF.');return false;}
   comps.push({type:'header',parameters:[{type:'document',document:{link:sg.data.signedUrl,filename:doc.name}}]});}
  if(vals.length)comps.push({type:'body',parameters:vals.map(t=>({type:'text',text:t}))});
  if(m.categoria==='AUTHENTICATION'&&vals.length)comps.push({type:'button',sub_type:'url',index:'0',parameters:[{type:'text',text:vals[0]}]});
  c.wpp.push({id:'tmp-'+id_local,id_local,tipo:'texto',d:'sai',t:previa,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]});waDesenharMsgs();
- const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo:'template',template:{nome:m.nome,idioma:m.idioma||'pt_BR',componentes:comps,previa}});
+ const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo:'template',arquivo,template:{nome:m.nome,idioma:m.idioma||'pt_BR',componentes:comps,previa}});
  if(!j.ok){const x=c.wpp.find(y=>y.id_local===id_local);if(x)x.st=j.incerto?'incerto':'falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar o modelo.');return false;}
- toast('Modelo enviado.');return true;
+ if(arquivo)setTimeout(()=>carregarMensagens(c.id),1200);toast('Modelo enviado.');return true;
 }
 async function waModelos(id,pref){
  const c=waConv(id);if(!c)return;const ctx={nome:c.nome,empresa:'',cnpj:'',enviar:(m,v,d,p)=>waEnviarModelo(c,m,v,d,p)};
@@ -2764,6 +2764,7 @@ function bolhaReal(c,m){
  if(m.modelo){const hd=md?modParte(md,'HEADER'):null,ft=md?modParte(md,'FOOTER'):null,bt=md?modParte(md,'BUTTONS'):null;
   h+=`<span class="wz-tag">▤ Modelo · ${escH(MOD_TITULO[m.modelo]||m.modelo.replace(/_/g,' '))}</span>`;
   if(hd&&hd.format==='TEXT')h+=`<div class="wz-mcab">${escH(hd.text)}</div>`;
+  if(m.caminho||(hd&&hd.format==='DOCUMENT'&&m.nomeArq))h+=waDocHtml(m,u);
   h+=`<div class="wz-txt">${escH(m.t&&!/^\[modelo /.test(m.t)?m.t:'')}</div>`;
   if(ft)h+=`<div class="wz-mrod">${escH(ft.text)}</div>`;
   if(bt&&bt.buttons)h+=`<div class="wz-mbts">${bt.buttons.map(b=>`<span>${escH(b.text)}</span>`).join('')}</div>`;}
@@ -3175,6 +3176,8 @@ function waEmojiPainel(alvo){waFecharMenus();const t=alvo||el('wwin');if(!t)retu
  document.body.appendChild(m);const r=t.getBoundingClientRect();m.style.left=Math.max(8,Math.min(window.innerWidth-m.offsetWidth-8,r.left))+'px';m.style.top=Math.max(8,r.top-m.offsetHeight-8)+'px';
  setTimeout(()=>document.addEventListener('click',ev=>{if(!m.contains(ev.target))waFecharMenus();},{once:true}),0);}
 function waIrConversa(d){const l=waListaVisivel();if(!l.length)return;const i=l.findIndex(x=>x.id===selWhats);const n=l[(i+d+l.length)%l.length];if(n)waAbrir(n.id);}
+document.addEventListener('keydown',e=>{const a=e.target;if(e.key!=='Enter'||!e.ctrlKey||!e.shiftKey||!a||a.tagName!=='TEXTAREA')return;
+ e.preventDefault();e.stopPropagation();const i=a.selectionStart,f=a.selectionEnd;a.value=a.value.slice(0,i)+'\n'+a.value.slice(f);a.selectionStart=a.selectionEnd=i+1;a.dispatchEvent(new Event('input',{bubbles:true}));},true);
 document.addEventListener('keydown',e=>{
  if(!waChatAberto())return;const k=(e.key||'').toLowerCase();const t=e.target;const c=selWhats&&waConv(selWhats);
  if(k==='escape'){if(document.querySelector('.wa-menu')){waFecharMenus();return;}if(document.querySelector('.modal')){fecharModal();return;}
