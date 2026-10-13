@@ -1092,7 +1092,7 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="it" data-view="apuracao" onclick="irView('apuracao')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 5h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM9.5 11l1.8 1.8L14.8 9.5M10 16h4"/></svg></span> Apuração</div>
   <div class="it" data-view="pessoal" onclick="irView('pessoal')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 4a6 6 0 0 1 6 6v3l1.5 3h-15L6 13v-3a6 6 0 0 1 6-6zM10 19a2 2 0 0 0 4 0"/></svg></span> <span id="navPessoal"></span></div>
   <div class="lab">FLUXO</div>
-  <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd">2</span></div>
+  <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd" id="estBadge" style="display:none"></span></div>
   <div class="lab">MENSAGENS</div>
   <div class="sub">
     <div class="it sem" data-view="email" onclick="irView('email')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></span> E-mail's <span class="bd" id="emBadge" style="display:none">0</span></div>
@@ -2478,34 +2478,145 @@ function renderXml(){const linhas=[];
  el('conteudo').innerHTML=`<div class="tela"><h1>Radar de XML</h1><p class="intro">Chegada dos XMLs por plataforma na competência ${mesTxt()}. Pendente vira pedido (Flow) no WhatsApp.</p>
   <div class="tbwrap"><table><thead><tr><th>Cliente</th><th>Shopee</th><th>TikTok</th><th>Mercado Livre</th><th>Status</th><th></th></tr></thead><tbody>${linhas.map(l=>`<tr><td style="font-weight:600">${l.c}</td><td>${cell(l.sh)}</td><td>${cell(l.tk)}</td><td>${cell(l.ml)}</td><td>${l.s}</td><td><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="toast('Pedir XML (Flow) — demo')">Pedir XML</button></td></tr>`).join('')}</tbody></table></div></div>`;
 }
-/* esteiras — modelos reais de apuração + demandas CEO/Cúpula */
-const MODELOS_REAIS=[
- {nome:'MODELO PADRÃO V1',sub:'ERP · Prefeitura · SIEG · Domínio',qt:21,uso:'usado na maioria das lojas',passos:['Demonstrativo de ST','Recibo de Declaração','UPSELLER (ERP)','São Paulo (Prefeitura)','SIEG','Apuração no Sistema Domínio','DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST']},
- {nome:'MODELO V2',sub:'XML do cliente · Prefeitura · SIEG · Domínio',qt:21,uso:'quando o cliente manda o XML',passos:['Solicitar XML ao Cliente','São Paulo (Prefeitura)','SIEG','Apuração no Sistema Domínio','DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST','Demonstrativo de ST','Recibo de Declaração']},
- {nome:'Enviar Guia',sub:'pacote enviado ao cliente',qt:17,uso:'só o envio dos documentos',passos:['DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST','Demonstrativo de ST','Recibo de Declaração']},
- {nome:'Solicitar XML ao Cliente',sub:'tarefa única',qt:0,uso:'cobrar o XML',passos:[]},
- {nome:'SIEG',sub:'tarefa única',qt:0,uso:'importar XMLs',passos:[]},
- {nome:'Apuração no Sistema Domínio',sub:'tarefa única',qt:0,uso:'calcular no Domínio',passos:[]},
- {nome:'ICMS — GERAR DIFAL',sub:'tarefa única',qt:0,uso:'diferencial de alíquota',passos:[]},
- {nome:'DeSTDA',sub:'tarefa única',qt:0,uso:'obrigação ST mensal',passos:[]},
- {nome:'RBA',sub:'tarefa única',qt:0,uso:'conferir Relatório de Apuração',passos:[]},
-];
-let estAba='modelos',estOpen=null;
+/* esteiras */
+let estAba='modelos',estMods=[],estTar=[],estArv={},estEmp={},estUsu={},estMes=new Date().toISOString().slice(0,7),estEdit=null,estAp=null,estCanal=null,estCarregado=false,estSel=0,estTm=null,estBuscaTm=null;
+async function estCarregar(){
+ const m=await sb.from('modelos').select('id,nome,descricao,dono_tipo,status,criado_por').order('nome');
+ if(m.error){toast('Não foi possível ler os modelos.');return;}
+ estMods=m.data||[];
+ const t=await sb.from('apu_tarefa').select('id,empresa_id,etapa_id,modelo_id,ciclo_referencia,status_id,responsavel_id,sugestao_fase_id,sugestao_texto,sugestao_em').eq('ciclo_referencia',estMes+'-01');
+ if(t.error){toast('Não foi possível ler as demandas.');return;}
+ estTar=t.data||[];
+ const ids=[...new Set([...estMods.map(x=>x.id),...estTar.map(x=>x.modelo_id)])];
+ const arv={};await Promise.all(ids.map(async id=>{const r=await sb.rpc('apu_modelo_arvore',{p_modelo:id});if(!r.error&&r.data)arv[id]=r.data;}));estArv=arv;
+ const faltam=[...new Set(estTar.map(x=>x.empresa_id))].filter(id=>!estEmp[id]);
+ if(faltam.length){const r=await sb.rpc('fiscal_empresas',{p_ids:faltam});(r.data||[]).forEach(e=>estEmp[e.empresa_id]=e);}
+ if(!Object.keys(estUsu).length){const u=await sb.from('fiscal_usuario').select('id,nome');(u.data||[]).forEach(x=>estUsu[x.id]=x.nome);}
+ estCarregado=true;
+ if(!estCanal)estCanal=sb.channel('fiscal-esteira').on('postgres_changes',{event:'*',schema:'public',table:'modelos'},estRecarregar).on('postgres_changes',{event:'*',schema:'public',table:'apu_tarefa'},estRecarregar).subscribe();
+}
+function estRecarregar(){clearTimeout(estTm);estTm=setTimeout(async()=>{await estCarregar();if(view==='esteiras'&&!modal)renderEst();},300);}
 function renderEst(){
- el('conteudo').innerHTML=`<div class="tela"><h1>Esteiras do Fiscal</h1><p class="intro">Os <b>modelos reais</b> que a equipe usa na apuração (vindos dos modelos de tarefa do escritório) e as demandas que chegam do CEO/Cúpula.</p>
-  <div class="subtabs"><button class="${estAba==='modelos'?'on':''}" onclick="estAba='modelos';render()">Modelos de apuração <span class="c">${MODELOS_REAIS.length}</span></button><button class="${estAba==='demandas'?'on':''}" onclick="estAba='demandas';render()">Demandas CEO/Cúpula <span class="c">${esteira.length}</span></button></div>
+ if(!estCarregado){el('conteudo').innerHTML='<div class="tela"><h1>Esteiras do Fiscal</h1></div>';estCarregar().then(()=>{if(view==='esteiras')renderEst();});return;}
+ el('conteudo').innerHTML=`<div class="tela"><h1>Esteiras do Fiscal</h1><p class="intro">Modelos de demanda do departamento e as demandas de cada cliente no mês.</p>
+  <div class="subtabs"><button class="${estAba==='modelos'?'on':''}" onclick="estAba='modelos';render()">Modelos de apuração <span class="c">${estMods.length}</span></button><button class="${estAba==='mes'?'on':''}" onclick="estAba='mes';render()">Demandas do mês <span class="c">${estTar.length}</span></button><button class="${estAba==='demandas'?'on':''}" onclick="estAba='demandas';render()">Demandas CEO/Cúpula <span class="c">${esteira.length}</span></button></div>
   <div id="estBody"></div></div>`;
- el('estBody').innerHTML = estAba==='modelos'? estModelos() : estDemandas();
+ el('estBody').innerHTML=estAba==='modelos'?estModelos():estAba==='mes'?estMesHtml():estDemandas();
 }
 function estModelos(){
- return `<div class="grade">${MODELOS_REAIS.map((m,i)=>`<div class="cardP" style="cursor:pointer" onclick="estOpen=estOpen===${i}?null:${i};render()">
-   <div class="top"><b class="disp" style="flex:1">${m.nome}</b>${m.qt?`<span class="tag t-util">${m.qt} tickets</span>`:'<span class="tag" style="background:var(--superf2);color:var(--apoio)">tarefa única</span>'}</div>
-   <div style="font-size:11.5px;color:var(--apoio)">${m.sub}</div>
-   <div style="font-size:11px;color:var(--apagado);margin-top:4px">${m.uso}</div>
-   ${estOpen===i&&m.passos.length?`<div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">${m.passos.map((p,j)=>`<div style="display:flex;gap:8px;align-items:center;font-size:11.5px"><span style="width:20px;height:20px;border-radius:999px;background:var(--superf2);color:var(--apoio);display:grid;place-items:center;font-size:10px;font-weight:700;flex:none">${j+1}</span>${p}</div>`).join('')}</div>`:''}
-   <div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="event.stopPropagation();estOpen=${estOpen===i?'null':i};render()">${estOpen===i?'Ocultar passos':'Ver passos'}</button>${m.qt?'<button class="miniB" onclick="event.stopPropagation();toast(\'Editar molde — só gestor (demo)\')">Editar molde 🔒</button>':''}</div>
-  </div>`).join('')}</div>`;
+ return `<div class="loteBar"><label>Modelos</label><button class="bwpp" onclick="estNovo()">Novo modelo</button></div>
+ <div class="grade">${estMods.map(m=>{const a=estArv[m.id]||{etapas:[]};const n=estTar.filter(t=>t.modelo_id===m.id).length;const of=m.dono_tipo==='oficial';
+  const edita=of?tem('editar_modelo_oficial'):a.meu;
+  return `<div class="cardP"><div class="top"><b class="disp" style="flex:1">${escH(m.nome)}</b><span class="tag ${of?'t-util':''}" ${of?'':'style="background:var(--superf2);color:var(--apoio)"'}>${of?'Oficial':'Pessoal'}</span></div>
+   ${m.descricao?`<div style="font-size:11.5px;color:var(--apoio)">${escH(m.descricao)}</div>`:''}
+   <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${a.etapas.map((e,j)=>`<div style="display:flex;gap:8px;align-items:flex-start;font-size:11.5px"><span style="width:20px;height:20px;border-radius:999px;background:var(--superf2);color:var(--apoio);display:grid;place-items:center;font-size:10px;font-weight:700;flex:none">${j+1}</span><div><div style="font-weight:600">${escH(e.titulo)}</div><div style="color:var(--apagado)">${e.fases.map(f=>escH(f.nome)).join(' → ')}</div></div></div>`).join('')}</div>
+   <div class="foot">${edita?`<button class="miniB" onclick="estEditar('${m.id}')">Editar</button>`:''}${tem('aplicar_modelo_cliente')?`<button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="estAplicarAbrir('${m.id}')">Aplicar em cliente</button>`:''}${n?`<span class="tag t-util">${n} no mês</span>`:''}</div></div>`;}).join('')}</div>`;
 }
+function estEtapaNova(){return {titulo:'',mensagem_envio:'',dias_mes:[],checklist:[],opcoes:[],fases:[{nome:'',exigir_justificativa:false,acoes:[]}]};}
+function estNovo(){estEdit={nome:'',descricao:'',dono_tipo:tem('criar_modelo_oficial')?'oficial':'pessoal',etapas:[estEtapaNova()]};estEditorAbrir();}
+function estEditar(id){const a=estArv[id];if(!a)return;estEdit=JSON.parse(JSON.stringify(a));estEditorAbrir();}
+function estEditorAbrir(){fecharModal();estSel=0;modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(1120px,96vw);height:88vh"><div class="mcab"><b>${estEdit.id?'Editar modelo':'Novo modelo'}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="estEd"><div class="lado" id="estEdLado"></div><div class="principal" id="estEdBody"></div></div><div class="mrod"><span></span><button class="bwpp" id="estSalvarB" onclick="estSalvar()">Salvar modelo</button></div></div>`;
+ document.body.appendChild(modal);estEditorRender();}
+function estV(p,v){const k=p.split('.');let o=estEdit;for(let i=0;i<k.length-1;i++)o=o[k[i]];o[k[k.length-1]]=v;}
+function estLinhas(s){return String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);}
+function estMover(i,d){const E=estEdit.etapas;[E[i],E[i+d]]=[E[i+d],E[i]];estSel=i+d;estEditorRender();}
+function estEtapaRemover(i){estEdit.etapas.splice(i,1);estSel=Math.max(0,Math.min(estSel,estEdit.etapas.length-1));estEditorRender();}
+function estFaseRemover(i,j){const e=estEdit.etapas[i];e.fases.splice(j,1);e.fases.forEach(f=>(f.acoes||[]).forEach(a=>{if(a.mudar_para===j+1)a.mudar_para=null;else if(a.mudar_para>j+1)a.mudar_para--;}));estEditorRender();}
+function estLadoHtml(){const E=estEdit;
+ return `<div class="rot" style="margin-top:0">Modelo</div><input class="fi" placeholder="Nome do modelo" value="${escH(E.nome)}" oninput="estV('nome',this.value)">
+ <input class="fi" placeholder="Descrição" value="${escH(E.descricao)}" oninput="estV('descricao',this.value)">
+ ${E.id?`<span class="chip" style="align-self:flex-start">${E.dono_tipo==='oficial'?'Oficial do departamento':'Pessoal'}</span>`:`<select class="fi" onchange="estV('dono_tipo',this.value)">${tem('criar_modelo_oficial')?`<option value="oficial" ${E.dono_tipo==='oficial'?'selected':''}>Oficial do departamento</option>`:''}<option value="pessoal" ${E.dono_tipo==='pessoal'?'selected':''}>Pessoal</option></select>`}
+ <div class="rot">Etapas</div>
+ ${E.etapas.map((e,i)=>`<div class="etp ${i===estSel?'on':''}" onclick="estSel=${i};estEditorRender()"><span class="num">${i+1}</span><div style="flex:1;min-width:0"><div class="t" id="estLadoT${i}">${escH(e.titulo)||'Sem título'}</div><div class="s">${e.fases.length} fase${e.fases.length>1?'s':''}${(e.dias_mes||[])[0]?' · dia '+e.dias_mes[0]:''}</div></div></div>`).join('')}
+ <button class="add" onclick="estEdit.etapas.push(estEtapaNova());estSel=estEdit.etapas.length-1;estEditorRender()">+ Nova etapa</button>`;}
+function estAvancoHtml(i,j,f){const av=f.avanco||'manual';
+ return `<div class="avc"><span class="rot" style="margin:0">Como chega aqui</span><select class="fi" style="width:300px" onchange="estV('etapas.${i}.fases.${j}.avanco',this.value);estEditorRender()"><option value="manual" ${av==='manual'?'selected':''}>O usuário muda</option><option value="automatico_arquivo_detectado" ${av==='automatico_arquivo_detectado'?'selected':''}>Sugerida quando o cliente manda arquivo</option><option value="automatico_mensagem_recebida" ${av==='automatico_mensagem_recebida'?'selected':''}>Sugerida quando o cliente responde</option></select>${av==='automatico_arquivo_detectado'?`<input class="fi" placeholder="Tipos de arquivo (ex.: xml, zip)" value="${escH(f.avanco_padrao_arquivo)}" oninput="estV('etapas.${i}.fases.${j}.avanco_padrao_arquivo',this.value)">`:''}${av==='automatico_mensagem_recebida'?`<input class="fi" placeholder="Resposta do cliente (ex.: Não tive emissão)" value="${escH(f.avanco_resposta)}" oninput="estV('etapas.${i}.fases.${j}.avanco_resposta',this.value)">`:''}</div>`;}
+function estFluxoHtml(e){return e.fases.map((f,j)=>`<span class="chip ${j===0?'ini':''}">${j+1}. ${escH(f.nome)||'—'}</span>`).join('<span class="seta">→</span>');}
+function estFluxoAtualizar(i){const x=el('estFluxo');if(x)x.innerHTML=estFluxoHtml(estEdit.etapas[i]);}
+function estEditorRender(){const E=estEdit;if(!el('estEdBody'))return;el('estEdLado').innerHTML=estLadoHtml();
+ const i=estSel,e=E.etapas[i];if(!e){el('estEdBody').innerHTML='';return;}
+ el('estEdBody').innerHTML=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px"><span class="num" style="width:34px;height:34px;font-size:14px;background:var(--laranja);color:#fff">${i+1}</span>
+  <input class="fi titEt" placeholder="Título da etapa" value="${escH(e.titulo)}" oninput="estV('etapas.${i}.titulo',this.value);el('estLadoT${i}').textContent=this.value||'Sem título'">
+  ${i?`<button class="lixo" title="Subir" onclick="estMover(${i},-1)">↑</button>`:''}${i<E.etapas.length-1?`<button class="lixo" title="Descer" onclick="estMover(${i},1)">↓</button>`:''}${E.etapas.length>1?`<button class="lixo" title="Remover etapa" onclick="estEtapaRemover(${i})">${icone('excluir')}</button>`:''}</div>
+ <div class="grid2"><div class="bloco"><h4>Quando</h4><div style="display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--apoio)">Todo mês, no dia <input class="fi" type="number" min="1" max="31" style="width:80px" value="${(e.dias_mes||[])[0]||''}" oninput="estV('etapas.${i}.dias_mes',this.value?[+this.value]:[])"></div></div>
+  <div class="bloco"><h4>Mensagem ao cliente</h4><textarea class="fi" rows="2" oninput="estV('etapas.${i}.mensagem_envio',this.value)">${escH(e.mensagem_envio)}</textarea></div></div>
+ <div class="bloco"><h4>Caminho da demanda</h4><div class="fluxo" id="estFluxo">${estFluxoHtml(e)}</div>
+  ${e.fases.map((f,j)=>`<div class="fase"><span class="num">${j+1}</span><div class="fcx">
+   <div class="fcab"><input class="fi" placeholder="Nome da fase" value="${escH(f.nome)}" oninput="estV('etapas.${i}.fases.${j}.nome',this.value);estFluxoAtualizar(${i})">
+    <label class="chave"><input type="checkbox" ${f.exigir_justificativa?'checked':''} onchange="estV('etapas.${i}.fases.${j}.exigir_justificativa',this.checked)">Pede justificativa</label>
+    ${e.fases.length>1?`<button class="lixo" title="Remover fase" onclick="estFaseRemover(${i},${j})">${icone('excluir')}</button>`:''}</div>${j?estAvancoHtml(i,j,f):''}
+   ${(f.acoes||[]).map((a,k)=>`<div class="acao"><div class="lin"><span class="rot" style="margin:0">Ação rápida</span><input class="fi bt" placeholder="Nome do botão" value="${escH(a.nome)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.nome',this.value)">
+     <span class="seta">depois vai para</span><select class="fi" style="width:190px" onchange="estV('etapas.${i}.fases.${j}.acoes.${k}.mudar_para',this.value?+this.value:null)"><option value="">Fica nesta fase</option>${e.fases.map((g,x)=>`<option value="${x+1}" ${a.mudar_para===x+1?'selected':''}>${x+1}. ${escH(g.nome)}</option>`).join('')}</select>
+     <button class="lixo" title="Remover ação" onclick="estEdit.etapas[${i}].fases[${j}].acoes.splice(${k},1);estEditorRender()">${icone('excluir')}</button></div>
+    <input class="fi" style="margin-top:8px" placeholder="Mensagem enviada ao cliente" value="${escH(a.mensagem_texto)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.mensagem_texto',this.value)"></div>`).join('')}
+   <button class="add" style="margin-top:10px" onclick="(estEdit.etapas[${i}].fases[${j}].acoes=estEdit.etapas[${i}].fases[${j}].acoes||[]).push({nome:'',mensagem_texto:'',mudar_para:null});estEditorRender()">+ Ação rápida</button></div></div>`).join('')}
+  <button class="add" style="margin-left:38px" onclick="estEdit.etapas[${i}].fases.push({nome:'',exigir_justificativa:false,acoes:[]});estEditorRender()">+ Nova fase</button></div>
+ <div class="grid2"><div class="bloco"><h4>Checklist</h4><textarea class="fi" rows="4" placeholder="Um item por linha" oninput="estV('etapas.${i}.checklist',estLinhas(this.value))">${escH((e.checklist||[]).join('\n'))}</textarea></div>
+  <div class="bloco"><h4>Opções de escolha</h4><textarea class="fi" rows="4" placeholder="Uma opção por linha" oninput="estV('etapas.${i}.opcoes',estLinhas(this.value))">${escH((e.opcoes||[]).join('\n'))}</textarea></div></div>`;}
+async function estSalvar(){const b=el('estSalvarB');b.disabled=true;
+ const r=await sb.rpc('apu_modelo_salvar',{p:estEdit});b.disabled=false;
+ if(r.error){toast(r.error.message);return;}
+ fecharModal();toast('Modelo salvo.');await estCarregar();render();}
+function estAplicarAbrir(id){const m=estMods.find(x=>x.id===id);estAp={modelo:id,sel:new Map(),achados:[]};fecharModal();
+ modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(640px,96vw)"><div class="mcab"><b>Aplicar — ${escH(m?m.nome:'')}</b><button class="x" onclick="fecharModal()">✕</button></div>
+  <div class="mbody"><label class="fl">Mês de referência</label><input class="fi" type="month" id="estApMes" oninput="estApRender()">
+   <label class="fl">Cliente</label><input class="fi" id="estApBusca" placeholder="Razão social, nome fantasia ou CNPJ" oninput="estApBuscar(this.value)"><div id="estApLista" style="margin-top:10px"></div></div>
+  <div class="mrod"><span id="estApQt" style="font-size:11.5px;color:var(--apagado)"></span><button class="bwpp" id="estApB" disabled onclick="estAplicarConfirmar()">Aplicar</button></div></div>`;
+ document.body.appendChild(modal);estApRender();setTimeout(()=>{const b=el('estApBusca');if(b)b.focus();},50);}
+function estApBuscar(v){clearTimeout(estBuscaTm);estBuscaTm=setTimeout(async()=>{if(String(v).trim().length<2){estAp.achados=[];estApRender();return;}
+ const r=await sb.rpc('fiscal_buscar_clientes',{p_texto:v});if(r.error){toast(r.error.message);return;}estAp.achados=r.data||[];estApRender();},300);}
+function estApTog(id){if(estAp.sel.has(id))estAp.sel.delete(id);else{if(!tem('aplicar_modelo_lote'))estAp.sel.clear();const e=estAp.achados.find(x=>x.empresa_id===id);if(e)estAp.sel.set(id,e);}estApRender();}
+function estApRender(){if(!el('estApLista'))return;
+ const sel=[...estAp.sel.values()];const outros=estAp.achados.filter(x=>!estAp.sel.has(x.empresa_id));
+ const card=(e,on)=>`<div class="cardP loteCard ${on?'sel':''}" style="cursor:pointer;margin-bottom:8px" onclick="estApTog('${e.empresa_id}')"><div class="top" style="margin:0"><span class="ckq">${on?'✓':''}</span><div style="flex:1"><div class="nm">${escH(e.razao_social||e.nome_fantasia||'')}</div><div style="font-size:11px;color:var(--apagado)">${escH(fmtCnpj(e.cnpj||''))}${e.nome_fantasia&&e.razao_social?' · '+escH(e.nome_fantasia):''}</div></div></div></div>`;
+ el('estApLista').innerHTML=sel.map(e=>card(e,true)).join('')+outros.map(e=>card(e,false)).join('');
+ const mes=(el('estApMes')||{}).value;const n=estAp.sel.size;
+ el('estApQt').textContent=n?n+(n>1?' clientes selecionados':' cliente selecionado'):'';
+ el('estApB').disabled=!n||!mes;}
+async function estAplicarConfirmar(){const mes=el('estApMes').value;const b=el('estApB');b.disabled=true;
+ const r=await sb.rpc('apu_modelo_aplicar',{p_modelo:estAp.modelo,p_empresas:[...estAp.sel.keys()],p_ciclo:mes+'-01'});
+ if(r.error){b.disabled=false;toast(r.error.message);return;}
+ fecharModal();toast((r.data.criadas||0)+' demanda(s) criada(s)'+(r.data.ja_existiam?' · '+r.data.ja_existiam+' já existia(m)':''));
+ estMes=mes;estAba='mes';await estCarregar();render();}
+function estLinhasMes(){return estTar.map(t=>{const a=estArv[t.modelo_id];const e=a&&a.etapas.find(x=>x.id===t.etapa_id);const f=e&&e.fases.find(x=>x.id===t.status_id);return {t,a,e,f,emp:estEmp[t.empresa_id]||{}};})
+ .sort((x,y)=>(x.emp.razao_social||'').localeCompare(y.emp.razao_social||'')||((x.a&&x.a.nome)||'').localeCompare((y.a&&y.a.nome)||''));}
+function estMesHtml(){
+ return `<div class="loteBar"><label>Mês</label><input type="month" value="${estMes}" onchange="if(this.value){estMes=this.value;estCarregar().then(render);}" style="border:1px solid var(--borda);border-radius:9px;padding:8px 11px;font-size:12.5px;font-family:inherit"></div>
+ <div class="tbwrap"><table><thead><tr><th>Cliente</th><th>Modelo</th><th>Etapa</th><th>Fase</th><th>Ações rápidas</th><th>Responsável</th><th></th></tr></thead><tbody>${estLinhasMes().map(({t,a,e,f,emp})=>`<tr>
+  <td style="font-weight:600">${escH(emp.razao_social||emp.nome_fantasia||'')}<div style="font-size:11px;color:var(--apagado);font-weight:400">${escH(fmtCnpj(emp.cnpj||''))}</div></td>
+  <td>${escH(a?a.nome:'')}</td><td>${escH(e?e.titulo:'')}</td>
+  <td>${e?`<select class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:6px 9px;font-size:12px;font-family:inherit" onchange="estFase('${t.id}',this.value)">${e.fases.map(x=>`<option value="${x.id}" ${x.id===t.status_id?'selected':''}>${escH(x.nome)}</option>`).join('')}</select>`:''}</td>
+  <td>${((f&&f.acoes)||[]).map(ac=>`<button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx);margin:2px" onclick="estAcao('${t.id}','${ac.id}')">${escH(ac.nome)}</button>`).join('')}</td>
+  <td>${escH(estUsu[t.responsavel_id]||'')}</td>
+  <td><button class="miniB" onclick="estHistorico('${t.id}')">Histórico</button></td></tr>${t.sugestao_fase_id?`<tr><td colspan="7" style="padding-top:0">${estSugHtml(t,e)}</td></tr>`:''}`).join('')}</tbody></table></div>`;
+}
+function estSugHtml(t,e){const s=e&&e.fases.find(x=>x.id===t.sugestao_fase_id);
+ return `<div class="estSug"><div><b>Sugestão: ${escH(s?s.nome:'')}</b><div>${escH(t.sugestao_texto||'')}</div></div><button class="miniB" style="border-color:var(--verde);color:var(--verde)" onclick="estSugDecidir('${t.id}',true)">Confirmar</button><button class="miniB" onclick="estSugErrada('${t.id}')">Está errado</button></div>`;}
+async function estSugDecidir(tid,ok,just){const r=await sb.rpc('apu_tarefa_sugestao_decidir',{p_tarefa:tid,p_aceitar:ok,p_justificativa:just||null});
+ if(r.error){toast(r.error.message);return;}fecharModal();toast(ok?'Confirmado: '+r.data.fase:'Registrado como erro do sistema.');await estCarregar();renderEst();}
+function estSugErrada(tid){fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx"><div class="mcab"><b>O que estava errado?</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody"><textarea class="fi" rows="3" id="estErr"></textarea></div><div class="mrod"><span></span><button class="bwpp" onclick="estSugDecidir('${tid}',false,el('estErr').value)">Registrar</button></div></div>`;
+ document.body.appendChild(modal);setTimeout(()=>el('estErr').focus(),50);}
+function estFaseDe(tid,fid){const t=estTar.find(x=>x.id===tid);const a=t&&estArv[t.modelo_id];const e=a&&a.etapas.find(x=>x.id===t.etapa_id);return e&&e.fases.find(x=>x.id===fid);}
+async function estFase(tid,fid){const f=estFaseDe(tid,fid);
+ if(f&&f.exigir_justificativa){fecharModal();modal=document.createElement('div');modal.className='modal';
+  modal.innerHTML=`<div class="mcx"><div class="mcab"><b>${escH(f.nome)}</b><button class="x" onclick="fecharModal();renderEst()">✕</button></div><div class="mbody"><label class="fl">Justificativa</label><textarea class="fi" rows="3" id="estJust"></textarea></div><div class="mrod"><span></span><button class="bwpp" onclick="estFaseGravar('${tid}','${fid}',el('estJust').value)">Confirmar</button></div></div>`;
+  document.body.appendChild(modal);setTimeout(()=>el('estJust').focus(),50);return;}
+ estFaseGravar(tid,fid,null);}
+async function estFaseGravar(tid,fid,just){if(just!==null&&!String(just).trim()){toast('Escreva a justificativa.');return;}
+ const r=await sb.rpc('apu_tarefa_mudar_fase',{p_tarefa:tid,p_fase:fid,p_justificativa:just});
+ if(r.error){toast(r.error.message);renderEst();return;}
+ fecharModal();toast('Fase: '+r.data.fase);await estCarregar();renderEst();}
+async function estAcao(tid,aid){const r=await sb.rpc('apu_tarefa_mudar_fase',{p_tarefa:tid,p_fase:null,p_justificativa:null,p_acao:aid});
+ if(r.error){toast(r.error.message);return;}
+ toast('Fase: '+r.data.fase);await estCarregar();renderEst();}
+async function estHistorico(tid){const r=await sb.from('apu_tarefa_historico').select('descricao,justificativa,usuario_id,origem,created_at').eq('tarefa_id',tid).order('created_at',{ascending:false});
+ if(r.error){toast('Não foi possível ler o histórico.');return;}
+ fecharModal();modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(560px,96vw)"><div class="mcab"><b>Histórico</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody">${(r.data||[]).map(h=>`<div style="border-bottom:1px solid var(--borda);padding:8px 0;font-size:12.5px"><div style="font-weight:600">${escH(h.descricao||'')}</div>${h.justificativa?`<div style="color:var(--apoio)">${escH(h.justificativa)}</div>`:''}<div style="font-size:11px;color:var(--apagado)">${new Date(h.created_at).toLocaleString('pt-BR')} · ${escH(h.origem==='automatico'?'Automático':(estUsu[h.usuario_id]||''))}</div></div>`).join('')}</div></div>`;
+ document.body.appendChild(modal);}
 function estDemandas(){const cols=[['recebidas','Recebidas'],['andamento','Em andamento'],['validacao','Aguardando validação'],['concluidas','Concluídas']];
  return `<p class="intro" style="margin-top:-4px">Demandas dos CEOs (Adrian/Lucas/William) e da Cúpula, atreladas a um cliente. A IA sugere e resume, o humano decide.</p>
   <div class="kanban">${cols.map(([k,l])=>{const it=esteira.filter(e=>e.col===k);return `<div class="kcol" ondragover="event.preventDefault()" ondrop="dropEst('${k}')"><div class="kh">${l} <span class="pill" style="background:var(--superf2);color:var(--apoio)">${it.length}</span></div>
