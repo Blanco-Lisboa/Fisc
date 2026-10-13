@@ -156,10 +156,9 @@ public class FiscalApplication {
                 return true;
             }
         });
-        CefBrowser browser = client.createBrowser(url, false, false);
-        navegador = browser;
-
         SwingUtilities.invokeLater(() -> {
+            CefBrowser browser = client.createBrowser(url, false, false);
+            navegador = browser;
             JFrame frame = new JFrame("Fiscal — You Contabilidade");
             java.util.List<Image> icones = new java.util.ArrayList<>();
             for (int s : new int[]{16, 24, 32, 48, 64, 128, 256}) {
