@@ -864,10 +864,10 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-ai.arr{opacity:.45}
 .wz-ai .wz-ext{width:30px;height:34px;font-size:8.5px}
 .wz-athumb{width:34px;height:34px;object-fit:cover;border-radius:7px;flex:none}
-.wz-am{width:190px;min-width:0;display:flex;flex-direction:column}
+.wz-am{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
 .wz-am b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wz-am span{font-size:10.5px;color:var(--apagado)}
-.wz-aleg{flex:1;min-width:0;border:1px solid var(--borda);border-radius:8px;padding:6px 9px;font:inherit;font-size:12.5px;outline:0}
+.wz-aleg{flex:1 1 0;min-width:0;border:1px solid var(--borda);border-radius:8px;padding:6px 9px;font:inherit;font-size:12.5px;outline:0}
 .wz-aleg:focus{border-color:var(--laranja)}
 .wz-aord{display:flex;gap:3px;flex:none}
 .wz-aord button{width:26px;height:26px;border-radius:7px;border:1px solid var(--borda);background:var(--pagina);color:var(--grafite);font-size:12px}
@@ -1562,7 +1562,7 @@ async function plVincular(){
  toast(`${(r.data.movidas||[]).length} CNPJ vinculados`);
  const id=cartUsuario;plan=null;clientesBrutos=null;await carregarMapa();abrirCarteira(id);
 }
-function waPendentes(){return waEntrada.concat(waMeus).filter(c=>c.naoLidas>0).length;}
+function waPendentes(){return waMeus.concat(tem('wa_entrada_responder')?waEntrada:[]).filter(c=>!c.arquivada&&!c.silenciada&&waNaoLidas(c)>0).length;}
 function render(){
   document.querySelectorAll('.side .it[data-view]').forEach(e=>e.classList.toggle('on',e.dataset.view===view));
   const b=el('waBadge');if(b)b.textContent=waPendentes();
@@ -1710,7 +1710,7 @@ function modDesenharForm(){
  const box=el('modCorpo');if(!box||!modSel)return;const m=modSel,vs=modVars(m),h=modParte(m,'HEADER');
  box.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><button class="miniB" onclick="modSel=null;modDesenharLista()">‹ Modelos</button><b style="font-size:13px">${escH(MOD_TITULO[m.nome]||m.nome)}</b></div>
   <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start">
-   <div style="display:flex;flex-direction:column;gap:2px">${vs.map(v=>`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">${escH(modRotulo(v))}</span><input class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" placeholder="${escH(v.ex)}" value="${escH(modVals[v.i-1]||'')}" oninput="modVals[${v.i-1}]=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDoc)">`).join('')}
+   <div style="display:flex;flex-direction:column;gap:2px">${vs.map(v=>`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">${escH(modRotulo(v))}</span><input class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" value="${escH(modVals[v.i-1]||'')}" oninput="modVals[${v.i-1}]=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDoc)">`).join('')}
    ${h&&h.format==='DOCUMENT'?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Documento (PDF)</span><button class="apubtn" onclick="modEscolherDoc()">📎 ${modDoc?escH(modDoc.name):'Anexar PDF'}</button>`:''}</div>
    <div class="ap-prev" id="modPrev">${modBolha(m,modVals,modDoc)}</div></div>
   <div style="display:flex;justify-content:flex-end;gap:8px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="modEnv" onclick="modEnviar()">Enviar</button></div>`;
@@ -2610,7 +2610,7 @@ function waHoraLista(d){if(!d)return '';const r=waDiaRotulo(d);return r==='Hoje'
 function waEmpresaTxt(x){const e=(x.empresas||[]).map(id=>waEmp[id]).filter(Boolean);if(!e.length)return x.grupo?('Grupo'+(x.grupoDesc?' · '+x.grupoDesc:'')):(x.natureza?WA_NATUREZA[x.natureza]||'':fmtTel(x.telefone));
  const p=e[0];return (p.nome_fantasia||p.razao_social||'')+(p.cnpj?' · '+fmtCnpj(p.cnpj):'')+(e.length>1?' · +'+(e.length-1):'');}
 function waBase(){return waAba==='entrada'?waEntrada:waMeus;}
-function waContagens(){const t=waTodas().filter(x=>!x.arquivada);
+function waContagens(){const t=waBase().filter(x=>!x.arquivada);
  return {nl:t.filter(x=>waNaoLidas(x)>0).length,ab:t.filter(x=>!x.grupo&&waRestante(x)>0).length,fim:t.filter(x=>waEstadoJan(x)==='fim').length};}
 function waListaVisivel(){
  const t=waBusca.trim().toLowerCase(),td=waBusca.replace(/\D/g,'');
@@ -2620,6 +2620,7 @@ function waListaVisivel(){
   if(waFiltro==='acabando'&&waEstadoJan(x)!=='fim')return false;
   if(waFiltro==='fixadas'&&!x.fixada)return false;
   if(waFiltro==='grupos'&&!x.grupo)return false;
+  if(waFiltro==='abertas'&&(x.grupo||waRestante(x)<=0))return false;
   if(!t)return true;
   const emp=(x.empresas||[]).map(id=>waEmp[id]).filter(Boolean).map(e=>(e.razao_social||'')+' '+(e.nome_fantasia||'')+' '+(e.cnpj||'')).join(' ').toLowerCase();
   return x.nome.toLowerCase().includes(t)||emp.includes(t)||(td.length>=3&&(String(x.telefone||'').includes(td)||emp.replace(/\D/g,' ').includes(td)))||String(x.previa||'').toLowerCase().includes(t);}));}
@@ -2649,7 +2650,7 @@ function renderWhatsWeb(){
   <aside class="wz-fila">
    <div class="wz-ftop">
     <div class="wz-l1"><h2>WhatsApp</h2>${waNumOf?`<span class="wz-num"><i></i><b>Oficial</b> ${escH(fmtTel(waNumOf.telefone))}</span>`:''}${tem('wa_grupo_criar')?`<button class="wz-ibtn" title="Novo grupo" onclick="waNovoGrupo()">${WZ.grupo}</button>`:''}</div>
-    <div class="wz-kpis"><button class="wz-kpi al${waFiltro==='naolidas'?' on':''}" onclick="waFiltrar('naolidas')"><span>Não lidas</span><b>${k.nl}</b></button><button class="wz-kpi${waFiltro==='todas'?'':''}" onclick="waFiltrar('todas')"><span>Abertas</span><b>${k.ab}</b></button><button class="wz-kpi av${waFiltro==='acabando'?' on':''}" onclick="waFiltrar('acabando')"><span>Janela acaba</span><b>${k.fim}</b></button></div>
+    <div class="wz-kpis"><button class="wz-kpi al${waFiltro==='naolidas'?' on':''}" onclick="waFiltrar('naolidas')"><span>Não lidas</span><b>${k.nl}</b></button><button class="wz-kpi${waFiltro==='abertas'?' on':''}" onclick="waFiltrar('abertas')"><span>Abertas</span><b>${k.ab}</b></button><button class="wz-kpi av${waFiltro==='acabando'?' on':''}" onclick="waFiltrar('acabando')"><span>Janela acaba</span><b>${k.fim}</b></button></div>
     <div class="wz-seg"><button class="${waAba==='entrada'?'on':''}" onclick="waAba='entrada';selWhats=null;render()">Entrada <em>${waEntrada.filter(x=>!x.arquivada).length}</em></button><button class="${waAba==='meus'?'on':''}" onclick="waAba='meus';selWhats=null;render()">Minhas <em>${waMeus.filter(x=>!x.arquivada).length}</em></button></div>
     <div class="wz-abas"><label class="wz-busca">${WZ.busca}<input id="wwbusca" placeholder="Buscar por nome, telefone, empresa ou CNPJ" value="${escH(waBusca)}" oninput="waBusca=this.value;render()"></label>${abI('fixadas','Fixadas',WZ.fixar)}${abI('arquivadas','Arquivadas',WZ.arquivo)}</div>
     <div class="wz-seg3">${ab('todas','Todas')}${ab('naolidas','Não lidas',k.nl)}${ab('acabando','Janela',k.fim,'Janela de 24h acabando')}${ab('grupos','Grupos')}</div>
@@ -2917,7 +2918,10 @@ function waSobreConversa(ev){if(!waTemArquivos(ev)||!selWhats)return;ev.preventD
 function waSoltaConversa(ev){ev.currentTarget.classList.remove('solta');if(!ev.dataTransfer||!ev.dataTransfer.files.length||!selWhats)return;ev.preventDefault();waAdicionarArquivos(selWhats,ev.dataTransfer.files);}
 window.addEventListener('dragover',e=>{if(waTemArquivos(e))e.preventDefault();});
 window.addEventListener('drop',e=>{if(waTemArquivos(e))e.preventDefault();});
-document.addEventListener('paste',e=>{if(!waChatAberto()||!selWhats)return;const fs=[...((e.clipboardData&&e.clipboardData.files)||[])];if(!fs.length)return;e.preventDefault();waAdicionarArquivos(selWhats,fs);});
+document.addEventListener('paste',e=>{if(!waChatAberto()||!selWhats)return;const dt=e.clipboardData;const fs=[...((dt&&dt.files)||[])];if(!fs.length)return;
+ const t=e.target,campo=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);
+ if(document.querySelector('.modal')||(campo&&(t.id!=='wwin'||(dt.getData('text/plain')||'').trim())))return;
+ e.preventDefault();waAdicionarArquivos(selWhats,fs);});
 /* ---------- WHATSAPP ligações ---------- */
 let waLig=null,waLigToque=null;
 const WA_LIG_FIM=['encerrada','nao_atendida','rejeitada','falhou'];
