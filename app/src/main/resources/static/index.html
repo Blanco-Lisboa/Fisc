@@ -376,6 +376,42 @@ tr.rnovo:hover{background:#ffe6d6}
 .mbody .fl:first-child{margin-top:0}
 .mbody .fi{width:100%;border:1px solid var(--borda);border-radius:9px;padding:9px 11px;font-size:12.5px;font-family:inherit;outline:0}
 .mbody .fi:focus{border-color:var(--laranja)}
+.estEd{display:grid;grid-template-columns:280px 1fr;flex:1;min-height:0;overflow:hidden}
+.estEd .lado{background:var(--superf);border-right:1px solid var(--borda);padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.estEd .principal{padding:18px 22px;overflow-y:auto;background:var(--superf2)}
+.estEd .fi{width:100%;border:1px solid var(--borda);border-radius:9px;padding:9px 11px;font-size:12.5px;font-family:inherit;outline:0;background:var(--pagina)}
+.estEd .fi:focus{border-color:var(--laranja)}
+.estEd .rot{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin:14px 0 2px;white-space:nowrap}
+.estEd .etp{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;border:1px solid var(--borda);cursor:pointer;background:var(--pagina)}
+.estEd .etp:hover{border-color:var(--bordaF)}
+.estEd .etp.on{border-color:var(--laranja);box-shadow:inset 3px 0 0 var(--laranja)}
+.estEd .num{width:24px;height:24px;border-radius:999px;background:var(--superf2);color:var(--apoio);display:grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.estEd .etp.on .num{background:var(--laranja);color:#fff}
+.estEd .etp .t{font-size:12.5px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.estEd .etp .s{font-size:10.5px;color:var(--apagado);margin-top:2px}
+.estEd .titEt{font-size:17px;font-weight:700;font-family:var(--disp);flex:1}
+.estEd .bloco{border:1px solid var(--borda);border-radius:12px;padding:14px;margin-bottom:14px;background:var(--pagina)}
+.estEd .bloco h4{margin:0 0 10px;font-size:13px;font-family:var(--disp)}
+.estEd .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.estEd .fluxo{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px;border-radius:10px;background:var(--superf);margin-bottom:16px}
+.estEd .chip{font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--superf2);color:var(--grafite)}
+.estEd .chip.ini{background:var(--laranjaSv);color:var(--laranjaTx)}
+.estEd .seta{font-size:11px;color:var(--apagado);white-space:nowrap}
+.estEd .fase{position:relative;padding-left:40px;margin-bottom:12px}
+.estEd .fase:before{content:"";position:absolute;left:13px;top:32px;bottom:-14px;width:2px;background:var(--borda)}
+.estEd .fase>.num{position:absolute;left:0;top:8px;width:28px;height:28px;background:var(--ink);color:#fff}
+.estEd .fcx{border:1px solid var(--borda);border-radius:12px;padding:12px;background:var(--pagina)}
+.estEd .fcab{display:flex;gap:10px;align-items:center}
+.estEd .fcab .fi{font-weight:600}
+.estEd .chave{display:flex;gap:6px;align-items:center;font-size:11.5px;color:var(--apoio);white-space:nowrap;cursor:pointer}
+.estEd .lixo{width:32px;height:32px;border-radius:8px;border:1px solid var(--borda);background:var(--pagina);display:grid;place-items:center;color:var(--apoio);flex:none;padding:0}
+.estEd .lixo:hover{border-color:var(--vermelho)}
+.estEd .lixo .ico8{width:18px;height:18px}
+.estEd .acao{margin-top:10px;border-left:3px solid var(--laranja);background:var(--laranjaSv);border-radius:0 10px 10px 0;padding:10px 12px}
+.estEd .acao .lin{display:flex;gap:8px;align-items:center}
+.estEd .acao .bt{font-weight:700;color:var(--laranjaTx)}
+.estEd .add{border:1px dashed var(--bordaF);background:transparent;border-radius:9px;padding:7px 12px;font-size:11.5px;font-weight:600;color:var(--apoio);align-self:flex-start}
+.estEd .add:hover{border-color:var(--laranja);color:var(--laranjaTx)}
 .cg{display:flex;flex-direction:column;gap:18px}
 .cg-sec{display:flex;flex-direction:column;gap:10px}
 .cg-cab{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap}
@@ -1054,7 +1090,7 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="it" data-view="apuracao" onclick="irView('apuracao')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 5h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM9.5 11l1.8 1.8L14.8 9.5M10 16h4"/></svg></span> Apuração</div>
   <div class="it" data-view="pessoal" onclick="irView('pessoal')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 4a6 6 0 0 1 6 6v3l1.5 3h-15L6 13v-3a6 6 0 0 1 6-6zM10 19a2 2 0 0 0 4 0"/></svg></span> <span id="navPessoal"></span></div>
   <div class="lab">FLUXO</div>
-  <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd">2</span></div>
+  <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd" id="estBadge" style="display:none"></span></div>
   <div class="lab">MENSAGENS</div>
   <div class="sub">
     <div class="it sem" data-view="email" onclick="irView('email')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></span> E-mail's <span class="bd" id="emBadge" style="display:none">0</span></div>
@@ -2383,7 +2419,7 @@ function renderXml(){const linhas=[];
   <div class="tbwrap"><table><thead><tr><th>Cliente</th><th>Shopee</th><th>TikTok</th><th>Mercado Livre</th><th>Status</th><th></th></tr></thead><tbody>${linhas.map(l=>`<tr><td style="font-weight:600">${l.c}</td><td>${cell(l.sh)}</td><td>${cell(l.tk)}</td><td>${cell(l.ml)}</td><td>${l.s}</td><td><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="toast('Pedir XML (Flow) — demo')">Pedir XML</button></td></tr>`).join('')}</tbody></table></div></div>`;
 }
 /* esteiras */
-let estAba='modelos',estMods=[],estTar=[],estArv={},estEmp={},estUsu={},estMes=new Date().toISOString().slice(0,7),estEdit=null,estAp=null,estCanal=null,estCarregado=false,estTm=null,estBuscaTm=null;
+let estAba='modelos',estMods=[],estTar=[],estArv={},estEmp={},estUsu={},estMes=new Date().toISOString().slice(0,7),estEdit=null,estAp=null,estCanal=null,estCarregado=false,estSel=0,estTm=null,estBuscaTm=null;
 async function estCarregar(){
  const m=await sb.from('modelos').select('id,nome,descricao,dono_tipo,status,criado_por').order('nome');
  if(m.error){toast('Não foi possível ler os modelos.');return;}
@@ -2419,28 +2455,43 @@ function estModelos(){
 function estEtapaNova(){return {titulo:'',mensagem_envio:'',dias_mes:[],checklist:[],opcoes:[],fases:[{nome:'',exigir_justificativa:false,acoes:[]}]};}
 function estNovo(){estEdit={nome:'',descricao:'',dono_tipo:tem('criar_modelo_oficial')?'oficial':'pessoal',etapas:[estEtapaNova()]};estEditorAbrir();}
 function estEditar(id){const a=estArv[id];if(!a)return;estEdit=JSON.parse(JSON.stringify(a));estEditorAbrir();}
-function estEditorAbrir(){fecharModal();modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(880px,96vw)"><div class="mcab"><b>${estEdit.id?'Editar modelo':'Novo modelo'}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="estEdBody"></div><div class="mrod"><span></span><button class="bwpp" id="estSalvarB" onclick="estSalvar()">Salvar modelo</button></div></div>`;
+function estEditorAbrir(){fecharModal();estSel=0;modal=document.createElement('div');modal.className='modal';
+ modal.innerHTML=`<div class="mcx" style="width:min(1120px,96vw);height:88vh"><div class="mcab"><b>${estEdit.id?'Editar modelo':'Novo modelo'}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="estEd"><div class="lado" id="estEdLado"></div><div class="principal" id="estEdBody"></div></div><div class="mrod"><span></span><button class="bwpp" id="estSalvarB" onclick="estSalvar()">Salvar modelo</button></div></div>`;
  document.body.appendChild(modal);estEditorRender();}
 function estV(p,v){const k=p.split('.');let o=estEdit;for(let i=0;i<k.length-1;i++)o=o[k[i]];o[k[k.length-1]]=v;}
 function estLinhas(s){return String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);}
-function estMover(i,d){const E=estEdit.etapas;[E[i],E[i+d]]=[E[i+d],E[i]];estEditorRender();}
+function estMover(i,d){const E=estEdit.etapas;[E[i],E[i+d]]=[E[i+d],E[i]];estSel=i+d;estEditorRender();}
+function estEtapaRemover(i){estEdit.etapas.splice(i,1);estSel=Math.max(0,Math.min(estSel,estEdit.etapas.length-1));estEditorRender();}
 function estFaseRemover(i,j){const e=estEdit.etapas[i];e.fases.splice(j,1);e.fases.forEach(f=>(f.acoes||[]).forEach(a=>{if(a.mudar_para===j+1)a.mudar_para=null;else if(a.mudar_para>j+1)a.mudar_para--;}));estEditorRender();}
-function estEditorRender(){const E=estEdit;
- el('estEdBody').innerHTML=`<label class="fl">Nome do modelo</label><input class="fi" value="${escH(E.nome)}" oninput="estV('nome',this.value)">
- <label class="fl">Descrição</label><input class="fi" value="${escH(E.descricao)}" oninput="estV('descricao',this.value)">
- ${E.id?'':`<label class="fl">Tipo</label><select class="fi" onchange="estV('dono_tipo',this.value)">${tem('criar_modelo_oficial')?`<option value="oficial" ${E.dono_tipo==='oficial'?'selected':''}>Oficial do departamento</option>`:''}<option value="pessoal" ${E.dono_tipo==='pessoal'?'selected':''}>Pessoal</option></select>`}
- ${E.etapas.map((e,i)=>`<div class="cardP" style="margin-top:14px"><div class="top"><b class="disp" style="flex:1">Etapa ${i+1}</b>${i?`<button class="miniB" onclick="estMover(${i},-1)">↑</button>`:''}${i<E.etapas.length-1?`<button class="miniB" onclick="estMover(${i},1)">↓</button>`:''}${E.etapas.length>1?`<button class="miniB" onclick="estEdit.etapas.splice(${i},1);estEditorRender()">Remover</button>`:''}</div>
-  <div style="display:grid;grid-template-columns:1fr 140px;gap:10px"><div><label class="fl">Título</label><input class="fi" value="${escH(e.titulo)}" oninput="estV('etapas.${i}.titulo',this.value)"></div><div><label class="fl">Dia do mês</label><input class="fi" type="number" min="1" max="31" value="${(e.dias_mes||[])[0]||''}" oninput="estV('etapas.${i}.dias_mes',this.value?[+this.value]:[])"></div></div>
-  <label class="fl">Mensagem ao cliente</label><textarea class="fi" rows="2" oninput="estV('etapas.${i}.mensagem_envio',this.value)">${escH(e.mensagem_envio)}</textarea>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label class="fl">Checklist (um por linha)</label><textarea class="fi" rows="3" oninput="estV('etapas.${i}.checklist',estLinhas(this.value))">${escH((e.checklist||[]).join('\n'))}</textarea></div><div><label class="fl">Opções de escolha (uma por linha)</label><textarea class="fi" rows="3" oninput="estV('etapas.${i}.opcoes',estLinhas(this.value))">${escH((e.opcoes||[]).join('\n'))}</textarea></div></div>
-  <label class="fl">Fases</label>
-  ${e.fases.map((f,j)=>`<div style="border:1px solid var(--borda);border-radius:9px;padding:9px;margin-bottom:8px">
-    <div style="display:flex;gap:8px;align-items:center"><span class="tag" style="background:var(--superf2);color:var(--apoio)">${j+1}</span><input class="fi" style="flex:1" placeholder="Nome da fase" value="${escH(f.nome)}" oninput="estV('etapas.${i}.fases.${j}.nome',this.value)"><label style="font-size:11.5px;display:flex;gap:5px;align-items:center;white-space:nowrap"><input type="checkbox" ${f.exigir_justificativa?'checked':''} onchange="estV('etapas.${i}.fases.${j}.exigir_justificativa',this.checked)">Pede justificativa</label>${e.fases.length>1?`<button class="miniB" onclick="estFaseRemover(${i},${j})">Remover</button>`:''}</div>
-    ${(f.acoes||[]).map((a,k)=>`<div style="display:flex;gap:6px;margin-top:6px;align-items:center"><input class="fi" style="flex:1" placeholder="Ação rápida" value="${escH(a.nome)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.nome',this.value)"><input class="fi" style="flex:2" placeholder="Mensagem" value="${escH(a.mensagem_texto)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.mensagem_texto',this.value)"><select class="fi" style="width:170px" onchange="estV('etapas.${i}.fases.${j}.acoes.${k}.mudar_para',this.value?+this.value:null)"><option value="">Fica na fase</option>${e.fases.map((g,x)=>`<option value="${x+1}" ${a.mudar_para===x+1?'selected':''}>Vai para ${x+1}${g.nome?' · '+escH(g.nome):''}</option>`).join('')}</select><button class="miniB" onclick="estEdit.etapas[${i}].fases[${j}].acoes.splice(${k},1);estEditorRender()">✕</button></div>`).join('')}
-    <button class="miniB" style="margin-top:6px" onclick="(estEdit.etapas[${i}].fases[${j}].acoes=estEdit.etapas[${i}].fases[${j}].acoes||[]).push({nome:'',mensagem_texto:'',mudar_para:null});estEditorRender()">+ Ação rápida</button></div>`).join('')}
-  <button class="miniB" onclick="estEdit.etapas[${i}].fases.push({nome:'',exigir_justificativa:false,acoes:[]});estEditorRender()">+ Fase</button></div>`).join('')}
- <button class="miniB" style="margin-top:12px" onclick="estEdit.etapas.push(estEtapaNova());estEditorRender()">+ Etapa</button>`;}
+function estLadoHtml(){const E=estEdit;
+ return `<div class="rot" style="margin-top:0">Modelo</div><input class="fi" placeholder="Nome do modelo" value="${escH(E.nome)}" oninput="estV('nome',this.value)">
+ <input class="fi" placeholder="Descrição" value="${escH(E.descricao)}" oninput="estV('descricao',this.value)">
+ ${E.id?`<span class="chip" style="align-self:flex-start">${E.dono_tipo==='oficial'?'Oficial do departamento':'Pessoal'}</span>`:`<select class="fi" onchange="estV('dono_tipo',this.value)">${tem('criar_modelo_oficial')?`<option value="oficial" ${E.dono_tipo==='oficial'?'selected':''}>Oficial do departamento</option>`:''}<option value="pessoal" ${E.dono_tipo==='pessoal'?'selected':''}>Pessoal</option></select>`}
+ <div class="rot">Etapas</div>
+ ${E.etapas.map((e,i)=>`<div class="etp ${i===estSel?'on':''}" onclick="estSel=${i};estEditorRender()"><span class="num">${i+1}</span><div style="flex:1;min-width:0"><div class="t" id="estLadoT${i}">${escH(e.titulo)||'Sem título'}</div><div class="s">${e.fases.length} fase${e.fases.length>1?'s':''}${(e.dias_mes||[])[0]?' · dia '+e.dias_mes[0]:''}</div></div></div>`).join('')}
+ <button class="add" onclick="estEdit.etapas.push(estEtapaNova());estSel=estEdit.etapas.length-1;estEditorRender()">+ Nova etapa</button>`;}
+function estFluxoHtml(e){return e.fases.map((f,j)=>`<span class="chip ${j===0?'ini':''}">${j+1}. ${escH(f.nome)||'—'}</span>`).join('<span class="seta">→</span>');}
+function estFluxoAtualizar(i){const x=el('estFluxo');if(x)x.innerHTML=estFluxoHtml(estEdit.etapas[i]);}
+function estEditorRender(){const E=estEdit;if(!el('estEdBody'))return;el('estEdLado').innerHTML=estLadoHtml();
+ const i=estSel,e=E.etapas[i];if(!e){el('estEdBody').innerHTML='';return;}
+ el('estEdBody').innerHTML=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px"><span class="num" style="width:34px;height:34px;font-size:14px;background:var(--laranja);color:#fff">${i+1}</span>
+  <input class="fi titEt" placeholder="Título da etapa" value="${escH(e.titulo)}" oninput="estV('etapas.${i}.titulo',this.value);el('estLadoT${i}').textContent=this.value||'Sem título'">
+  ${i?`<button class="lixo" title="Subir" onclick="estMover(${i},-1)">↑</button>`:''}${i<E.etapas.length-1?`<button class="lixo" title="Descer" onclick="estMover(${i},1)">↓</button>`:''}${E.etapas.length>1?`<button class="lixo" title="Remover etapa" onclick="estEtapaRemover(${i})">${icone('excluir')}</button>`:''}</div>
+ <div class="grid2"><div class="bloco"><h4>Quando</h4><div style="display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--apoio)">Todo mês, no dia <input class="fi" type="number" min="1" max="31" style="width:80px" value="${(e.dias_mes||[])[0]||''}" oninput="estV('etapas.${i}.dias_mes',this.value?[+this.value]:[])"></div></div>
+  <div class="bloco"><h4>Mensagem ao cliente</h4><textarea class="fi" rows="2" oninput="estV('etapas.${i}.mensagem_envio',this.value)">${escH(e.mensagem_envio)}</textarea></div></div>
+ <div class="bloco"><h4>Caminho da demanda</h4><div class="fluxo" id="estFluxo">${estFluxoHtml(e)}</div>
+  ${e.fases.map((f,j)=>`<div class="fase"><span class="num">${j+1}</span><div class="fcx">
+   <div class="fcab"><input class="fi" placeholder="Nome da fase" value="${escH(f.nome)}" oninput="estV('etapas.${i}.fases.${j}.nome',this.value);estFluxoAtualizar(${i})">
+    <label class="chave"><input type="checkbox" ${f.exigir_justificativa?'checked':''} onchange="estV('etapas.${i}.fases.${j}.exigir_justificativa',this.checked)">Pede justificativa</label>
+    ${e.fases.length>1?`<button class="lixo" title="Remover fase" onclick="estFaseRemover(${i},${j})">${icone('excluir')}</button>`:''}</div>
+   ${(f.acoes||[]).map((a,k)=>`<div class="acao"><div class="lin"><span class="rot" style="margin:0">Ação rápida</span><input class="fi bt" placeholder="Nome do botão" value="${escH(a.nome)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.nome',this.value)">
+     <span class="seta">depois vai para</span><select class="fi" style="width:190px" onchange="estV('etapas.${i}.fases.${j}.acoes.${k}.mudar_para',this.value?+this.value:null)"><option value="">Fica nesta fase</option>${e.fases.map((g,x)=>`<option value="${x+1}" ${a.mudar_para===x+1?'selected':''}>${x+1}. ${escH(g.nome)}</option>`).join('')}</select>
+     <button class="lixo" title="Remover ação" onclick="estEdit.etapas[${i}].fases[${j}].acoes.splice(${k},1);estEditorRender()">${icone('excluir')}</button></div>
+    <input class="fi" style="margin-top:8px" placeholder="Mensagem enviada ao cliente" value="${escH(a.mensagem_texto)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.mensagem_texto',this.value)"></div>`).join('')}
+   <button class="add" style="margin-top:10px" onclick="(estEdit.etapas[${i}].fases[${j}].acoes=estEdit.etapas[${i}].fases[${j}].acoes||[]).push({nome:'',mensagem_texto:'',mudar_para:null});estEditorRender()">+ Ação rápida</button></div></div>`).join('')}
+  <button class="add" style="margin-left:38px" onclick="estEdit.etapas[${i}].fases.push({nome:'',exigir_justificativa:false,acoes:[]});estEditorRender()">+ Nova fase</button></div>
+ <div class="grid2"><div class="bloco"><h4>Checklist</h4><textarea class="fi" rows="4" placeholder="Um item por linha" oninput="estV('etapas.${i}.checklist',estLinhas(this.value))">${escH((e.checklist||[]).join('\n'))}</textarea></div>
+  <div class="bloco"><h4>Opções de escolha</h4><textarea class="fi" rows="4" placeholder="Uma opção por linha" oninput="estV('etapas.${i}.opcoes',estLinhas(this.value))">${escH((e.opcoes||[]).join('\n'))}</textarea></div></div>`;}
 async function estSalvar(){const b=el('estSalvarB');b.disabled=true;
  const r=await sb.rpc('apu_modelo_salvar',{p:estEdit});b.disabled=false;
  if(r.error){toast(r.error.message);return;}
