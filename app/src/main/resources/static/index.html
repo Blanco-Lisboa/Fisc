@@ -1116,6 +1116,7 @@ tr.rnovo:hover{background:#ffe6d6}
 <div class="toasts" id="toasts"></div>
 
 <script src="vendor/supabase.js"></script>
+<script src="vendor/pdf-lib.min.js"></script>
 <script src="vendor/xlsx.full.min.js"></script>
 <script src="sessao.js"></script>
 <script src="email/email.js"></script>
@@ -1707,7 +1708,7 @@ function teamsTela(){if(window.TeamsIT)TeamsIT.tela({bolinhaAlta:view==='whatswe
 /* ---------- modelos da Meta (WhatsApp e Apuração) ---------- */
 const MOD_TITULO={fiscal_solicitacao_xml:'Pedir XML do mês',fiscal_lembrete_urgente_xml:'Cobrar XML (urgente)',fiscal_confirmacao_movimento_mes:'Perguntar se teve notas no mês',fiscal_confirmacao_dados_apuracao:'Confirmar dados antes da apuração',fiscal_entrega_apuracao_mensal:'Enviar apuração e guia (DAS)',fiscal_aviso_declaracao_zerada:'Avisar declaração zerada',fiscal_aviso_vencimento_certificado:'Avisar vencimento do certificado',fiscal_boas_vindas_cliente:'Boas-vindas ao cliente novo',fiscal_difal_explicacao_decisao:'Explicar o ICMS DIFAL',fiscal_atualizacao_rotina_erp:'Avisar mudança na rotina do ERP',fiscal_aviso_alteracao_cadastral:'Avisar alteração cadastral',fiscal_pendencia_cadastral:'Cobrar pendência cadastral',fiscal_recibo_opcao_regime:'Enviar recibo da opção de regime',fiscal_reforma_tributaria_lembrete:'Lembrete da Reforma Tributária',fiscal_comunicado_institucional:'Comunicado da YOU',fiscal_divulgacao_servicos_grupo:'Divulgar serviços do grupo',fiscal_pesquisa_satisfacao:'Pesquisa de satisfação',fiscal_codigo_verificacao:'Código de verificação',fiscal_retomar_atendimento:'Retomar atendimento',fiscal_confirmar_envio_apuracao:'Confirmar envio da apuração',fiscal_xml_ou_sem_emissao:'Pedir XML ou informar sem emissão'};
 const MOD_CAT={UTILITY:['Utilidade','vd'],MARKETING:['Marketing','cz'],AUTHENTICATION:['Código','am']};
-let modLista=null,modCtx=null,modBusca='',modSel=null,modVals=[],modDoc=null;
+let modLista=null,modCtx=null,modBusca='',modSel=null,modVals=[],modDoc=null,modDocs=[],modDocNome='',modArrasta=null;
 async function modCarregar(){const r=await sb.from('wa_modelo').select('nome,idioma,categoria,estado,componentes').eq('estado','APPROVED').eq('em_uso',true).order('nome');
  if(r.error){toast('Não foi possível carregar os modelos.');return [];}
  modLista=(r.data||[]).filter(m=>m.nome!=='hello_world');return modLista;}
@@ -1726,7 +1727,7 @@ function modTexto(m,vals){const b=modParte(m,'BODY');return ((b&&b.text)||'').re
 function modBolha(m,vals,doc){const h=modParte(m,'HEADER'),f=modParte(m,'FOOTER'),bt=modParte(m,'BUTTONS');
  return apBolha({d:'sai',cab:h&&h.format==='TEXT'?h.text:null,doc:h&&h.format==='DOCUMENT'?(doc?doc.name:'Documento.pdf'):null,t:modTexto(m,vals||[]),rod:f?f.text:null,btns:bt?bt.buttons.map(x=>x.text):null,dt:'',h:''});}
 async function modAbrir(ctx,preferido){
- modCtx=ctx;modBusca='';modSel=null;modDoc=null;fecharModal();
+ modCtx=ctx;modBusca='';modSel=null;modDoc=null;modDocs=[];modDocNome='';fecharModal();
  modal=document.createElement('div');modal.className='modal';
  modal.innerHTML=`<div class="mcx" style="width:min(660px,96vw)"><div class="mcab">${ICO_TPL}<b>Modelos · ${escH(ctx.nome||'')}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="modCorpo" style="background:var(--superf);display:flex;flex-direction:column;gap:10px"></div></div>`;
  document.body.appendChild(modal);
@@ -1741,7 +1742,7 @@ function modDesenharLista(){
  box.innerHTML=`<div class="ap-busca" style="background:var(--pagina)">🔎<input id="modBuscaIn" placeholder="Buscar modelo…" value="${escH(modBusca)}" oninput="modBusca=this.value;modDesenharLista();const i=el('modBuscaIn');i.focus();i.setSelectionRange(i.value.length,i.value.length)"></div><div class="ap-mods">${lista.map(m=>{const c=MOD_CAT[m.categoria]||[m.categoria,'cz'];return `<div class="ap-mod"><div style="min-width:0"><div class="tt"><b>${escH(MOD_TITULO[m.nome]||m.nome.replace(/_/g,' '))}</b><span class="ap-st ${c[1]}">${escH(c[0])}</span></div><div class="ap-prev">${modBolha(m,ex(m),null)}</div></div><button class="ap-envm" onclick="modEscolher('${escH(m.nome)}')">Usar</button></div>`;}).join('')}</div>`;
 }
 function modEscolher(nome){
- const m=(modLista||[]).find(x=>x.nome===nome);if(!m)return;modSel=m;modDoc=null;
+ const m=(modLista||[]).find(x=>x.nome===nome);if(!m)return;modSel=m;modDoc=null;modDocs=[];modDocNome='';
  modVals=[];modVars(m).forEach(v=>modVals[v.i-1]=modPalpite(v,modCtx));
  modDesenharForm();
 }
@@ -1754,17 +1755,45 @@ function modDesenharForm(){
  const emps=modCtx.empresas||[];const escolhe=emps.length&&modEmpresaCampos(vs).length;
  box.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><button class="miniB" onclick="modSel=null;modDesenharLista()">‹ Modelos</button><b style="font-size:13px">${escH(MOD_TITULO[m.nome]||m.nome)}</b></div>
   <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start">
-   <div style="display:flex;flex-direction:column;gap:2px">${escolhe?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Empresa do contato${emps.length>1?' ('+emps.length+')':''}</span><select class="fi" style="border:1px solid var(--laranjaCl);background:var(--laranjaSv);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" onchange="modEscolherEmpresa(this.value)">${modCtx.empresaId?'':'<option value="" disabled selected>Escolha a empresa…</option>'}${emps.map(e=>`<option value="${escH(e.empresa_id)}"${e.empresa_id===modCtx.empresaId?' selected':''}>${escH((e.razao_social||e.nome_fantasia||'')+' — '+fmtCnpj(e.cnpj||''))}</option>`).join('')}</select>`:''}${vs.map(v=>`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">${escH(modRotulo(v))}</span><input class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" value="${escH(modVals[v.i-1]||'')}" oninput="modVals[${v.i-1}]=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDoc)">`).join('')}
-   ${h&&h.format==='DOCUMENT'?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Documento (PDF)</span><button class="apubtn" onclick="modEscolherDoc()">📎 ${modDoc?escH(modDoc.name):'Anexar PDF'}</button>`:''}</div>
-   <div class="ap-prev" id="modPrev">${modBolha(m,modVals,modDoc)}</div></div>
+   <div style="display:flex;flex-direction:column;gap:2px">${escolhe?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Empresa do contato${emps.length>1?' ('+emps.length+')':''}</span><select class="fi" style="border:1px solid var(--laranjaCl);background:var(--laranjaSv);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" onchange="modEscolherEmpresa(this.value)">${modCtx.empresaId?'':'<option value="" disabled selected>Escolha a empresa…</option>'}${emps.map(e=>`<option value="${escH(e.empresa_id)}"${e.empresa_id===modCtx.empresaId?' selected':''}>${escH((e.razao_social||e.nome_fantasia||'')+' — '+fmtCnpj(e.cnpj||''))}</option>`).join('')}</select>`:''}${vs.map(v=>`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">${escH(modRotulo(v))}</span><input class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" value="${escH(modVals[v.i-1]||'')}" oninput="modVals[${v.i-1}]=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDocPrevia())">`).join('')}
+   ${h&&h.format==='DOCUMENT'?modDocsHtml():''}</div>
+   <div class="ap-prev" id="modPrev">${modBolha(m,modVals,modDocPrevia())}</div></div>
   <div style="display:flex;justify-content:flex-end;gap:8px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="modEnv" onclick="modEnviar()">Enviar</button></div>`;
 }
-function modEscolherDoc(){const i=document.createElement('input');i.type='file';i.accept='application/pdf';i.onchange=()=>{const f=i.files[0];if(!f)return;if(f.size>100*1048576){toast('PDF acima de 100 MB.');return;}modDoc=f;modDesenharForm();};i.click();}
+function modDocPrevia(){return modDocs.length?{name:modNomeFinal()}:null;}
+function modNomeFinal(){let n=String(modDocNome||'').trim()||(modDocs[0]?modDocs[0].f.name:'Documentos.pdf');n=n.replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim();if(!/\.pdf$/i.test(n))n+='.pdf';return n;}
+function modDocsHtml(){const rot='font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px';const tam=modDocs.reduce((a,d)=>a+d.f.size,0);const tem=modDocs.length>0;
+ return `<span class="fl" style="${rot}">Documentos (PDF)${modDocs.length>1?' · '+modDocs.length+' viram 1 arquivo':''}</span>
+ <div id="modDocsZona" tabindex="0" onclick="modEscolherDoc()" ondragenter="event.preventDefault();this.style.borderColor='var(--laranja)';this.style.background='var(--laranjaSv)'" ondragover="event.preventDefault()" ondragleave="this.style.borderColor='';this.style.background=''" ondrop="modDocsSoltar(event)" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:${tem?'46px':'84px'};border:2px dashed var(--bordaF);border-radius:10px;padding:10px;cursor:pointer;text-align:center;font-size:12px;color:var(--apoio)">
+  <span style="font-size:${tem?'15px':'22px'}">📎</span><span><b>Arraste os PDFs aqui</b>, cole com <b>Ctrl+V</b> ou clique para escolher</span></div>
+ ${tem?`<div style="display:flex;flex-direction:column;gap:4px;margin-top:6px">${modDocs.map((d,i)=>`<div draggable="true" ondragstart="modArrasta=${i}" ondragover="event.preventDefault()" ondrop="event.preventDefault();event.stopPropagation();if(modArrasta!=null)modDocsMover(modArrasta,${i});else modDocsSoltar(event)" style="display:flex;align-items:center;gap:6px;background:var(--superf);border:1px solid var(--borda);border-radius:8px;padding:5px 7px;font-size:12px;cursor:grab">
+   <span style="width:20px;height:20px;border-radius:999px;background:var(--laranja);color:#fff;display:grid;place-items:center;font-size:10px;font-weight:700;flex:none">${i+1}</span>
+   <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escH(d.f.name)}">${escH(d.f.name)}</span>
+   <span style="font-size:10.5px;color:var(--apagado);flex:none">${d.pag?d.pag+' pág.':''}</span>
+   <button class="miniB" style="padding:2px 6px" ${i?'':'disabled'} onclick="modDocsMover(${i},${i-1})">↑</button><button class="miniB" style="padding:2px 6px" ${i<modDocs.length-1?'':'disabled'} onclick="modDocsMover(${i},${i+1})">↓</button><button class="miniB" style="padding:2px 6px" onclick="modDocs.splice(${i},1);modDesenharForm()">✕</button></div>`).join('')}</div>`:''}
+ <span class="fl" style="${rot}">Nome do arquivo único</span>
+ <input class="fi" ${tem?'':'disabled'} style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0;${tem?'':'background:var(--superf2);cursor:not-allowed'}" placeholder="${tem?escH(modDocs[0].f.name):''}" value="${escH(modDocNome)}" oninput="modDocNome=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDocPrevia())">
+ ${tem?`<span style="font-size:10.5px;color:var(--apagado)">${modDocs.reduce((a,d)=>a+(d.pag||0),0)} páginas · ${(tam/1048576).toFixed(1).replace('.',',')} MB</span>`:''}`;}
+function modDocsMover(de,para){if(de==null||de===para||!modDocs[de]||!modDocs[para])return;const [x]=modDocs.splice(de,1);modDocs.splice(para,0,x);modArrasta=null;modDesenharForm();}
+async function modDocsAdicionar(lista){const novos=[...lista].filter(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name));
+ if(novos.length<lista.length)toast('Só arquivos PDF entram aqui.');
+ for(const f of novos){const d={f,pag:0};modDocs.push(d);try{const doc=await PDFLib.PDFDocument.load(await f.arrayBuffer(),{ignoreEncryption:true});d.pag=doc.getPageCount();}catch(e){d.pag=0;}}
+ modDesenharForm();}
+function modDocsSoltar(e){e.preventDefault();modArrasta=null;if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length)modDocsAdicionar(e.dataTransfer.files);}
+function modEscolherDoc(){const i=document.createElement('input');i.type='file';i.accept='application/pdf';i.multiple=true;i.onchange=()=>{if(i.files.length)modDocsAdicionar(i.files);};i.click();}
+async function modJuntarPdfs(){const out=await PDFLib.PDFDocument.create();
+ for(const d of modDocs){let src;try{src=await PDFLib.PDFDocument.load(await d.f.arrayBuffer(),{ignoreEncryption:true});}catch(e){throw new Error('Não foi possível abrir "'+d.f.name+'".');}
+  if(src.isEncrypted)throw new Error('"'+d.f.name+'" tem senha; tire a senha antes.');
+  const pgs=await out.copyPages(src,src.getPageIndices());pgs.forEach(pg=>out.addPage(pg));}
+ out.setTitle(modNomeFinal().replace(/\.pdf$/i,''));
+ return new File([await out.save()],modNomeFinal(),{type:'application/pdf'});}
 async function modEnviar(){
  const m=modSel;if(!m)return;const vs=modVars(m),h=modParte(m,'HEADER');
  if(vs.some(v=>!String(modVals[v.i-1]||'').trim())){toast('Preencha todos os campos.');return;}
- if(h&&h.format==='DOCUMENT'&&!modDoc){toast('Anexe o PDF.');return;}
+ if(h&&h.format==='DOCUMENT'&&!modDocs.length){toast('Anexe o PDF.');return;}
  const b=el('modEnv');if(b)b.disabled=true;
+ if(h&&h.format==='DOCUMENT'){if(b)b.textContent='Juntando PDFs…';try{modDoc=await modJuntarPdfs();}catch(e){toast(e.message||'Não foi possível juntar os PDFs.');if(b){b.disabled=false;b.textContent='Enviar';}return;}
+  if(b)b.textContent='Enviar';if(modDoc.size>100*1048576){toast('O arquivo final passou de 100 MB.');if(b)b.disabled=false;return;}}
  const ok=await modCtx.enviar(m,vs.map(v=>String(modVals[v.i-1]).trim()),modDoc,modTexto(m,modVals));
  if(ok)fecharModal();else if(b)b.disabled=false;
 }
@@ -3105,6 +3134,7 @@ function waSobreConversa(ev){if(!waTemArquivos(ev)||!selWhats)return;ev.preventD
 function waSoltaConversa(ev){ev.currentTarget.classList.remove('solta');if(!ev.dataTransfer||!ev.dataTransfer.files.length||!selWhats)return;ev.preventDefault();waAdicionarArquivos(selWhats,ev.dataTransfer.files);}
 window.addEventListener('dragover',e=>{if(waTemArquivos(e))e.preventDefault();});
 window.addEventListener('drop',e=>{if(waTemArquivos(e))e.preventDefault();});
+document.addEventListener('paste',e=>{if(!el('modDocsZona'))return;const fs=[...((e.clipboardData&&e.clipboardData.files)||[])].filter(f=>f.type==='application/pdf'||/\.pdf$/i.test(f.name));if(!fs.length)return;e.preventDefault();modDocsAdicionar(fs);});
 document.addEventListener('paste',e=>{if(!waChatAberto()||!selWhats)return;const dt=e.clipboardData;const fs=[...((dt&&dt.files)||[])];if(!fs.length)return;
  const t=e.target,campo=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);
  if(document.querySelector('.modal')||(campo&&(t.id!=='wwin'||(dt.getData('text/plain')||'').trim())))return;
