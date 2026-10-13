@@ -2482,17 +2482,16 @@ function renderXml(){const linhas=[];
 /* esteiras */
 let estAba='modelos',estMods=[],estTar=[],estArv={},estEmp={},estUsu={},estMes=new Date().toISOString().slice(0,7),estEdit=null,estAp=null,estCanal=null,estCarregado=false,estSel=0,estTm=null,estBuscaTm=null;
 async function estCarregar(){
- const m=await sb.from('modelos').select('id,nome,descricao,dono_tipo,status,criado_por').order('nome');
+ const [m,t,u]=await Promise.all([sb.from('modelos').select('id,nome,descricao,dono_tipo,status,criado_por').order('nome'),
+  sb.from('apu_tarefa').select('id,empresa_id,etapa_id,modelo_id,ciclo_referencia,status_id,responsavel_id,sugestao_fase_id,sugestao_texto,sugestao_em').eq('ciclo_referencia',estMes+'-01'),
+  Object.keys(estUsu).length?null:sb.from('fiscal_usuario').select('id,nome')]);
  if(m.error){toast('Não foi possível ler os modelos.');return;}
- estMods=m.data||[];
- const t=await sb.from('apu_tarefa').select('id,empresa_id,etapa_id,modelo_id,ciclo_referencia,status_id,responsavel_id,sugestao_fase_id,sugestao_texto,sugestao_em').eq('ciclo_referencia',estMes+'-01');
  if(t.error){toast('Não foi possível ler as demandas.');return;}
- estTar=t.data||[];
+ estMods=m.data||[];estTar=t.data||[];if(u)(u.data||[]).forEach(x=>estUsu[x.id]=x.nome);
  const ids=[...new Set([...estMods.map(x=>x.id),...estTar.map(x=>x.modelo_id)])];
- const arv={};await Promise.all(ids.map(async id=>{const r=await sb.rpc('apu_modelo_arvore',{p_modelo:id});if(!r.error&&r.data)arv[id]=r.data;}));estArv=arv;
  const faltam=[...new Set(estTar.map(x=>x.empresa_id))].filter(id=>!estEmp[id]);
- if(faltam.length){const r=await sb.rpc('fiscal_empresas',{p_ids:faltam});(r.data||[]).forEach(e=>estEmp[e.empresa_id]=e);}
- if(!Object.keys(estUsu).length){const u=await sb.from('fiscal_usuario').select('id,nome');(u.data||[]).forEach(x=>estUsu[x.id]=x.nome);}
+ const arv={};await Promise.all([...ids.map(async id=>{const r=await sb.rpc('apu_modelo_arvore',{p_modelo:id});if(!r.error&&r.data)arv[id]=r.data;}),
+  faltam.length?sb.rpc('fiscal_empresas',{p_ids:faltam}).then(r=>(r.data||[]).forEach(e=>estEmp[e.empresa_id]=e)):null]);estArv=arv;
  estCarregado=true;
  if(!estCanal)estCanal=sb.channel('fiscal-esteira').on('postgres_changes',{event:'*',schema:'public',table:'modelos'},estRecarregar).on('postgres_changes',{event:'*',schema:'public',table:'apu_tarefa'},estRecarregar).subscribe();
 }
@@ -3665,6 +3664,7 @@ async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=
 async function iniciarDados(){
  el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('navPessoal').textContent=eu.nome;TITULOS.pessoal=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
  preCarregarGestor();
+ estCarregar();if(tem('wa_lote_gerir'))envCarregar();
  teamsIniciar();
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
