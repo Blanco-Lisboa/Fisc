@@ -124,11 +124,19 @@ async function tmxChegou(p){
  let c=tmxCanais.find(x=>x.id===m.canal_id);
  if(!c){await tmxCarregarCanais();c=tmxCanais.find(x=>x.id===m.canal_id);}
  if(c){c.ultima={autor_id:m.autor_id,corpo:m.corpo,tipo:m.tipo,em:m.criada_em};
-  if(m.autor_id!==tmxEu.id){tmxBolPulsar();if((tmxNoModulo()&&tmxSel===c.id&&tmxAba==='conversas')||(tmxFlutAberto&&tmxFlutCanal===c.id))tmx.rpc('chat_marcar_lido',{p_canal:c.id});else c.nao_lidas=(c.nao_lidas||0)+1;}}
+  if(m.autor_id!==tmxEu.id){tmxBolPulsar();const vendo=(tmxNoModulo()&&tmxSel===c.id&&tmxAba==='conversas')||(tmxFlutAberto&&tmxFlutCanal===c.id);if(vendo)tmx.rpc('chat_marcar_lido',{p_canal:c.id});else c.nao_lidas=(c.nao_lidas||0)+1;if(!c.silenciado)tmxAvisar(c,m,vendo);}}
  tmxBadge();
  if(tmxNoModulo()){tmxDesenharLista();if(tmxSel===m.canal_id)tmxDesenharMsgs();}
  if(tmxFlutAberto){if(tmxFlutCanal===m.canal_id)tmxDesenharMsgs('tmfms',m.canal_id);else if(!tmxFlutCanal)tmxFlutDesenhar();}
 }
+function tmxAvisoTexto(c,m){const t=m.tipo==='audio'?'Áudio':m.tipo==='arquivo'?'Arquivo · '+(m.corpo||'arquivo'):m.tipo==='pedido'?'Pedido · '+(m.corpo||''):(m.corpo||'Nova mensagem');return c.tipo!=='direta'?tmxPessoa(m.autor_id).nome.split(' ')[0]+': '+t:t;}
+function tmxAvisar(c,m,vendo){if(!tmxCfg.aoMensagem)return;const p=tmxPessoa(m.autor_id);
+ try{tmxCfg.aoMensagem({canal_id:c.id,nome:tmxNomeCanal(c),texto:tmxAvisoTexto(c,m),em:m.criada_em,grupo:c.tipo!=='direta',foto:c.tipo==='direta'?(p.foto_url||''):'',rodape:c.tipo==='setor'?'Setor':c.tipo!=='direta'?'Grupo':'Conversa direta',vendo});}catch(e){}}
+async function tmxAvisoAcao(a){const id=a.id;const c=tmxCanais.find(x=>x.id===id);
+ if(a.acao==='abrir'){if(tmxCfg.abrirModulo)tmxCfg.abrirModulo();setTimeout(()=>{if(tmxNoModulo())tmxAbrirCanal(id);else{if(!tmxFlutAberto)tmxFlutAbrir();tmxFlutAbrirCanal(id);}},60);return {ok:true};}
+ if(a.acao==='lida'){if(c&&c.nao_lidas){c.nao_lidas=0;tmxBadge();}const r=await tmx.rpc('chat_marcar_lido',{p_canal:id});return {ok:!r.error};}
+ if(a.acao==='responder'){const t=String(a.texto||'').trim();if(!t)return {ok:false,erro:'Mensagem vazia.'};const r=await tmxGravarMsg({tipo:'texto',corpo:t},tmxMencoes(t),id);return r?{ok:true}:{ok:false,erro:'Não foi possível enviar.'};}
+ return {ok:false};}
 function tmxRenderTeams(){
  tmxModRaiz().innerHTML=`<div class="waweb"><div class="walist" id="tmxLista"></div><div class="wachat" id="tmxCentro"></div></div>`;
  if(!tmxPronto){tmxIniciar().then(ok=>{if(!tmxNoModulo())return;if(!ok){tmxEl('tmxCentro').innerHTML='';tmxToast('Não foi possível entrar no Team\'s.');return;}tmxDesenharTudo();});return;}
@@ -685,6 +693,7 @@ window.TeamsIT={
   [tmxModHost,tmxCamHost].forEach(h=>{if(h)tmxAplicarTema(h);});
   return tmxIniciar();
  },
+ avisoAcao(a){return tmxAvisoAcao(a);},
  abrirModulo(caixa){
   if(!caixa)return;if(!tmxModHost)tmxModHost=tmxHost('tmx-mod');
   caixa.innerHTML='';caixa.appendChild(tmxModHost);tmxRenderTeams();tmxBolinha();

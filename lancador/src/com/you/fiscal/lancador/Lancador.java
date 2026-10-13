@@ -26,6 +26,7 @@ public class Lancador {
     static Path base;
     static Path arquivos;
     static JWindow janela;
+    static boolean oculto;
     static JProgressBar barra;
 
     public static void main(String[] args) {
@@ -45,7 +46,10 @@ public class Lancador {
         Files.createDirectories(base.resolve("logs"));
 
         long esperar = 0;
-        for (String a : args) if (a.startsWith("--esperar=")) esperar = Long.parseLong(a.substring(10));
+        for (String a : args) {
+            if (a.startsWith("--esperar=")) esperar = Long.parseLong(a.substring(10));
+            if (a.equals("--oculto")) oculto = true;
+        }
         if (esperar > 0) {
             Optional<ProcessHandle> p = ProcessHandle.of(esperar);
             if (p.isPresent()) {
@@ -85,7 +89,9 @@ public class Lancador {
 
     static boolean jaAberto() {
         try {
-            HttpRequest r = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + PORTA + "/sistema/frente"))
+            HttpRequest r = oculto
+                    ? HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + PORTA + "/sistema/versao")).timeout(Duration.ofSeconds(2)).GET().build()
+                    : HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + PORTA + "/sistema/frente"))
                     .timeout(Duration.ofSeconds(2)).header("X-Fiscal", "1").POST(HttpRequest.BodyPublishers.noBody()).build();
             return http.send(r, HttpResponse.BodyHandlers.discarding()).statusCode() == 200;
         } catch (Exception e) {
@@ -178,6 +184,7 @@ public class Lancador {
         cmd.add("-Dfiscal.base=" + base);
         String exe = System.getProperty("jpackage.app-path");
         if (exe != null) cmd.add("-Dfiscal.lancador=" + exe);
+        if (oculto) cmd.add("-Dfiscal.oculto=1");
         Object l = m.get("lancador");
         Path meuJar = meuJar();
         if (l instanceof Map && meuJar != null) {

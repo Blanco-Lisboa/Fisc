@@ -20,14 +20,22 @@ public class SistemaController {
     @PostMapping("/frente")
     public ResponseEntity<Void> frente(@RequestHeader(value = "X-Fiscal", required = false) String h) {
         if (!"1".equals(h)) return ResponseEntity.status(403).build();
-        JFrame f = FiscalApplication.janela;
-        if (f != null) SwingUtilities.invokeLater(() -> {
-            if ((f.getExtendedState() & Frame.ICONIFIED) != 0) f.setExtendedState(f.getExtendedState() & ~Frame.ICONIFIED);
-            f.setAlwaysOnTop(true);
-            f.toFront();
-            f.requestFocus();
-            f.setAlwaysOnTop(false);
-        });
+        FiscalApplication.mostrar();
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/aviso")
+    public ResponseEntity<Void> aviso(@RequestHeader(value = "X-Fiscal", required = false) String h, @RequestBody Map<String, Object> d) {
+        if (!"1".equals(h)) return ResponseEntity.status(403).build();
+        AvisoJanela.mostrar(d);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/aviso/resultado")
+    public ResponseEntity<Void> avisoResultado(@RequestHeader(value = "X-Fiscal", required = false) String h, @RequestBody Map<String, Object> d) {
+        if (!"1".equals(h)) return ResponseEntity.status(403).build();
+        AvisoJanela.resultado(String.valueOf(d.get("chave")), Boolean.TRUE.equals(d.get("ok")),
+                d.get("erro") == null ? null : String.valueOf(d.get("erro")));
         return ResponseEntity.ok().build();
     }
 
