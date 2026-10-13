@@ -119,7 +119,7 @@ async function tmxIniciar(){
    .on('postgres_changes',{event:'*',schema:'public',table:'chat_aviso_visto'},()=>tmxCarregarPend())
    .subscribe();
   tmxEscutarLigacoes();
-  window.addEventListener('beforeunload',()=>{try{tmx.from('chat_presenca').upsert({usuario_id:tmxEu.id,status:'offline',atualizado_em:new Date().toISOString()});}catch(e){}});
+  window.addEventListener('beforeunload',()=>{try{tmx.from('chat_presenca').upsert({usuario_id:tmxEu.id,status:'offline',atualizado_em:new Date().toISOString()}).then(()=>{},()=>{});}catch(e){}});
   tmxPronto=true;tmxBadge();tmxCarregarPend();return true;})();
  const ok=await tmxIniciando;tmxIniciando=null;return ok;
 }
@@ -131,7 +131,7 @@ async function tmxChegou(p){
  let c=tmxCanais.find(x=>x.id===m.canal_id);
  if(!c){await tmxCarregarCanais();c=tmxCanais.find(x=>x.id===m.canal_id);}
  if(c){c.ultima={autor_id:m.autor_id,corpo:m.corpo,tipo:m.tipo,em:m.criada_em};
-  if(m.autor_id!==tmxEu.id){tmxBolPulsar();const vendo=(tmxNoModulo()&&tmxSel===c.id&&tmxAba==='conversas')||(tmxFlutAberto&&tmxFlutCanal===c.id);if(vendo)tmx.rpc('chat_marcar_lido',{p_canal:c.id});else c.nao_lidas=(c.nao_lidas||0)+1;if(!c.silenciado)tmxAvisar(c,m,vendo);}}
+  if(m.autor_id!==tmxEu.id){tmxBolPulsar();const vendo=(tmxNoModulo()&&tmxSel===c.id&&tmxAba==='conversas')||(tmxFlutAberto&&tmxFlutCanal===c.id);if(vendo)tmx.rpc('chat_marcar_lido',{p_canal:c.id}).then(()=>{},()=>{});else c.nao_lidas=(c.nao_lidas||0)+1;if(!c.silenciado)tmxAvisar(c,m,vendo);}}
  tmxBadge();
  if(tmxNoModulo()){tmxDesenharLista();if(tmxSel===m.canal_id)tmxDesenharMsgs();}
  if(tmxFlutAberto){if(tmxFlutCanal===m.canal_id)tmxDesenharMsgs('tmfms',m.canal_id);else if(!tmxFlutCanal)tmxFlutDesenhar();}
@@ -203,10 +203,11 @@ function tmxListaSub(sub,flut){
   const grs=tmxCanais.filter(c=>c.tipo==='grupo'&&(!t||String(c.nome).toLowerCase().includes(t))).sort((a,b)=>String(a.nome).localeCompare(String(b.nome))).map(c=>tmxItemCanal(c,sel(c.id),ab(c.id))).join('');
   return `<div class="tm-sec">Departamentos</div>${deps}<div class="tm-sec">Grupos<button onclick="tmxNovoGrupo()" title="Novo grupo">＋ Novo</button></div>${grs}`;
  }
- const lista=tmxCaixa().filter(c=>sub==='entrada'?(tmxHoje(c)||c.id===tmxSel&&!flut):!tmxHoje(c)&&!(c.id===tmxSel&&!flut)&&(c.ultima||c.tipo==='direta'));
+ const lista=tmxCaixa().filter(c=>sub==='entrada'?tmxNaEntrada(c,flut):!tmxNaEntrada(c,flut)&&(c.ultima||c.tipo==='direta'));
  return lista.map(c=>tmxItemCanal(c,sel(c.id),ab(c.id))).join('');
 }
-function tmxContSub(sub){const cs=sub==='grupos'?tmxCanais.filter(c=>c.tipo!=='direta'):tmxCanais.filter(c=>sub==='entrada'?tmxHoje(c):!tmxHoje(c));return cs.filter(c=>!c.silenciado).reduce((s,c)=>s+(c.nao_lidas||0),0);}
+function tmxNaEntrada(c,flut){return tmxHoje(c)||(c.nao_lidas||0)>0||(c.id===tmxSel&&!flut);}
+function tmxContSub(sub){const cs=sub==='grupos'?tmxCanais.filter(c=>c.tipo!=='direta'):tmxCanais.filter(c=>sub==='entrada'?tmxNaEntrada(c,true):!tmxNaEntrada(c,true));return cs.filter(c=>!c.silenciado).reduce((s,c)=>s+(c.nao_lidas||0),0);}
 function tmxSubAbas(flut){
  const b=(id,t)=>{const n=tmxContSub(id);return `<button class="${tmxSub===id?'on':''}" onclick="tmxSub='${id}';${flut?'tmxFlutDesenhar()':'tmxDesenharLista()'}">${t}${n?`<i>${n>99?'99+':n}</i>`:''}</button>`;};
  return `<div class="tm-subs">${b('entrada','Caixa de entrada')}${b('anteriores','Anteriores')}${b('grupos','Grupos')}</div>`;
@@ -241,7 +242,7 @@ function tmxIrAba(a){tmxAba=a;tmxDesenharTudo();}
 async function tmxMudarStatus(s){tmxPres[tmxEu.id]=s;const r=await tmx.from('chat_presenca').upsert({usuario_id:tmxEu.id,status:s,visto_por_ultimo_em:new Date().toISOString(),atualizado_em:new Date().toISOString()}).select('usuario_id');if(r.error||!r.data||!r.data.length)tmxToast('Não foi possível mudar o status.');}
 async function tmxAbrirSetor(sid){const r=await tmx.rpc('chat_abrir_setor',{p_setor:sid,p_nome:tmxSetorNome(sid)});if(r.error){tmxToast('Não foi possível abrir o setor.');return;}if(!tmxCanais.find(c=>c.id===r.data))await tmxCarregarCanais();tmxAbrirCanal(r.data);}
 async function tmxAbrirDireta(pid){const r=await tmx.rpc('chat_abrir_direta',{p_outro:pid});if(r.error){tmxToast('Não foi possível abrir a conversa.');return;}tmxBusca='';await tmxCarregarCanais();tmxAbrirCanal(r.data);}
-function tmxAbrirCanal(id){tmxAba='conversas';tmxSel=id;tmxResp=null;const c=tmxCanais.find(x=>x.id===id);if(c&&c.nao_lidas){c.nao_lidas=0;tmxBadge();}tmx.rpc('chat_marcar_lido',{p_canal:id});tmxDesenharLista();tmxDesenharConversa();}
+function tmxAbrirCanal(id){tmxAba='conversas';tmxSel=id;tmxResp=null;const c=tmxCanais.find(x=>x.id===id);if(c&&c.nao_lidas){c.nao_lidas=0;tmxBadge();}tmx.rpc('chat_marcar_lido',{p_canal:id}).then(()=>{},()=>{});tmxDesenharLista();tmxDesenharConversa();}
 async function tmxCarregarMsgs(id){
  const r=await tmx.from('chat_mensagem').select('id,canal_id,autor_id,tipo,corpo,meta,responde_a,criada_em,editada_em,excluida_em,chat_anexo(id,tipo,nome,url,tamanho,transcricao)').eq('canal_id',id).is('excluida_em',null).order('criada_em',{ascending:false}).limit(300);
  if(r.error){tmxToast('Não foi possível carregar as mensagens.');return;}
@@ -299,7 +300,7 @@ async function tmxGravarMsg(dados,mencoes,canal){
  const r=await tmx.from('chat_mensagem').insert(Object.assign({canal_id:canal,autor_id:tmxEu.id},dados)).select('id').single();
  if(r.error){tmxToast('Não foi possível enviar.');return null;}
  if(mencoes&&mencoes.length){const x=await tmx.from('chat_mencao').insert(mencoes.map(u=>({mensagem_id:r.data.id,usuario_id:u})));if(x.error)tmxToast('Mensagem enviada, mas a menção não foi registrada.');}
- tmx.from('chat_evento').insert({tipo:'mensagem',origem:tmxCfg.origem||'java',canal_id:canal,mensagem_id:r.data.id,payload:{tipo:dados.tipo||'texto'}});
+ tmx.from('chat_evento').insert({tipo:'mensagem',origem:tmxCfg.origem||'java',canal_id:canal,mensagem_id:r.data.id,payload:{tipo:dados.tipo||'texto'}}).then(()=>{},()=>{});
  return r.data.id;
 }
 async function tmxEnviar(){
@@ -488,7 +489,7 @@ function tmxFlutDesenhar(){
  const i=tmxEl('tmfin');if(i)i.focus();
 }
 async function tmxFlutAbrirSetor(sid){const r=await tmx.rpc('chat_abrir_setor',{p_setor:sid,p_nome:tmxSetorNome(sid)});if(r.error){tmxToast('Não foi possível abrir o setor.');return;}if(!tmxCanais.find(c=>c.id===r.data))await tmxCarregarCanais();tmxFlutAbrirCanal(r.data);}
-function tmxFlutAbrirCanal(id){tmxFlutCanal=id;const c=tmxCanais.find(x=>x.id===id);if(c&&c.nao_lidas){c.nao_lidas=0;tmxBadge();}tmx.rpc('chat_marcar_lido',{p_canal:id});tmxFlutDesenhar();}
+function tmxFlutAbrirCanal(id){tmxFlutCanal=id;const c=tmxCanais.find(x=>x.id===id);if(c&&c.nao_lidas){c.nao_lidas=0;tmxBadge();}tmx.rpc('chat_marcar_lido',{p_canal:id}).then(()=>{},()=>{});tmxFlutDesenhar();}
 function tmxFlutExpandir(){const c=tmxFlutCanal;tmxFlutFechar();tmxCfg.abrirModulo&&tmxCfg.abrirModulo();if(c)setTimeout(()=>tmxAbrirCanal(c),0);}
 async function tmxFlutEnviar(){
  const i=tmxEl('tmfin');if(!i||!i.value.trim()||!tmxFlutCanal)return;const t=i.value.trim(),canal=tmxFlutCanal;i.value='';
@@ -611,7 +612,7 @@ function tmxSinalChegou(ev,p){
  if(!tmxCall||p.chamada!==tmxCall.id)return;
  if(ev==='entrou'){if(tmxCall.estado==='tocando'){return;}
   if(!tmxCall.participantes.includes(p.de))tmxCall.participantes.push(p.de);
-  if(tmxCall.estado==='chamando'){tmxCall.estado='ativa';tmxCall.inicio=Date.now();clearTimeout(tmxCall.limite);tmx.from('chat_chamada').update({atendida_em:new Date().toISOString()}).eq('id',tmxCall.id);}
+  if(tmxCall.estado==='chamando'){tmxCall.estado='ativa';tmxCall.inicio=Date.now();clearTimeout(tmxCall.limite);tmx.from('chat_chamada').update({atendida_em:new Date().toISOString()}).eq('id',tmxCall.id).then(()=>{},()=>{});}
   if(!tmxCall.lk)tmxOfertar(p.de);tmxDesenharLigacao();}
  else if(ev==='sdp')tmxRecebeuSdp(p.de,p.sdp);
  else if(ev==='ice'){const pc=tmxCall.pcs[p.de];if(pc&&p.cand)pc.addIceCandidate(p.cand).catch(()=>{});}
@@ -642,7 +643,7 @@ async function tmxAtender(comVideo){
  if(tmxCall.modo==='lk'){if(!(await tmxLkEntrar(comVideo))){tmxToast('Não foi possível entrar na ligação.');tmxRecusar();return;}}
  else{const st=await tmxMidia(comVideo);if(!st){tmxRecusar();return;}tmxCall.local=st;}
  if(!tmxCall)return;tmxCall.inicio=tmxCall.inicio||Date.now();
- tmx.from('chat_chamada_participante').insert({chamada_id:tmxCall.id,usuario_id:tmxEu.id,entrou_em:new Date().toISOString()});
+ tmx.from('chat_chamada_participante').insert({chamada_id:tmxCall.id,usuario_id:tmxEu.id,entrou_em:new Date().toISOString()}).then(()=>{},()=>{});
  tmxCall.participantes.filter(u=>u!==tmxEu.id).forEach(u=>tmxEnviarSinal(u,'entrou',{}));
  tmxDesenharLigacao();
 }
@@ -652,7 +653,7 @@ async function tmxEncerrar(motivo){
  c.participantes.filter(u=>u!==tmxEu.id).forEach(u=>tmxEnviarSinal(u,'sair',{chamada:c.id}));
  Object.values(c.pcs).forEach(pc=>{try{pc.close();}catch(e){}});if(c.lk){const r=c.lk;c.lk=null;try{r.disconnect();}catch(e){}}
  if(c.local)c.local.getTracks().forEach(t=>t.stop());if(c.tela)c.tela.getTracks().forEach(t=>t.stop());
- tmx.from('chat_chamada_participante').update({saiu_em:new Date().toISOString()}).eq('chamada_id',c.id).eq('usuario_id',tmxEu.id);
+ tmx.from('chat_chamada_participante').update({saiu_em:new Date().toISOString()}).eq('chamada_id',c.id).eq('usuario_id',tmxEu.id).then(()=>{},()=>{});
  if(c.dono||c.inicio){
   const dur=c.inicio?Math.round((Date.now()-c.inicio)/1000):0;const mm=String(Math.floor(dur/60)).padStart(2,'0')+':'+String(dur%60).padStart(2,'0');
   if(c.dono){await tmx.from('chat_chamada').update({encerrada_em:new Date().toISOString()}).eq('id',c.id);

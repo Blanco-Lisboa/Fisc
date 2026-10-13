@@ -1666,15 +1666,15 @@ function teamsIniciar(){return teamsCarregar().then(ok=>ok&&TeamsIT.iniciar({ori
 function teamsModulo(){const c=el('conteudo');if(window.TeamsIT){TeamsIT.abrirModulo(c);return;}c.innerHTML='';teamsCarregar().then(ok=>{if(ok&&view==='teams')TeamsIT.abrirModulo(el('conteudo'));});}
 function teamsTela(){if(window.TeamsIT)TeamsIT.tela({bolinhaAlta:view==='whatsweb'});}
 /* ---------- modelos da Meta (WhatsApp e Apuração) ---------- */
-const MOD_TITULO={fiscal_solicitacao_xml:'Pedir XML do mês',fiscal_lembrete_urgente_xml:'Cobrar XML (urgente)',fiscal_confirmacao_movimento_mes:'Perguntar se teve notas no mês',fiscal_confirmacao_dados_apuracao:'Confirmar dados antes da apuração',fiscal_entrega_apuracao_mensal:'Enviar apuração e guia (DAS)',fiscal_aviso_declaracao_zerada:'Avisar declaração zerada',fiscal_aviso_vencimento_certificado:'Avisar vencimento do certificado',fiscal_boas_vindas_cliente:'Boas-vindas ao cliente novo',fiscal_difal_explicacao_decisao:'Explicar o ICMS DIFAL',fiscal_atualizacao_rotina_erp:'Avisar mudança na rotina do ERP',fiscal_aviso_alteracao_cadastral:'Avisar alteração cadastral',fiscal_pendencia_cadastral:'Cobrar pendência cadastral',fiscal_recibo_opcao_regime:'Enviar recibo da opção de regime',fiscal_reforma_tributaria_lembrete:'Lembrete da Reforma Tributária',fiscal_comunicado_institucional:'Comunicado da YOU',fiscal_divulgacao_servicos_grupo:'Divulgar serviços do grupo',fiscal_pesquisa_satisfacao:'Pesquisa de satisfação'};
+const MOD_TITULO={fiscal_solicitacao_xml:'Pedir XML do mês',fiscal_lembrete_urgente_xml:'Cobrar XML (urgente)',fiscal_confirmacao_movimento_mes:'Perguntar se teve notas no mês',fiscal_confirmacao_dados_apuracao:'Confirmar dados antes da apuração',fiscal_entrega_apuracao_mensal:'Enviar apuração e guia (DAS)',fiscal_aviso_declaracao_zerada:'Avisar declaração zerada',fiscal_aviso_vencimento_certificado:'Avisar vencimento do certificado',fiscal_boas_vindas_cliente:'Boas-vindas ao cliente novo',fiscal_difal_explicacao_decisao:'Explicar o ICMS DIFAL',fiscal_atualizacao_rotina_erp:'Avisar mudança na rotina do ERP',fiscal_aviso_alteracao_cadastral:'Avisar alteração cadastral',fiscal_pendencia_cadastral:'Cobrar pendência cadastral',fiscal_recibo_opcao_regime:'Enviar recibo da opção de regime',fiscal_reforma_tributaria_lembrete:'Lembrete da Reforma Tributária',fiscal_comunicado_institucional:'Comunicado da YOU',fiscal_divulgacao_servicos_grupo:'Divulgar serviços do grupo',fiscal_pesquisa_satisfacao:'Pesquisa de satisfação',fiscal_codigo_verificacao:'Código de verificação'};
 const MOD_CAT={UTILITY:['Utilidade','vd'],MARKETING:['Marketing','cz'],AUTHENTICATION:['Código','am']};
 let modLista=null,modCtx=null,modBusca='',modSel=null,modVals=[],modDoc=null;
 async function modCarregar(){const r=await sb.from('wa_modelo').select('nome,idioma,categoria,estado,componentes').eq('estado','APPROVED').eq('em_uso',true).order('nome');
  if(r.error){toast('Não foi possível carregar os modelos.');return [];}
- modLista=(r.data||[]).filter(m=>m.nome!=='hello_world'&&m.categoria!=='AUTHENTICATION');return modLista;}
+ modLista=(r.data||[]).filter(m=>m.nome!=='hello_world');return modLista;}
 function modParte(m,t){return (m.componentes||[]).find(c=>c.type===t)||null;}
 function modVars(m){const b=modParte(m,'BODY');const ex=(b&&b.example&&b.example.body_text&&b.example.body_text[0])||[];const n=((b&&b.text)||'').match(/\{\{\d+\}\}/g)||[];
- return [...new Set(n)].map(x=>+x.replace(/\D/g,'')).sort((a,b)=>a-b).map(i=>({i,ex:ex[i-1]||'',eu:['aqui é','Sou','realizado por'].some(w=>((b&&b.text)||'').includes(w+' {{'+i+'}}'))}));}
+ return [...new Set(n)].map(x=>+x.replace(/\D/g,'')).sort((a,b)=>a-b).map(i=>({i,ex:ex[i-1]||'',cod:m.categoria==='AUTHENTICATION',eu:['aqui é','Sou','realizado por'].some(w=>((b&&b.text)||'').includes(w+' {{'+i+'}}'))}));}
 function modPalpite(v,ctx){const e=String(v.ex);
  if(v.eu)return ((eu&&eu.nome)||'').split(' ')[0];
  if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return ctx.cnpj?fmtCnpj(ctx.cnpj):'';
@@ -1682,7 +1682,7 @@ function modPalpite(v,ctx){const e=String(v.ex);
  if(/^\d{2}\/\d{2}\/\d{4}$/.test(e)){const m=comp.mes+2>12?1:comp.mes+2,a=comp.mes+2>12?comp.ano+1:comp.ano;return '20/'+String(m).padStart(2,'0')+'/'+a;}
  if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e)&&ctx.empresa)return ctx.empresa;
  return '';}
-function modRotulo(v){const e=String(v.ex);if(v.eu)return 'Seu nome';if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return 'CNPJ';if(/^[a-zç]+\/\d{4}$/i.test(e))return 'Mês';if(/^\d{2}\/\d{2}\/\d{4}$/.test(e))return 'Vencimento';if(/^R\$/.test(e))return 'Valor';if(/DAS|Relat[óo]rio|Guia|DARE/i.test(e))return 'Documentos';if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e))return 'Empresa';return 'Informação '+v.i;}
+function modRotulo(v){const e=String(v.ex);if(v.cod)return 'Código';if(v.eu)return 'Seu nome';if(/\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}/.test(e))return 'CNPJ';if(/^[a-zç]+\/\d{4}$/i.test(e))return 'Mês';if(/^\d{2}\/\d{2}\/\d{4}$/.test(e))return 'Vencimento';if(/^R\$/.test(e))return 'Valor';if(/DAS|Relat[óo]rio|Guia|DARE/i.test(e))return 'Documentos';if(/ltda|me$|eireli|s\.a|loja|exemplo/i.test(e))return 'Empresa';return 'Informação '+v.i;}
 function modTexto(m,vals){const b=modParte(m,'BODY');return ((b&&b.text)||'').replace(/\{\{(\d+)\}\}/g,(_,i)=>vals[+i-1]||'{{'+i+'}}');}
 function modBolha(m,vals,doc){const h=modParte(m,'HEADER'),f=modParte(m,'FOOTER'),bt=modParte(m,'BUTTONS');
  return apBolha({d:'sai',cab:h&&h.format==='TEXT'?h.text:null,doc:h&&h.format==='DOCUMENT'?(doc?doc.name:'Documento.pdf'):null,t:modTexto(m,vals||[]),rod:f?f.text:null,btns:bt?bt.buttons.map(x=>x.text):null,dt:'',h:''});}
@@ -1706,11 +1706,16 @@ function modEscolher(nome){
  modVals=[];modVars(m).forEach(v=>modVals[v.i-1]=modPalpite(v,modCtx));
  modDesenharForm();
 }
+function modEmpresaCampos(vs){return vs.filter(v=>['Empresa','CNPJ'].includes(modRotulo(v)));}
+function modEscolherEmpresa(id){const x=(modCtx.empresas||[]).find(e=>e.empresa_id===id);if(!x||!modSel)return;
+ modCtx.empresa=x.razao_social||x.nome_fantasia||'';modCtx.cnpj=x.cnpj||'';modCtx.empresaId=x.empresa_id;
+ modEmpresaCampos(modVars(modSel)).forEach(v=>modVals[v.i-1]=modRotulo(v)==='CNPJ'?fmtCnpj(modCtx.cnpj):modCtx.empresa);modDesenharForm();}
 function modDesenharForm(){
  const box=el('modCorpo');if(!box||!modSel)return;const m=modSel,vs=modVars(m),h=modParte(m,'HEADER');
+ const emps=modCtx.empresas||[];const escolhe=emps.length&&modEmpresaCampos(vs).length;
  box.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><button class="miniB" onclick="modSel=null;modDesenharLista()">‹ Modelos</button><b style="font-size:13px">${escH(MOD_TITULO[m.nome]||m.nome)}</b></div>
   <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start">
-   <div style="display:flex;flex-direction:column;gap:2px">${vs.map(v=>`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">${escH(modRotulo(v))}</span><input class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" value="${escH(modVals[v.i-1]||'')}" oninput="modVals[${v.i-1}]=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDoc)">`).join('')}
+   <div style="display:flex;flex-direction:column;gap:2px">${escolhe?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Empresa do contato${emps.length>1?' ('+emps.length+')':''}</span><select class="fi" style="border:1px solid var(--laranjaCl);background:var(--laranjaSv);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" onchange="modEscolherEmpresa(this.value)">${emps.map(e=>`<option value="${escH(e.empresa_id)}"${e.empresa_id===modCtx.empresaId?' selected':''}>${escH((e.razao_social||e.nome_fantasia||'')+' — '+fmtCnpj(e.cnpj||''))}</option>`).join('')}</select>`:''}${vs.map(v=>`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">${escH(modRotulo(v))}</span><input class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:8px 10px;font-size:12.5px;font-family:inherit;outline:0" value="${escH(modVals[v.i-1]||'')}" oninput="modVals[${v.i-1}]=this.value;el('modPrev').innerHTML=modBolha(modSel,modVals,modDoc)">`).join('')}
    ${h&&h.format==='DOCUMENT'?`<span class="fl" style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px">Documento (PDF)</span><button class="apubtn" onclick="modEscolherDoc()">📎 ${modDoc?escH(modDoc.name):'Anexar PDF'}</button>`:''}</div>
    <div class="ap-prev" id="modPrev">${modBolha(m,modVals,modDoc)}</div></div>
   <div style="display:flex;justify-content:flex-end;gap:8px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="modEnv" onclick="modEnviar()">Enviar</button></div>`;
@@ -1731,6 +1736,7 @@ async function waEnviarModelo(c,m,vals,doc,previa){
   const sg=await sb.storage.from('wa-midia').createSignedUrl(caminho,1800);if(sg.error){toast('Não foi possível preparar o PDF.');return false;}
   comps.push({type:'header',parameters:[{type:'document',document:{link:sg.data.signedUrl,filename:doc.name}}]});}
  if(vals.length)comps.push({type:'body',parameters:vals.map(t=>({type:'text',text:t}))});
+ if(m.categoria==='AUTHENTICATION'&&vals.length)comps.push({type:'button',sub_type:'url',index:'0',parameters:[{type:'text',text:vals[0]}]});
  c.wpp.push({id:'tmp-'+id_local,id_local,tipo:'texto',d:'sai',t:previa,h:hhmm(new Date()),dt:ddmm(new Date()),em:new Date().toISOString(),st:'enviando',autor:eu.nome.split(' ')[0]});waDesenharMsgs();
  const j=await waEdge('wa-meta-enviar',{conversa_id:c.id,id_local,tipo:'template',template:{nome:m.nome,idioma:m.idioma||'pt_BR',componentes:comps,previa}});
  if(!j.ok){const x=c.wpp.find(y=>y.id_local===id_local);if(x)x.st=j.incerto?'incerto':'falhou';waDesenharMsgs();toast(j.erro||'Não foi possível enviar o modelo.');return false;}
@@ -1738,9 +1744,8 @@ async function waEnviarModelo(c,m,vals,doc,previa){
 }
 async function waModelos(id,pref){
  const c=waConv(id);if(!c)return;const ctx={nome:c.nome,empresa:'',cnpj:'',enviar:(m,v,d,p)=>waEnviarModelo(c,m,v,d,p)};
- if(c.contatoId){const r=await sb.from('wa_pessoa_vinculo').select('wa_vinculo_alcance(empresa_id,escopo,ativo)').eq('contato_id',c.contatoId).eq('ativo',true);
-  const ids=[...new Set((r.data||[]).flatMap(v=>(v.wa_vinculo_alcance||[]).filter(a=>a.ativo&&a.escopo==='empresa'&&a.empresa_id).map(a=>a.empresa_id)))];
-  if(ids.length===1){const e=await sb.rpc('fiscal_empresas',{p_ids:ids});const x=e.data&&e.data[0];if(x){ctx.empresa=x.razao_social||x.nome_fantasia||'';ctx.cnpj=x.cnpj||'';}}}
+ if(!c.grupo){const r=await sb.rpc('wa_conversa_empresas',{p_conversa:c.id});ctx.empresas=(!r.error&&Array.isArray(r.data))?r.data:[];
+  const x=ctx.empresas[0];if(x){ctx.empresa=x.razao_social||x.nome_fantasia||'';ctx.cnpj=x.cnpj||'';ctx.empresaId=x.empresa_id;}}
  modAbrir(ctx,pref);
 }
 /* ---------- APURAÇÃO (com abas: Apuração · Radar XML · Demanda em lote · Meu espaço) ---------- */
@@ -2083,11 +2088,35 @@ async function waEnviarMidia(c,blob,tipo,nome,legenda,ptmp){
  return j;
 }
 function waRespWamid(c){if(!waResp)return undefined;const r=c.wpp.find(m=>m.id===waResp);return r&&r.idWa?r.idWa:undefined;}
-function waContatoForm(id){
- waModal('Enviar contato',`<span class="fl">Nome</span><input class="fi" id="wacn" maxlength="200"><span class="fl">Telefone com DDD</span><input class="fi" id="wact" placeholder="+55 11 99999-9999"><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="waEnviarContato('${id}')">Enviar</button></div>`);
-}
-async function waEnviarContato(id){const n=el('wacn').value.trim(),t=el('wact').value.replace(/\D/g,'');if(!n||t.length<10){toast('Preencha nome e telefone.');return;}
- fecharModal();await waEnviarSimples(waConv(id),'contato',{nome:n,telefone:t},n);}
+let waCtSel=[],waCtInt=null;
+async function waContatoForm(id){
+ waCtSel=[];
+ waModal('Enviar contato',`<span class="fl">Contatos da YOU</span><div id="wactInt" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"></div>
+  <span class="fl">Buscar contato salvo ou digitar outro</span>
+  <div style="display:flex;gap:8px;align-items:flex-start"><div style="position:relative;flex:1.3;min-width:0"><input class="fi" id="wacn" maxlength="200" autocomplete="off" placeholder="Nome do contato" oninput="waCtBuscar()" onkeydown="if(event.key==='Escape'){event.stopPropagation();el('wactSug').innerHTML='';}"><div id="wactSug" style="position:absolute;left:0;right:0;top:100%;z-index:5"></div></div>
+  <input class="fi" id="wact" autocomplete="off" placeholder="Telefone com DDD" style="flex:1;min-width:0"><button class="apubtn" style="flex:none" onclick="waCtAdicionar()">Adicionar</button></div>
+  <div id="wactSel" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="wactEnv" onclick="waEnviarContato('${id}')">Enviar</button></div>`,560);
+ if(!waCtInt){const r=await sb.rpc('wa_contatos_internos');waCtInt=r.error?[]:(r.data||[]);}
+ waCtDesenhar();}
+function waCtTem(t){return waCtSel.some(x=>x.telefone===t);}
+function waCtAlternar(nome,tel){const t=String(tel||'').replace(/D/g,'');if(!nome||t.length<10)return;if(waCtTem(t))waCtSel=waCtSel.filter(x=>x.telefone!==t);else waCtSel.push({nome,telefone:t});waCtDesenhar();}
+function waCtDesenhar(){
+ const i=el('wactInt');if(i)i.innerHTML=(waCtInt||[]).map(x=>{const on=waCtTem(String(x.telefone));return `<button type="button" data-n="${escH(x.nome)}" data-t="${escH(x.telefone)}" onclick="waCtAlternar(this.dataset.n,this.dataset.t)" style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0;padding:8px 11px;border-radius:10px;border:1px solid ${on?'var(--laranja)':'var(--borda)'};background:${on?'var(--laranjaSv)':'var(--pagina)'};cursor:pointer;font-family:inherit;text-align:left"><b style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${on?'✓ ':''}${escH(x.nome)}</b><span style="font-size:11px;color:var(--apagado)">${escH(fmtTel(x.telefone))}</span></button>`;}).join('');
+ const s=el('wactSel');if(s)s.innerHTML=waCtSel.map(x=>`<span style="display:inline-flex;align-items:center;gap:6px;background:var(--laranjaSv);border:1px solid var(--laranjaCl);color:var(--laranjaTx);border-radius:999px;padding:4px 6px 4px 11px;font-size:12px;font-weight:600">${escH(x.nome)}<button type="button" data-t="${escH(x.telefone)}" onclick="waCtSel=waCtSel.filter(y=>y.telefone!==this.dataset.t);waCtDesenhar()" style="border:0;background:transparent;cursor:pointer;color:inherit;font-size:12px;padding:0 4px">✕</button></span>`).join('');
+ const b=el('wactEnv');if(b)b.textContent=waCtSel.length>1?'Enviar '+waCtSel.length+' contatos':'Enviar';}
+function waCtBuscar(){const box=el('wactSug');const q=(el('wacn').value||'').trim().toLowerCase(),qd=q.replace(/D/g,'');if(!box)return;if(q.length<2){box.innerHTML='';return;}
+ const vistos=new Set();const l=(waCtInt||[]).map(x=>({nome:x.nome,telefone:String(x.telefone)})).concat(waTodas().filter(x=>!x.grupo&&x.telefone).map(x=>({nome:x.nome,telefone:String(x.telefone)})))
+  .filter(x=>{if(vistos.has(x.telefone))return false;vistos.add(x.telefone);return x.nome.toLowerCase().includes(q)||(qd.length>=3&&x.telefone.includes(qd));}).slice(0,8);
+ box.innerHTML=l.length?`<div class="wa-menu" style="position:static;margin-top:4px;max-height:260px;overflow:auto">${l.map(x=>`<button type="button" data-n="${escH(x.nome)}" data-t="${escH(x.telefone)}" onclick="waCtEscolher(this.dataset.n,this.dataset.t)" style="display:flex;justify-content:space-between;gap:10px"><b style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(x.nome)}</b><span style="color:var(--apagado);flex:none">${escH(fmtTel(x.telefone))}</span></button>`).join('')}</div>`:'';}
+function waCtEscolher(n,t){if(!waCtTem(String(t)))waCtAlternar(n,t);el('wacn').value='';el('wact').value='';el('wactSug').innerHTML='';el('wacn').focus();}
+function waCtAdicionar(){const n=el('wacn').value.trim(),t=el('wact').value.replace(/D/g,'');if(!n||t.length<10){toast('Preencha nome e telefone.');return;}
+ if(!waCtTem(t))waCtAlternar(n,t);el('wacn').value='';el('wact').value='';el('wactSug').innerHTML='';}
+async function waEnviarContato(id){
+ const n=el('wacn').value.trim(),t=el('wact').value.replace(/D/g,'');if(n&&t.length>=10&&!waCtTem(t))waCtSel.push({nome:n,telefone:t});
+ if(!waCtSel.length){toast('Escolha ao menos um contato.');return;}
+ const lista=waCtSel.slice();fecharModal();const c=waConv(id);if(!c)return;
+ for(const x of lista)await waEnviarSimples(c,'contato',{nome:x.nome,telefone:x.telefone},x.nome);}
 function waLocalForm(id){
  waModal('Enviar localização',`<span class="fl">Link do Google Maps ou latitude, longitude</span><input class="fi" id="walc" placeholder="-23.5505, -46.6333"><span class="fl">Nome do local</span><input class="fi" id="waln" maxlength="200"><span class="fl">Endereço</span><input class="fi" id="wale" maxlength="300"><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="waEnviarLocal('${id}')">Enviar</button></div>`);
 }
@@ -3293,7 +3322,8 @@ async function iniciarDados(){
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_chamada'},aoMudarChamada)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
-  .on('postgres_changes',{event:'UPDATE',schema:'public',table:'wa_midia'},aoMudarMidia).subscribe();
+  .on('postgres_changes',{event:'UPDATE',schema:'public',table:'wa_midia'},aoMudarMidia)
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo'},()=>{modLista=null;}).subscribe();
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).on('postgres_changes',{event:'*',schema:'public',table:'fiscal_nivel_permissao'},()=>aoMudarEu({new:{ativo:true,nivel:eu.nivel}})).subscribe();
  appVersaoIniciar();
  view=telaInicial();render();}
