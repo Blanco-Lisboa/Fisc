@@ -1,7 +1,11 @@
+param([string]$Departamento = 'fiscal')
 $ErrorActionPreference = 'Stop'
 $raiz = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $build = Join-Path $raiz 'build'
-if (-not (Test-Path (Join-Path $build 'app\fiscal-lancador.jar'))) { & (Join-Path $PSScriptRoot 'compilar.ps1') }
+$nomes = @{ fiscal = 'Fiscal'; legalizacao = 'Legalizacao' }
+$nome = $nomes[$Departamento]
+if (-not $nome) { throw "departamento desconhecido: $Departamento" }
+& (Join-Path $PSScriptRoot 'compilar.ps1') -Departamento $Departamento
 
 $imagem = Join-Path $build 'imagem'
 $runtime = Join-Path $build 'runtime'
@@ -15,7 +19,7 @@ if (-not $env:JAVA_HOME) { $jmods = Join-Path (Split-Path (Split-Path (Get-Comma
 & jlink --module-path $jmods --add-modules ALL-MODULE-PATH --strip-debug --no-header-files --no-man-pages --output $runtime
 if ($LASTEXITCODE) { throw 'falha no jlink' }
 
-& jpackage --type app-image --name Fiscal --dest $imagem --input $entrada --main-jar fiscal-lancador.jar `
+& jpackage --type app-image --name $nome --dest $imagem --input $entrada --main-jar fiscal-lancador.jar `
     --main-class com.you.fiscal.lancador.Lancador --runtime-image $runtime `
     --icon (Join-Path $raiz 'app\src\main\resources\icone\fiscal.ico') --vendor 'You Contabilidade' --app-version 1.0
 if ($LASTEXITCODE) { throw 'falha no jpackage' }
@@ -25,6 +29,6 @@ if (Test-Path $jcef) { Remove-Item -Recurse -Force $jcef }
 Copy-Item -Recurse (Join-Path $env:USERPROFILE '.fiscal-jcef') $jcef
 
 $iscc = Join-Path $env:LOCALAPPDATA 'Programs\Inno Setup 6\ISCC.exe'
-& $iscc /Q (Join-Path $PSScriptRoot 'fiscal.iss')
+& $iscc /Q (Join-Path $PSScriptRoot "$Departamento.iss")
 if ($LASTEXITCODE) { throw 'falha no Inno Setup' }
-Get-Item (Join-Path $build 'instalador\Fiscal-Instalador.exe') | Select-Object FullName, Length
+Get-Item (Join-Path $build "instalador\$nome-Instalador.exe") | Select-Object FullName, Length
