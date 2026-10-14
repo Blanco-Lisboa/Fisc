@@ -1,4 +1,4 @@
-import hashlib, json, mimetypes, os, subprocess, threading, time
+import hashlib, json, mimetypes, os, subprocess, threading, time, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 
 BASE = os.environ.get('APP_BASE', '/opt/app-web')
@@ -8,6 +8,9 @@ SUB = 'app/src/main/resources/static'
 FORA = ('teams-web/',)
 TIPOS = {'.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.html': 'text/html; charset=utf-8',
          '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.woff2': 'font/woff2', '.ico': 'image/x-icon'}
+AUTH_URL = os.environ.get('APP_AUTH_URL', 'https://wfqcoocfastgsfgegpcm.supabase.co')
+AUTH_CHAVE = os.environ.get('APP_AUTH_CHAVE', 'sb_publishable_88ukR4t1KNTc73DxbF6-Pw_0CKW16Fe')
+validos = {}
 trava = threading.Lock()
 ultima = [0.0]
 manifestos = {}
@@ -61,6 +64,27 @@ def atualizar():
             os._exit(0)
 
 
+def logado(cabecalho):
+    if not cabecalho.startswith('Bearer ') or len(cabecalho) > 8192:
+        return False
+    token = cabecalho[7:].strip()
+    chave = hashlib.sha256(token.encode('utf-8')).hexdigest()
+    agora = time.time()
+    if validos.get(chave, 0) > agora:
+        return True
+    pedido = urllib.request.Request(AUTH_URL + '/auth/v1/user', headers={'apikey': AUTH_CHAVE, 'Authorization': 'Bearer ' + token})
+    try:
+        with urllib.request.urlopen(pedido, timeout=8) as r:
+            ok = r.status == 200 and bool(json.loads(r.read() or b'{}').get('id'))
+    except Exception:
+        ok = False
+    if ok:
+        if len(validos) > 5000:
+            validos.clear()
+        validos[chave] = agora + 300
+    return ok
+
+
 class Pedido(BaseHTTPRequestHandler):
     server_version = 'app-web'
     sys_version = ''
@@ -82,7 +106,7 @@ class Pedido(BaseHTTPRequestHandler):
     def do_GET(self):
         partes = self.path.split('?', 1)[0].lstrip('/').split('/', 1)
         canal = partes[0]
-        if canal not in CANAIS or self.headers.get('Sec-Fetch-Dest', '') in ('document', 'iframe', 'frame', 'embed', 'object'):
+        if canal not in CANAIS or self.headers.get('Sec-Fetch-Dest', '') in ('document', 'iframe', 'frame', 'embed', 'object') or not logado(self.headers.get('Authorization', '')):
             return self.responder(404, b'nao encontrado')
         resto = partes[1] if len(partes) > 1 else ''
         if resto == 'manifesto.json':
@@ -105,10 +129,10 @@ class Pedido(BaseHTTPRequestHandler):
         if self.path.split('?', 1)[0] != '/_atualizar':
             return self.responder(404, b'nao encontrado')
         if time.time() - ultima[0] < 15:
-            return self.responder(429, b'aguarde')
+            return self.responder(404, b'nao encontrado')
         ultima[0] = time.time()
         threading.Thread(target=atualizar, daemon=True).start()
-        self.responder(202, b'atualizando')
+        self.responder(404, b'nao encontrado')
 
 
 if __name__ == '__main__':
