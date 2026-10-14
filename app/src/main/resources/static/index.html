@@ -1702,12 +1702,34 @@ function teamsIniciar(){return teamsCarregar().then(ok=>ok&&TeamsIT.iniciar({ori
  clientes:ids=>sb.rpc('fiscal_empresas',{p_ids:ids}),
  buscarPessoas:t=>sb.rpc('fiscal_buscar_pessoas',{p_texto:t}),
  pessoasContato:ids=>sb.rpc('fiscal_pessoas_contato',{p_ids:ids}),
+ diretos:()=>teamsDiretos(),
+ abrirDireto:(k,h)=>teamsDirAbrir(k,h),
  abrirModulo:()=>irView('teams'),
  baixar:(u,n)=>fiscalBaixar(u,n),
  aoMensagem:x=>teamsAvisar(x),
  aoContar:n=>{const b=el('tmBadge');if(b){b.textContent=n;b.style.display=n?'':'none';}},
  toast:t=>toast(t)}));}
-function teamsModulo(){const c=el('conteudo');if(window.TeamsIT){TeamsIT.abrirModulo(c);return;}c.innerHTML='';teamsCarregar().then(ok=>{if(ok&&view==='teams')TeamsIT.abrirModulo(el('conteudo'));});}
+/* ---------- Team's: diretoria ---------- */
+let teamsDir=[],teamsDirAberto=null;
+async function teamsDirCarregar(){const r=await sb.rpc('wa_canais_diretoria');if(r.error)return;teamsDir=r.data||[];teamsDirAtualizar();}
+function teamsDirDe(id){return teamsDir.find(d=>d.conversa_id===id)||null;}
+function teamsDirConv(k){const d=teamsDir.find(x=>x.numero_chave===k);return d&&d.conversa_id?waConv(d.conversa_id):null;}
+function teamsDirFoto(c){return c&&c.foto&&waFoto[c.foto]&&waFoto[c.foto].u||'';}
+function teamsDiretos(){return teamsDir.map(d=>{const c=d.conversa_id?waConv(d.conversa_id):null;return {chave:d.numero_chave,nome:d.nome,cargo:d.cargo,lado:d.lado,nao_lidas:c?waNaoLidas(c):0,foto:teamsDirFoto(c)};});}
+function teamsDirAtualizar(){if(window.TeamsIT&&TeamsIT.atualizarDiretos)TeamsIT.atualizarDiretos();}
+function teamsDirAbrir(k,host){let s=el('tmDirSlot');
+ if(!k){if(teamsDirAberto){const ii=el('wwin');if(ii&&selWhats)waRasc[selWhats]=ii.value;}teamsDirAberto=null;if(s)s.remove();return;}
+ if(!host)return;
+ if(!s||s.parentNode!==host){if(s)s.remove();s=document.createElement('div');s.id='tmDirSlot';s.slot='direto';s.style.cssText='display:flex;flex-direction:column;flex:1;min-height:0;height:100%';host.appendChild(s);}
+ teamsDirAberto=k;teamsDirDesenhar();}
+function teamsDirDesenhar(){const s=el('tmDirSlot');if(!s||!teamsDirAberto)return;const c=teamsDirConv(teamsDirAberto);
+ if(!c){s.innerHTML=`<div class="wz-vazio">${WZ.balao}</div>`;return;}
+ waAquecer();const ii=el('wwin');if(ii&&selWhats&&selWhats!==c.id)waRasc[selWhats]=ii.value;selWhats=c.id;waSemSelecao=false;if(!c.carregada)carregarMensagens(c.id);
+ if(c.carregada&&waNaoLidas(c)&&waPodeAgir(c)&&!waLidaTentada.has(c.id+':'+c.naoLidas)){waLidaTentada.add(c.id+':'+c.naoLidas);waMarcarLida(c);}
+ const a=document.activeElement;const foco=a&&a.id==='wwin'&&s.contains(a);const rasc=foco?a.value:null;
+ s.innerHTML=`<section class="wz-conversa" style="flex:1;min-height:0" ondragover="waSobreConversa(event)" ondragleave="if(!this.contains(event.relatedTarget))this.classList.remove('solta')" ondrop="waSoltaConversa(event)">${waCabecalho(c)}${waBuscaMsg!==null?`<div class="wz-bbusca"><input id="wwbmsg" placeholder="Buscar na conversa" value="${escH(waBuscaMsg)}" oninput="waBuscaMsg=this.value;waDesenharMsgs()"><button class="wz-sec2" onclick="waBuscaMsg=null;render()">Fechar</button></div>`:''}<div class="wz-msgs" id="wwms"></div>${waComposer(c,waEntrada.includes(c))}</section>`;
+ waDesenharMsgs();const t=el('wwin');if(t){t.value=rasc!==null?rasc:(waRasc[c.id]||'');waCresce(t);if(foco){t.focus();t.setSelectionRange(t.value.length,t.value.length);}}}
+function teamsModulo(){const c=el('conteudo');if(window.TeamsIT&&teamsDirAberto&&c.querySelector('.tmx-mod')&&TeamsIT.diretoAberto&&TeamsIT.diretoAberto()===teamsDirAberto){teamsDirDesenhar();teamsDirAtualizar();return;}if(window.TeamsIT){TeamsIT.abrirModulo(c);return;}c.innerHTML='';teamsCarregar().then(ok=>{if(ok&&view==='teams')TeamsIT.abrirModulo(el('conteudo'));});}
 function teamsTela(){if(window.TeamsIT)TeamsIT.tela({bolinhaAlta:view==='whatsweb'});}
 /* ---------- modelos da Meta (WhatsApp e Apuração) ---------- */
 const MOD_TITULO={fiscal_solicitacao_xml:'Pedir XML do mês',fiscal_lembrete_urgente_xml:'Cobrar XML (urgente)',fiscal_confirmacao_movimento_mes:'Perguntar se teve notas no mês',fiscal_confirmacao_dados_apuracao:'Confirmar dados antes da apuração',fiscal_entrega_apuracao_mensal:'Enviar apuração e guia (DAS)',fiscal_aviso_declaracao_zerada:'Avisar declaração zerada',fiscal_aviso_vencimento_certificado:'Avisar vencimento do certificado',fiscal_boas_vindas_cliente:'Boas-vindas ao cliente novo',fiscal_difal_explicacao_decisao:'Explicar o ICMS DIFAL',fiscal_atualizacao_rotina_erp:'Avisar mudança na rotina do ERP',fiscal_aviso_alteracao_cadastral:'Avisar alteração cadastral',fiscal_pendencia_cadastral:'Cobrar pendência cadastral',fiscal_recibo_opcao_regime:'Enviar recibo da opção de regime',fiscal_reforma_tributaria_lembrete:'Lembrete da Reforma Tributária',fiscal_comunicado_institucional:'Comunicado da YOU',fiscal_divulgacao_servicos_grupo:'Divulgar serviços do grupo',fiscal_pesquisa_satisfacao:'Pesquisa de satisfação',fiscal_codigo_verificacao:'Código de verificação',fiscal_retomar_atendimento:'Retomar atendimento',fiscal_confirmar_envio_apuracao:'Confirmar envio da apuração',fiscal_xml_ou_sem_emissao:'Pedir XML ou informar sem emissão'};
@@ -1956,7 +1978,7 @@ const ICO_GRUPO='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" str
 const ICO_CLIPE='<svg viewBox="0 0 24 24"><path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg>';
 const ICO_ESTRELA='★';
 function waTodas(){return waEntrada.concat(waMeus);}
-function waPodeAgir(c){return !!c&&(tem('wa_conversa_qualquer')||c.dono===eu.id);}
+function waPodeAgir(c){return !!c&&(tem('wa_conversa_qualquer')||c.dono===eu.id||!!teamsDirDe(c.id));}
 function waOrdenar(l){return l.slice().sort((a,b)=>(b.fixada?1:0)-(a.fixada?1:0)||(a.fixada&&b.fixada?new Date(b.fixada)-new Date(a.fixada):0)||new Date(b.ultima||0)-new Date(a.ultima||0));}
 function waNaoLidas(x){return x.marcadaNL?Math.max(1,x.naoLidas):x.naoLidas;}
 function waFecharMenus(){document.querySelectorAll('.wa-menu').forEach(m=>m.remove());}
@@ -3486,7 +3508,7 @@ function waLigDesenhar(){let b=el('wzLig');
 /* ---------- WHATSAPP atalhos e conversa compartilhada ---------- */
 let waSemSelecao=false,waEmojiAlvo=null;
 const WA_EMOJIS_PAINEL='😀 😃 😄 😁 😊 🙂 😉 😍 😘 🤗 🤔 😐 😅 😂 🙏 👍 👎 👏 🙌 👋 🤝 ✅ ❌ ⚠️ ❗ ❓ 📌 📎 📄 📊 📅 ⏰ 💰 🧾 📈 🎉 🚀 ❤️ 💙 💚 🔥 ⭐ ✨ 👀 💡 📞 ✉️'.split(' ');
-function waChatAberto(){return view==='whatsweb'||(view==='apuracao'&&apuAba==='apuracao'&&!!el('wwms'));}
+function waChatAberto(){return view==='whatsweb'||(view==='apuracao'&&apuAba==='apuracao'&&!!el('wwms'))||(view==='teams'&&!!teamsDirAberto&&!!el('wwms'));}
 function apConversaDe(cl){const d=String(cl&&cl.cnpj||'').replace(/\D/g,'');if(!d)return null;
  return waOrdenar(waTodas().filter(x=>!x.grupo&&(x.empresas||[]).some(id=>waEmp[id]&&String(waEmp[id].cnpj||'').replace(/\D/g,'')===d)))[0]||null;}
 let apWaCont={},apWaSel={},apWaAberto=false;
@@ -3552,7 +3574,8 @@ let sb=null,eu=null,waEntrada=[],waMeus=[],waMsgs={},waFoto={};
 async function waAssinarFotos(lista){const ag=Date.now();const f=[...new Set(lista.map(x=>x.foto).filter(p=>p&&!(waFoto[p]&&waFoto[p].ate>ag)))];if(!f.length)return false;let mudou=false;
  for(let i=0;i<f.length;i+=500){const r=await sb.storage.from('wa-midia').createSignedUrls(f.slice(i,i+500),3600);if(r.error||!r.data)continue;r.data.forEach(x=>{if(x.signedUrl){waFoto[x.path]={u:x.signedUrl,ate:ag+3300e3};mudou=true;}});}
  return mudou;}
-function waConv(id){return waEntrada.find(x=>x.id===id)||waMeus.find(x=>x.id===id);}
+let waTudo=[];
+function waConv(id){return waEntrada.find(x=>x.id===id)||waMeus.find(x=>x.id===id)||(teamsDirDe(id)?waTudo.find(x=>x.id===id):undefined);}
 function hhmm(d){const x=new Date(d);return String(x.getHours()).padStart(2,'0')+':'+String(x.getMinutes()).padStart(2,'0');}
 function ddmm(d){const x=new Date(d);return String(x.getDate()).padStart(2,'0')+'/'+String(x.getMonth()+1).padStart(2,'0');}
 function fmtTel(t){if(!t)return '';const s=String(t);return s.startsWith('55')&&s.length>=12?'+55 '+s.slice(2,4)+' '+s.slice(4,-4)+'-'+s.slice(-4):'+'+s;}
@@ -3585,9 +3608,9 @@ async function carregarConversas(){
  await waCarregarPainel();
  nv.forEach(c=>{const p=waPainel[c.id];c.dono=(p&&p.dono_id)||null;c.arquivada=!!(p&&p.arquivada);if(p&&p.nome_provisorio)c.nome=p.nome_provisorio;});
  waEntrada=nv.filter(c=>!c.dono);
- waMeus=nv.filter(c=>c.dono===eu.id);
+ waMeus=nv.filter(c=>c.dono===eu.id);waTudo=nv;
  waAplicarPainel();
- waEntrada.concat(waMeus).forEach(c=>janelaWA(c));waAgendarJanela();
+ waEntrada.concat(waMeus).concat(nv.filter(c=>teamsDirDe(c.id))).forEach(c=>janelaWA(c));waAgendarJanela();
  waAssinarFotos(nv).then(m=>{if(!m||view!=='whatsweb')return;const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'||a.id==='wwbusca'))return;render();});
 }
 const WA_COLUNAS_MSG='id,id_local,id_whatsapp,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,autor_grupo,responder_a,reacao,reacao_nossa,encaminhada,favorita,editada_em,dados,wa_midia(nome,caminho,estado,mimetype,transcricao,tamanho,duracao_s)';
@@ -3623,11 +3646,11 @@ function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;if(p.even
    const c=waConv(m.conversa_id);if(c)janelaWA(c);
    if((!ant&&['imagem','audio','video','documento','figurinha'].includes(m.tipo))||(m.dados&&m.dados.modelo&&!nova.caminho&&p.eventType==='INSERT'))setTimeout(()=>carregarMensagens(m.conversa_id),1500);}}
  if(waChatAberto()&&selWhats===m.conversa_id)waDesenharMsgs();}
-async function aoMudarConversa(){await carregarConversas();if(view==='whatsweb'){const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'))return;render();}else{const b=el('waBadge');if(b)b.textContent=waPendentes();}}
+async function aoMudarConversa(){await carregarConversas();teamsDirAtualizar();if(view==='whatsweb'){const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'))return;render();}else{const b=el('waBadge');if(b)b.textContent=waPendentes();}}
 /* ---------- avisos ---------- */
 const avisoMidia={},avisoFeitos=new Set();
 function avisoPost(rota,d){return fetch('/sistema/'+rota,{method:'POST',headers:{'Content-Type':'application/json','X-Fiscal':'1'},body:JSON.stringify(d)}).catch(()=>{});}
-function avisoOlhando(canal,id){if(!document.hasFocus()||document.hidden)return false;return canal==='wa'?(view==='whatsweb'&&selWhats===id):(view==='teams'||false);}
+function avisoOlhando(canal,id){if(!document.hasFocus()||document.hidden)return false;return canal==='wa'?((view==='whatsweb'||(view==='teams'&&!!teamsDirAberto))&&selWhats===id):(view==='teams'||false);}
 function avisoEspera(p,ms){return Promise.race([p,new Promise(ok=>setTimeout(()=>ok(null),ms))]);}
 function avisoDur(s){if(!s||!isFinite(s))return '';s=Math.round(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 async function avisoDuracao(msgId){
@@ -3643,7 +3666,8 @@ async function waAvisar(m){
  let texto=d.texto||'';const t=dur?await dur:'';if(t&&!/(Áudio|Vídeo) · \d+:\d{2}/.test(texto))texto=texto.replace(/(Áudio|Vídeo)/,'$1 · '+t);
  let foto='';if(d.foto){await waAssinarFotos([{foto:d.foto}]);foto=(waFoto[d.foto]&&waFoto[d.foto].u)||'';}
  let c=waConv(d.conversa_id);if(!c){await carregarConversas();c=waConv(d.conversa_id);}
- avisoPost('aviso',{canal:'wa',id:d.conversa_id,nome:d.nome,texto,em:d.em,janelaAte:d.janela_ate,podeResponder:!!d.pode_responder,
+ const dir=teamsDirDe(d.conversa_id);teamsDirAtualizar();
+ avisoPost('aviso',{canal:'wa',diretoria:!!dir,id:d.conversa_id,nome:dir?dir.nome+' · '+dir.cargo:d.nome,texto,em:d.em,janelaAte:d.janela_ate,podeResponder:!!d.pode_responder,
   somenteLeitura:!!d.somente_leitura,grupo:!!d.grupo,foto,rodape:c&&!c.grupo?waEmpresaTxt(c):''});}
 function teamsAvisar(x){if(!x||(x.vendo&&avisoOlhando('teams')))return;
  avisoPost('aviso',{canal:'teams',id:x.canal_id,nome:x.nome,texto:x.texto,em:x.em,podeResponder:true,grupo:!!x.grupo,foto:x.foto||'',rodape:x.rodape||''});}
@@ -3651,7 +3675,7 @@ window.fiscalAvisoAcao=async function(a){
  if(!a||!a.acao)return;
  if(a.canal==='teams'){if(!window.TeamsIT||!TeamsIT.avisoAcao)return;const r=await TeamsIT.avisoAcao(a);if(a.acao==='responder')avisoPost('aviso/resultado',{chave:a.chave,ok:!!(r&&r.ok),erro:(r&&r.erro)||''});return;}
  let c=waConv(a.id);if(!c){await carregarConversas();c=waConv(a.id);}
- if(a.acao==='abrir'){irView('whatsweb');if(c)waAbrir(c.id);return;}
+ if(a.acao==='abrir'){const dir=c&&teamsDirDe(c.id);if(dir){irView('teams');if(window.TeamsIT&&TeamsIT.abrirDireto)TeamsIT.abrirDireto(dir.numero_chave);return;}irView('whatsweb');if(c)waAbrir(c.id);return;}
  if(!c){if(a.acao==='responder')avisoPost('aviso/resultado',{chave:a.chave,ok:false,erro:'Conversa não encontrada.'});return;}
  if(a.acao==='responder'){const j=await enviarTextoWA(c,a.texto);avisoPost('aviso/resultado',{chave:a.chave,ok:!!(j&&j.ok),erro:(j&&j.erro)||''});return;}
  if(a.acao==='lida'){await waMarcarLida(c,true);return;}
@@ -3666,7 +3690,7 @@ async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=
 async function iniciarDados(){
  el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('navPessoal').textContent=eu.nome;TITULOS.pessoal=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
  preCarregarGestor();
- estCarregar();if(tem('wa_lote_gerir'))envCarregar();
+ estCarregar();if(tem('wa_lote_gerir'))envCarregar();teamsDirCarregar();
  teamsIniciar();
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)

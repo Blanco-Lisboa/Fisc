@@ -37,6 +37,8 @@ final class AvisoJanela extends JFrame {
             new Color(0x9ccbb4), new Color(0x1f8f5a), Color.WHITE, "WhatsApp", "Abrir no WhatsApp", "Windows Notify Messaging.wav");
     static final Tema TEAMS = new Tema(new Color(0x0e2a4d), new Color(0x13386a), new Color(0x1f4f8f), new Color(0xdfe9f8),
             new Color(0xa3b8d9), new Color(0x2f6fed), Color.WHITE, "Team's", "Abrir no Team's", "Windows Message Nudge.wav");
+    static final Tema DIRETORIA = new Tema(new Color(0xD9480F), new Color(0xFE6A1F), new Color(0xFFD2B8), Color.WHITE,
+            new Color(0xFFE6D6), Color.WHITE, new Color(0xC2410C), "Team's · Diretoria", "Abrir no Team's", "Windows Message Nudge.wav");
 
     static final int LARG = 376, RAIO = 16, PAD = 14, MAX = 3, ESPACO = 10;
     static final Color[] CORES = {new Color(0xC2410C), new Color(0x2F5DA8), new Color(0x6D4AA0), new Color(0x0E7490),
@@ -113,7 +115,7 @@ final class AvisoJanela extends JFrame {
         this.canal = canal;
         this.id = id;
         this.chave = canal + ":" + id;
-        this.tema = "teams".equals(canal) ? TEAMS : WA;
+        this.tema = "teams".equals(canal) ? TEAMS : Boolean.TRUE.equals(d.get("diretoria")) ? DIRETORIA : WA;
         ler(d);
         setUndecorated(true);
         setType(Window.Type.UTILITY);
@@ -239,9 +241,10 @@ final class AvisoJanela extends JFrame {
         g.setPaint(new GradientPaint(0, 0, tema.fundo2, 0, h, tema.fundo));
         g.fill(forma);
         g.setClip(forma);
-        g.setPaint(new GradientPaint(0, 0, new Color(254, 73, 1, 60), w * 0.55f, 0, new Color(254, 73, 1, 0)));
+        Color acento = tema == DIRETORIA ? new Color(255, 255, 255, 0) : new Color(254, 73, 1, 0);
+        g.setPaint(new GradientPaint(0, 0, tema == DIRETORIA ? new Color(255, 255, 255, 90) : new Color(254, 73, 1, 60), w * 0.55f, 0, acento));
         g.fillRect(0, 0, w, 3);
-        g.setColor(new Color(254, 73, 1, 150));
+        g.setColor(tema == DIRETORIA ? new Color(255, 255, 255, 200) : new Color(254, 73, 1, 150));
         g.fillRoundRect(0, RAIO, 3, h - RAIO * 2, 3, 3);
         g.setClip(null);
         g.setColor(tema.borda);
@@ -278,9 +281,9 @@ final class AvisoJanela extends JFrame {
             g.setFont(fonte(Font.BOLD, 10.5f));
             int bw = Math.max(20, g.getFontMetrics().stringWidth(q) + 10);
             int bx = xt + fn.stringWidth(n) + 8;
-            g.setColor(LARANJA);
+            g.setColor(tema == DIRETORIA ? Color.WHITE : LARANJA);
             g.fillRoundRect(bx, y + 2, bw, 17, 17, 17);
-            g.setColor(Color.WHITE);
+            g.setColor(tema == DIRETORIA ? tema.destaqueTx : Color.WHITE);
             g.drawString(q, bx + (bw - g.getFontMetrics().stringWidth(q)) / 2, y + 14);
         }
         g.setFont(fonte(Font.PLAIN, 13));
@@ -297,11 +300,11 @@ final class AvisoJanela extends JFrame {
                 g.setFont(fonte(Font.BOLD, 11));
                 int cw = g.getFontMetrics().stringWidth(chip) + 22;
                 boolean aberta = janelaAberta() && !somenteLeitura;
-                g.setColor(aberta ? new Color(254, 73, 1, 46) : new Color(255, 255, 255, 22));
+                g.setColor(aberta ? (tema == DIRETORIA ? new Color(255, 255, 255, 40) : new Color(254, 73, 1, 46)) : new Color(255, 255, 255, 22));
                 g.fillRoundRect(x, y, cw, 22, 22, 22);
-                g.setColor(aberta ? new Color(254, 73, 1, 120) : new Color(255, 255, 255, 40));
+                g.setColor(aberta ? (tema == DIRETORIA ? new Color(255, 255, 255, 140) : new Color(254, 73, 1, 120)) : new Color(255, 255, 255, 40));
                 g.drawRoundRect(x, y, cw - 1, 21, 22, 22);
-                g.setColor(aberta ? LARANJA_CL : tema.apagado);
+                g.setColor(aberta ? (tema == DIRETORIA ? Color.WHITE : LARANJA_CL) : tema.apagado);
                 g.fill(new Ellipse2D.Float(x + 8, y + 8, 6, 6));
                 g.drawString(chip, x + 18, y + 15);
                 x += cw + 8;
@@ -321,7 +324,7 @@ final class AvisoJanela extends JFrame {
         }
         if (estado != null || estadoErro != null) {
             g.setFont(fonte(Font.PLAIN, 11.5f));
-            g.setColor(estadoErro != null ? new Color(0xFF8A80) : LARANJA_CL);
+            g.setColor(estadoErro != null ? (tema == DIRETORIA ? Color.WHITE : new Color(0xFF8A80)) : (tema == DIRETORIA ? Color.WHITE : LARANJA_CL));
             g.drawString(cortar(estadoErro != null ? estadoErro : estado, g.getFontMetrics(), LARG - PAD * 2), PAD, h - PAD - 2);
         }
         g.dispose();
@@ -413,9 +416,10 @@ final class AvisoJanela extends JFrame {
 
     void desenharEnviar(Graphics2D g, Rectangle r) {
         boolean pode = campo.isEnabled() && !campo.getText().isBlank();
-        g.setColor(pode ? (sobreRet(r) ? LARANJA.brighter() : LARANJA) : new Color(255, 255, 255, 40));
+        Color base = tema == DIRETORIA ? Color.WHITE : LARANJA;
+        g.setColor(pode ? (sobreRet(r) && tema != DIRETORIA ? base.brighter() : base) : new Color(255, 255, 255, 40));
         g.fillOval(r.x, r.y, r.width, r.height);
-        g.setColor(Color.WHITE);
+        g.setColor(tema == DIRETORIA && pode ? tema.destaqueTx : Color.WHITE);
         g.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         int cx = r.x + r.width / 2, cy = r.y + r.height / 2;
         int[] xs = {cx - 7, cx + 8, cx - 7, cx - 4};
