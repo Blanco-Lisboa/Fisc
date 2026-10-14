@@ -3098,7 +3098,34 @@ function waComposer(c,isEntrada){
    <textarea id="wwin" rows="1" placeholder="Escreva para ${escH(c.nome.split(' ')[0])}…" oninput="waRasc['${c.id}']=this.value;waDigitando();waCresce(this)" onkeydown="waTecla(event,'${c.id}')"></textarea>
    <button class="wz-env" onclick="enviarWW()">Enviar ${WZ.env}</button></div>
   <div class="wz-dica"><span><kbd>Enter</kbd> envia</span><span><kbd>Shift</kbd>+<kbd>Enter</kbd> nova linha</span><span><kbd>/</kbd> abre modelos</span></div>`}</div>`;}
-function waCresce(t){t.style.height='auto';t.style.height=Math.min(120,t.scrollHeight)+'px';}
+function waZapEspHtml(txt){
+ const M='<span style="opacity:.38">',F='</span>',bl=[];const guarda=h=>{bl.push(h);return '\u0001'+(bl.length-1)+'\u0002';};
+ let h=escH(txt||'');
+ h=h.replace(/```([\s\S]+?)```/g,(q,x)=>guarda(M+'```'+F+'<span style="background:rgba(0,0,0,.07);border-radius:3px">'+x+'</span>'+M+'```'+F));
+ h=h.replace(/`([^`\n]+)`/g,(q,x)=>guarda(M+'`'+F+'<span style="background:rgba(0,0,0,.07);border-radius:3px">'+x+'</span>'+M+'`'+F));
+ const env=(c,cr,est)=>{h=h.replace(new RegExp('(^|[\\s(\\[{>~_*\\u0002])'+c+'(?=\\S)([^\\n]*?\\S)'+c+'(?=$|[\\s)\\]}.,;:!?<~_*\\u0001])','gm'),(q,p,x)=>p+guarda(M+cr+F+'<span style="'+est+'">'+x+'</span>'+M+cr+F));};
+ env('\\*','*','text-shadow:.45px 0 0 currentColor,-.2px 0 0 currentColor');env('_','_','font-style:italic');env('~','~','text-decoration:line-through');
+ h=h.replace(/\u0001(\d+)\u0002/g,(q,i)=>bl[+i]).replace(/\u0001(\d+)\u0002/g,(q,i)=>bl[+i]);
+ h=h.split('\n').map(z=>z.startsWith('&gt; ')?M+'&gt; '+F+'<span style="opacity:.75">'+z.slice(5)+'</span>':/^[*-] /.test(z)?M+z[0]+F+z.slice(1):/^\d+\. /.test(z)?z.replace(/^(\d+\.)/,M+'$1'+F):z).join('\n');
+ return h+(/\n$/.test(txt||'')?'​':'');}
+function waZapEspelho(t){
+ if(!t||!t.isConnected)return;let e=t.previousElementSibling;
+ if(!e||!e.hasAttribute('data-zap-esp')){
+  const cs=getComputedStyle(t);e=document.createElement('div');e.setAttribute('data-zap-esp','');e.setAttribute('aria-hidden','true');
+  const cp=['fontFamily','fontSize','fontWeight','fontStyle','lineHeight','letterSpacing','wordSpacing','textAlign','textIndent','textTransform','paddingTop','paddingRight','paddingBottom','paddingLeft','borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth','borderRadius','boxSizing','tabSize'];
+  cp.forEach(k=>e.style[k]=cs[k]);
+  Object.assign(e.style,{position:'absolute',margin:'0',borderStyle:'solid',borderColor:'transparent',whiteSpace:'pre-wrap',overflowWrap:'break-word',wordBreak:'break-word',overflow:'hidden',pointerEvents:'none',background:cs.backgroundColor,color:cs.color,zIndex:'0'});
+  const p=t.parentElement;if(getComputedStyle(p).position==='static')p.style.position='relative';
+  p.insertBefore(e,t);
+  Object.assign(t.style,{background:'transparent',color:'transparent',caretColor:cs.color,position:'relative',zIndex:'1'});
+  t.addEventListener('scroll',()=>{e.scrollTop=t.scrollTop;});
+  const dv=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value');
+  Object.defineProperty(t,'value',{configurable:true,get(){return dv.get.call(this);},set(v){dv.set.call(this,v);waZapEspelho(this);}});
+  t.addEventListener('input',()=>waZapEspelho(t));
+  if(window.ResizeObserver){const ro=new ResizeObserver(()=>waZapEspPos(t,e));ro.observe(t);}}
+ e.innerHTML=waZapEspHtml(t.value);waZapEspPos(t,e);}
+function waZapEspPos(t,e){Object.assign(e.style,{left:t.offsetLeft+'px',top:t.offsetTop+'px',width:t.offsetWidth+'px',height:t.offsetHeight+'px'});e.scrollTop=t.scrollTop;}
+function waCresce(t){t.style.height='auto';t.style.height=Math.min(120,t.scrollHeight)+'px';if(t.id==='wwin')waZapEspelho(t);}
 function waTecla(ev,id){if(ev.key==='Enter'&&!ev.shiftKey&&!ev.isComposing){ev.preventDefault();enviarWW();return;}if(ev.key==='/'&&!ev.target.value){ev.preventDefault();waModelos(id);}}
 const ICO_EXT={xml:'xml',pdf:'pdf',zip:'zip',rar:'zip','7z':'zip',xls:'xls',xlsx:'xls',ods:'xls',csv:'csv',doc:'word',docx:'word',odt:'word',rtf:'doc',txt:'txt',ppt:'ppt',pptx:'ppt',html:'html',htm:'html',jpg:'jpg',jpeg:'jpg',png:'png',gif:'gif',json:'arquivo-de-codigo',js:'arquivo-de-codigo'};
 function icone(n){return `<img class="ico8" src="icones/${n}.png" alt="">`;}
