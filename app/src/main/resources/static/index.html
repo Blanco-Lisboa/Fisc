@@ -758,6 +758,7 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz-edt-b button:hover{border-color:var(--laranja)}
 .wz-edt:hover .wz-edt-b,.wz-edt:focus-within .wz-edt-b,.wz-edt-s:hover .wz-edt-b,.wz-edt-s:focus-within .wz-edt-b{display:block}
 .wz-enc{font-size:11px;color:var(--apagado);font-style:italic;margin-bottom:2px}
+.wz-txt code.zcod,code.zmono{font-family:ui-monospace,Consolas,"Cascadia Mono",monospace;font-size:.93em}.wz-txt code.zcod{background:rgba(0,0,0,.07);padding:1px 4px;border-radius:4px}.wz-txt .zq{display:inline-block;border-left:3px solid rgba(0,0,0,.25);padding-left:8px;color:inherit;opacity:.85}
 .wz-txt{font-size:13.5px;white-space:pre-line;overflow-wrap:anywhere}
 .wz-pe{display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:10.5px;color:var(--apagado);margin-top:3px;font-variant-numeric:tabular-nums}
 .wz-pe svg{width:15px;height:15px}
@@ -3145,16 +3146,16 @@ function bolhaReal(c,m){
   h+=`<span class="wz-tag">▤ Modelo · ${escH(MOD_TITULO[m.modelo]||m.modelo.replace(/_/g,' '))}</span>`;
   if(hd&&hd.format==='TEXT')h+=`<div class="wz-mcab">${escH(hd.text)}</div>`;
   if(m.caminho||(hd&&hd.format==='DOCUMENT'&&m.nomeArq))h+=waDocHtml(m,u);
-  h+=`<div class="wz-txt">${escH(m.t&&!/^\[modelo /.test(m.t)?m.t:'')}</div>`;
+  h+=`<div class="wz-txt">${waZapHtml(m.t&&!/^\[modelo /.test(m.t)?m.t:'')}</div>`;
   if(ft)h+=`<div class="wz-mrod">${escH(ft.text)}</div>`;
   if(bt&&bt.buttons)h+=`<div class="wz-mbts">${bt.buttons.map(b=>`<span>${escH(b.text)}</span>`).join('')}</div>`;}
- else if(m.tipo==='imagem'||m.tipo==='figurinha'){h+=u?`<img class="wz-img" src="${escH(u)}" alt="" data-p="${escH(m.caminho||'')}" data-n="${escH(m.nomeArq||'foto.jpg')}" onclick="waVerImagem(this.src,this.dataset.n,this.dataset.p)">`:waDocHtml(m,null);if(m.legenda)h+=`<div class="wz-txt">${escH(m.legenda)}</div>`;}
- else if(m.tipo==='video'){h+=u?`<video class="wz-img" src="${escH(u)}" controls></video>`:waDocHtml(m,null);if(m.legenda)h+=`<div class="wz-txt">${escH(m.legenda)}</div>`;}
+ else if(m.tipo==='imagem'||m.tipo==='figurinha'){h+=u?`<img class="wz-img" src="${escH(u)}" alt="" data-p="${escH(m.caminho||'')}" data-n="${escH(m.nomeArq||'foto.jpg')}" onclick="waVerImagem(this.src,this.dataset.n,this.dataset.p)">`:waDocHtml(m,null);if(m.legenda)h+=`<div class="wz-txt">${waZapHtml(m.legenda)}</div>`;}
+ else if(m.tipo==='video'){h+=u?`<video class="wz-img" src="${escH(u)}" controls></video>`:waDocHtml(m,null);if(m.legenda)h+=`<div class="wz-txt">${waZapHtml(m.legenda)}</div>`;}
  else if(m.tipo==='audio'){h+=waAudioHtml(m,u);if(m.transcricao)h+=`<div class="wz-transc">${WZ.mic.replace('class="i"','')}<span>${escH(m.transcricao)}</span></div>`;}
- else if(m.tipo==='documento'){h+=waDocHtml(m,u);if(m.legenda)h+=`<div class="wz-txt" style="margin-top:5px">${escH(m.legenda)}</div>`;}
+ else if(m.tipo==='documento'){h+=waDocHtml(m,u);if(m.legenda)h+=`<div class="wz-txt" style="margin-top:5px">${waZapHtml(m.legenda)}</div>`;}
  else if(m.tipo==='local'&&m.dados&&m.dados.latitude!=null)h+=`<div class="wz-doc" style="cursor:pointer" onclick="window.open('https://www.google.com/maps?q=${Number(m.dados.latitude)},${Number(m.dados.longitude)}')"><span class="wz-ext img">MAPA</span><div class="dn"><b>${escH(m.dados.name||'Localização')}</b><span>${escH(m.dados.address||'')}</span></div></div>`;
  else if(m.tipo==='contato')h+=`<div class="wz-doc"><span class="wz-ext doc">👤</span><div class="dn"><b>${escH(m.t||'Contato')}</b><span>${m.dados&&m.dados.telefone?escH(fmtTel(m.dados.telefone)):''}</span></div></div>`;
- else h+=`<div class="wz-txt">${escH(m.t||'')}</div>`;
+ else h+=`<div class="wz-txt">${waZapHtml(m.t||'')}</div>`;
  const st=m.d==='sai'?(m.st==='lida'?' · Lida':m.st==='falhou'?' · Falhou':m.st==='incerto'?' · Sem confirmação':m.st==='enviando'?'':''):'';
  const reac=[m.reacao,m.reacaoNossa].filter(Boolean);
  h+=`<div class="wz-pe">${m.favorita?'★ ':''}${escH(m.h||'')}${escH(st)}${m.d==='sai'?waTiques(m.st):''}</div>`;
@@ -3564,7 +3565,35 @@ function renderWpp(cl){
   <div class="wz-emb"><section class="wz-conversa" ondragover="waSobreConversa(event)" ondragleave="if(!this.contains(event.relatedTarget))this.classList.remove('solta')" ondrop="waSoltaConversa(event)">${waCabecalho(c)}${waBuscaMsg!==null?`<div class="wz-bbusca"><input id="wwbmsg" placeholder="Buscar na conversa" value="${escH(waBuscaMsg)}" oninput="waBuscaMsg=this.value;waDesenharMsgs()"><button class="wz-sec2" onclick="waBuscaMsg=null;render()">Fechar</button></div>`:''}<div class="wz-msgs" id="wwms"></div>${waComposer(c,waEntrada.includes(c))}</section></div>`;}
 function apChatPos(){if(!el('wwms')||!selWhats)return;waDesenharMsgs();const t=el('wwin');if(t){t.value=waRasc[selWhats]||'';waCresce(t);}}
 function pedirXml(){const c=apConversaDe(cli());if(!c){toast('Cliente sem conversa no WhatsApp.');return;}waModelos(c.id,'fiscal_solicitacao_xml');}
-function waFormatar(t,m){const a=t.selectionStart,b=t.selectionEnd,v=t.value;t.value=v.slice(0,a)+m+v.slice(a,b)+m+v.slice(b);t.setSelectionRange(a+m.length,b+m.length);t.dispatchEvent(new Event('input',{bubbles:true}));t.focus();}
+const WA_ZAP_INL={negrito:'*',italico:'_',tachado:'~',mono:'```',codigo:'`'};
+const WA_ZAP_MENU=[['Negrito','negrito'],['Itálico','italico'],['Tachado','tachado'],['Monoespaçado','mono'],['Código','codigo'],['Citação','citacao'],['Lista com marcadores','lista'],['Lista numerada','numerada']];
+function waZapAplicar(t,tipo){
+ const v=t.value,a=t.selectionStart,b=t.selectionEnd,m=WA_ZAP_INL[tipo];let s=a,e=b,novo,cur=null;
+ if(m){let x=v.slice(s,e);const l=x.length-x.replace(/^\s+/,'').length,r=x.length-x.replace(/\s+$/,'').length;if(x.trim()){s+=l;e-=r;x=v.slice(s,e);}
+  if(x.length>=m.length*2&&x.startsWith(m)&&x.endsWith(m))novo=x.slice(m.length,x.length-m.length);
+  else if(x&&v.slice(s-m.length,s)===m&&v.slice(e,e+m.length)===m){s-=m.length;e+=m.length;novo=x;}
+  else if(!x){novo=m+m;cur=s+m.length;}
+  else if(x.includes('\n')&&tipo!=='mono')novo=x.split('\n').map(z=>z.trim()?m+z.trim()+m:z).join('\n');
+  else novo=m+x+m;}
+ else{s=v.lastIndexOf('\n',a-1)+1;let f=v.indexOf('\n',b>a&&v[b-1]==='\n'?b-1:b);if(f<0)f=v.length;e=f;let n=0;
+  const ls=v.slice(s,e).split('\n');const tira=tipo==='citacao'?ls.every(z=>!z.trim()||z.startsWith('> ')):tipo==='lista'?ls.every(z=>!z.trim()||/^[*-] /.test(z)):ls.every(z=>!z.trim()||/^\d+\. /.test(z));
+  novo=ls.map(z=>{if(!z.trim()&&ls.length>1)return z;if(tipo==='citacao')return tira?z.slice(2):'> '+z;if(tipo==='lista')return tira?z.slice(2):'* '+z;n++;return tira?z.replace(/^\d+\. /,''):n+'. '+z;}).join('\n');
+  if(a===b&&!tira)cur=a+(novo.length-(e-s));}
+ t.focus();t.setSelectionRange(s,e);
+ if(!document.execCommand('insertText',false,novo)){t.setRangeText(novo,s,e,'end');t.dispatchEvent(new Event('input',{bubbles:true}));}
+ if(cur!==null)t.setSelectionRange(cur,cur);else t.setSelectionRange(s,s+novo.length);}
+function waZapHtml(txt){
+ const bl=[];const guarda=h=>{bl.push(h);return '\u0001'+(bl.length-1)+'\u0002';};
+ let h=escH(txt||'');
+ h=h.replace(/```([\s\S]+?)```/g,(q,x)=>guarda('<code class="zmono">'+x+'</code>'));
+ h=h.replace(/`([^`\n]+)`/g,(q,x)=>guarda('<code class="zcod">'+x+'</code>'));
+ const env=(c,tg)=>{h=h.replace(new RegExp('(^|[\\s(\\[{>~_*\\u0002])'+c+'(?=\\S)([^\\n]*?\\S)'+c+'(?=$|[\\s)\\]}.,;:!?<~_*\\u0001])','gm'),(q,p,x)=>p+'<'+tg+'>'+x+'</'+tg+'>');};
+ env('\\*','b');env('_','i');env('~','s');
+ h=h.split('\n').map(z=>z.startsWith('&gt; ')?'<span class="zq">'+z.slice(5)+'</span>':/^[*-] /.test(z)?'• '+z.slice(2):z).join('\n');
+ return h.replace(/\u0001(\d+)\u0002/g,(q,i)=>bl[+i]);}
+function waFormatar(t,m){waZapAplicar(t,{'*':'negrito','_':'italico','~':'tachado'}[m]||'negrito');}
+document.addEventListener('contextmenu',e=>{const t=e.target;if(!waCampoTexto(t))return;e.preventDefault();
+ waMenu({stopPropagation(){},clientX:e.clientX,clientY:e.clientY},[...WA_ZAP_MENU.map(([r,k])=>[r,()=>waZapAplicar(t,k)]),['Recortar',()=>{t.focus();document.execCommand('cut');}],['Copiar',()=>{t.focus();document.execCommand('copy');}]],true);});
 function waCampoTexto(t){return !!t&&(t.id==='wwin'||(t.classList&&t.classList.contains('wz-aleg')));}
 function waEmojiPainel(alvo){waFecharMenus();const t=alvo||el('wwin');if(!t)return;waEmojiAlvo=t;
  const m=document.createElement('div');m.className='wa-menu wz-emojipainel';
