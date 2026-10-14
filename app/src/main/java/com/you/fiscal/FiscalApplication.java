@@ -48,14 +48,14 @@ public class FiscalApplication {
         if (!SystemTray.isSupported() || icones.isEmpty()) return;
         try {
             PopupMenu menu = new PopupMenu();
-            MenuItem abrir = new MenuItem("Abrir o Fiscal");
+            MenuItem abrir = new MenuItem("Abrir o " + Departamento.nome());
             abrir.addActionListener(e -> mostrar());
-            MenuItem sair = new MenuItem("Sair do Fiscal");
+            MenuItem sair = new MenuItem("Sair do " + Departamento.nome());
             sair.addActionListener(e -> encerrar());
             menu.add(abrir);
             menu.addSeparator();
             menu.add(sair);
-            TrayIcon t = new TrayIcon(icones.get(Math.min(2, icones.size() - 1)), "Fiscal — You Contabilidade", menu);
+            TrayIcon t = new TrayIcon(icones.get(Math.min(2, icones.size() - 1)), Departamento.nome() + " — You Contabilidade", menu);
             t.setImageAutoSize(true);
             t.addActionListener(e -> mostrar());
             t.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -70,7 +70,7 @@ public class FiscalApplication {
         String exe = System.getProperty("fiscal.lancador");
         if (exe == null) return;
         try {
-            new ProcessBuilder("reg", "add", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", "/v", "Fiscal",
+            new ProcessBuilder("reg", "add", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", "/v", Departamento.registro(),
                     "/t", "REG_SZ", "/d", "\"" + exe + "\" --oculto", "/f").redirectErrorStream(true)
                     .redirectOutput(ProcessBuilder.Redirect.DISCARD).start();
         } catch (Exception ignorado) { }
@@ -94,6 +94,7 @@ public class FiscalApplication {
 
     public static void main(String[] args) throws Exception {
         System.setProperty("java.awt.headless", "false");
+        if (System.getProperty("server.port") == null) System.setProperty("server.port", Departamento.porta());
         new Thread(FiscalApplication::trocarLancador).start();
         new Thread(FiscalApplication::iniciarComWindows).start();
         boolean oculto = "1".equals(System.getProperty("fiscal.oculto"));
@@ -103,7 +104,7 @@ public class FiscalApplication {
         String url = "http://127.0.0.1:" + porta + "/login.html?boot=" + System.currentTimeMillis();
 
         // janela com Chromium embutido
-        File perfil = new File(System.getProperty("java.io.tmpdir"), "fiscal-jcef-perfil");
+        File perfil = new File(System.getProperty("java.io.tmpdir"), Departamento.perfil());
         perfil.mkdirs();
         CefAppBuilder builder = new CefAppBuilder();
         builder.setInstallDir(new File(System.getProperty("user.home"), ".fiscal-jcef"));
@@ -160,7 +161,7 @@ public class FiscalApplication {
         SwingUtilities.invokeLater(() -> {
             CefBrowser browser = client.createBrowser(url, false, false);
             navegador = browser;
-            JFrame frame = new JFrame("Fiscal — You Contabilidade");
+            JFrame frame = new JFrame(Departamento.nome() + " — You Contabilidade");
             java.util.List<Image> icones = new java.util.ArrayList<>();
             for (int s : new int[]{16, 24, 32, 48, 64, 128, 256}) {
                 java.net.URL u = FiscalApplication.class.getResource("/icone/fiscal-" + s + ".png");

@@ -1,4 +1,5 @@
-const SB_URL='https://vvohwixeokxydmbhqklu.supabase.co',SB_KEY='sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM';
+const DEPTO=window.DEP||{id:'fiscal',nome:'Fiscal'};
+const SB_URL=DEPTO.sb_url||'https://vvohwixeokxydmbhqklu.supabase.co',SB_KEY=DEPTO.sb_key||'sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM';
 const BL_URL='https://wfqcoocfastgsfgegpcm.supabase.co',BL_KEY='sb_publishable_88ukR4t1KNTc73DxbF6-Pw_0CKW16Fe';
 const CHAVE_MANTER='fiscal-manter';
 
@@ -26,9 +27,10 @@ async function fiscalEntrar(email,senha,manter){
     body:JSON.stringify({bl_token:a.data.session.access_token})});
   const j=await f.json().catch(()=>({}));
   if(!j.ok){await bl.auth.signOut().catch(()=>{});}
-  if(!j.ok)throw new Error(f.status===403?'Sem acesso ao Fiscal.':'Não foi possível entrar.');
+  if(!j.ok)throw new Error(f.status===403?'Sem acesso ao '+DEPTO.nome+'.':'Não foi possível entrar.');
   const s=await fiscalCliente().auth.setSession({access_token:j.access_token,refresh_token:j.refresh_token});
   if(s.error)throw new Error('Não foi possível entrar.');
   return j.usuario;
 }
 async function fiscalSair(){try{await fiscalCliente().auth.signOut();}catch(e){}try{await blLogado().auth.signOut();}catch(e){}location.href='login.html';}
+async function telaSincronizar(){if(!DEPTO.front)return;try{const s=await blSessao();if(!s)return;await Promise.race([fetch('/sistema/tela/sincronizar',{method:'POST',headers:{'X-Fiscal':'1','Content-Type':'application/json'},body:JSON.stringify({token:s.access_token})}),new Promise(r=>setTimeout(r,15000))]);}catch(e){}}

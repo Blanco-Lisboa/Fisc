@@ -1,3 +1,4 @@
+param([string]$Departamento = 'fiscal')
 $ErrorActionPreference = 'Stop'
 $raiz = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $saida = Join-Path $raiz 'build\app'
@@ -25,6 +26,7 @@ $fontes = Get-ChildItem (Join-Path $raiz 'lancador\src') -Recurse -Filter *.java
 & javac --release 21 -encoding UTF-8 -d $cls @fontes
 if ($LASTEXITCODE) { throw 'falha ao compilar o lancador' }
 Copy-Item (Join-Path $app 'src\main\resources\icone\fiscal-64.png') $cls
+if ($Departamento -ne 'fiscal') { Copy-Item (Join-Path $PSScriptRoot "departamentos\$Departamento.properties") (Join-Path $cls 'departamento.properties') }
 & jar --create --date=2026-01-01T00:00:02Z --file (Join-Path $saida 'fiscal-lancador.jar') --main-class com.you.fiscal.lancador.Lancador -C $cls .
 if ($LASTEXITCODE) { throw 'falha ao empacotar o lancador' }
 Write-Host "Compilado em $saida"

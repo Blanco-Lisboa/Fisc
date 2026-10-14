@@ -111,7 +111,7 @@
 
   <div class="brand">
     <div class="brand-mark">YOU</div>
-    <div class="brand-name">Fiscal</div>
+    <div class="brand-name" id="depNome">Fiscal</div>
   </div>
 
   <!-- ENTRAR -->
@@ -185,8 +185,10 @@
 </div>
 
 <script src="vendor/supabase.js"></script>
+<script src="/sistema/departamento.js"></script>
 <script src="sessao.js"></script>
 <script>
+  document.title=DEPTO.nome+' — Entrar';document.getElementById('depNome').textContent=DEPTO.nome;
   function mostrar(tela){
     ['entrar','codigo','recuperar'].forEach(function(t){
       document.getElementById('tela-' + t).hidden = (t !== tela);
@@ -198,7 +200,7 @@
     if(!email||!senha)return;
     erro.textContent='';b.disabled=true;
     const manter=document.getElementById('manter').checked;
-    try{await fiscalEntrar(email,senha,manter);try{if(manter)localStorage.setItem('fiscal-ultimo-login',email);else localStorage.removeItem('fiscal-ultimo-login');}catch(e){}location.href='index.html';}
+    try{await fiscalEntrar(email,senha,manter);try{if(manter)localStorage.setItem('fiscal-ultimo-login',email);else localStorage.removeItem('fiscal-ultimo-login');}catch(e){}await telaSincronizar();location.href='index.html';}
     catch(e){erro.textContent=e.message;b.disabled=false;}
   }
   async function recuperar(){
@@ -209,7 +211,7 @@
     b.disabled=false;
   }
   try{const u=localStorage.getItem('fiscal-ultimo-login');if(u){document.getElementById('email').value=u;document.getElementById('manter').checked=true;document.getElementById('senha').focus();}}catch(e){}
-  fiscalSessaoAtual().then(s=>{if(s)location.href='index.html';});
+  fiscalSessaoAtual().then(async s=>{if(s){await telaSincronizar();location.href='index.html';}});
 </script>
 
 </body>

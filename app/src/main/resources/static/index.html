@@ -1088,7 +1088,7 @@ tr.rnovo:hover{background:#ffe6d6}
 </head>
 <body>
 <nav class="side">
-  <div class="brand2"><img class="lg" src="img/you-icone.png" alt=""><div><b>Fiscal</b><span class="rl">YOU Contabilidade</span></div></div>
+  <div class="brand2"><img class="lg" src="img/you-icone.png" alt=""><div><b id="depNome">Fiscal</b><span class="rl">YOU Contabilidade</span></div></div>
   <div class="lab">OPERAÇÃO</div>
   <div class="it" data-view="central" id="navCentral" style="display:none" onclick="irView('central')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span> Central</div>
   <div class="it" data-view="gestor" id="navGestor" style="display:none" onclick="irView('gestor')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span> Painel do Gestor</div>
@@ -1123,6 +1123,7 @@ tr.rnovo:hover{background:#ffe6d6}
 <script src="vendor/pdf-lib.min.js"></script>
 <script src="vendor/pdf.min.js"></script>
 <script src="vendor/xlsx.full.min.js"></script>
+<script src="/sistema/departamento.js"></script>
 <script src="sessao.js"></script>
 <script src="email/email.js"></script>
 <script>
@@ -1245,12 +1246,18 @@ function prog(c){if(!c.etapas.some(e=>e.status))return null;const done=c.etapas.
 
 const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',envios:'Envios Programados',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
 let acesso={perfil:'',tela_inicial:'apuracao',permissoes:[]};
-async function carregarAcesso(){const r=await sb.rpc('fiscal_minhas_permissoes');if(r.error){toast('Não foi possível ler as permissões.');return;}acesso=r.data||{perfil:'',tela_inicial:'apuracao',permissoes:[]};}
+let depto=null;
+const MOD_VIEW={apuracao:'operacoes',xml:'operacoes',pessoal:'perfil',esteiras:'esteiras',envios:'envios',email:'emails',teams:'teams',whatsweb:'whatsapp',ia:'ia',config:'configuracoes',central:'central',gestor:'gestor'};
+function depVer(v){return !depto||!Array.isArray(depto.modulos)||depto.modulos.includes(MOD_VIEW[v]||v);}
+async function carregarAcesso(){const r=await sb.rpc('fiscal_minhas_permissoes');if(r.error){toast('Não foi possível ler as permissões.');return;}acesso=r.data||{perfil:'',tela_inicial:'apuracao',permissoes:[]};if(DEPTO.id!=='fiscal'){const d=await sb.rpc('fiscal_departamento');depto=d.error?null:d.data;}}
 function tem(p){return (acesso.permissoes||[]).includes(p);}
 function eGestor(){return acesso.perfil==='gestor';}
-function telaInicial(){return acesso.tela_inicial||'apuracao';}
-function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver'))||(v==='envios'&&!tem('wa_lote_gerir')));}
-function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';el('navEnvios').style.display=tem('wa_lote_gerir')?'':'none';}
+function telaInicial(){const t=acesso.tela_inicial||'apuracao';return podeVer(t)?t:(Object.keys(MOD_VIEW).find(podeVer)||t);}
+function podeVer(v){return depVer(v)&&!((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver'))||(v==='envios'&&!tem('wa_lote_gerir')));}
+function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';el('navEnvios').style.display=tem('wa_lote_gerir')?'':'none';if(depto)depAplicar();}
+function depAplicar(){document.querySelectorAll('.side .it[data-view]').forEach(e=>{if(!depVer(e.dataset.view))e.style.display='none';});
+ document.querySelectorAll('.side .lab').forEach(l=>{let n=l.nextElementSibling,vis=false;while(n&&!n.classList.contains('lab')&&!n.classList.contains('foot')){if(n.classList.contains('sub')?[...n.querySelectorAll('.it')].some(i=>i.style.display!=='none'):n.style.display!=='none')vis=true;n=n.nextElementSibling;}l.style.display=vis?'':'none';});
+ if(depto.operacoes_nome){TITULOS.apuracao=depto.operacoes_nome;const a=document.querySelector('.side .it[data-view=apuracao]');if(a&&a.lastChild)a.lastChild.textContent=' '+depto.operacoes_nome;}}
 function irView(v){if(!podeVer(v))v=telaInicial();if(v==='apuracao'&&view!=='apuracao')railAba='cadastro';if(v==='whatsweb'&&view!=='whatsweb'){selWhats=null;waSemSelecao=true;}view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
 function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central',mapaDados=null,cartAberta=new Set();
@@ -3777,7 +3784,7 @@ async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=
 
 /* ---------- entrada ---------- */
 async function iniciarDados(){
- el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('navPessoal').textContent=eu.nome;TITULOS.pessoal=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
+ el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('navPessoal').textContent=eu.nome;TITULOS.pessoal=eu.nome;if(DEPTO.id!=='fiscal'){el('depNome').textContent=DEPTO.nome;document.title=document.title.replace('Fiscal',DEPTO.nome);}el('euInfo').textContent=eu.nivel+' · '+DEPTO.nome;aplicarMenu();view=telaInicial();
  preCarregarGestor();
  estCarregar();if(tem('wa_lote_gerir'))envCarregar();teamsDirCarregar();
  teamsIniciar();
@@ -3790,7 +3797,7 @@ async function iniciarDados(){
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).on('postgres_changes',{event:'*',schema:'public',table:'fiscal_nivel_permissao'},()=>aoMudarEu({new:{ativo:true,nivel:eu.nivel}})).subscribe();
  appVersaoIniciar();
  view=telaInicial();render();}
-async function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}const era=tem('painel_gestor');eu.nivel=n.nivel;await carregarAcesso();el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();if(!era)preCarregarGestor();if(!podeVer(view))view=telaInicial();render();}
+async function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}const era=tem('painel_gestor');eu.nivel=n.nivel;await carregarAcesso();el('euInfo').textContent=eu.nivel+' · '+DEPTO.nome;aplicarMenu();if(!era)preCarregarGestor();if(!podeVer(view))view=telaInicial();render();}
 (async()=>{const s=await fiscalSessaoAtual();if(!s){location.href='login.html';return;}
  const sbl=await blSessao();if(!sbl||sbl.user.id!==s.user.id){fiscalSair();return;}
  EMAILS.aoContar=n=>{const b=el('emBadge');if(b){b.textContent=n;b.style.display=n?'':'none';}};EMAILS.contar();

@@ -14,7 +14,26 @@ public class SistemaController {
     @GetMapping("/versao")
     public Map<String, Object> versao() {
         return Map.of("versao", System.getProperty("fiscal.versao", "dev"),
-                "atualizavel", System.getProperty("fiscal.lancador") != null);
+                "atualizavel", System.getProperty("fiscal.lancador") != null,
+                "departamento", Departamento.id());
+    }
+
+    @GetMapping(value = "/departamento.js", produces = "application/javascript; charset=utf-8")
+    public ResponseEntity<String> departamento() throws Exception {
+        return ResponseEntity.ok().header("Cache-Control", "no-store")
+                .body("window.DEP=" + new com.fasterxml.jackson.databind.ObjectMapper()
+                        .configure(com.fasterxml.jackson.core.json.JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature(), true)
+                        .writeValueAsString(Departamento.paraTela()) + ";");
+    }
+
+    @PostMapping("/tela/sincronizar")
+    public ResponseEntity<Map<String, Object>> telaSincronizar(@RequestHeader(value = "X-Fiscal", required = false) String h, @RequestBody Map<String, Object> d) {
+        if (!"1".equals(h)) return ResponseEntity.status(403).build();
+        try {
+            return ResponseEntity.ok(FrenteVps.sincronizar(String.valueOf(d.get("token"))));
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("ok", false));
+        }
     }
 
     @PostMapping("/frente")

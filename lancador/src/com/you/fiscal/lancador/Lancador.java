@@ -16,10 +16,13 @@ import java.util.List;
 
 public class Lancador {
 
-    static final String URL = "https://vvohwixeokxydmbhqklu.supabase.co";
-    static final String CHAVE = "sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM";
-    static final String APP = "fiscal";
-    static final int PORTA = 47120;
+    static final Properties DEP = configuracao();
+    static final String ID = DEP.getProperty("id", "fiscal");
+    static final String NOME = DEP.getProperty("nome", "Fiscal");
+    static final String URL = DEP.getProperty("url", "https://vvohwixeokxydmbhqklu.supabase.co");
+    static final String CHAVE = DEP.getProperty("chave", "sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM");
+    static final String APP = DEP.getProperty("app", "fiscal");
+    static final int PORTA = Integer.parseInt(DEP.getProperty("porta", "47120"));
 
     static final HttpClient http = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(8)).followRedirects(HttpClient.Redirect.NORMAL).build();
@@ -29,18 +32,26 @@ public class Lancador {
     static boolean oculto;
     static JProgressBar barra;
 
+    static Properties configuracao() {
+        Properties p = new Properties();
+        try (InputStream in = Lancador.class.getResourceAsStream("/departamento.properties")) {
+            if (in != null) p.load(in);
+        } catch (Exception ignorado) { }
+        return p;
+    }
+
     public static void main(String[] args) {
         try {
             executar(args);
         } catch (Throwable t) {
             registrar(t);
-            erro("Não foi possível abrir o Fiscal.\n" + t.getMessage());
+            erro("Não foi possível abrir o " + NOME + ".\n" + t.getMessage());
         }
         System.exit(0);
     }
 
     static void executar(String[] args) throws Exception {
-        base = Paths.get(System.getenv().getOrDefault("LOCALAPPDATA", System.getProperty("user.home")), "Fiscal");
+        base = Paths.get(System.getenv().getOrDefault("LOCALAPPDATA", System.getProperty("user.home")), DEP.getProperty("pasta", "Fiscal"));
         arquivos = base.resolve("arquivos");
         Files.createDirectories(arquivos);
         Files.createDirectories(base.resolve("logs"));
@@ -80,7 +91,7 @@ public class Lancador {
         }
         if (atual == null) atual = anterior;
         if (atual == null || !arquivosPresentes(atual)) {
-            erro("Não foi possível baixar o Fiscal. Verifique a internet e abra de novo.");
+            erro("Não foi possível baixar o " + NOME + ". Verifique a internet e abra de novo.");
             return;
         }
         abrir(atual);
@@ -182,6 +193,7 @@ public class Lancador {
         if (jvm instanceof List) for (Object o : (List<Object>) jvm) cmd.add(String.valueOf(o));
         cmd.add("-Dfiscal.versao=" + v.get("versao"));
         cmd.add("-Dfiscal.base=" + base);
+        if (!"fiscal".equals(ID)) cmd.add("-Dfiscal.departamento=" + ID);
         String exe = System.getProperty("jpackage.app-path");
         if (exe != null) cmd.add("-Dfiscal.lancador=" + exe);
         if (oculto) cmd.add("-Dfiscal.oculto=1");
@@ -250,7 +262,7 @@ public class Lancador {
                 p.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(0xDDDDDD)),
                         BorderFactory.createEmptyBorder(22, 26, 22, 26)));
                 java.net.URL u = Lancador.class.getResource("/fiscal-64.png");
-                JLabel t = new JLabel("Atualizando o Fiscal", u != null ? new ImageIcon(u) : null, SwingConstants.LEFT);
+                JLabel t = new JLabel("Atualizando o " + NOME, u != null ? new ImageIcon(u) : null, SwingConstants.LEFT);
                 t.setIconTextGap(14);
                 t.setFont(t.getFont().deriveFont(Font.BOLD, 15f));
                 p.add(t, BorderLayout.CENTER);
@@ -279,7 +291,7 @@ public class Lancador {
 
     static void erro(String msg) {
         fecharJanela();
-        try { JOptionPane.showMessageDialog(null, msg, "Fiscal", JOptionPane.ERROR_MESSAGE); } catch (Throwable ignorado) { }
+        try { JOptionPane.showMessageDialog(null, msg, NOME, JOptionPane.ERROR_MESSAGE); } catch (Throwable ignorado) { }
     }
 
     static void registrar(Throwable t) {
