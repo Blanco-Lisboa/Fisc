@@ -1152,6 +1152,7 @@ tr.rnovo:hover{background:#ffe6d6}
   </div>
   <div class="lab">GERAL</div>
   <div class="it" data-view="ia" id="navIA" style="display:none" onclick="irView('ia')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg></span> IA &amp; Meta</div>
+  <div class="it" data-view="meuperfil" onclick="irView('meuperfil')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span> Meu Perfil</div>
   <div class="it" data-view="config" onclick="irView('config')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span> Configurações</div>
   <div class="foot"><span class="av" id="euAv"></span><div><b id="euNome"></b><span id="euInfo"></span></div><button class="sair" title="Sair" onclick="waConfirmar('Sair da sua conta neste computador?','Sair',fiscalSair)"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
 </nav>
@@ -1291,10 +1292,10 @@ function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
 function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
 function prog(c){if(!c.etapas.some(e=>e.status))return null;const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
-const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',envios:'Envios Programados',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
+const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',envios:'Envios Programados',ia:'IA & Meta',meuperfil:'Meu Perfil',teams:"Team's",email:"E-mail's",config:'Configurações'};
 let acesso={perfil:'',tela_inicial:'apuracao',permissoes:[]};
 let depto=null;
-const MOD_VIEW={apuracao:'operacoes',xml:'operacoes',pessoal:'perfil',esteiras:'esteiras',envios:'envios',email:'emails',teams:'teams',whatsweb:'whatsapp',ia:'ia',config:'configuracoes',central:'central',gestor:'gestor'};
+const MOD_VIEW={apuracao:'operacoes',xml:'operacoes',pessoal:'perfil',esteiras:'esteiras',envios:'envios',email:'emails',teams:'teams',whatsweb:'whatsapp',ia:'ia',meuperfil:'perfil',config:'configuracoes',central:'central',gestor:'gestor'};
 function depVer(v){return !depto||!Array.isArray(depto.modulos)||depto.modulos.includes(MOD_VIEW[v]||v);}
 async function carregarAcesso(){const r=await sb.rpc('fiscal_minhas_permissoes');if(r.error){toast('Não foi possível ler as permissões.');return;}acesso=r.data||{perfil:'',tela_inicial:'apuracao',permissoes:[]};if(DEPTO.id!=='fiscal'){const d=await sb.rpc('fiscal_departamento');depto=d.error?null:d.data;}}
 function tem(p){return (acesso.permissoes||[]).includes(p);}
@@ -1668,10 +1669,12 @@ function render(){
   el('crumbTitulo').textContent=TITULOS[view]||view;
   document.querySelector('.topo .crumb').style.display='none';
   document.querySelector('.topo').style.display='none';
-  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pessoal:renderPessoal,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,envios:renderEnvios,ia:renderIA,email:renderEmail,config:renderConfig}[view])();
+  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pessoal:renderPessoal,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,envios:renderEnvios,ia:renderIA,meuperfil:renderMeuPerfil,email:renderEmail,config:renderConfig}[view])();
   document.querySelectorAll('.wa-msgs').forEach(m=>m.scrollTop=m.scrollHeight);
   teamsTela();
 }
+
+function renderMeuPerfil(){el('conteudo').innerHTML=`<div class="aputabs"><div class="aputabs-l"><button class="on">Meu Perfil</button></div></div>`;}
 
 /* ---------- CONFIGURAÇÕES ---------- */
 let cfgAba='info',cfgInfo=null,cfgFiltro='tudo',cfgCarregando=false;
