@@ -2091,6 +2091,8 @@ let waAquecidoEm=0;
 async function waAquecer(){if(Date.now()-waAquecidoEm<120000)return;waAquecidoEm=Date.now();
  try{const se=(await sb.auth.getSession()).data.session;fetch(SB_URL+'/functions/v1/wa-meta-enviar',{method:'GET',headers:{apikey:SB_KEY,Authorization:'Bearer '+(se?se.access_token:'')}}).catch(()=>{});}catch(e){}}
 async function waEdge(nome,corpo){
+ const cv=corpo&&corpo.conversa_id?waConv(corpo.conversa_id):null;
+ if(cv&&cv.prov==='whatsgw'){if(nome==='wa-meta-enviar')nome='wa-gw-enviar';else if(nome==='wa-meta-acao')return ['lida','digitando'].includes(corpo.acao)?{ok:true}:{ok:false,erro:'Não disponível neste WhatsApp.'};}
  const s=(await sb.auth.getSession()).data.session;
  const r=await fetch(SB_URL+'/functions/v1/'+nome,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+(s?s.access_token:'')},body:JSON.stringify(corpo)});
  return await r.json().catch(()=>({ok:false}));
@@ -3696,7 +3698,7 @@ function janelaWA(c){if(!c.janelaAte){c.janela=false;c.janelaLbl='fechada';retur
  const rest=waRestante(c);c.janela=rest>0;c.optin=true;
  c.janelaLbl=rest>0?Math.floor(rest/3600e3)+'h'+String(Math.floor(rest%3600e3/60e3)).padStart(2,'0'):'fechada';}
 function convWA(c){const ant=waConv(c.id);const ct=Array.isArray(c.wa_contato)?c.wa_contato[0]:c.wa_contato;
- const x={id:c.id,contatoId:c.contato_id,nome:(waPainel[c.id]&&waPainel[c.id].nome_provisorio)||c.contato_nome||fmtTel(c.contato_telefone)||'Contato',telefone:c.contato_telefone,plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
+ const x={id:c.id,prov:(c.wa_numero&&c.wa_numero.provedor)||'meta_cloud',contatoId:c.contato_id,nome:(waPainel[c.id]&&waPainel[c.id].nome_provisorio)||c.contato_nome||fmtTel(c.contato_telefone)||'Contato',telefone:c.contato_telefone,plats:[],regime:'',optin:false,janela:false,janelaLbl:'fechada',
  dono:null,wpp:waMsgs[c.id]||[],carregada:!!waMsgs[c.id],previa:c.ultima_previa,ultima:c.ultima_em,naoLidas:c.nao_lidas||0,janelaAte:c.janela_ate||null,
  arquivada:!!c.arquivada,fixada:c.fixada_em,silenciada:!!c.silenciada,marcadaNL:!!c.marcada_nao_lida,grupo:!!(c.e_grupo||c.grupo_meta_id),grupoAntigo:!!c.e_grupo&&!c.grupo_meta_id,grupoLink:c.grupo_link,grupoDesc:c.grupo_descricao,
  bloqueado:!!(ct&&ct.bloqueado),foto:(ct&&ct.foto_url)||null};
@@ -3704,8 +3706,8 @@ function convWA(c){const ant=waConv(c.id);const ct=Array.isArray(c.wa_contato)?c
 async function carregarConversas(){
  const todas=[];await waAcertarRelogio();
  for(let de=0;;de+=1000){
-  const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,estado,ultima_em,ultima_previa,nao_lidas,janela_ate,arquivada,fixada_em,silenciada,marcada_nao_lida,e_grupo,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado,foto_url),wa_numero!inner(provedor)')
-   .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false,nullsFirst:false}).order('id').range(de,de+999);
+  const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,estado,ultima_em,ultima_previa,nao_lidas,janela_ate,arquivada,fixada_em,silenciada,marcada_nao_lida,e_grupo,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado,foto_url),wa_numero!inner(provedor,ativo)')
+   .eq(DEPTO.id==='fiscal'?'wa_numero.provedor':'wa_numero.ativo',DEPTO.id==='fiscal'?'meta_cloud':true).neq('estado','arquivada').order('ultima_em',{ascending:false,nullsFirst:false}).order('id').range(de,de+999);
   if(r.error){toast('Não foi possível carregar as conversas.');return;}
   todas.push(...r.data);if(r.data.length<1000)break;
  }
