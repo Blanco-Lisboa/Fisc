@@ -1711,7 +1711,7 @@ function teamsIniciar(){return teamsCarregar().then(ok=>ok&&TeamsIT.iniciar({ori
  toast:t=>toast(t)}));}
 /* ---------- Team's: diretoria ---------- */
 let teamsDir=[],teamsDirAberto=null;
-async function teamsDirCarregar(){const r=await sb.rpc('wa_canais_diretoria');if(r.error)return;teamsDir=r.data||[];teamsDirAtualizar();}
+async function teamsDirCarregar(){const r=await sb.rpc('wa_canais_diretoria');if(r.error)return;teamsDir=r.data||[];waEntrada=waEntrada.filter(c=>!teamsDirDe(c.id));waMeus=waMeus.filter(c=>!teamsDirDe(c.id));teamsDirAtualizar();if(view==='whatsweb')render();}
 function teamsDirDe(id){return teamsDir.find(d=>d.conversa_id===id)||null;}
 function teamsDirConv(k){const d=teamsDir.find(x=>x.numero_chave===k);return d&&d.conversa_id?waConv(d.conversa_id):null;}
 function teamsDirFoto(c){return c&&c.foto&&waFoto[c.foto]&&waFoto[c.foto].u||'';}
@@ -1720,9 +1720,9 @@ function teamsDirAtualizar(){if(window.TeamsIT&&TeamsIT.atualizarDiretos)TeamsIT
 function teamsDirAbrir(k,host){let s=el('tmDirSlot');
  if(!k){if(teamsDirAberto){const ii=el('wwin');if(ii&&selWhats)waRasc[selWhats]=ii.value;}teamsDirAberto=null;if(s)s.remove();return;}
  if(!host)return;
- if(!s||s.parentNode!==host){if(s)s.remove();s=document.createElement('div');s.id='tmDirSlot';s.slot='direto';s.style.cssText='display:flex;flex-direction:column;flex:1;min-height:0;height:100%';host.appendChild(s);}
+ if(!s||s.parentNode!==host){if(s)s.remove();s=document.createElement('div');s.id='tmDirSlot';s.slot='direto';s.className='wz';s.style.cssText='display:flex;flex-direction:column;flex:1;min-height:0;height:100%';host.appendChild(s);}
  teamsDirAberto=k;teamsDirDesenhar();}
-function teamsDirDesenhar(){const s=el('tmDirSlot');if(!s||!teamsDirAberto)return;const c=teamsDirConv(teamsDirAberto);
+function teamsDirDesenhar(){const s=el('tmDirSlot');if(!s||!teamsDirAberto)return;const c=teamsDirConv(teamsDirAberto);const dd=c&&teamsDirDe(c.id);if(dd)c.nome=dd.nome;
  if(!c){s.innerHTML=`<div class="wz-vazio">${WZ.balao}</div>`;return;}
  waAquecer();const ii=el('wwin');if(ii&&selWhats&&selWhats!==c.id)waRasc[selWhats]=ii.value;selWhats=c.id;waSemSelecao=false;if(!c.carregada)carregarMensagens(c.id);
  if(c.carregada&&waNaoLidas(c)&&waPodeAgir(c)&&!waLidaTentada.has(c.id+':'+c.naoLidas)){waLidaTentada.add(c.id+':'+c.naoLidas);waMarcarLida(c);}
@@ -3607,8 +3607,8 @@ async function carregarConversas(){
  const nv=todas.map(convWA);
  await waCarregarPainel();
  nv.forEach(c=>{const p=waPainel[c.id];c.dono=(p&&p.dono_id)||null;c.arquivada=!!(p&&p.arquivada);if(p&&p.nome_provisorio)c.nome=p.nome_provisorio;});
- waEntrada=nv.filter(c=>!c.dono);
- waMeus=nv.filter(c=>c.dono===eu.id);waTudo=nv;
+ waEntrada=nv.filter(c=>!c.dono&&!teamsDirDe(c.id));
+ waMeus=nv.filter(c=>c.dono===eu.id&&!teamsDirDe(c.id));waTudo=nv;
  waAplicarPainel();
  waEntrada.concat(waMeus).concat(nv.filter(c=>teamsDirDe(c.id))).forEach(c=>janelaWA(c));waAgendarJanela();
  waAssinarFotos(nv).then(m=>{if(!m||view!=='whatsweb')return;const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'||a.id==='wwbusca'))return;render();});
@@ -3667,7 +3667,7 @@ async function waAvisar(m){
  let foto='';if(d.foto){await waAssinarFotos([{foto:d.foto}]);foto=(waFoto[d.foto]&&waFoto[d.foto].u)||'';}
  let c=waConv(d.conversa_id);if(!c){await carregarConversas();c=waConv(d.conversa_id);}
  const dir=teamsDirDe(d.conversa_id);teamsDirAtualizar();
- avisoPost('aviso',{canal:'wa',diretoria:!!dir,id:d.conversa_id,nome:dir?dir.nome+' · '+dir.cargo:d.nome,texto,em:d.em,janelaAte:d.janela_ate,podeResponder:!!d.pode_responder,
+ avisoPost('aviso',{canal:'wa',diretoria:!!dir,id:d.conversa_id,nome:dir?dir.nome:d.nome,texto,em:d.em,janelaAte:d.janela_ate,podeResponder:!!d.pode_responder,
   somenteLeitura:!!d.somente_leitura,grupo:!!d.grupo,foto,rodape:c&&!c.grupo?waEmpresaTxt(c):''});}
 function teamsAvisar(x){if(!x||(x.vendo&&avisoOlhando('teams')))return;
  avisoPost('aviso',{canal:'teams',id:x.canal_id,nome:x.nome,texto:x.texto,em:x.em,podeResponder:true,grupo:!!x.grupo,foto:x.foto||'',rodape:x.rodape||''});}
