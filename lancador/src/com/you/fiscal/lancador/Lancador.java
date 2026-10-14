@@ -286,7 +286,13 @@ public class Lancador {
     }
 
     static void fecharJanela() {
-        if (janela != null) SwingUtilities.invokeLater(() -> janela.dispose());
+        JWindow j = janela;
+        janela = null;
+        if (j == null) return;
+        try {
+            if (SwingUtilities.isEventDispatchThread()) j.dispose();
+            else SwingUtilities.invokeAndWait(j::dispose);
+        } catch (Exception ignorado) { }
     }
 
     static void erro(String msg) {
