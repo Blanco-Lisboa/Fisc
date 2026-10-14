@@ -1,0 +1,21 @@
+[Unit]
+Description=Tela unica dos Javas por departamento (canais teste e estavel)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=appweb
+Group=appweb
+Environment=APP_BASE=/opt/app-web
+Environment=APP_PORTA=7891
+ExecStart=/usr/bin/python3 /opt/app-web/teste/deploy/app-web/servidor.py
+Restart=always
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/app-web
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

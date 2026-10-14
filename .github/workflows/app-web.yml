@@ -1,0 +1,16 @@
+name: Atualizar a tela dos Javas na VPS
+
+on:
+  push:
+    branches: [main, app-estavel]
+    paths:
+      - 'app/src/main/resources/static/**'
+      - 'deploy/app-web/**'
+  workflow_dispatch:
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Avisar a VPS
+        run: curl -sS -X POST https://app.it-ia.tec.br/_atualizar || true
