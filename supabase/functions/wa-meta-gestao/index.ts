@@ -34,6 +34,23 @@ async function graph(m: { token: string; base: string }, caminho: string, init: 
   return { ok: r.ok && !j?.error, j };
 }
 
+// exemplo de arquivo
+const PDF_EXEMPLO = "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n" +
+  "3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n" +
+  "4 0 obj<</Length 58>>stream\nBT /F1 18 Tf 72 760 Td (Apuracao - YOU Contabilidade) Tj ET\nendstream endobj\n" +
+  "5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n";
+async function exemploArquivo(m: { token: string; base: string }): Promise<string> {
+  const app = await graph(m, "app?fields=id");
+  if (!app.ok || !app.j?.id) throw new Error("app");
+  const bytes = new TextEncoder().encode(PDF_EXEMPLO);
+  const s = await graph(m, `${app.j.id}/uploads?file_name=exemplo.pdf&file_length=${bytes.byteLength}&file_type=application/pdf`, { method: "POST" });
+  if (!s.ok || !s.j?.id) throw new Error("sessao");
+  const r = await fetch(`${m.base}/${s.j.id}`, { method: "POST", headers: { Authorization: `OAuth ${m.token}`, file_offset: "0" }, body: bytes });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j?.h) throw new Error("envio");
+  return j.h as string;
+}
+
 // gestao
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
@@ -70,6 +87,12 @@ Deno.serve(async (req) => {
     let m;
     try { m = await meta(); } catch { return json({ ok: false, erro: "Configuração da Meta indisponível." }, 502); }
     const corpo = prep.data.corpo;
+    for (const c of corpo.components ?? []) {
+      if (c.type === "HEADER" && c.format === "DOCUMENT" && !c.example) {
+        try { c.example = { header_handle: [await exemploArquivo(m)] }; }
+        catch { return json({ ok: false, erro: "Não foi possível mandar o arquivo de exemplo para a Meta." }, 502); }
+      }
+    }
     const r = await graph(m, `${m.waba}/message_templates`, { method: "POST", body: JSON.stringify(corpo) });
     const erro = r.ok ? null : [r.j?.error?.code, r.j?.error?.error_user_title, r.j?.error?.error_user_msg ?? r.j?.error?.message]
       .filter((x) => x !== undefined && x !== null && String(x) !== "").join(" | ");
