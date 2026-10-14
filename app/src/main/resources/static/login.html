@@ -189,6 +189,7 @@
 <script src="sessao.js"></script>
 <script>
   document.title=DEPTO.nome+' — Entrar';document.getElementById('depNome').textContent=DEPTO.nome;
+  if(DEPTO.fundo_login)document.body.style.background="#1a120c url('"+DEPTO.fundo_login+"') center/cover no-repeat fixed";
   function mostrar(tela){
     ['entrar','codigo','recuperar'].forEach(function(t){
       document.getElementById('tela-' + t).hidden = (t !== tela);

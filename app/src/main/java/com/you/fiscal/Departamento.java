@@ -31,6 +31,8 @@ final class Departamento {
         m.put("sb_url", P.getProperty("sb_url", "https://vvohwixeokxydmbhqklu.supabase.co"));
         m.put("sb_key", P.getProperty("sb_key", "sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM"));
         m.put("front", FrenteVps.ativo());
+        String fundo = P.getProperty("fundo_login", "");
+        if (fundo.matches("img/[a-z0-9-]+\\.(png|jpg|webp)")) m.put("fundo_login", fundo);
         return m;
     }
 }
