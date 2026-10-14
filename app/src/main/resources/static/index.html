@@ -1693,13 +1693,15 @@ function renderEmail(){const c=el('conteudo');if(!EMAILS.aberto(c))EMAILS.abrir(
 /* ---------- TEAM'S ---------- */
 const TEAMS_JS=['https://teams.it-ia.tec.br/teams.js','teams-web/teams.js'];
 let teamsCarga=null;
-function teamsCarregar(){if(!teamsCarga)teamsCarga=new Promise(ok=>{const tenta=i=>{if(window.TeamsIT)return ok(true);if(i>=TEAMS_JS.length)return ok(false);const s=document.createElement('script');s.src=TEAMS_JS[i];s.onload=()=>ok(!!window.TeamsIT);s.onerror=()=>{s.remove();tenta(i+1);};document.head.appendChild(s);};tenta(0);});return teamsCarga;}
+function teamsCarregar(){if(!teamsCarga)teamsCarga=fetch('/sistema/versao').then(r=>r.json()).catch(()=>({})).then(v=>String(v.versao||'').startsWith('teste')?TEAMS_JS.reverse():TEAMS_JS).then(TEAMS_JS=>new Promise(ok=>{const tenta=i=>{if(window.TeamsIT)return ok(true);if(i>=TEAMS_JS.length)return ok(false);const s=document.createElement('script');s.src=TEAMS_JS[i];s.onload=()=>ok(!!window.TeamsIT);s.onerror=()=>{s.remove();tenta(i+1);};document.head.appendChild(s);};tenta(0);}));return teamsCarga;}
 function teamsIniciar(){return teamsCarregar().then(ok=>ok&&TeamsIT.iniciar({origem:'fiscal',chave:'fiscal-teams',
  entrar:async()=>{const s=(await sb.auth.getSession()).data.session;return s?{fiscal_token:s.access_token}:null;},
  usuario:()=>({id:eu.id,nome:eu.nome}),
  pessoas:()=>sb.rpc('fiscal_equipe'),
  buscarClientes:t=>sb.rpc('fiscal_buscar_clientes',{p_texto:t}),
  clientes:ids=>sb.rpc('fiscal_empresas',{p_ids:ids}),
+ buscarPessoas:t=>sb.rpc('fiscal_buscar_pessoas',{p_texto:t}),
+ pessoasContato:ids=>sb.rpc('fiscal_pessoas_contato',{p_ids:ids}),
  abrirModulo:()=>irView('teams'),
  baixar:(u,n)=>fiscalBaixar(u,n),
  aoMensagem:x=>teamsAvisar(x),

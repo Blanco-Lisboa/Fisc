@@ -110,8 +110,9 @@ public class FiscalApplication {
         builder.getCefSettings().windowless_rendering_enabled = false;
         builder.getCefSettings().cache_path = perfil.getAbsolutePath();
         builder.getCefSettings().persist_session_cookies = true;
+        builder.getCefSettings().locale = "pt-BR";
         builder.addJcefArgs("--disable-gpu", "--disable-gpu-compositing", "--disable-http-cache",
-                "--disk-cache-size=1", "--enable-media-stream", "--user-data-dir=" + perfil.getAbsolutePath(),
+                "--disk-cache-size=1", "--enable-media-stream", "--lang=pt-BR", "--user-data-dir=" + perfil.getAbsolutePath(),
                 "--disable-background-timer-throttling", "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows");
         String depurar = System.getProperty("fiscal.depurar");
         if (depurar != null && depurar.matches("\\d{4,5}")) builder.addJcefArgs("--remote-debugging-port=" + depurar, "--remote-allow-origins=*");
