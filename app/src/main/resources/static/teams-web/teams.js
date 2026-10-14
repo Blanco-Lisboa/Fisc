@@ -554,7 +554,7 @@ function tmxPedClienteHtml(p){
  const emp=(c.empresas||[]).filter(e=>p.todas_empresas||(p.empresa_ids||[]).includes(e.empresa_id));
  return `<div style="font-size:11.5px;margin-top:4px">👤 <b>${tmxEsc(c.nome)}</b>${c.whatsapp?' · '+tmxEsc(tmxFone(c.whatsapp)):''}</div>${emp.map(e=>`<div style="font-size:11px;color:var(--apagado)">🏢 ${tmxEsc(e.nome||'')} · ${tmxEsc(tmxCnpj(e.doc))}</div>`).join('')}`;
 }
-function tmxPedAnexosHtml(p){return (p&&p.chat_anexo||[]).map(a=>`<button class="miniB" style="margin:4px 4px 0 0" onclick="tmxBaixar('${tmxEsc(a.url)}','${tmxEsc(String(a.nome||'').replace(/'/g,''))}')">📎 ${tmxEsc(a.nome||'arquivo')}</button>`).join('');}
+function tmxPedAnexosHtml(p){return (p&&p.chat_anexo||[]).map(a=>`<button class="miniB" style="margin:4px 4px 0 0" data-p="${tmxEsc(a.url||'')}" data-n="${tmxEsc(a.nome||'arquivo')}" onclick="tmxBaixar(this.dataset.p,this.dataset.n)">📎 ${tmxEsc(a.nome||'arquivo')}</button>`).join('');}
 async function tmxAbrirPedidos(){
  tmxAba='pedidos';tmxDesenharLista();const box=tmxEl('tmxCentro');if(!box)return;
  const r=await tmx.from('chat_pedido').select('id,titulo,descricao,solicitante_id,responsavel_id,status,prazo,criado_em,canal_id,cliente_id,empresa_ids,todas_empresas,chat_anexo(id,nome,url,tamanho)').order('criado_em',{ascending:false}).limit(300);
