@@ -1746,7 +1746,7 @@ function teamsTela(){if(window.TeamsIT)TeamsIT.tela({bolinhaAlta:view==='whatswe
 /* ---------- modelos da Meta (WhatsApp e Apuração) ---------- */
 const MOD_TITULO={fiscal_solicitacao_xml:'Pedir XML do mês',fiscal_lembrete_urgente_xml:'Cobrar XML (urgente)',fiscal_confirmacao_movimento_mes:'Perguntar se teve notas no mês',fiscal_confirmacao_dados_apuracao:'Confirmar dados antes da apuração',fiscal_entrega_apuracao_mensal:'Enviar apuração e guia (DAS)',fiscal_aviso_declaracao_zerada:'Avisar declaração zerada',fiscal_aviso_vencimento_certificado:'Avisar vencimento do certificado',fiscal_boas_vindas_cliente:'Boas-vindas ao cliente novo',fiscal_difal_explicacao_decisao:'Explicar o ICMS DIFAL',fiscal_atualizacao_rotina_erp:'Avisar mudança na rotina do ERP',fiscal_aviso_alteracao_cadastral:'Avisar alteração cadastral',fiscal_pendencia_cadastral:'Cobrar pendência cadastral',fiscal_recibo_opcao_regime:'Enviar recibo da opção de regime',fiscal_reforma_tributaria_lembrete:'Lembrete da Reforma Tributária',fiscal_comunicado_institucional:'Comunicado da YOU',fiscal_divulgacao_servicos_grupo:'Divulgar serviços do grupo',fiscal_pesquisa_satisfacao:'Pesquisa de satisfação',fiscal_codigo_verificacao:'Código de verificação',fiscal_retomar_atendimento:'Retomar atendimento',fiscal_confirmar_envio_apuracao:'Confirmar envio da apuração',fiscal_xml_ou_sem_emissao:'Pedir XML ou informar sem emissão',fiscal_pendencia_atendimento:'Avisar pendência no atendimento'};
 const MOD_CAT={UTILITY:['Utilidade','vd'],MARKETING:['Marketing','cz'],AUTHENTICATION:['Código','am']};
-let modLista=null,modCtx=null,modBusca='',modSel=null,modVals=[],modDoc=null,modDocs=[],modDocNome='',modArrasta=null;
+let modLista=null,modCtx=null,modBusca='',modSel=null,modVals=[],modDoc=null,modDocs=[],modDocNome='',modArrasta=null,modSemArq=false;
 async function modCarregar(){const r=await sb.from('wa_modelo').select('nome,idioma,categoria,estado,componentes').eq('estado','APPROVED').eq('em_uso',true).order('nome');
  if(r.error){toast('Não foi possível carregar os modelos.');return [];}
  modLista=(r.data||[]).filter(m=>m.nome!=='hello_world');return modLista;}
@@ -1765,7 +1765,7 @@ function modTexto(m,vals){const b=modParte(m,'BODY');return ((b&&b.text)||'').re
 function modBolha(m,vals,doc){const h=modParte(m,'HEADER'),f=modParte(m,'FOOTER'),bt=modParte(m,'BUTTONS');
  return apBolha({d:'sai',cab:h&&h.format==='TEXT'?h.text:null,doc:h&&h.format==='DOCUMENT'?(doc?doc.name:'Documento.pdf'):null,t:modTexto(m,vals||[]),rod:f?f.text:null,btns:bt?bt.buttons.map(x=>x.text):null,dt:'',h:''});}
 async function modAbrir(ctx,preferido){
- modCtx=ctx;modBusca='';modSel=null;modDoc=null;modDocs=[];modDocNome='';fecharModal();
+ modCtx=ctx;modBusca='';modSel=null;modDoc=null;modDocs=[];modDocNome='';modSemArq=false;fecharModal();
  modal=document.createElement('div');modal.className='modal';
  modal.innerHTML=`<div class="mcx" style="width:min(660px,96vw)"><div class="mcab">${ICO_TPL}<b>Modelos · ${escH(ctx.nome||'')}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="modCorpo" style="background:var(--superf);display:flex;flex-direction:column;gap:10px"></div></div>`;
  document.body.appendChild(modal);
@@ -1780,7 +1780,7 @@ function modDesenharLista(){
  box.innerHTML=`<div class="ap-busca" style="background:var(--pagina)">🔎<input id="modBuscaIn" placeholder="Buscar modelo…" value="${escH(modBusca)}" oninput="modBusca=this.value;modDesenharLista();const i=el('modBuscaIn');i.focus();i.setSelectionRange(i.value.length,i.value.length)"></div><div class="ap-mods">${lista.map(m=>{const c=MOD_CAT[m.categoria]||[m.categoria,'cz'];return `<div class="ap-mod"><div style="min-width:0"><div class="tt"><b>${escH(MOD_TITULO[m.nome]||m.nome.replace(/_/g,' '))}</b><span class="ap-st ${c[1]}">${escH(c[0])}</span></div><div class="ap-prev">${modBolha(m,ex(m),null)}</div></div><button class="ap-envm" onclick="modEscolher('${escH(m.nome)}')">Usar</button></div>`;}).join('')}</div>`;
 }
 function modEscolher(nome){
- const m=(modLista||[]).find(x=>x.nome===nome);if(!m)return;modSel=m;modDoc=null;modDocs=[];modDocNome='';
+ const m=(modLista||[]).find(x=>x.nome===nome);if(!m)return;modSel=m;modDoc=null;modDocs=[];modDocNome='';modSemArq=false;
  modVals=[];modVars(m).forEach(v=>modVals[v.i-1]=modPalpite(v,modCtx));
  modDesenharForm();
 }
@@ -1826,10 +1826,17 @@ async function modPdfTela(){if(!modPdfCache.bytes)return;modPdfSair();const o=do
  try{await modPdfDesenhar(modPdfCache.bytes,el('modPdfTelaPags'),larg);}catch(e){toast('Não foi possível abrir em tela cheia.');}}
 function modPdfSair(){const o=el('modPdfTelaCheia');if(o)o.remove();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&el('modPdfTelaCheia')){e.stopPropagation();modPdfSair();}},true);
-function modDocPrevia(){return modDocs.length?{name:modNomeFinal()}:null;}
+function modDocPrevia(){return modSemArq?{name:modTxtNome()}:modDocs.length?{name:modNomeFinal()}:null;}
 function modNomeFinal(){let n=String(modDocNome||'').trim()||(modDocs[0]?modDocs[0].f.name:'Documentos.pdf');n=n.replace(/[\\/:*?"<>|]+/g,' ').replace(/\s+/g,' ').trim();if(!/\.pdf$/i.test(n))n+='.pdf';return n;}
+function modSemArqChave(){return `<label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;cursor:pointer"><input type="checkbox" ${modSemArq?'checked':''} onclick="event.preventDefault();modSemArqTrocar()" style="accent-color:var(--laranja);width:15px;height:15px;margin:0">Enviar sem arquivo</label>`;}
+function modSemArqTrocar(){if(modSemArq){modSemArq=false;modDesenharForm();return;}
+ const o=document.createElement('div');o.className='modal';o.style.zIndex='10000';const fim=()=>o.remove();
+ o.innerHTML=`<div class="mcx"><div class="mcab"><b>Enviar sem arquivo</b><button class="x" data-f>✕</button></div><div class="mbody"><div style="font-size:12.5px;line-height:1.5">Com esta opção, nenhum arquivo precisa ser anexado. O sistema cria um arquivo de texto (.txt) com o mesmo texto desta mensagem e envia junto. O cliente recebe a mensagem normalmente e, acima dela, esse arquivo .txt no lugar do PDF.</div><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" data-f>Cancelar</button><button class="bt-assumir" data-ok>Enviar sem arquivo</button></div></div></div>`;
+ o.querySelectorAll('[data-f]').forEach(b=>b.onclick=fim);o.querySelector('[data-ok]').onclick=()=>{fim();modSemArq=true;modDesenharForm();};document.body.appendChild(o);}
+function modTxtNome(){return (MOD_TITULO[modSel&&modSel.nome]||'Mensagem').replace(/[\\/:*?"<>|]+/g,' ').trim()+'.txt';}
 function modDocsHtml(){const rot='font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin-top:8px';const tam=modDocs.reduce((a,d)=>a+d.f.size,0);const tem=modDocs.length>0;
- return `<span class="fl" style="${rot}">Documentos (PDF)${modDocs.length>1?' · '+modDocs.length+' viram 1 arquivo':''}</span>
+ if(modSemArq)return modSemArqChave();
+ return modSemArqChave()+`<span class="fl" style="${rot}">Documentos (PDF)${modDocs.length>1?' · '+modDocs.length+' viram 1 arquivo':''}</span>
  <div id="modDocsZona" tabindex="0" onclick="modEscolherDoc()" ondragenter="event.preventDefault();this.style.borderColor='var(--laranja)';this.style.background='var(--laranjaSv)'" ondragover="event.preventDefault()" ondragleave="this.style.borderColor='';this.style.background=''" ondrop="modDocsSoltar(event)" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:${tem?'46px':'84px'};border:2px dashed var(--bordaF);border-radius:10px;padding:10px;cursor:pointer;text-align:center;font-size:12px;color:var(--apoio)">
   <span style="font-size:${tem?'15px':'22px'}">📎</span><span><b>Arraste os PDFs aqui</b>, cole com <b>Ctrl+V</b> ou clique para escolher</span></div>
  ${tem?`<div style="display:flex;flex-direction:column;gap:4px;margin-top:6px">${modDocs.map((d,i)=>`<div draggable="true" ondragstart="modArrasta=${i}" ondragover="event.preventDefault()" ondrop="event.preventDefault();event.stopPropagation();if(modArrasta!=null)modDocsMover(modArrasta,${i});else modDocsSoltar(event)" style="display:flex;align-items:center;gap:6px;background:var(--superf);border:1px solid var(--borda);border-radius:8px;padding:5px 7px;font-size:12px;cursor:grab">
@@ -1856,17 +1863,18 @@ async function modJuntarPdfs(){const out=await PDFLib.PDFDocument.create();
 async function modEnviar(){
  const m=modSel;if(!m)return;const vs=modVars(m),h=modParte(m,'HEADER');
  if(vs.some(v=>!String(modVals[v.i-1]||'').trim())){toast('Preencha todos os campos.');return;}
- if(h&&h.format==='DOCUMENT'&&!modDocs.length){toast('Anexe o PDF.');return;}
+ if(h&&h.format==='DOCUMENT'&&!modSemArq&&!modDocs.length){toast('Anexe o PDF.');return;}
  const b=el('modEnv');if(b)b.disabled=true;
- if(h&&h.format==='DOCUMENT'){if(b)b.textContent='Juntando PDFs…';try{modDoc=await modJuntarPdfs();}catch(e){toast(e.message||'Não foi possível juntar os PDFs.');if(b){b.disabled=false;b.textContent='Enviar';}return;}
+ if(h&&h.format==='DOCUMENT'&&modSemArq)modDoc=new File([modTexto(m,modVals)],modTxtNome(),{type:'text/plain'});
+ else if(h&&h.format==='DOCUMENT'){if(b)b.textContent='Juntando PDFs…';try{modDoc=await modJuntarPdfs();}catch(e){toast(e.message||'Não foi possível juntar os PDFs.');if(b){b.disabled=false;b.textContent='Enviar';}return;}
   if(b)b.textContent='Enviar';if(modDoc.size>100*1048576){toast('O arquivo final passou de 100 MB.');if(b)b.disabled=false;return;}}
  const ok=await modCtx.enviar(m,vs.map(v=>String(modVals[v.i-1]).trim()),modDoc,modTexto(m,modVals));
  if(ok)fecharModal();else if(b)b.disabled=false;
 }
 async function waEnviarModelo(c,m,vals,doc,previa){
  const id_local=crypto.randomUUID();const comps=[];let arquivo;
- if(doc){const caminho=`${c.id}/saida/${id_local}.pdf`;arquivo={caminho,nome:doc.name};const up=await sb.storage.from('wa-midia').upload(caminho,doc,{contentType:'application/pdf'});
-  if(up.error){toast('Não foi possível subir o PDF.');return false;}
+ if(doc){const txt=doc.type==='text/plain';const caminho=`${c.id}/saida/${id_local}.${txt?'txt':'pdf'}`;arquivo={caminho,nome:doc.name};const up=await sb.storage.from('wa-midia').upload(caminho,doc,{contentType:txt?'text/plain':'application/pdf'});
+  if(up.error){toast('Não foi possível subir o arquivo.');return false;}
   const sg=await sb.storage.from('wa-midia').createSignedUrl(caminho,1800);if(sg.error){toast('Não foi possível preparar o PDF.');return false;}
   comps.push({type:'header',parameters:[{type:'document',document:{link:sg.data.signedUrl,filename:doc.name}}]});}
  if(vals.length)comps.push({type:'body',parameters:vals.map(t=>({type:'text',text:t}))});
