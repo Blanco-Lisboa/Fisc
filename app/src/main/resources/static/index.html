@@ -57,46 +57,39 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .side .foot{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 6px 4px;border-top:1px solid #1c1c22}
 .side .foot .av{width:32px;height:32px;border-radius:999px;background:var(--grad);display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex:none}
 .side .foot .sair{margin-left:auto;width:30px;height:30px;border-radius:8px;border:1px solid #2a2a31;background:transparent;color:#7a7a82;display:grid;place-items:center;cursor:pointer;flex:none;padding:0}.side .foot .sair:hover{color:#fff;border-color:#4a4a52}.side .foot .sair svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.pm{padding:22px 26px 8px;display:flex;flex-direction:column;gap:18px}
-.pm-top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
-.pm-olho{display:inline-flex;align-items:center;gap:8px;font-size:10.5px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--laranjaTx)}
-.pm-olho i{width:7px;height:7px;border-radius:999px;background:var(--laranja);box-shadow:0 0 0 0 rgba(254,73,1,.45);animation:pmPulso 2.4s infinite}
-@keyframes pmPulso{0%{box-shadow:0 0 0 0 rgba(254,73,1,.45)}70%{box-shadow:0 0 0 9px rgba(254,73,1,0)}100%{box-shadow:0 0 0 0 rgba(254,73,1,0)}}
-.pm-tit{font-family:var(--disp);font-size:30px;font-weight:700;letter-spacing:-.025em;line-height:1.05;margin:6px 0 0;color:var(--ink)}
-.pm-tit .sep{color:var(--nevoa);font-weight:500;margin:0 10px}
-.pm-tit .nome{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-.pm-dia{display:flex;align-items:center;gap:12px;background:var(--pagina);border:1px solid var(--borda);border-radius:16px;padding:9px 16px 9px 10px;box-shadow:var(--sm)}
-.pm-dia .ic{width:38px;height:38px;border-radius:12px;background:var(--laranjaSv);color:var(--laranja);display:grid;place-items:center}
-.pm-dia .ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.pm-dia b{display:block;font-family:var(--disp);font-size:15px;font-weight:600;color:var(--ink);line-height:1.15;text-transform:capitalize}
-.pm-dia span{display:block;font-size:11px;color:var(--apagado)}
-.pm-grade{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;width:100%}
-@media (max-width:1180px){.pm-grade{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.pm-card{--c:var(--laranja);--cs:var(--laranjaSv);position:relative;overflow:hidden;background:var(--pagina);border:1px solid var(--borda);border-radius:20px;padding:16px 18px 18px;min-height:150px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;box-shadow:var(--sm);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
-.pm-card::after{content:"";position:absolute;width:180px;height:180px;right:-70px;top:-80px;border-radius:999px;background:radial-gradient(closest-side,var(--cs),transparent);opacity:.9;pointer-events:none}
-.pm-card:hover{transform:translateY(-3px);box-shadow:var(--md);border-color:var(--c)}
-.pm-card .cab{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1}
-.pm-card .ic{width:40px;height:40px;border-radius:13px;background:var(--cs);color:var(--c);display:grid;place-items:center}
-.pm-card .ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.pm-card .seta{width:28px;height:28px;border-radius:999px;border:1px solid var(--borda);display:grid;place-items:center;color:var(--apagado);transition:all .2s ease}
-.pm-card .seta svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pm{padding:16px 22px 8px;display:flex;flex-direction:column;gap:14px}
+.pm-top{display:flex;align-items:stretch;gap:24px}
+.pm-tit{flex:none;display:flex;flex-direction:column;justify-content:center;margin:0;font-family:var(--disp);font-weight:700;letter-spacing:-.02em;line-height:1.08;color:var(--ink)}
+.pm-tit .ar{font-size:19px;font-weight:600;color:var(--grafite)}
+.pm-tit .nome{font-size:30px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pm-dia{display:flex;align-items:center;gap:8px;background:var(--pagina);border:1px solid var(--borda);border-radius:10px;padding:3px 11px 3px 3px;white-space:nowrap}
+.pm-dia .ic{width:24px;height:24px;border-radius:7px;background:var(--laranjaSv);color:var(--laranja);display:grid;place-items:center}
+.pm-dia .ic svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.pm-dia b{font-family:var(--disp);font-size:12.5px;font-weight:600;color:var(--ink);text-transform:capitalize}
+.pm-dia span{font-size:11.5px;color:var(--apagado)}
+.pm-grade{flex:1;min-width:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.pm-card{--c:var(--laranja);--cs:var(--laranjaSv);position:relative;overflow:hidden;background:var(--pagina);border:1px solid var(--borda);border-radius:16px;padding:10px 12px 10px 12px;display:flex;align-items:center;gap:11px;cursor:pointer;box-shadow:var(--sm);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.pm-card::after{content:"";position:absolute;width:120px;height:120px;right:-50px;top:-60px;border-radius:999px;background:radial-gradient(closest-side,var(--cs),transparent);pointer-events:none}
+.pm-card:hover{transform:translateY(-2px);box-shadow:var(--md);border-color:var(--c)}
+.pm-card .ic{position:relative;z-index:1;flex:none;width:36px;height:36px;border-radius:11px;background:var(--cs);color:var(--c);display:grid;place-items:center}
+.pm-card .ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pm-card .tx{position:relative;z-index:1;flex:1;min-width:0}
+.pm-card .num{font-family:var(--disp);font-size:24px;font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.pm-card .rot{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--apoio);margin-top:5px;line-height:1.25}
+.pm-card .seta{position:relative;z-index:1;flex:none;align-self:flex-start;width:22px;height:22px;border-radius:999px;border:1px solid var(--borda);display:grid;place-items:center;color:var(--apagado);transition:all .2s ease}
+.pm-card .seta svg{width:10px;height:10px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .pm-card:hover .seta{background:var(--c);border-color:var(--c);color:#fff}
-.pm-card .num{position:relative;z-index:1;font-family:var(--disp);font-size:42px;font-weight:700;letter-spacing:-.03em;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:18px}
-.pm-card .rot{position:relative;z-index:1;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--apoio);margin-top:6px}
-.pm-card .trilho{position:relative;z-index:1;height:4px;border-radius:999px;background:var(--superf2);margin-top:14px;overflow:hidden}
-.pm-card .trilho i{display:block;height:100%;width:0;border-radius:inherit;background:var(--c)}
+@media (max-width:1600px){.pm-card .seta{display:none}}
 .pm-card.azul{--c:var(--azul);--cs:var(--azulSv)}
 .pm-card.vermelho{--c:var(--vermelho);--cs:var(--vermelhoSv)}
 .pm-card.ambar{--c:var(--ambar);--cs:var(--ambarSv)}
 .pm-card.verde{--c:var(--verde);--cs:var(--verdeSv)}
-.pm-card.destaque{background:var(--grad);border-color:transparent;box-shadow:0 14px 32px -14px rgba(254,73,1,.65)}
+.pm-card.destaque{background:var(--grad);border-color:transparent;box-shadow:0 12px 26px -14px rgba(254,73,1,.65)}
 .pm-card.destaque::after{background:radial-gradient(closest-side,rgba(255,255,255,.28),transparent)}
 .pm-card.destaque .ic{background:rgba(255,255,255,.2);color:#fff}
 .pm-card.destaque .seta{border-color:rgba(255,255,255,.45);color:#fff}
 .pm-card.destaque:hover .seta{background:#fff;color:var(--laranja);border-color:#fff}
 .pm-card.destaque .num,.pm-card.destaque .rot{color:#fff}
-.pm-card.destaque .trilho{background:rgba(255,255,255,.25)}
-.pm-card.destaque .trilho i{background:#fff}
 .aputabs.pm-abas{padding:0;background:transparent;margin-top:4px}
 .aputabs.pm-abas .aputabs-l{flex:1;gap:6px}
 .aputabs.pm-abas .aputabs-l button{flex:1;justify-content:center;padding:12px 18px;font-size:13.5px}
@@ -1317,7 +1310,7 @@ function renderGestor(){
  const ab=[['eu',escH(eu.nome)],['central','Central'],['mapa','Mapa do Departamento'],['clientes','Clientes']];
  el('conteudo').innerHTML=`
   <div class="aputabs">
-    <div class="aputabs-l">${ab.map(([k,t])=>`<button class="${gestorAba===k?'on':''}" onclick="setGestorAba('${k}')">${t}</button>`).join('')}</div>
+    <div class="aputabs-l">${ab.map(([k,t])=>`<button class="${gestorAba===k?'on':''}" onclick="setGestorAba('${k}')">${t}</button>`).join('')}</div>${gestorAba==='eu'?`<div class="aputabs-r">${pmDiaHtml()}</div>`:''}
   </div>
   <div class="apuBody" id="gestorBody"></div>`;
  if(gestorAba==='mapa')renderMapa();
@@ -2567,13 +2560,13 @@ function renderPend(alvo){const cats=[['xml','XML pendente',0],['guias','Guias a
   <div class="grade">${(dados[pendSub]||[]).map(x=>`<div class="cardP"><div class="top"><div class="av">${iniciais(x.c)}</div><div class="nm">${x.c}</div></div><div style="font-size:12.5px;color:var(--apoio)">${x.d}</div><div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="selCli='${x.cli}';irView('apuracao')">Abrir na Apuração →</button></div></div>`).join('')}</div></div>`;
 }
 let pesAba='solicitacoes';
-function renderPessoal(){el('conteudo').innerHTML=`<div class="aputabs"><div class="aputabs-l"><button class="${pesAba==='solicitacoes'?'on':''}" onclick="pesAba='solicitacoes';renderPessoal()">${escH(eu.nome)}</button></div></div><div id="pesConteudo">${pesMesaHtml()}</div>`;}
-function pesMesaHtml(){const h=new Date();const dia=h.toLocaleDateString('pt-BR',{weekday:'long'});const data=h.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'});
+function renderPessoal(){el('conteudo').innerHTML=`<div class="aputabs"><div class="aputabs-l"><button class="${pesAba==='solicitacoes'?'on':''}" onclick="pesAba='solicitacoes';renderPessoal()">${escH(eu.nome)}</button></div><div class="aputabs-r">${pmDiaHtml()}</div></div><div id="pesConteudo">${pesMesaHtml()}</div>`;}
+function pmDiaHtml(){const h=new Date();return `<div class="pm-dia"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></svg></span><b>${escH(h.toLocaleDateString('pt-BR',{weekday:'long'}))}</b><span>${escH(h.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'}))}</span></div>`;}
+function pesMesaHtml(){
  const ic={volta:'<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/>',hoje:'<rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/><path d="m9 15 2 2 4-4"/>',atraso:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2.5h6"/>',parado:'<rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/>',andando:'<path d="M3 12h4l3-7 4 14 3-7h4"/>'};
  const cards=[['destaque','volta','voltou pra você'],['azul','hoje','pra hoje'],['vermelho','atraso','atrasados seus'],['ambar','parado','parados 7+ dias'],['verde','andando','demandas andando']];
- return `<div class="pm"><div class="pm-top"><div><h2 class="pm-tit">Área de Operação<span class="sep">—</span><span class="nome">${escH(eu.nome||'')}</span></h2></div>
-  <div class="pm-dia"><span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></svg></span><div><b>${escH(dia)}</b><span>${escH(data)}</span></div></div></div>
-  <div class="pm-grade">${cards.map(([c,i,t])=>`<div class="pm-card ${c}"><div class="cab"><span class="ic"><svg viewBox="0 0 24 24">${ic[i]}</svg></span><span class="seta"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span></div><div><div class="num">—</div><div class="rot">${t}</div><div class="trilho"><i></i></div></div></div>`).join('')}</div>
+ return `<div class="pm"><div class="pm-top"><h2 class="pm-tit"><span class="ar">Área de Operação</span><span class="nome">${escH(String(eu.nome||'').trim().split(/\s+/)[0])}</span></h2>
+  <div class="pm-grade">${cards.map(([c,i,t])=>`<div class="pm-card ${c}"><span class="ic"><svg viewBox="0 0 24 24">${ic[i]}</svg></span><div class="tx"><div class="num">—</div><div class="rot">${t}</div></div><span class="seta"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span></div>`).join('')}</div></div>
   <div class="aputabs pm-abas"><div class="aputabs-l">${[['hoje','Hoje'],['retornos','Retornos'],['enviados','Enviados'],['geral','Geral']].map(([k,t])=>`<button class="${pmAba===k?'on':''}" onclick="pmIr('${k}')">${t}</button>`).join('')}</div></div></div>`;}
 let pmAba='hoje';
 function pmIr(a){pmAba=a;const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();}
