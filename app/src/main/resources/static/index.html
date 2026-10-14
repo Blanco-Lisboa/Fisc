@@ -95,6 +95,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-col-cab{position:relative;display:flex;align-items:center;justify-content:center;height:44px;flex:none;background:var(--superf);border-bottom:1px solid var(--borda)}
 .pm-col-cab b{font-family:var(--disp);font-size:14px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
 .pm-col-cab::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad)}
+.pm-col-cab::after{content:"";position:absolute;right:0;top:0;bottom:0;width:3px;background:var(--grad)}
 .pm-col-mais{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:8px;border:1px solid var(--bordaF);background:var(--pagina);color:var(--grafite);display:grid;place-items:center;cursor:pointer;transition:all .15s ease}
 .pm-col-mais svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .pm-col-mais:hover{background:var(--laranja);border-color:var(--laranja);color:#fff}
@@ -2576,7 +2577,7 @@ function pesMesaHtml(){
  const cards=[['destaque','volta','voltou pra você'],['azul','hoje','pra hoje'],['vermelho','atraso','atrasados seus'],['ambar','parado','parados 7+ dias'],['verde','andando','demandas andando']];
  return `<div class="pm"><div class="pm-top"><h2 class="pm-tit"><span class="ar">Área de Operação</span><span class="nome">${escH(String(eu.nome||'').trim().split(/\s+/)[0])}</span></h2>
   <div class="pm-grade">${cards.map(([c,i,t])=>`<div class="pm-card ${c}"><span class="ic"><svg viewBox="0 0 24 24">${ic[i]}</svg></span><div class="tx"><div class="num">—</div><div class="rot">${t}</div></div><span class="seta"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span></div>`).join('')}</div></div>
-  <div class="aputabs pm-abas"><div class="aputabs-l">${[['hoje','Hoje'],['retornos','Retornos'],['enviados','Enviados'],['geral','Geral']].map(([k,t])=>`<button class="${pmAba===k?'on':''}" onclick="pmIr('${k}')">${t}</button>`).join('')}</div></div>${pmAba==='hoje'?`<div class="pm-hoje"><div class="pm-col"><div class="pm-col-cab"><b>Checklist</b><button class="pm-col-mais" title="Adicionar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pm-col-corpo"></div></div><div class="pm-col"><div class="pm-col-cab"><b>Caixas de Entradas</b></div><div class="pm-col-corpo"></div></div></div>`:''}</div>`;}
+  <div class="aputabs pm-abas"><div class="aputabs-l">${[['hoje','Hoje'],['retornos','Retornos'],['enviados','Enviados'],['geral','Geral']].map(([k,t])=>`<button class="${pmAba===k?'on':''}" onclick="pmIr('${k}')">${t}</button>`).join('')}</div></div>${pmAba==='hoje'?`<div class="pm-hoje"><div class="pm-col"><div class="pm-col-cab"><b>Checklist</b><button class="pm-col-mais" title="Adicionar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pm-col-corpo"></div></div><div class="pm-col"><div class="pm-col-cab"><b>Caixa de Entrada</b></div><div class="pm-col-corpo"></div></div></div>`:''}</div>`;}
 let pmAba='hoje';
 function pmIr(a){pmAba=a;const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();}
 /* radar xml */
