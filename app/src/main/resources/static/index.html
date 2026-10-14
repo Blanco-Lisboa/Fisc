@@ -57,6 +57,19 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .side .foot{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 6px 4px;border-top:1px solid #1c1c22}
 .side .foot .av{width:32px;height:32px;border-radius:999px;background:var(--grad);display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex:none}
 .side .foot .sair{margin-left:auto;width:30px;height:30px;border-radius:8px;border:1px solid #2a2a31;background:transparent;color:#7a7a82;display:grid;place-items:center;cursor:pointer;flex:none;padding:0}.side .foot .sair:hover{color:#fff;border-color:#4a4a52}.side .foot .sair svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pm-cab{display:flex;align-items:flex-start;gap:16px;padding:18px 24px 12px;flex-wrap:wrap}
+.pm-data .rot{display:block;color:#B98A2E;font-weight:700;letter-spacing:.16em;font-size:9.5px;text-transform:uppercase}
+.pm-data h2{font-family:'Clash Display',sans-serif;font-size:27px;font-weight:700;letter-spacing:-.015em;line-height:1;margin:2px 0 0;color:#101820}
+.pm-resumo{display:flex;gap:10px;flex-wrap:wrap}
+.pm-res{position:relative;display:flex;flex-direction:column;gap:2px;min-width:132px;padding:12px 14px 11px;border-radius:11px;background:#fff;border:1px solid #E1E6EB;box-shadow:0 1px 2px rgba(1,29,58,.08),0 6px 16px -10px rgba(1,29,58,.22);overflow:hidden;cursor:pointer;transition:box-shadow .15s,transform .15s}
+.pm-res::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:#011D3A}
+.pm-res.o::before{background:linear-gradient(90deg,#F2C86A,#D99F30)}
+.pm-res.q::before{background:#D64545}
+.pm-res.a::before{background:#E0A62B}
+.pm-res:hover{transform:translateY(-1px)}
+.pm-res b{font-family:'Clash Display',sans-serif;font-size:24px;font-weight:700;line-height:1;margin-top:1px;color:#101820;font-variant-numeric:tabular-nums}
+.pm-res.o b{color:#B98A2E}.pm-res.q b{color:#D64545}.pm-res.a b{color:#E0A62B}
+.pm-res span{font-size:9px;letter-spacing:.07em;color:#6B7684;text-transform:uppercase;font-weight:700}
 .side .foot b{font-size:13px;color:#fff;display:block;line-height:1.15}.side .foot span{font-size:11px;color:#7a7a82}
 /* ===== ÁREA PRINCIPAL ===== */
 .main{flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;overflow:hidden}
@@ -1254,14 +1267,14 @@ async function carregarAcesso(){const r=await sb.rpc('fiscal_minhas_permissoes')
 function tem(p){return (acesso.permissoes||[]).includes(p);}
 function eGestor(){return acesso.perfil==='gestor';}
 function telaInicial(){const t=acesso.tela_inicial||'apuracao';return podeVer(t)?t:(Object.keys(MOD_VIEW).find(podeVer)||t);}
-function podeVer(v){return depVer(v)&&!((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver'))||(v==='envios'&&!tem('wa_lote_gerir')));}
-function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';el('navEnvios').style.display=tem('wa_lote_gerir')?'':'none';if(depto)depAplicar();}
+function podeVer(v){return depVer(v)&&!((v==='pessoal'&&tem('painel_gestor'))||(v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver'))||(v==='envios'&&!tem('wa_lote_gerir')));}
+function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';const np=document.querySelector('.side .it[data-view=pessoal]');if(np)np.style.display=tem('painel_gestor')?'none':'';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';el('navEnvios').style.display=tem('wa_lote_gerir')?'':'none';if(depto)depAplicar();}
 function depAplicar(){document.querySelectorAll('.side .it[data-view]').forEach(e=>{if(!depVer(e.dataset.view))e.style.display='none';});
  document.querySelectorAll('.side .lab').forEach(l=>{let n=l.nextElementSibling,vis=false;while(n&&!n.classList.contains('lab')&&!n.classList.contains('foot')){if(n.classList.contains('sub')?[...n.querySelectorAll('.it')].some(i=>i.style.display!=='none'):n.style.display!=='none')vis=true;n=n.nextElementSibling;}l.style.display=vis?'':'none';});
  if(depto.operacoes_nome){TITULOS.apuracao=depto.operacoes_nome;const a=document.querySelector('.side .it[data-view=apuracao]');if(a&&a.lastChild)a.lastChild.textContent=' '+depto.operacoes_nome;}}
-function irView(v){if(!podeVer(v))v=telaInicial();if(v==='apuracao'&&view!=='apuracao')railAba='cadastro';if(v==='whatsweb'&&view!=='whatsweb'){selWhats=null;waSemSelecao=true;}view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
+function irView(v){if(!podeVer(v))v=telaInicial();if(v==='apuracao'&&view!=='apuracao')railAba='cadastro';if(v==='whatsweb'&&view!=='whatsweb'){selWhats=null;waSemSelecao=true;}view=v;render();if(v==='gestor'){const f={central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba];if(f)f();}}
 function renderCentral(){el('conteudo').innerHTML='';}
-let gestorAba='central',mapaDados=null,cartAberta=new Set();
+let gestorAba='eu',mapaDados=null,cartAberta=new Set();
 function escH(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmtCnpj(c){const d=String(c||'').replace(/\D/g,'');return d.length===14?d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5'):d;}
 let clientesDados=null;
@@ -1269,9 +1282,9 @@ const emCurso={};
 function umaVez(k,fn){if(!emCurso[k])emCurso[k]=fn().finally(()=>{emCurso[k]=null;});return emCurso[k];}
 function mudou(a,b){return JSON.stringify(a)!==JSON.stringify(b);}
 function preCarregarGestor(){if(!tem('painel_gestor'))return;carregarCentralGestor();carregarMapa();carregarClientes();}
-function setGestorAba(a){gestorAba=a;if(a==='clientes'){cliPag=1;cliPorPag=0;}renderGestor();({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[a])();}
+function setGestorAba(a){gestorAba=a;if(a==='clientes'){cliPag=1;cliPorPag=0;}renderGestor();const f={central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[a];if(f)f();}
 function renderGestor(){
- const ab=[['central','Central'],['mapa','Mapa do Departamento'],['clientes','Clientes']];
+ const ab=[['eu',escH(eu.nome)],['central','Central'],['mapa','Mapa do Departamento'],['clientes','Clientes']];
  el('conteudo').innerHTML=`
   <div class="aputabs">
     <div class="aputabs-l">${ab.map(([k,t])=>`<button class="${gestorAba===k?'on':''}" onclick="setGestorAba('${k}')">${t}</button>`).join('')}</div>
@@ -1280,6 +1293,7 @@ function renderGestor(){
  if(gestorAba==='mapa')renderMapa();
  if(gestorAba==='clientes')renderClientes();
  if(gestorAba==='central')renderCentralGestor();
+ if(gestorAba==='eu')el('gestorBody').innerHTML=pesMesaHtml();
 }
 /* ---------- central do gestor ---------- */
 let centralDados=null;
@@ -2523,7 +2537,11 @@ function renderPend(alvo){const cats=[['xml','XML pendente',0],['guias','Guias a
   <div class="grade">${(dados[pendSub]||[]).map(x=>`<div class="cardP"><div class="top"><div class="av">${iniciais(x.c)}</div><div class="nm">${x.c}</div></div><div style="font-size:12.5px;color:var(--apoio)">${x.d}</div><div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="selCli='${x.cli}';irView('apuracao')">Abrir na Apuração →</button></div></div>`).join('')}</div></div>`;
 }
 let pesAba='solicitacoes';
-function renderPessoal(){el('conteudo').innerHTML=`<div class="aputabs"><div class="aputabs-l"><button class="${pesAba==='solicitacoes'?'on':''}" onclick="pesAba='solicitacoes';renderPessoal()">${escH(eu.nome)}</button></div></div><div id="pesConteudo"></div>`;}
+function renderPessoal(){el('conteudo').innerHTML=`<div class="aputabs"><div class="aputabs-l"><button class="${pesAba==='solicitacoes'?'on':''}" onclick="pesAba='solicitacoes';renderPessoal()">${escH(eu.nome)}</button></div></div><div id="pesConteudo">${pesMesaHtml()}</div>`;}
+function pesMesaHtml(){const d=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
+ const cards=[['o','voltou pra você'],['','pra hoje'],['q','atrasados seus'],['a','parados 7+ dias'],['','demandas andando']];
+ return `<div class="pm-cab"><div class="pm-data"><span class="rot">${escH(d)}</span><h2>Mesa de ${escH(String(eu.nome||'').split(' ')[0])}</h2></div>
+  <div class="pm-resumo">${cards.map(([k,t])=>`<div class="pm-res ${k}"><b>—</b><span>${t}</span></div>`).join('')}</div></div>`;}
 /* radar xml */
 function renderXml(){const linhas=[];
  const cell=v=>v==='ok'?'<span class="pill ok">recebido</span>':v==='pend'?'<span class="pill falta">pendente</span>':'<span style="color:var(--nevoa)">—</span>';
