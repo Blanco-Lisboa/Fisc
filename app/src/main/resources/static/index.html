@@ -2221,27 +2221,30 @@ async function waContatoForm(id){
  waCtSel=[];
  waModal('Enviar contato',`<span class="fl">Contatos da YOU</span><div id="wactInt" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px"></div>
   <span class="fl">Buscar contato salvo ou digitar outro</span>
-  <div style="display:flex;gap:8px;align-items:flex-start"><div style="position:relative;flex:1.3;min-width:0"><input class="fi" id="wacn" maxlength="200" autocomplete="off" placeholder="Nome do contato" oninput="waCtBuscar()" onkeydown="if(event.key==='Escape'){event.stopPropagation();el('wactSug').innerHTML='';}"><div id="wactSug" style="position:absolute;left:0;right:0;top:100%;z-index:5"></div></div>
-  <input class="fi" id="wact" autocomplete="off" placeholder="Telefone com DDD" style="flex:1;min-width:0"><button class="apubtn" style="flex:none" onclick="waCtAdicionar()">Adicionar</button></div>
+  <div style="display:flex;gap:8px;align-items:flex-start"><div style="position:relative;flex:1.3;min-width:0"><input class="fi" id="wacn" maxlength="200" autocomplete="off" placeholder="Nome do contato" oninput="waCtBuscar()" onkeydown="if(event.key==='Escape'){event.stopPropagation();el('wactSug').innerHTML='';}"></div>
+  <input class="fi" id="wact" autocomplete="off" placeholder="Telefone com DDD" style="flex:1;min-width:0" oninput="waCtBuscar(this.value)"><button class="apubtn" style="flex:none" onclick="waCtAdicionar()">Adicionar</button></div>
+  <div id="wactSug"></div>
   <div id="wactSel" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px"></div>
   <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="wactEnv" onclick="waEnviarContato('${id}')">Enviar</button></div>`,560);
  if(!waCtInt){const r=await sb.rpc('wa_contatos_internos');waCtInt=r.error?[]:(r.data||[]);}
  waCtDesenhar();}
 function waCtTem(t){return waCtSel.some(x=>x.telefone===t);}
-function waCtAlternar(nome,tel){const t=String(tel||'').replace(/D/g,'');if(!nome||t.length<10)return;if(waCtTem(t))waCtSel=waCtSel.filter(x=>x.telefone!==t);else waCtSel.push({nome,telefone:t});waCtDesenhar();}
+function waCtAlternar(nome,tel){const t=String(tel||'').replace(/\D/g,'');if(!nome||t.length<10)return;if(waCtTem(t))waCtSel=waCtSel.filter(x=>x.telefone!==t);else waCtSel.push({nome,telefone:t});waCtDesenhar();}
 function waCtDesenhar(){
  const i=el('wactInt');if(i)i.innerHTML=(waCtInt||[]).map(x=>{const on=waCtTem(String(x.telefone));return `<button type="button" data-n="${escH(x.nome)}" data-t="${escH(x.telefone)}" onclick="waCtAlternar(this.dataset.n,this.dataset.t)" style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:0;padding:8px 11px;border-radius:10px;border:1px solid ${on?'var(--laranja)':'var(--borda)'};background:${on?'var(--laranjaSv)':'var(--pagina)'};cursor:pointer;font-family:inherit;text-align:left"><b style="font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">${on?'✓ ':''}${escH(x.nome)}</b><span style="font-size:11px;color:var(--apagado)">${escH(fmtTel(x.telefone))}</span></button>`;}).join('');
  const s=el('wactSel');if(s)s.innerHTML=waCtSel.map(x=>`<span style="display:inline-flex;align-items:center;gap:6px;background:var(--laranjaSv);border:1px solid var(--laranjaCl);color:var(--laranjaTx);border-radius:999px;padding:4px 6px 4px 11px;font-size:12px;font-weight:600">${escH(x.nome)}<button type="button" data-t="${escH(x.telefone)}" onclick="waCtSel=waCtSel.filter(y=>y.telefone!==this.dataset.t);waCtDesenhar()" style="border:0;background:transparent;cursor:pointer;color:inherit;font-size:12px;padding:0 4px">✕</button></span>`).join('');
  const b=el('wactEnv');if(b)b.textContent=waCtSel.length>1?'Enviar '+waCtSel.length+' contatos':'Enviar';}
-function waCtBuscar(){const box=el('wactSug');const q=(el('wacn').value||'').trim().toLowerCase(),qd=q.replace(/D/g,'');if(!box)return;if(q.length<2){box.innerHTML='';return;}
- const vistos=new Set();const l=(waCtInt||[]).map(x=>({nome:x.nome,telefone:String(x.telefone)})).concat(waTodas().filter(x=>!x.grupo&&x.telefone).map(x=>({nome:x.nome,telefone:String(x.telefone)})))
-  .filter(x=>{if(vistos.has(x.telefone))return false;vistos.add(x.telefone);return x.nome.toLowerCase().includes(q)||(qd.length>=3&&x.telefone.includes(qd));}).slice(0,8);
- box.innerHTML=l.length?`<div class="wa-menu" style="position:static;margin-top:4px;max-height:260px;overflow:auto">${l.map(x=>`<button type="button" data-n="${escH(x.nome)}" data-t="${escH(x.telefone)}" onclick="waCtEscolher(this.dataset.n,this.dataset.t)" style="display:flex;justify-content:space-between;gap:10px"><b style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(x.nome)}</b><span style="color:var(--apagado);flex:none">${escH(fmtTel(x.telefone))}</span></button>`).join('')}</div>`:'';}
+let waCtTm=null,waCtVez=0;
+function waCtBuscar(q0){const box=el('wactSug');if(!box)return;const q=(q0!==undefined?q0:((el('wacn').value||'')+' '+(el('wact').value||''))).trim().toLowerCase(),qd=q.replace(/\D/g,'');if(q.length<2){box.innerHTML='';return;}
+ clearTimeout(waCtTm);const vez=++waCtVez;waCtTm=setTimeout(async()=>{const r=await sb.rpc('wa_contatos_buscar',{p_texto:q});if(vez!==waCtVez||!el('wactSug'))return;
+  const vistos=new Set();const l=(waCtInt||[]).map(x=>({nome:x.nome,telefone:String(x.telefone)})).filter(x=>x.nome.toLowerCase().includes(q)||(qd.length>=3&&x.telefone.includes(qd))).concat(r.error?[]:(r.data||[]).map(x=>({nome:x.nome,telefone:String(x.telefone)})))
+   .filter(x=>{if(vistos.has(x.telefone))return false;vistos.add(x.telefone);return true;}).slice(0,10);
+  box.innerHTML=l.length?`<div class="wa-menu" style="position:static;margin-top:4px;max-height:260px;overflow:auto">${l.map(x=>`<button type="button" data-n="${escH(x.nome)}" data-t="${escH(x.telefone)}" onclick="waCtEscolher(this.dataset.n,this.dataset.t)" style="display:flex;justify-content:space-between;gap:10px"><b style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(x.nome)}</b><span style="color:var(--apagado);flex:none">${escH(fmtTel(x.telefone))}</span></button>`).join('')}</div>`:'';},250);}
 function waCtEscolher(n,t){if(!waCtTem(String(t)))waCtAlternar(n,t);el('wacn').value='';el('wact').value='';el('wactSug').innerHTML='';el('wacn').focus();}
-function waCtAdicionar(){const n=el('wacn').value.trim(),t=el('wact').value.replace(/D/g,'');if(!n||t.length<10){toast('Preencha nome e telefone.');return;}
+function waCtAdicionar(){const n=el('wacn').value.trim(),t=el('wact').value.replace(/\D/g,'');if(!n||t.length<10){toast('Preencha nome e telefone.');return;}
  if(!waCtTem(t))waCtAlternar(n,t);el('wacn').value='';el('wact').value='';el('wactSug').innerHTML='';}
 async function waEnviarContato(id){
- const n=el('wacn').value.trim(),t=el('wact').value.replace(/D/g,'');if(n&&t.length>=10&&!waCtTem(t))waCtSel.push({nome:n,telefone:t});
+ const n=el('wacn').value.trim(),t=el('wact').value.replace(/\D/g,'');if(n&&t.length>=10&&!waCtTem(t))waCtSel.push({nome:n,telefone:t});
  if(!waCtSel.length){toast('Escolha ao menos um contato.');return;}
  const lista=waCtSel.slice();fecharModal();const c=waConv(id);if(!c)return;
  for(const x of lista)await waEnviarSimples(c,'contato',{nome:x.nome,telefone:x.telefone},x.nome);}
