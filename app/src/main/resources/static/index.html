@@ -1095,8 +1095,7 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="it" data-view="apuracao" onclick="irView('apuracao')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M9 5h6a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM9.5 11l1.8 1.8L14.8 9.5M10 16h4"/></svg></span> Apuração</div>
   <div class="it" data-view="pessoal" onclick="irView('pessoal')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 4a6 6 0 0 1 6 6v3l1.5 3h-15L6 13v-3a6 6 0 0 1 6-6zM10 19a2 2 0 0 0 4 0"/></svg></span> <span id="navPessoal"></span></div>
   <div class="lab">FLUXO</div>
-  <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd" id="estBadge" style="display:none"></span></div>
-  <div class="it" data-view="envios" id="navEnvios" style="display:none" onclick="irView('envios')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span> Envios Programados</div>
+  <div class="it" data-view="esteiras" onclick="irView('esteiras')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3v12M21 6a3 3 0 1 0-6 0a3 3 0 1 0 6 0M9 18a3 3 0 1 0-6 0a3 3 0 1 0 6 0M18 9a9 9 0 0 1-9 9"/></svg></span> Esteiras <span class="bd">2</span></div>
   <div class="lab">MENSAGENS</div>
   <div class="sub">
     <div class="it sem" data-view="email" onclick="irView('email')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg></span> E-mail's <span class="bd" id="emBadge" style="display:none">0</span></div>
@@ -1243,14 +1242,14 @@ function mesTxt(){return MESES[comp.mes]+'/'+comp.ano;}
 function mudarComp(d){comp.mes+=d;if(comp.mes<0){comp.mes=11;comp.ano--;}if(comp.mes>11){comp.mes=0;comp.ano++;}el('compV').textContent=MESES[comp.mes]+' / '+comp.ano;render();}
 function prog(c){if(!c.etapas.some(e=>e.status))return null;const done=c.etapas.filter(e=>e.status==='concluido').length;return Math.round(100*done/c.etapas.length);}
 
-const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',envios:'Envios Programados',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
+const TITULOS={apuracao:'Apuração',whatsweb:'WhatsApp',pessoal:'',gestor:'Painel do Gestor',central:'Central',xml:'Radar XML',esteiras:'Esteiras',ia:'IA & Meta',teams:"Team's",email:"E-mail's",config:'Configurações'};
 let acesso={perfil:'',tela_inicial:'apuracao',permissoes:[]};
 async function carregarAcesso(){const r=await sb.rpc('fiscal_minhas_permissoes');if(r.error){toast('Não foi possível ler as permissões.');return;}acesso=r.data||{perfil:'',tela_inicial:'apuracao',permissoes:[]};}
 function tem(p){return (acesso.permissoes||[]).includes(p);}
 function eGestor(){return acesso.perfil==='gestor';}
 function telaInicial(){return acesso.tela_inicial||'apuracao';}
-function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver'))||(v==='envios'&&!tem('wa_lote_gerir')));}
-function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';el('navEnvios').style.display=tem('wa_lote_gerir')?'':'none';}
+function podeVer(v){return !((v==='gestor'&&!tem('painel_gestor'))||(v==='central'&&!tem('central_colaborador'))||(v==='ia'&&!tem('wa_conta_ver')));}
+function aplicarMenu(){el('navGestor').style.display=tem('painel_gestor')?'':'none';el('navCentral').style.display=tem('central_colaborador')?'':'none';el('navIA').style.display=tem('wa_conta_ver')?'':'none';}
 function irView(v){if(!podeVer(v))v=telaInicial();if(v==='apuracao'&&view!=='apuracao')railAba='cadastro';if(v==='whatsweb'&&view!=='whatsweb'){selWhats=null;waSemSelecao=true;}view=v;render();if(v==='gestor')({central:carregarCentralGestor,mapa:carregarMapa,clientes:carregarClientes}[gestorAba])();}
 function renderCentral(){el('conteudo').innerHTML='';}
 let gestorAba='central',mapaDados=null,cartAberta=new Set();
@@ -1613,7 +1612,7 @@ function render(){
   el('crumbTitulo').textContent=TITULOS[view]||view;
   document.querySelector('.topo .crumb').style.display='none';
   document.querySelector('.topo').style.display='none';
-  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pessoal:renderPessoal,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,envios:renderEnvios,ia:renderIA,email:renderEmail,config:renderConfig}[view])();
+  ({teams:teamsModulo,apuracao:renderApuracao,whatsweb:renderWhatsWeb,pessoal:renderPessoal,gestor:renderGestor,central:renderCentral,xml:renderXml,esteiras:renderEst,ia:renderIA,email:renderEmail,config:renderConfig}[view])();
   document.querySelectorAll('.wa-msgs').forEach(m=>m.scrollTop=m.scrollHeight);
   teamsTela();
 }
@@ -2511,264 +2510,34 @@ function renderXml(){const linhas=[];
  el('conteudo').innerHTML=`<div class="tela"><h1>Radar de XML</h1><p class="intro">Chegada dos XMLs por plataforma na competência ${mesTxt()}. Pendente vira pedido (Flow) no WhatsApp.</p>
   <div class="tbwrap"><table><thead><tr><th>Cliente</th><th>Shopee</th><th>TikTok</th><th>Mercado Livre</th><th>Status</th><th></th></tr></thead><tbody>${linhas.map(l=>`<tr><td style="font-weight:600">${l.c}</td><td>${cell(l.sh)}</td><td>${cell(l.tk)}</td><td>${cell(l.ml)}</td><td>${l.s}</td><td><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="toast('Pedir XML (Flow) — demo')">Pedir XML</button></td></tr>`).join('')}</tbody></table></div></div>`;
 }
-/* esteiras */
-let estAba='modelos',estMods=[],estTar=[],estArv={},estEmp={},estUsu={},estMes=new Date().toISOString().slice(0,7),estEdit=null,estAp=null,estCanal=null,estCarregado=false,estSel=0,estTm=null,estBuscaTm=null;
-async function estCarregar(){
- const [m,t,u]=await Promise.all([sb.from('modelos').select('id,nome,descricao,dono_tipo,status,criado_por').order('nome'),
-  sb.from('apu_tarefa').select('id,empresa_id,etapa_id,modelo_id,ciclo_referencia,status_id,responsavel_id,sugestao_fase_id,sugestao_texto,sugestao_em').eq('ciclo_referencia',estMes+'-01'),
-  Object.keys(estUsu).length?null:sb.from('fiscal_usuario').select('id,nome')]);
- if(m.error){toast('Não foi possível ler os modelos.');return;}
- if(t.error){toast('Não foi possível ler as demandas.');return;}
- estMods=m.data||[];estTar=t.data||[];if(u)(u.data||[]).forEach(x=>estUsu[x.id]=x.nome);
- const ids=[...new Set([...estMods.map(x=>x.id),...estTar.map(x=>x.modelo_id)])];
- const faltam=[...new Set(estTar.map(x=>x.empresa_id))].filter(id=>!estEmp[id]);
- const arv={};await Promise.all([...ids.map(async id=>{const r=await sb.rpc('apu_modelo_arvore',{p_modelo:id});if(!r.error&&r.data)arv[id]=r.data;}),
-  faltam.length?sb.rpc('fiscal_empresas',{p_ids:faltam}).then(r=>(r.data||[]).forEach(e=>estEmp[e.empresa_id]=e)):null]);estArv=arv;
- estCarregado=true;
- if(!estCanal)estCanal=sb.channel('fiscal-esteira').on('postgres_changes',{event:'*',schema:'public',table:'modelos'},estRecarregar).on('postgres_changes',{event:'*',schema:'public',table:'apu_tarefa'},estRecarregar).subscribe();
-}
-function estRecarregar(){clearTimeout(estTm);estTm=setTimeout(async()=>{await estCarregar();if(view==='esteiras'&&!modal)renderEst();},300);}
+/* esteiras — modelos reais de apuração + demandas CEO/Cúpula */
+const MODELOS_REAIS=[
+ {nome:'MODELO PADRÃO V1',sub:'ERP · Prefeitura · SIEG · Domínio',qt:21,uso:'usado na maioria das lojas',passos:['Demonstrativo de ST','Recibo de Declaração','UPSELLER (ERP)','São Paulo (Prefeitura)','SIEG','Apuração no Sistema Domínio','DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST']},
+ {nome:'MODELO V2',sub:'XML do cliente · Prefeitura · SIEG · Domínio',qt:21,uso:'quando o cliente manda o XML',passos:['Solicitar XML ao Cliente','São Paulo (Prefeitura)','SIEG','Apuração no Sistema Domínio','DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST','Demonstrativo de ST','Recibo de Declaração']},
+ {nome:'Enviar Guia',sub:'pacote enviado ao cliente',qt:17,uso:'só o envio dos documentos',passos:['DAS (Simples)','Relatório de Apuração','Relatório de Saídas','Relatório de Entradas','Notas não lançadas','Guia de ISS','DAS-MEI','Relatório/Nota de Serviços','DARE ICMS DIFAL','Demonstrativo ICMS DIFAL','DARF de Aluguel','Demonstrativo IRRF PF','DARE ICMS ST','Demonstrativo ICMS ST','DARE de ST','Demonstrativo de ST','Recibo de Declaração']},
+ {nome:'Solicitar XML ao Cliente',sub:'tarefa única',qt:0,uso:'cobrar o XML',passos:[]},
+ {nome:'SIEG',sub:'tarefa única',qt:0,uso:'importar XMLs',passos:[]},
+ {nome:'Apuração no Sistema Domínio',sub:'tarefa única',qt:0,uso:'calcular no Domínio',passos:[]},
+ {nome:'ICMS — GERAR DIFAL',sub:'tarefa única',qt:0,uso:'diferencial de alíquota',passos:[]},
+ {nome:'DeSTDA',sub:'tarefa única',qt:0,uso:'obrigação ST mensal',passos:[]},
+ {nome:'RBA',sub:'tarefa única',qt:0,uso:'conferir Relatório de Apuração',passos:[]},
+];
+let estAba='modelos',estOpen=null;
 function renderEst(){
- if(!estCarregado){el('conteudo').innerHTML='<div class="tela"><h1>Esteiras do Fiscal</h1></div>';estCarregar().then(()=>{if(view==='esteiras')renderEst();});return;}
- el('conteudo').innerHTML=`<div class="tela"><h1>Esteiras do Fiscal</h1><p class="intro">Modelos de demanda do departamento e as demandas de cada cliente no mês.</p>
-  <div class="subtabs"><button class="${estAba==='modelos'?'on':''}" onclick="estAba='modelos';render()">Modelos de apuração <span class="c">${estMods.length}</span></button><button class="${estAba==='mes'?'on':''}" onclick="estAba='mes';render()">Demandas do mês <span class="c">${estTar.length}</span></button><button class="${estAba==='demandas'?'on':''}" onclick="estAba='demandas';render()">Demandas CEO/Cúpula <span class="c">${esteira.length}</span></button></div>
+ el('conteudo').innerHTML=`<div class="tela"><h1>Esteiras do Fiscal</h1><p class="intro">Os <b>modelos reais</b> que a equipe usa na apuração (vindos dos modelos de tarefa do escritório) e as demandas que chegam do CEO/Cúpula.</p>
+  <div class="subtabs"><button class="${estAba==='modelos'?'on':''}" onclick="estAba='modelos';render()">Modelos de apuração <span class="c">${MODELOS_REAIS.length}</span></button><button class="${estAba==='demandas'?'on':''}" onclick="estAba='demandas';render()">Demandas CEO/Cúpula <span class="c">${esteira.length}</span></button></div>
   <div id="estBody"></div></div>`;
- el('estBody').innerHTML=estAba==='modelos'?estModelos():estAba==='mes'?estMesHtml():estDemandas();
+ el('estBody').innerHTML = estAba==='modelos'? estModelos() : estDemandas();
 }
 function estModelos(){
- return `<div class="loteBar"><label>Modelos</label><button class="bwpp" onclick="estNovo()">Novo modelo</button></div>
- <div class="grade">${estMods.map(m=>{const a=estArv[m.id]||{etapas:[]};const n=estTar.filter(t=>t.modelo_id===m.id).length;const of=m.dono_tipo==='oficial';
-  const edita=of?tem('editar_modelo_oficial'):a.meu;
-  return `<div class="cardP"><div class="top"><b class="disp" style="flex:1">${escH(m.nome)}</b><span class="tag ${of?'t-util':''}" ${of?'':'style="background:var(--superf2);color:var(--apoio)"'}>${of?'Oficial':'Pessoal'}</span></div>
-   ${m.descricao?`<div style="font-size:11.5px;color:var(--apoio)">${escH(m.descricao)}</div>`:''}
-   <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${a.etapas.map((e,j)=>`<div style="display:flex;gap:8px;align-items:flex-start;font-size:11.5px"><span style="width:20px;height:20px;border-radius:999px;background:var(--superf2);color:var(--apoio);display:grid;place-items:center;font-size:10px;font-weight:700;flex:none">${j+1}</span><div><div style="font-weight:600">${escH(e.titulo)}</div><div style="color:var(--apagado)">${e.fases.map(f=>escH(f.nome)).join(' → ')}</div></div></div>`).join('')}</div>
-   <div class="foot">${edita?`<button class="miniB" onclick="estEditar('${m.id}')">Editar</button>`:''}${tem('aplicar_modelo_cliente')?`<button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="estAplicarAbrir('${m.id}')">Aplicar em cliente</button>`:''}${n?`<span class="tag t-util">${n} no mês</span>`:''}</div></div>`;}).join('')}</div>`;
+ return `<div class="grade">${MODELOS_REAIS.map((m,i)=>`<div class="cardP" style="cursor:pointer" onclick="estOpen=estOpen===${i}?null:${i};render()">
+   <div class="top"><b class="disp" style="flex:1">${m.nome}</b>${m.qt?`<span class="tag t-util">${m.qt} tickets</span>`:'<span class="tag" style="background:var(--superf2);color:var(--apoio)">tarefa única</span>'}</div>
+   <div style="font-size:11.5px;color:var(--apoio)">${m.sub}</div>
+   <div style="font-size:11px;color:var(--apagado);margin-top:4px">${m.uso}</div>
+   ${estOpen===i&&m.passos.length?`<div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">${m.passos.map((p,j)=>`<div style="display:flex;gap:8px;align-items:center;font-size:11.5px"><span style="width:20px;height:20px;border-radius:999px;background:var(--superf2);color:var(--apoio);display:grid;place-items:center;font-size:10px;font-weight:700;flex:none">${j+1}</span>${p}</div>`).join('')}</div>`:''}
+   <div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="event.stopPropagation();estOpen=${estOpen===i?'null':i};render()">${estOpen===i?'Ocultar passos':'Ver passos'}</button>${m.qt?'<button class="miniB" onclick="event.stopPropagation();toast(\'Editar molde — só gestor (demo)\')">Editar molde 🔒</button>':''}</div>
+  </div>`).join('')}</div>`;
 }
-function estEtapaNova(){return {titulo:'',mensagem_envio:'',dias_mes:[],checklist:[],opcoes:[],fases:[{nome:'',exigir_justificativa:false,acoes:[]}]};}
-function estNovo(){estEdit={nome:'',descricao:'',dono_tipo:tem('criar_modelo_oficial')?'oficial':'pessoal',etapas:[estEtapaNova()]};estEditorAbrir();}
-function estEditar(id){const a=estArv[id];if(!a)return;estEdit=JSON.parse(JSON.stringify(a));estEditorAbrir();}
-function estEditorAbrir(){fecharModal();estSel=0;modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(1120px,96vw);height:88vh"><div class="mcab"><b>${estEdit.id?'Editar modelo':'Novo modelo'}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="estEd"><div class="lado" id="estEdLado"></div><div class="principal" id="estEdBody"></div></div><div class="mrod"><span></span><button class="bwpp" id="estSalvarB" onclick="estSalvar()">Salvar modelo</button></div></div>`;
- document.body.appendChild(modal);estEditorRender();}
-function estV(p,v){const k=p.split('.');let o=estEdit;for(let i=0;i<k.length-1;i++)o=o[k[i]];o[k[k.length-1]]=v;}
-function estLinhas(s){return String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);}
-function estMover(i,d){const E=estEdit.etapas;[E[i],E[i+d]]=[E[i+d],E[i]];estSel=i+d;estEditorRender();}
-function estEtapaRemover(i){estEdit.etapas.splice(i,1);estSel=Math.max(0,Math.min(estSel,estEdit.etapas.length-1));estEditorRender();}
-function estFaseRemover(i,j){const e=estEdit.etapas[i];e.fases.splice(j,1);e.fases.forEach(f=>(f.acoes||[]).forEach(a=>{if(a.mudar_para===j+1)a.mudar_para=null;else if(a.mudar_para>j+1)a.mudar_para--;}));estEditorRender();}
-function estLadoHtml(){const E=estEdit;
- return `<div class="rot" style="margin-top:0">Modelo</div><input class="fi" placeholder="Nome do modelo" value="${escH(E.nome)}" oninput="estV('nome',this.value)">
- <input class="fi" placeholder="Descrição" value="${escH(E.descricao)}" oninput="estV('descricao',this.value)">
- ${E.id?`<span class="chip" style="align-self:flex-start">${E.dono_tipo==='oficial'?'Oficial do departamento':'Pessoal'}</span>`:`<select class="fi" onchange="estV('dono_tipo',this.value)">${tem('criar_modelo_oficial')?`<option value="oficial" ${E.dono_tipo==='oficial'?'selected':''}>Oficial do departamento</option>`:''}<option value="pessoal" ${E.dono_tipo==='pessoal'?'selected':''}>Pessoal</option></select>`}
- <div class="rot">Etapas</div>
- ${E.etapas.map((e,i)=>`<div class="etp ${i===estSel?'on':''}" onclick="estSel=${i};estEditorRender()"><span class="num">${i+1}</span><div style="flex:1;min-width:0"><div class="t" id="estLadoT${i}">${escH(e.titulo)||'Sem título'}</div><div class="s">${e.fases.length} fase${e.fases.length>1?'s':''}${(e.dias_mes||[])[0]?' · dia '+e.dias_mes[0]:''}</div></div></div>`).join('')}
- <button class="add" onclick="estEdit.etapas.push(estEtapaNova());estSel=estEdit.etapas.length-1;estEditorRender()">+ Nova etapa</button>`;}
-function estAvancoHtml(i,j,f){const av=f.avanco||'manual';
- return `<div class="avc"><span class="rot" style="margin:0">Como chega aqui</span><select class="fi" style="width:300px" onchange="estV('etapas.${i}.fases.${j}.avanco',this.value);estEditorRender()"><option value="manual" ${av==='manual'?'selected':''}>O usuário muda</option><option value="automatico_arquivo_detectado" ${av==='automatico_arquivo_detectado'?'selected':''}>Sugerida quando o cliente manda arquivo</option><option value="automatico_mensagem_recebida" ${av==='automatico_mensagem_recebida'?'selected':''}>Sugerida quando o cliente responde</option></select>${av==='automatico_arquivo_detectado'?`<input class="fi" placeholder="Tipos de arquivo (ex.: xml, zip)" value="${escH(f.avanco_padrao_arquivo)}" oninput="estV('etapas.${i}.fases.${j}.avanco_padrao_arquivo',this.value)">`:''}${av==='automatico_mensagem_recebida'?`<input class="fi" placeholder="Resposta do cliente (ex.: Não tive emissão)" value="${escH(f.avanco_resposta)}" oninput="estV('etapas.${i}.fases.${j}.avanco_resposta',this.value)">`:''}</div>`;}
-function estFluxoHtml(e){return e.fases.map((f,j)=>`<span class="chip ${j===0?'ini':''}">${j+1}. ${escH(f.nome)||'—'}</span>`).join('<span class="seta">→</span>');}
-function estFluxoAtualizar(i){const x=el('estFluxo');if(x)x.innerHTML=estFluxoHtml(estEdit.etapas[i]);}
-function estEditorRender(){const E=estEdit;if(!el('estEdBody'))return;el('estEdLado').innerHTML=estLadoHtml();
- const i=estSel,e=E.etapas[i];if(!e){el('estEdBody').innerHTML='';return;}
- el('estEdBody').innerHTML=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px"><span class="num" style="width:34px;height:34px;font-size:14px;background:var(--laranja);color:#fff">${i+1}</span>
-  <input class="fi titEt" placeholder="Título da etapa" value="${escH(e.titulo)}" oninput="estV('etapas.${i}.titulo',this.value);el('estLadoT${i}').textContent=this.value||'Sem título'">
-  ${i?`<button class="lixo" title="Subir" onclick="estMover(${i},-1)">↑</button>`:''}${i<E.etapas.length-1?`<button class="lixo" title="Descer" onclick="estMover(${i},1)">↓</button>`:''}${E.etapas.length>1?`<button class="lixo" title="Remover etapa" onclick="estEtapaRemover(${i})">${icone('excluir')}</button>`:''}</div>
- <div class="grid2"><div class="bloco"><h4>Quando</h4><div style="display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--apoio)">Todo mês, no dia <input class="fi" type="number" min="1" max="31" style="width:80px" value="${(e.dias_mes||[])[0]||''}" oninput="estV('etapas.${i}.dias_mes',this.value?[+this.value]:[])"></div></div>
-  <div class="bloco"><h4>Mensagem ao cliente</h4><textarea class="fi" rows="2" oninput="estV('etapas.${i}.mensagem_envio',this.value)">${escH(e.mensagem_envio)}</textarea></div></div>
- <div class="bloco"><h4>Caminho da demanda</h4><div class="fluxo" id="estFluxo">${estFluxoHtml(e)}</div>
-  ${e.fases.map((f,j)=>`<div class="fase"><span class="num">${j+1}</span><div class="fcx">
-   <div class="fcab"><input class="fi" placeholder="Nome da fase" value="${escH(f.nome)}" oninput="estV('etapas.${i}.fases.${j}.nome',this.value);estFluxoAtualizar(${i})">
-    <label class="chave"><input type="checkbox" ${f.exigir_justificativa?'checked':''} onchange="estV('etapas.${i}.fases.${j}.exigir_justificativa',this.checked)">Pede justificativa</label>
-    ${e.fases.length>1?`<button class="lixo" title="Remover fase" onclick="estFaseRemover(${i},${j})">${icone('excluir')}</button>`:''}</div>${j?estAvancoHtml(i,j,f):''}
-   ${(f.acoes||[]).map((a,k)=>`<div class="acao"><div class="lin"><span class="rot" style="margin:0">Ação rápida</span><input class="fi bt" placeholder="Nome do botão" value="${escH(a.nome)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.nome',this.value)">
-     <span class="seta">depois vai para</span><select class="fi" style="width:190px" onchange="estV('etapas.${i}.fases.${j}.acoes.${k}.mudar_para',this.value?+this.value:null)"><option value="">Fica nesta fase</option>${e.fases.map((g,x)=>`<option value="${x+1}" ${a.mudar_para===x+1?'selected':''}>${x+1}. ${escH(g.nome)}</option>`).join('')}</select>
-     <button class="lixo" title="Remover ação" onclick="estEdit.etapas[${i}].fases[${j}].acoes.splice(${k},1);estEditorRender()">${icone('excluir')}</button></div>
-    <input class="fi" style="margin-top:8px" placeholder="Mensagem enviada ao cliente" value="${escH(a.mensagem_texto)}" oninput="estV('etapas.${i}.fases.${j}.acoes.${k}.mensagem_texto',this.value)"></div>`).join('')}
-   <button class="add" style="margin-top:10px" onclick="(estEdit.etapas[${i}].fases[${j}].acoes=estEdit.etapas[${i}].fases[${j}].acoes||[]).push({nome:'',mensagem_texto:'',mudar_para:null});estEditorRender()">+ Ação rápida</button></div></div>`).join('')}
-  <button class="add" style="margin-left:38px" onclick="estEdit.etapas[${i}].fases.push({nome:'',exigir_justificativa:false,acoes:[]});estEditorRender()">+ Nova fase</button></div>
- <div class="grid2"><div class="bloco"><h4>Checklist</h4><textarea class="fi" rows="4" placeholder="Um item por linha" oninput="estV('etapas.${i}.checklist',estLinhas(this.value))">${escH((e.checklist||[]).join('\n'))}</textarea></div>
-  <div class="bloco"><h4>Opções de escolha</h4><textarea class="fi" rows="4" placeholder="Uma opção por linha" oninput="estV('etapas.${i}.opcoes',estLinhas(this.value))">${escH((e.opcoes||[]).join('\n'))}</textarea></div></div>`;}
-async function estSalvar(){const b=el('estSalvarB');b.disabled=true;
- const r=await sb.rpc('apu_modelo_salvar',{p:estEdit});b.disabled=false;
- if(r.error){toast(r.error.message);return;}
- fecharModal();toast('Modelo salvo.');await estCarregar();render();}
-function estAplicarAbrir(id){const m=estMods.find(x=>x.id===id);estAp={modelo:id,sel:new Map(),achados:[]};fecharModal();
- modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(640px,96vw)"><div class="mcab"><b>Aplicar — ${escH(m?m.nome:'')}</b><button class="x" onclick="fecharModal()">✕</button></div>
-  <div class="mbody"><label class="fl">Mês de referência</label><input class="fi" type="month" id="estApMes" oninput="estApRender()">
-   <label class="fl">Cliente</label><input class="fi" id="estApBusca" placeholder="Razão social, nome fantasia ou CNPJ" oninput="estApBuscar(this.value)"><div id="estApLista" style="margin-top:10px"></div></div>
-  <div class="mrod"><span id="estApQt" style="font-size:11.5px;color:var(--apagado)"></span><button class="bwpp" id="estApB" disabled onclick="estAplicarConfirmar()">Aplicar</button></div></div>`;
- document.body.appendChild(modal);estApRender();setTimeout(()=>{const b=el('estApBusca');if(b)b.focus();},50);}
-function estApBuscar(v){clearTimeout(estBuscaTm);estBuscaTm=setTimeout(async()=>{if(String(v).trim().length<2){estAp.achados=[];estApRender();return;}
- const r=await sb.rpc('fiscal_buscar_clientes',{p_texto:v});if(r.error){toast(r.error.message);return;}estAp.achados=r.data||[];estApRender();},300);}
-function estApTog(id){if(estAp.sel.has(id))estAp.sel.delete(id);else{if(!tem('aplicar_modelo_lote'))estAp.sel.clear();const e=estAp.achados.find(x=>x.empresa_id===id);if(e)estAp.sel.set(id,e);}estApRender();}
-function estApRender(){if(!el('estApLista'))return;
- const sel=[...estAp.sel.values()];const outros=estAp.achados.filter(x=>!estAp.sel.has(x.empresa_id));
- const card=(e,on)=>`<div class="cardP loteCard ${on?'sel':''}" style="cursor:pointer;margin-bottom:8px" onclick="estApTog('${e.empresa_id}')"><div class="top" style="margin:0"><span class="ckq">${on?'✓':''}</span><div style="flex:1"><div class="nm">${escH(e.razao_social||e.nome_fantasia||'')}</div><div style="font-size:11px;color:var(--apagado)">${escH(fmtCnpj(e.cnpj||''))}${e.nome_fantasia&&e.razao_social?' · '+escH(e.nome_fantasia):''}</div></div></div></div>`;
- el('estApLista').innerHTML=sel.map(e=>card(e,true)).join('')+outros.map(e=>card(e,false)).join('');
- const mes=(el('estApMes')||{}).value;const n=estAp.sel.size;
- el('estApQt').textContent=n?n+(n>1?' clientes selecionados':' cliente selecionado'):'';
- el('estApB').disabled=!n||!mes;}
-async function estAplicarConfirmar(){const mes=el('estApMes').value;const b=el('estApB');b.disabled=true;
- const r=await sb.rpc('apu_modelo_aplicar',{p_modelo:estAp.modelo,p_empresas:[...estAp.sel.keys()],p_ciclo:mes+'-01'});
- if(r.error){b.disabled=false;toast(r.error.message);return;}
- fecharModal();toast((r.data.criadas||0)+' demanda(s) criada(s)'+(r.data.ja_existiam?' · '+r.data.ja_existiam+' já existia(m)':''));
- estMes=mes;estAba='mes';await estCarregar();render();}
-function estLinhasMes(){return estTar.map(t=>{const a=estArv[t.modelo_id];const e=a&&a.etapas.find(x=>x.id===t.etapa_id);const f=e&&e.fases.find(x=>x.id===t.status_id);return {t,a,e,f,emp:estEmp[t.empresa_id]||{}};})
- .sort((x,y)=>(x.emp.razao_social||'').localeCompare(y.emp.razao_social||'')||((x.a&&x.a.nome)||'').localeCompare((y.a&&y.a.nome)||''));}
-function estMesHtml(){
- return `<div class="loteBar"><label>Mês</label><input type="month" value="${estMes}" onchange="if(this.value){estMes=this.value;estCarregar().then(render);}" style="border:1px solid var(--borda);border-radius:9px;padding:8px 11px;font-size:12.5px;font-family:inherit"></div>
- <div class="tbwrap"><table><thead><tr><th>Cliente</th><th>Modelo</th><th>Etapa</th><th>Fase</th><th>Ações rápidas</th><th>Responsável</th><th></th></tr></thead><tbody>${estLinhasMes().map(({t,a,e,f,emp})=>`<tr>
-  <td style="font-weight:600">${escH(emp.razao_social||emp.nome_fantasia||'')}<div style="font-size:11px;color:var(--apagado);font-weight:400">${escH(fmtCnpj(emp.cnpj||''))}</div></td>
-  <td>${escH(a?a.nome:'')}</td><td>${escH(e?e.titulo:'')}</td>
-  <td>${e?`<select class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:6px 9px;font-size:12px;font-family:inherit" onchange="estFase('${t.id}',this.value)">${e.fases.map(x=>`<option value="${x.id}" ${x.id===t.status_id?'selected':''}>${escH(x.nome)}</option>`).join('')}</select>`:''}</td>
-  <td>${((f&&f.acoes)||[]).map(ac=>`<button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx);margin:2px" onclick="estAcao('${t.id}','${ac.id}')">${escH(ac.nome)}</button>`).join('')}</td>
-  <td>${escH(estUsu[t.responsavel_id]||'')}</td>
-  <td><button class="miniB" onclick="estHistorico('${t.id}')">Histórico</button></td></tr>${t.sugestao_fase_id?`<tr><td colspan="7" style="padding-top:0">${estSugHtml(t,e)}</td></tr>`:''}`).join('')}</tbody></table></div>`;
-}
-function estSugHtml(t,e){const s=e&&e.fases.find(x=>x.id===t.sugestao_fase_id);
- return `<div class="estSug"><div><b>Sugestão: ${escH(s?s.nome:'')}</b><div>${escH(t.sugestao_texto||'')}</div></div><button class="miniB" style="border-color:var(--verde);color:var(--verde)" onclick="estSugDecidir('${t.id}',true)">Confirmar</button><button class="miniB" onclick="estSugErrada('${t.id}')">Está errado</button></div>`;}
-async function estSugDecidir(tid,ok,just){const r=await sb.rpc('apu_tarefa_sugestao_decidir',{p_tarefa:tid,p_aceitar:ok,p_justificativa:just||null});
- if(r.error){toast(r.error.message);return;}fecharModal();toast(ok?'Confirmado: '+r.data.fase:'Registrado como erro do sistema.');await estCarregar();renderEst();}
-function estSugErrada(tid){fecharModal();modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx"><div class="mcab"><b>O que estava errado?</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody"><textarea class="fi" rows="3" id="estErr"></textarea></div><div class="mrod"><span></span><button class="bwpp" onclick="estSugDecidir('${tid}',false,el('estErr').value)">Registrar</button></div></div>`;
- document.body.appendChild(modal);setTimeout(()=>el('estErr').focus(),50);}
-function estFaseDe(tid,fid){const t=estTar.find(x=>x.id===tid);const a=t&&estArv[t.modelo_id];const e=a&&a.etapas.find(x=>x.id===t.etapa_id);return e&&e.fases.find(x=>x.id===fid);}
-async function estFase(tid,fid){const f=estFaseDe(tid,fid);
- if(f&&f.exigir_justificativa){fecharModal();modal=document.createElement('div');modal.className='modal';
-  modal.innerHTML=`<div class="mcx"><div class="mcab"><b>${escH(f.nome)}</b><button class="x" onclick="fecharModal();renderEst()">✕</button></div><div class="mbody"><label class="fl">Justificativa</label><textarea class="fi" rows="3" id="estJust"></textarea></div><div class="mrod"><span></span><button class="bwpp" onclick="estFaseGravar('${tid}','${fid}',el('estJust').value)">Confirmar</button></div></div>`;
-  document.body.appendChild(modal);setTimeout(()=>el('estJust').focus(),50);return;}
- estFaseGravar(tid,fid,null);}
-async function estFaseGravar(tid,fid,just){if(just!==null&&!String(just).trim()){toast('Escreva a justificativa.');return;}
- const r=await sb.rpc('apu_tarefa_mudar_fase',{p_tarefa:tid,p_fase:fid,p_justificativa:just});
- if(r.error){toast(r.error.message);renderEst();return;}
- fecharModal();toast('Fase: '+r.data.fase);await estCarregar();renderEst();}
-async function estAcao(tid,aid){const r=await sb.rpc('apu_tarefa_mudar_fase',{p_tarefa:tid,p_fase:null,p_justificativa:null,p_acao:aid});
- if(r.error){toast(r.error.message);return;}
- toast('Fase: '+r.data.fase);await estCarregar();renderEst();}
-async function estHistorico(tid){const r=await sb.from('apu_tarefa_historico').select('descricao,justificativa,usuario_id,origem,created_at').eq('tarefa_id',tid).order('created_at',{ascending:false});
- if(r.error){toast('Não foi possível ler o histórico.');return;}
- fecharModal();modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(560px,96vw)"><div class="mcab"><b>Histórico</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody">${(r.data||[]).map(h=>`<div style="border-bottom:1px solid var(--borda);padding:8px 0;font-size:12.5px"><div style="font-weight:600">${escH(h.descricao||'')}</div>${h.justificativa?`<div style="color:var(--apoio)">${escH(h.justificativa)}</div>`:''}<div style="font-size:11px;color:var(--apagado)">${new Date(h.created_at).toLocaleString('pt-BR')} · ${escH(h.origem==='automatico'?'Automático':(estUsu[h.usuario_id]||''))}</div></div>`).join('')}</div></div>`;
- document.body.appendChild(modal);}
-/* envios programados */
-let envQuandoGuardado='',envAba='envios',envLotes=[],envListas=[],envSaude=null,envModelos=[],envCarregado=false,envCanal=null,envTm=null,envEd=null,envLista=null,envListaItens=[];
-const ENV_ESTADO={rascunho:['Rascunho','neu'],agendado:['Agendado','and'],enviando:['Enviando','and'],aguardando_vaga:['Aguardando vaga','and'],aguardando_horario:['Fora do horário','and'],pausado:['Pausado','nao'],freio:['Parado por segurança','nao'],concluido:['Concluído','ok'],cancelado:['Cancelado','neu']};
-const ENV_FONTES=[['fixo','Valor fixo'],['quem_confirma','Quem confirmar o envio'],['responsavel_nome','Responsável da carteira'],['empresa_nome','Nome da empresa'],['empresa_cnpj','CNPJ da empresa'],['pessoa_nome','Nome do destinatário'],['pessoa_primeiro_nome','Primeiro nome do destinatário'],['mes_referencia','Mês de referência']];
-const ENV_SIT={ok:['Pronto','ok'],escolher:['Escolher destinatário','and'],sem_whatsapp:['Sem WhatsApp','nao'],empresa_inativa:['Empresa inativa','neu']};
-const ENV_PAPEL={quem_trata:'Quem trata',representante_legal:'Representante legal',titular:'Titular',socio:'Sócio',responsavel:'Responsável',familiar:'Familiar',funcionario:'Funcionário',terceiro:'Terceiro'};
-function envPill(e){const x=ENV_ESTADO[e]||[e,'neu'];return `<span class="mt-pl ${x[1]}">${escH(x[0])}</span>`;}
-function envMes(d){if(!d)return '';const [a,m]=String(d).split('-');return MESES[+m-1]+'/'+a;}
-function envData(d){return d?new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';}
-function envTitulo(nome){return (typeof MOD_TITULO!=='undefined'&&MOD_TITULO[nome])||String(nome||'').replace(/_/g,' ');}
-async function envCarregar(){
- const [a,b,c]=await Promise.all([sb.rpc('wa_lotes'),sb.rpc('wa_listas'),sb.rpc('wa_lote_saude')]);
- if(a.error||b.error){toast((a.error||b.error).message);return;}
- envLotes=a.data||[];envListas=b.data||[];envSaude=c.data||null;envCarregado=true;
- if(!envCanal)envCanal=sb.channel('fiscal-envios').on('postgres_changes',{event:'*',schema:'public',table:'wa_lote'},envRecarregar).on('postgres_changes',{event:'*',schema:'public',table:'wa_fila_saida'},envRecarregar).subscribe();}
-function envRecarregar(){clearTimeout(envTm);envTm=setTimeout(async()=>{await envCarregar();if(view==='envios'&&!modal)renderEnvios();},400);}
-function envSaudeHtml(){const s=envSaude||{};const q={GREEN:['Boa','ok'],YELLOW:['Média','and'],RED:['Baixa','nao']}[s.qualidade]||['Sem nota','neu'];
- const lim={TIER_250:'250',TIER_1K:'1 mil',TIER_2K:'2 mil',TIER_10K:'10 mil',TIER_100K:'100 mil',TIER_UNLIMITED:'Sem limite'}[s.limite]||'—';
- const dias=(s.dias||[]).length===5&&String(s.dias)==='1,2,3,4,5'?'seg a sex':(s.dias||[]).map(d=>['dom','seg','ter','qua','qui','sex','sáb'][d%7]).join(', ');
- const c=(r,v,sub,cls)=>`<div class="cardP" style="padding:12px 14px"><div style="font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700">${r}</div><div style="font-size:18px;font-weight:700;margin-top:4px;font-family:var(--disp)">${v}</div>${sub?`<div style="font-size:11px;color:var(--apoio);margin-top:2px">${sub}</div>`:''}</div>`;
- return `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px">
-  ${c('Saúde do número',`<span class="mt-pl ${q[1]}">${q[0]}</span>`,s.bloqueado?'<span style="color:var(--vermelho)">Envios bloqueados</span>':(s.situacao==='CONNECTED'?'Conectado':escH(s.situacao||'')))}
-  ${c('Vagas nas últimas 24h',`${s.vagas??'—'} <span style="font-size:12px;color:var(--apagado);font-weight:500">de ${s.teto_24h??'—'}</span>`,`${s.usadas_24h??0} pessoas já receberam modelo`)}
-  ${c('Limite da Meta',lim+' por dia','')}
-  ${c('Horário de envio',escH(s.horario||'—'),dias)}</div>`;}
-function renderEnvios(){
- if(!envCarregado){el('conteudo').innerHTML='<div class="tela"><h1>Envios Programados</h1></div>';envCarregar().then(()=>{if(view==='envios')renderEnvios();});return;}
- const ativos=envLotes.filter(l=>!['rascunho','concluido','cancelado'].includes(l.estado)),rasc=envLotes.filter(l=>l.estado==='rascunho'),hist=envLotes.filter(l=>['concluido','cancelado'].includes(l.estado));
- el('conteudo').innerHTML=`<div class="tela"><h1>Envios Programados</h1><p class="intro">Envio de modelos do WhatsApp para várias empresas de uma vez, com agendamento e acompanhamento.</p>
-  ${envSaudeHtml()}
-  <div class="subtabs"><button class="${envAba==='envios'?'on':''}" onclick="envAba='envios';render()">Envios <span class="c">${envLotes.length}</span></button><button class="${envAba==='listas'?'on':''}" onclick="envAba='listas';render()">Listas <span class="c">${envListas.length}</span></button></div>
-  <div id="envBody"></div></div>`;
- el('envBody').innerHTML=envAba==='envios'?`<div class="loteBar"><label>Envios</label><button class="bwpp" onclick="envNovo()">Novo envio</button></div>
-   ${envSecao('Em andamento e agendados',ativos)}${envSecao('Rascunhos',rasc)}${envSecao('Histórico',hist)}`:envListasHtml();}
-function envSecao(t,l){if(!l.length)return '';return `<div style="font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--apagado);font-weight:700;margin:18px 0 8px">${t}</div><div style="display:flex;flex-direction:column;gap:10px">${l.map(envCard).join('')}</div>`;}
-function envCard(l){const n=l.n||{};const tot=(n.aguardando||0)+(n.processando||0)+(n.enviado||0)+(n.erro||0);const pct=x=>tot?Math.round(100*x/tot):0;
- const bar=tot?`<div style="display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--superf2);margin:10px 0 6px"><span style="width:${pct(n.lido)}%;background:var(--verde)"></span><span style="width:${pct((n.entregue||0)-(n.lido||0))}%;background:#7fc8a0"></span><span style="width:${pct((n.enviado||0)-(n.entregue||0))}%;background:var(--laranja)"></span><span style="width:${pct(n.erro)}%;background:var(--vermelho)"></span></div>`:'';
- const num=(r,v,cor)=>`<span style="display:inline-flex;gap:4px;align-items:baseline;margin-right:14px;font-size:11.5px;color:var(--apoio)"><b style="font-size:13px;color:${cor||'var(--ink)'}">${v||0}</b>${r}</span>`;
- const ac=[];if(l.estado==='rascunho'){ac.push(`<button class="miniB" onclick="envEditar('${l.id}')">Editar</button>`,`<button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="envConferir('${l.id}')">Conferir e confirmar</button>`,`<button class="miniB" onclick="envAcao('${l.id}','excluir_rascunho')">Apagar</button>`);}
- else{ac.push(`<button class="miniB" onclick="envDetalhe('${l.id}')">Acompanhar</button>`);if(['agendado','enviando','aguardando_vaga','aguardando_horario'].includes(l.estado))ac.push(`<button class="miniB" onclick="envAcao('${l.id}','pausar')">Pausar</button>`);if(['pausado','freio'].includes(l.estado))ac.push(`<button class="miniB" onclick="envAcao('${l.id}','retomar')">Retomar</button>`);if(!['concluido','cancelado'].includes(l.estado))ac.push(`<button class="miniB" onclick="envAcao('${l.id}','cancelar')">Cancelar</button>`);}
- return `<div class="cardP"><div class="top" style="margin-bottom:4px"><b class="disp" style="flex:1;font-size:14px">${escH(l.nome)}</b>${envPill(l.estado)}</div>
-  <div style="font-size:12px;color:var(--apoio)">${escH(envTitulo(l.modelo))} · lista <b>${escH(l.lista)}</b> · ${escH(envMes(l.referencia))}${l.agendado_para?' · '+(l.estado==='agendado'?'agendado para ':'início ')+escH(envData(l.agendado_para)):''}</div>
-  ${l.motivo?`<div style="font-size:11.5px;color:var(--vermelho);margin-top:4px">${escH(l.motivo)}</div>`:''}
-  ${bar}${l.estado!=='rascunho'?`<div>${num('na fila',n.aguardando)}${num('enviados',n.enviado,'var(--laranjaTx)')}${num('entregues',n.entregue,'#3d9a6b')}${num('lidos',n.lido,'var(--verde)')}${num('responderam',n.respondeu)}${num('falharam',n.erro,'var(--vermelho)')}${num('fora',n.fora,'var(--apagado)')}</div>`:''}
-  <div class="foot">${ac.join('')}<span style="margin-left:auto;font-size:11px;color:var(--apagado)">${escH(l.criado_por||'')} · ${escH(envData(l.criado_em))}</span></div></div>`;}
-async function envAcao(id,a,ok){if(a==='cancelar'&&!ok){waConfirmar('Cancelar este envio? O que já saiu não volta.','Cancelar envio',()=>envAcao(id,a,true));return;}
- const r=await sb.rpc('wa_lote_acao',{p_lote:id,p_acao:a});if(r.error){toast(r.error.message);return;}toast({pausado:'Envio pausado.',agendado:'Envio retomado.',cancelado:'Envio cancelado.',apagado:'Rascunho apagado.'}[r.data]||'Feito.');await envCarregar();renderEnvios();}
-async function envModelosCarregar(){if(envModelos.length)return;const r=await sb.from('wa_modelo').select('id,nome,categoria,estado,em_uso,componentes').eq('estado','APPROVED').eq('em_uso',true).eq('categoria','UTILITY').order('nome');
- envModelos=(r.data||[]).filter(m=>!(m.componentes||[]).some(c=>c.type==='HEADER'&&['IMAGE','VIDEO','DOCUMENT'].includes(c.format)));}
-function envVarsDe(m){const b=(m&&(m.componentes||[]).find(c=>c.type==='BODY'))||{};return [...new Set([...(b.text||'').matchAll(/\{\{(\d+)\}\}/g)].map(x=>+x[1]))].sort((a,b)=>a-b);}
-function envCorpo(m){const b=(m&&(m.componentes||[]).find(c=>c.type==='BODY'))||{};return b.text||'';}
-async function envNovo(){await envModelosCarregar();envEd={nome:'',lista_id:'',modelo_id:'',referencia:'',variaveis:{},um_por_telefone:true};envEditorAbrir();}
-async function envEditar(id){await envModelosCarregar();const l=envLotes.find(x=>x.id===id);if(!l)return;envEd={id:l.id,nome:l.nome,lista_id:l.lista_id,modelo_id:l.modelo_id,referencia:String(l.referencia).slice(0,7),variaveis:JSON.parse(JSON.stringify(l.variaveis||{})),um_por_telefone:l.um_por_telefone};envEditorAbrir();}
-function envEditorAbrir(){fecharModal();modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(940px,96vw)"><div class="mcab"><b>${envEd.id?'Editar envio':'Novo envio'}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="envEdBody"></div><div class="mrod"><span></span><div style="display:flex;gap:8px"><button class="miniB" onclick="envSalvar(false)">Salvar rascunho</button><button class="bwpp" onclick="envSalvar(true)">Salvar e conferir</button></div></div></div>`;
- document.body.appendChild(modal);envEditorRender();}
-function envEditorRender(){const E=envEd;const m=envModelos.find(x=>x.id===E.modelo_id);const vs=envVarsDe(m);
- let prev=escH(envCorpo(m));vs.forEach(k=>{const f=(E.variaveis[k]||{});const rot=f.fonte==='fixo'?(f.valor||'valor fixo'):(ENV_FONTES.find(x=>x[0]===f.fonte)||[0,'?'])[1];prev=prev.split('{{'+k+'}}').join(`<b style="background:var(--laranjaSv);color:var(--laranjaTx);border-radius:4px;padding:0 3px">${escH(rot)}</b>`);});
- el('envEdBody').innerHTML=`<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px">
-  <div><label class="fl">Nome do envio</label><input class="fi" value="${escH(E.nome)}" placeholder="Ex.: Pedido de XML — outubro" oninput="envEd.nome=this.value">
-   <label class="fl">Lista de empresas</label><select class="fi" onchange="envEd.lista_id=this.value"><option value="">Escolha a lista…</option>${envListas.map(l=>`<option value="${l.id}" ${l.id===E.lista_id?'selected':''}>${escH(l.nome)} (${l.empresas})</option>`).join('')}</select>
-   <label class="fl">Modelo do WhatsApp</label><select class="fi" onchange="envEd.modelo_id=this.value;envEd.variaveis={};envEditorRender()"><option value="">Escolha o modelo…</option>${envModelos.map(x=>`<option value="${x.id}" ${x.id===E.modelo_id?'selected':''}>${escH(envTitulo(x.nome))}</option>`).join('')}</select>
-   <label class="fl">Mês de referência</label><input class="fi" type="month" value="${escH(E.referencia)}" oninput="envEd.referencia=this.value">
-   <label style="display:flex;gap:7px;align-items:center;font-size:12.5px;margin-top:12px"><input type="checkbox" ${E.um_por_telefone?'checked':''} onchange="envEd.um_por_telefone=this.checked">Uma mensagem por telefone (se o mesmo número cuida de várias empresas)</label></div>
-  <div>${m?`<label class="fl">O que vai em cada campo do modelo</label>${vs.map(k=>{const f=E.variaveis[k]||{};return `<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><span class="tag" style="background:var(--superf2);color:var(--apoio);flex:none">{{${k}}}</span><select class="fi" style="flex:1" onchange="envEd.variaveis[${k}]={fonte:this.value,valor:''};envEditorRender()"><option value="">Escolha…</option>${ENV_FONTES.map(x=>`<option value="${x[0]}" ${f.fonte===x[0]?'selected':''}>${x[1]}</option>`).join('')}</select>${f.fonte==='fixo'?`<input class="fi" style="flex:1" value="${escH(f.valor||'')}" placeholder="Valor" oninput="envEd.variaveis[${k}].valor=this.value">`:''}</div>`;}).join('')}
-   <label class="fl">Como fica a mensagem</label><div class="cardP" style="white-space:pre-wrap;font-size:12.5px;background:#e7f7dc;border-color:#cfe9bf">${prev}</div>`:''}</div></div>`;}
-async function envSalvar(conferir){const E=envEd;const p={...E,referencia:E.referencia?E.referencia+'-01':''};
- const r=await sb.rpc('wa_lote_salvar',{p});if(r.error){toast(r.error.message);return;}envEd.id=r.data;await envCarregar();
- if(conferir)envConferir(r.data);else{fecharModal();toast('Rascunho salvo.');renderEnvios();}}
-async function envConferir(id){fecharModal();modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(820px,96vw)"><div class="mcab"><b>Conferir envio</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="envCfBody" style="min-height:120px"></div><div class="mrod"><button class="miniB" onclick="envEditar('${id}')">Voltar e editar</button><div style="display:flex;gap:8px;align-items:center"><label style="font-size:11.5px;color:var(--apoio)">Agendar para</label><input type="datetime-local" id="envQuando" class="fi" style="border:1px solid var(--borda);border-radius:9px;padding:7px 9px;font-size:12px;font-family:inherit"><button class="bwpp" id="envCfB" disabled onclick="envConfirmar('${id}')">Confirmar envio</button></div></div></div>`;
- document.body.appendChild(modal);
- const r=await sb.rpc('wa_lote_previa',{p_lote:id});const b=el('envCfBody');if(!b)return;if(r.error){b.innerHTML='';toast(r.error.message);return;}
- const v=r.data,f=v.fora||{};const fora=[['sem destinatário',f.sem_destinatario],['sem WhatsApp',f.sem_whatsapp],['mesmo telefone',f.mesmo_telefone],['empresa inativa',f.empresa_inativa]].filter(x=>x[1]);
- b.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
-   <div class="cardP" style="padding:12px"><div class="fl" style="margin:0">Empresas na lista</div><div style="font-size:22px;font-weight:700">${v.total}</div></div>
-   <div class="cardP" style="padding:12px;border-color:var(--verde)"><div class="fl" style="margin:0">Vão receber</div><div style="font-size:22px;font-weight:700;color:var(--verde)">${v.entram}</div></div>
-   <div class="cardP" style="padding:12px"><div class="fl" style="margin:0">Ficam de fora</div><div style="font-size:22px;font-weight:700;color:var(--apagado)">${v.total-v.entram}</div><div style="font-size:11px;color:var(--apoio)">${fora.map(x=>x[1]+' '+x[0]).join(' · ')}</div></div></div>
-  <label class="fl">Exemplos da mensagem</label><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${(v.exemplos||[]).map(x=>`<div class="cardP" style="background:#e7f7dc;border-color:#cfe9bf;font-size:12px;white-space:pre-wrap"><div style="font-size:10.5px;font-weight:700;color:var(--apoio);margin-bottom:4px">${escH(x.empresa||'')}</div>${escH(x.texto||'')}</div>`).join('')}</div>`;
- const bt=el('envCfB');if(bt)bt.disabled=!v.entram;}
-async function envConfirmar(id,ok){const q=el('envQuando')?el('envQuando').value:envQuandoGuardado;const quando=q?new Date(q).toISOString():null;
- if(!ok){envQuandoGuardado=q;waConfirmar(quando?'Agendar este envio para '+envData(quando)+'?':'Confirmar este envio agora?',quando?'Agendar envio':'Confirmar envio',()=>envConfirmar(id,true));return;}
- const r=await sb.rpc('wa_lote_confirmar',{p_lote:id,p_quando:quando});if(r.error){toast(r.error.message);return;}
- fecharModal();toast(r.data.entram+' empresa(s) na fila de envio.');envAba='envios';await envCarregar();renderEnvios();}
-async function envDetalhe(id){const l=envLotes.find(x=>x.id===id);fecharModal();modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(940px,96vw)"><div class="mcab"><b>${escH(l?l.nome:'Envio')}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody" id="envDtBody" style="min-height:120px">${l?envCard(l).replace(/<div class="foot">[\s\S]*<\/div><\/div>$/,'</div>'):''}<div id="envItens" style="margin-top:12px"></div></div></div>`;
- document.body.appendChild(modal);
- const r=await sb.rpc('wa_lote_itens',{p_lote:id});const b=el('envItens');if(!b)return;if(r.error){toast(r.error.message);return;}
- const st={aguardando:['Na fila','and'],processando:['Enviando','and'],enviado:['Enviado','ok'],erro:['Falhou','nao'],cancelado:['Cancelado','neu'],fora:['Fora','neu']};
- const ms={enviada:'Enviada',entregue:'Entregue',lida:'Lida',falhou:'Falhou'};
- b.innerHTML=`<div class="tbwrap"><table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Situação</th><th>Motivo</th><th>Enviado em</th></tr></thead><tbody>${(r.data||[]).map(x=>{const s=st[x.estado]||[x.estado,'neu'];return `<tr><td style="font-weight:600">${escH(x.empresa||'')}</td><td>${escH(fmtCnpj(x.cnpj||''))}</td><td><span class="mt-pl ${s[1]}">${escH(ms[x.status]||s[0])}</span></td><td style="font-size:11.5px;color:var(--apoio)">${escH(x.motivo||'')}</td><td style="font-size:11.5px">${escH(envData(x.enviado_em))}</td></tr>`;}).join('')}</tbody></table></div>`;}
-function envListasHtml(){return `<div class="loteBar"><label>Listas</label><button class="bwpp" onclick="envListaNova()">Nova lista</button></div>
- <div class="grade">${envListas.map(l=>`<div class="cardP" style="cursor:pointer" onclick="envListaAbrir('${l.id}')"><div class="top"><b class="disp" style="flex:1">${escH(l.nome)}</b><span class="tag t-util">${l.empresas} empresa${l.empresas===1?'':'s'}</span></div><div style="font-size:11.5px;color:var(--apoio)">${l.ultimo_envio?'Último envio '+escH(envData(l.ultimo_envio)):'Ainda sem envio'}</div></div>`).join('')}</div>`;}
-function envNomeModal(titulo,valor,fn){fecharModal();modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx"><div class="mcab"><b>${escH(titulo)}</b><button class="x" onclick="fecharModal()">✕</button></div><div class="mbody"><label class="fl">Nome</label><input class="fi" id="envNomeIn" value="${escH(valor||'')}"></div><div class="mrod"><span></span><button class="bwpp" id="envNomeOk">Salvar</button></div></div>`;
- document.body.appendChild(modal);const i=el('envNomeIn');i.focus();i.onkeydown=ev=>{if(ev.key==='Enter')el('envNomeOk').click();};el('envNomeOk').onclick=()=>fn(i.value);}
-function envListaNova(){envNomeModal('Nova lista','',async n=>{const r=await sb.rpc('wa_lista_salvar',{p_id:null,p_nome:n});if(r.error){toast(r.error.message);return;}await envCarregar();envListaAbrir(r.data);});}
-async function envListaAbrir(id){envLista=envListas.find(x=>x.id===id)||{id,nome:''};fecharModal();modal=document.createElement('div');modal.className='modal';
- modal.innerHTML=`<div class="mcx" style="width:min(1000px,96vw);height:88vh"><div class="mcab"><b id="envLsTit">${escH(envLista.nome)}</b><button class="miniB" onclick="envListaRenomear()">Renomear</button><button class="miniB" onclick="envListaArquivar()">Arquivar</button><button class="x" onclick="fecharModal();renderEnvios()">✕</button></div>
-  <div class="mbody" style="flex:1"><div style="display:flex;gap:8px;align-items:flex-start"><textarea class="fi" id="envLsCnpjs" rows="2" style="flex:1" placeholder="Cole aqui os CNPJs (um por linha, ou separados por vírgula)"></textarea><button class="bwpp" onclick="envListaIncluir()">Incluir</button></div>
-  <div id="envLsCorpo" style="margin-top:12px"></div></div></div>`;
- document.body.appendChild(modal);envListaCarregar();}
-async function envListaCarregar(){const b=el('envLsCorpo');if(!b)return;b.innerHTML='<div style="height:80px;border-radius:10px;background:var(--superf2)"></div>';
- const r=await sb.rpc('wa_lista_ver',{p_lista:envLista.id});if(r.error){toast(r.error.message);return;}envListaItens=r.data||[];envListaRender();}
-function envListaRender(){const b=el('envLsCorpo');if(!b)return;const L=envListaItens;const esc=L.filter(x=>x.situacao==='escolher').length;
- const cont=Object.keys(ENV_SIT).map(k=>[k,L.filter(x=>x.situacao===k).length]).filter(x=>x[1]);
- b.innerHTML=`<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">${cont.map(([k,n])=>`<span class="mt-pl ${ENV_SIT[k][1]}">${n} ${ENV_SIT[k][0].toLowerCase()}</span>`).join('')}${esc?`<span style="margin-left:auto;font-size:12px;color:var(--apoio)">Nas que faltam destinatário, usar</span><select class="fi" id="envLsPapel" style="width:190px"><option value="titular">o Titular</option><option value="representante_legal">o Representante legal</option><option value="socio">o Sócio</option><option value="responsavel">o Responsável</option></select><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="envListaPapelFaltam()">Aplicar</button>`:''}</div>
- <div class="tbwrap"><table><thead><tr><th>Empresa</th><th>CNPJ</th><th>Quem recebe</th><th>Telefone</th><th>Situação</th><th></th></tr></thead><tbody>${L.map(x=>{const s=ENV_SIT[x.situacao]||[x.situacao,'neu'];
-  const ops=(x.opcoes||[]).map((o,i)=>`<option value="${i}" ${o.pessoa_id&&o.pessoa_id===x.pessoa_id?'selected':''} ${o.tem_whatsapp?'':'disabled'}>${escH(o.nome)} · ${escH(ENV_PAPEL[o.papel]||o.papel)}${o.tem_whatsapp?'':' (sem WhatsApp)'}</option>`).join('');
-  return `<tr><td style="font-weight:600">${escH(x.razao_social||'')}</td><td>${escH(fmtCnpj(x.cnpj||''))}</td><td><select class="fi" style="min-width:240px;border:1px solid var(--borda);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit" onchange="envListaDestino('${x.empresa_id}',this.value)"><option value="" ${x.pessoa_id?'':'selected'}>${x.situacao==='escolher'?'Escolher…':'Padrão (quem trata)'}</option>${ops}</select></td><td style="font-size:12px">${escH(x.telefone||'')}</td><td><span class="mt-pl ${s[1]}">${escH(s[0])}</span></td><td><button class="miniB" onclick="envListaRemover('${x.empresa_id}')">✕</button></td></tr>`;}).join('')}</tbody></table></div>`;}
-async function envListaIncluir(){const t=el('envLsCnpjs').value;if(!t.trim())return;const r=await sb.rpc('wa_lista_incluir',{p_lista:envLista.id,p_texto:t,p_empresas:null});if(r.error){toast(r.error.message);return;}
- el('envLsCnpjs').value='';const d=r.data;toast(`${d.incluidas} incluída(s)${d.ja_estavam?' · '+d.ja_estavam+' já estavam':''}${(d.nao_achados||[]).length?' · não achados: '+d.nao_achados.map(fmtCnpj).join(', '):''}`);envListaCarregar();}
-async function envListaDestino(emp,i){const x=envListaItens.find(y=>y.empresa_id===emp);const o=i===''?null:x.opcoes[+i];
- const r=await sb.rpc('wa_lista_destino',{p_lista:envLista.id,p_empresas:[emp],p_papel:o?o.papel:null,p_pessoa:o?o.pessoa_id:null});if(r.error){toast(r.error.message);return;}envListaCarregar();}
-async function envListaPapelFaltam(){const papel=el('envLsPapel').value;const ids=envListaItens.filter(x=>x.situacao==='escolher').map(x=>x.empresa_id);
- const r=await sb.rpc('wa_lista_destino',{p_lista:envLista.id,p_empresas:ids,p_papel:papel,p_pessoa:null});if(r.error){toast(r.error.message);return;}toast(r.data+' empresa(s) atualizada(s).');envListaCarregar();}
-async function envListaRemover(emp){const r=await sb.rpc('wa_lista_remover',{p_lista:envLista.id,p_empresas:[emp]});if(r.error){toast(r.error.message);return;}envListaItens=envListaItens.filter(x=>x.empresa_id!==emp);envListaRender();}
-function envListaRenomear(){const L=envLista;envNomeModal('Renomear lista',L.nome,async n=>{const r=await sb.rpc('wa_lista_salvar',{p_id:L.id,p_nome:n});if(r.error){toast(r.error.message);return;}await envCarregar();envListaAbrir(L.id);});}
-async function envListaArquivar(ok){if(!ok){waConfirmar('Arquivar esta lista? Ela some das listas, mas o histórico dos envios continua.','Arquivar lista',()=>envListaArquivar(true));return;}const r=await sb.rpc('wa_lista_arquivar',{p_id:envLista.id});if(r.error){toast(r.error.message);return;}fecharModal();await envCarregar();renderEnvios();}
-
 function estDemandas(){const cols=[['recebidas','Recebidas'],['andamento','Em andamento'],['validacao','Aguardando validação'],['concluidas','Concluídas']];
  return `<p class="intro" style="margin-top:-4px">Demandas dos CEOs (Adrian/Lucas/William) e da Cúpula, atreladas a um cliente. A IA sugere e resume, o humano decide.</p>
   <div class="kanban">${cols.map(([k,l])=>{const it=esteira.filter(e=>e.col===k);return `<div class="kcol" ondragover="event.preventDefault()" ondrop="dropEst('${k}')"><div class="kh">${l} <span class="pill" style="background:var(--superf2);color:var(--apoio)">${it.length}</span></div>
@@ -3779,7 +3548,7 @@ async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=
 async function iniciarDados(){
  el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('navPessoal').textContent=eu.nome;TITULOS.pessoal=eu.nome;el('euInfo').textContent=eu.nivel+' · Fiscal';aplicarMenu();view=telaInicial();
  preCarregarGestor();
- estCarregar();if(tem('wa_lote_gerir'))envCarregar();teamsDirCarregar();
+ teamsDirCarregar();
  teamsIniciar();
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
