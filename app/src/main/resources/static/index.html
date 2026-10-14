@@ -2523,7 +2523,7 @@ function renderPend(alvo){const cats=[['xml','XML pendente',0],['guias','Guias a
   <div class="grade">${(dados[pendSub]||[]).map(x=>`<div class="cardP"><div class="top"><div class="av">${iniciais(x.c)}</div><div class="nm">${x.c}</div></div><div style="font-size:12.5px;color:var(--apoio)">${x.d}</div><div class="foot"><button class="miniB" style="border-color:var(--laranja);color:var(--laranjaTx)" onclick="selCli='${x.cli}';irView('apuracao')">Abrir na Apuração →</button></div></div>`).join('')}</div></div>`;
 }
 let pesAba='solicitacoes';
-function renderPessoal(){el('conteudo').innerHTML=`<div class="aputabs"><div class="aputabs-l"><button class="${pesAba==='solicitacoes'?'on':''}" onclick="pesAba='solicitacoes';renderPessoal()">Solicitações</button></div></div><div id="pesConteudo"></div>`;}
+function renderPessoal(){el('conteudo').innerHTML=`<div class="aputabs"><div class="aputabs-l"><button class="${pesAba==='solicitacoes'?'on':''}" onclick="pesAba='solicitacoes';renderPessoal()">${escH(eu.nome)}</button></div></div><div id="pesConteudo"></div>`;}
 /* radar xml */
 function renderXml(){const linhas=[];
  const cell=v=>v==='ok'?'<span class="pill ok">recebido</span>':v==='pend'?'<span class="pill falta">pendente</span>':'<span style="color:var(--nevoa)">—</span>';
