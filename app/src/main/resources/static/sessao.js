@@ -22,7 +22,7 @@ async function fiscalEntrar(email,senha,manter){
   _fiscal=null;_bl=null;
   const bl=blLogado();
   const a=await bl.auth.signInWithPassword({email,password:senha});
-  if(a.error)throw new Error('E-mail ou senha inválidos.');
+  if(a.error)throw new Error('CPF ou senha inválidos.');
   const f=await fetch(SB_URL+'/functions/v1/fiscal-entrar',{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY},
     body:JSON.stringify({bl_token:a.data.session.access_token})});
   const j=await f.json().catch(()=>({}));

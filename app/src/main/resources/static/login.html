@@ -117,12 +117,12 @@
   <!-- ENTRAR -->
   <section id="tela-entrar">
     <h1>Entrar na sua conta</h1>
-    <p class="sub">Use o e-mail cadastrado pela sua empresa.</p>
+    <p class="sub">Use o seu CPF e a sua senha.</p>
 
     <form class="fields" onsubmit="event.preventDefault(); entrar();">
       <div class="field">
-        <label for="email">E-mail corporativo</label>
-        <input id="email" type="text" placeholder="marina@empresa.com.br" autocomplete="username">
+        <label for="email">CPF</label>
+        <input id="email" type="text" inputmode="numeric" placeholder="000.000.000-00" autocomplete="username">
       </div>
       <div class="field">
         <label for="senha">Senha</label>
@@ -133,53 +133,13 @@
         <label class="check">
           <input type="checkbox" id="manter">
           <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
-          Manter conectado
+          Salvar senha
         </label>
-        <a href="#recuperar" class="link-sm" onclick="event.preventDefault(); mostrar('recuperar');">Esqueci minha senha</a>
       </div>
 
       <button type="submit" class="btn" id="btnEntrar">Entrar</button>
       <div class="help" id="erroEntrar"></div>
     </form>
-
-    <p class="foot">Ainda não tem acesso? <a href="#acesso">Fale com o administrador</a></p>
-  </section>
-
-  <!-- CÓDIGO -->
-  <section id="tela-codigo" hidden>
-    <h1>Confirme que é você</h1>
-    <p class="sub">Código de 6 dígitos enviado para o número terminado em <strong style="font-variant-numeric:tabular-nums">•••• 4417</strong>.</p>
-
-    <div class="code">
-      <div class="cell">4</div>
-      <div class="cell">1</div>
-      <div class="cell">9</div>
-      <div class="cell active"><span class="caret"></span></div>
-      <div class="cell"></div>
-      <div class="cell"></div>
-    </div>
-
-    <button type="button" class="btn">Confirmar e entrar</button>
-
-    <div class="center"><span>Não recebeu?</span><a href="#reenviar">Reenviar em 0:42</a></div>
-    <div class="center"><button type="button" class="ghost" onclick="mostrar('entrar')">Voltar</button></div>
-  </section>
-
-  <!-- RECUPERAR -->
-  <section id="tela-recuperar" hidden>
-    <h1>Recuperar acesso</h1>
-    <p class="sub">Informe o e-mail cadastrado e enviamos um link para criar uma senha nova.</p>
-
-    <form class="fields" onsubmit="event.preventDefault(); recuperar();">
-      <div class="field">
-        <label for="email-rec">E-mail corporativo</label>
-        <input id="email-rec" type="text" placeholder="marina@empresa.com.br" autocomplete="email">
-        <div class="help" id="ajudaRec">O link vale por 30 minutos.</div>
-      </div>
-      <button type="submit" class="btn" id="btnRec">Enviar link</button>
-    </form>
-
-    <div class="center"><button type="button" class="ghost" onclick="mostrar('entrar')">Voltar para o login</button></div>
   </section>
 
 </div>
@@ -190,28 +150,24 @@
 <script>
   document.title=DEPTO.nome+' — Entrar';document.getElementById('depNome').textContent=DEPTO.nome;
   if(DEPTO.fundo_login)document.body.style.background="#1a120c url('"+DEPTO.fundo_login+"') center/cover no-repeat fixed";
-  function mostrar(tela){
-    ['entrar','codigo','recuperar'].forEach(function(t){
-      document.getElementById('tela-' + t).hidden = (t !== tela);
-    });
-  }
+  const CHAVE_SALVO='login-salvo';
+  function salvoLer(){try{return JSON.parse(localStorage.getItem(CHAVE_SALVO)||'null');}catch(e){return null;}}
+  function cpfFmt(v){const d=String(v||'').replace(/\D/g,'').slice(0,11);return d.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');}
+  document.getElementById('email').addEventListener('input',e=>{if(!/[@a-z]/i.test(e.target.value))e.target.value=cpfFmt(e.target.value);});
   async function entrar(){
     const email=document.getElementById('email').value.trim(),senha=document.getElementById('senha').value;
     const erro=document.getElementById('erroEntrar'),b=document.getElementById('btnEntrar');
     if(!email||!senha)return;
     erro.textContent='';b.disabled=true;
-    const manter=document.getElementById('manter').checked;
-    try{await fiscalEntrar(email,senha,manter);try{if(manter)localStorage.setItem('fiscal-ultimo-login',email);else localStorage.removeItem('fiscal-ultimo-login');}catch(e){}await telaSincronizar();location.href='index.html';}
-    catch(e){erro.textContent=e.message;b.disabled=false;}
+    const salvar=document.getElementById('manter').checked;
+    try{await fiscalEntrar(email,senha,salvar);
+      try{if(salvar)localStorage.setItem(CHAVE_SALVO,JSON.stringify({cpf:email,senha:senha}));else localStorage.removeItem(CHAVE_SALVO);localStorage.removeItem('fiscal-ultimo-login');}catch(e){}
+      await telaSincronizar();location.href='index.html';}
+    catch(e){erro.textContent=e.message;b.disabled=false;try{const v=salvoLer();if(v&&v.cpf===email&&v.senha===senha)localStorage.removeItem(CHAVE_SALVO);}catch(x){}}
   }
-  async function recuperar(){
-    const email=document.getElementById('email-rec').value.trim();if(!email)return;
-    const b=document.getElementById('btnRec');b.disabled=true;
-    const r=await blCliente().auth.resetPasswordForEmail(loginBL(email));
-    document.getElementById('ajudaRec').textContent=r.error?'Não foi possível enviar o link.':'Link enviado para '+email+'.';
-    b.disabled=false;
-  }
-  try{const u=localStorage.getItem('fiscal-ultimo-login');if(u){document.getElementById('email').value=u;document.getElementById('manter').checked=true;document.getElementById('senha').focus();}}catch(e){}
+  (function(){const v=salvoLer();let u=null;try{u=localStorage.getItem('fiscal-ultimo-login');}catch(e){}
+    if(v&&v.cpf){document.getElementById('email').value=v.cpf;document.getElementById('senha').value=v.senha||'';document.getElementById('manter').checked=true;document.getElementById('btnEntrar').focus();}
+    else if(u){document.getElementById('email').value=u;document.getElementById('senha').focus();}})();
   fiscalSessaoAtual().then(async s=>{if(s){await telaSincronizar();location.href='index.html';}});
 </script>
 
