@@ -1703,6 +1703,7 @@ function teamsIniciar(){return teamsCarregar().then(ok=>ok&&TeamsIT.iniciar({ori
  buscarPessoas:t=>sb.rpc('fiscal_buscar_pessoas',{p_texto:t}),
  pessoasContato:ids=>sb.rpc('fiscal_pessoas_contato',{p_ids:ids}),
  diretos:()=>teamsDiretos(),
+ aoLigacao:()=>avisoPost('frente',{}),
  abrirDireto:(k,h)=>teamsDirAbrir(k,h),
  abrirModulo:()=>irView('teams'),
  baixar:(u,n)=>fiscalBaixar(u,n),
@@ -3016,6 +3017,29 @@ function waLinhaConv(x){const n=waNaoLidas(x),est=waEstadoJan(x);
   <div class="wz-cm"><span class="wz-nome">${escH(x.nome)}</span><span class="wz-cemp">${escH(waEmpresaTxt(x))}</span><span class="wz-prev">${tiq}${x.bloqueado?'Bloqueado':escH(x.previa||'')}</span></div>
   <div class="wz-cd"><span class="wz-hora${n?' nl':''}">${escH(waHoraLista(x.ultima))}</span><div class="wz-cdl">${x.silenciada?`<span class="wz-mk">${WZ.mudo}</span>`:''}${x.fixada&&waFiltro!=='fixadas'?`<span class="wz-mk">${WZ.pin}</span>`:''}${dir}</div></div>
   <button class="wz-cseta" title="Opções" onclick="event.stopPropagation();waMenuConversa(event,'${x.id}')">${ICO_SETA}</button></div>`;}
+/* ---------- WHATSAPP registro de ligações ---------- */
+let waLigs=null,waLigsTm=null;
+const WA_LIG_ROT={chamando:'Chamando',tocando:'Tocando',pre_aceita:'Conectando',em_curso:'Em andamento',encerrada:'Atendida',nao_atendida:'Não atendida',rejeitada:'Recusada',falhou:'Falhou'};
+async function waLigsCarregar(){const r=await sb.rpc('wa_ligacoes',{p_limite:300});if(r.error){toast('Não foi possível carregar as ligações.');waLigs=[];}else waLigs=r.data||[];if(view==='whatsweb'&&waFiltro==='ligacoes')render();}
+function waLigsRecarregar(){if(waLigs===null)return;clearTimeout(waLigsTm);waLigsTm=setTimeout(waLigsCarregar,500);}
+function waLigDur(s){if(!s||s<1)return '';s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return h?h+':'+String(m).padStart(2,'0')+':'+String(x).padStart(2,'0'):m+':'+String(x).padStart(2,'0');}
+function waLigAbrir(cid){const d=teamsDirDe(cid);if(d){irView('teams');if(window.TeamsIT&&TeamsIT.abrirDireto)TeamsIT.abrirDireto(d.numero_chave);return;}if(waTodas().find(x=>x.id===cid))waAbrir(cid);}
+function waLigsHtml(){
+ if(waLigs===null){waLigsCarregar();return '';}
+ const t=(waBusca||'').trim().toLowerCase(),td=t.replace(/\D/g,'');
+ const l=waLigs.filter(x=>!t||String(x.contato_nome||'').toLowerCase().includes(t)||(td&&String(x.telefone||'').includes(td)));
+ let html='',ult=null;
+ l.forEach(x=>{const d=waDiaRotulo(x.criado_em);if(d!==ult){html+=`<div class="wz-sec">${escH(d)}</div>`;ult=d;}
+  const rec=x.direcao==='cliente',perd=rec&&['nao_atendida','rejeitada'].includes(x.estado),falha=x.estado==='falhou';
+  const c=waConv(x.conversa_id)||(waTudo||[]).find(y=>y.id===x.conversa_id);
+  const av=c?waAvatar(c):`<div class="wz-av" style="background:${waCorNome(x.contato_nome||'')}">${escH(waIni(x.contato_nome||''))}</div>`;
+  const dur=waLigDur(x.duracao_s);
+  const det=[rec?'Recebida':'Feita',WA_LIG_ROT[x.estado]||x.estado,x.estado==='encerrada'&&dur?dur:'',x.atendente_nome?(rec?'atendida por ':'por ')+x.atendente_nome.split(' ')[0]:''].filter(Boolean).join(' · ');
+  const cor=perd||falha?'var(--vermelho)':'var(--verde)';
+  html+=`<div class="wz-conv${x.conversa_id===selWhats?' sel':''}" onclick="waLigAbrir('${x.conversa_id}')">${av}
+   <div class="wz-cm"><span class="wz-nome" style="${perd?'color:var(--vermelho)':''}">${escH(x.contato_nome||fmtTel(x.telefone))}</span><span class="wz-cemp">${escH(fmtTel(x.telefone))}</span><span class="wz-prev"><b style="color:${cor};font-weight:800;margin-right:4px">${rec?'↙':'↗'}</b>${escH(det)}</span></div>
+   <div class="wz-cd"><span class="wz-hora">${escH(waHoraLista(x.criado_em))}</span><div class="wz-cdl">${tem('wa_ligacao_fazer')&&!teamsDirDe(x.conversa_id)?`<button class="wz-ibtn" title="Ligar de volta" onclick="event.stopPropagation();waLigar('${x.conversa_id}')">${WZ.fone}</button>`:''}</div></div></div>`;});
+ return html;}
 function waSecoes(lista){let html='',ult=null;
  lista.forEach(x=>{const s=x.fixada&&waFiltro!=='fixadas'?'Fixadas':(()=>{const r=waDiaRotulo(x.ultima);return r==='Hoje'||r==='Ontem'?r:'Anteriores';})();
   if(s!==ult){html+=`<div class="wz-sec">${s}</div>`;ult=s;}html+=waLinhaConv(x);});return html;}
@@ -3035,10 +3059,10 @@ function renderWhatsWeb(){
     <div class="wz-l1"><h2>WhatsApp</h2>${waNumOf?`<span class="wz-num"><i></i><b>Oficial</b> ${escH(fmtTel(waNumOf.telefone))}</span>`:''}${tem('wa_grupo_criar')?`<button class="wz-ibtn" title="Novo grupo" onclick="waNovoGrupo()">${WZ.grupo}</button>`:''}</div>
     <div class="wz-kpis"><button class="wz-kpi al${waFiltro==='naolidas'?' on':''}" onclick="waFiltrar('naolidas')"><span>Não lidas</span><b>${k.nl}</b></button><button class="wz-kpi${waFiltro==='abertas'?' on':''}" onclick="waFiltrar('abertas')"><span>Abertas</span><b>${k.ab}</b></button><button class="wz-kpi av${waFiltro==='acabando'?' on':''}" onclick="waFiltrar('acabando')"><span>Janela acaba</span><b>${k.fim}</b></button></div>
     <div class="wz-seg"><button class="${waAba==='entrada'?'on':''}" onclick="waAba='entrada';selWhats=null;render()">Entrada <em>${waEntrada.filter(x=>!x.arquivada).length}</em></button><button class="${waAba==='meus'?'on':''}" onclick="waAba='meus';selWhats=null;render()">Minhas <em>${waMeus.filter(x=>!x.arquivada).length}</em></button></div>
-    <div class="wz-abas"><label class="wz-busca">${WZ.busca}<input id="wwbusca" placeholder="Buscar por nome, telefone, empresa ou CNPJ" value="${escH(waBusca)}" oninput="waBusca=this.value;render()"></label>${abI('fixadas','Fixadas',WZ.fixar)}${abI('arquivadas','Arquivadas',WZ.arquivo)}</div>
+    <div class="wz-abas"><label class="wz-busca">${WZ.busca}<input id="wwbusca" placeholder="Buscar por nome, telefone, empresa ou CNPJ" value="${escH(waBusca)}" oninput="waBusca=this.value;render()"></label>${abI('fixadas','Fixadas',WZ.fixar)}${abI('arquivadas','Arquivadas',WZ.arquivo)}${abI('ligacoes','Ligações',WZ.fone)}</div>
     <div class="wz-seg3">${ab('todas','Todas')}${ab('naolidas','Não lidas',k.nl)}${ab('acabando','Janela',k.fim,'Janela de 24h acabando')}${ab('grupos','Grupos')}</div>
    </div>
-   <div class="wz-lista">${waSecoes(lista)}</div>
+   <div class="wz-lista">${waFiltro==='ligacoes'?waLigsHtml():waSecoes(lista)}</div>
   </aside>
   <section class="wz-conversa" ondragover="waSobreConversa(event)" ondragleave="if(!this.contains(event.relatedTarget))this.classList.remove('solta')" ondrop="waSoltaConversa(event)">${c?`${waCabecalho(c)}${waBuscaMsg!==null?`<div class="wz-bbusca"><input id="wwbmsg" placeholder="Buscar na conversa" value="${escH(waBuscaMsg)}" oninput="waBuscaMsg=this.value;waDesenharMsgs()"><button class="wz-sec2" onclick="waBuscaMsg=null;render()">Fechar</button></div>`:''}<div class="wz-msgs" id="wwms"></div>${waComposer(c,isEntrada)}`:`<div class="wz-vazio">${WZ.balao}</div>`}</section>
   <aside class="wz-ficha" id="wzFicha">${c?waFichaHtml(c):''}</aside>
@@ -3433,7 +3457,7 @@ function waLigTrocarMic(novo){if(!waLig||!waLig.pc)return;const t=novo.getAudioT
  if(waLig.mic&&waLig.mic!==novo)waLig.mic.getTracks().forEach(x=>x.stop());waLig.mic=novo;}
 window.addEventListener('beforeunload',()=>{if(!waLig||!waLig.id||!waLig.tk)return;
  try{fetch(SB_URL+'/functions/v1/wa-meta-chamada',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+waLig.tk},body:JSON.stringify({acao:waLig.estado==='tocando'&&!waLig.pc?'reject':'terminate',chamada_id:waLig.id})});}catch(e){}});
-async function aoMudarChamada(p){const ch=p.new;if(!ch||!ch.id)return;
+async function aoMudarChamada(p){const ch=p.new;if(!ch||!ch.id)return;waLigsRecarregar();
  if(waLig&&waLig.saida&&!waLig.id&&ch.direcao==='empresa'&&ch.atendente_id===eu.id&&ch.conversa_id===waLig.conv&&!WA_LIG_FIM.includes(ch.estado))waLig.id=ch.id;
  if(waLig&&(waLig.id===ch.id)){
   waLig.tocandoEm=ch.tocando_em||waLig.tocandoEm||null;
@@ -3444,6 +3468,7 @@ async function aoMudarChamada(p){const ch=p.new;if(!ch||!ch.id)return;
   if(ch.estado==='em_curso'&&!waLig.inicio){waLig.inicio=Date.now();waLig.relogio=setInterval(waLigTick,1000);}
   if(WA_LIG_FIM.includes(ch.estado)){const t=WA_LIG_TXT[ch.estado];const ativa=!!waLig.pc;await waLigDiag('fim');waLigFechar();if(ativa)waLigFimSom(ch.estado==='encerrada'?'fim':'ocupado');if(ch.estado!=='encerrada')toast(t);return;}
   waLigDesenhar();return;}
+ if(p.eventType==='INSERT'&&ch.estado==='tocando'&&ch.direcao==='cliente'&&tem('wa_ligacao_atender'))avisoPost('frente',{});
  if(p.eventType==='INSERT'&&ch.estado==='tocando'&&ch.direcao==='cliente'&&!waLig&&tem('wa_ligacao_atender')){
   const c=waConv(ch.conversa_id);waLig={id:ch.id,conv:ch.conversa_id,nome:c?c.nome:'Cliente',estado:'tocando',saida:false,mudo:false};waLigTocar('entrada');waLigDesenhar();}
  else if(p.eventType==='INSERT'&&ch.estado==='tocando'&&ch.direcao==='cliente'&&waLig&&tem('wa_ligacao_atender')){const c=waConv(ch.conversa_id);toast('Ligação de '+((c&&c.nome)||'cliente')+' chegando.');}
