@@ -116,9 +116,9 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-cx-lin .sol,.pm-cx-lin .op{text-align:left}
 .pm-cx-st{display:inline-flex;align-items:center;gap:5px;max-width:100%;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;background:var(--cs);color:var(--c);overflow:hidden;text-overflow:ellipsis}
 .pm-cx-st i{flex:none;width:6px;height:6px;border-radius:999px;background:var(--c)}
-.pm-ck{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:10px;height:40px;padding:0 12px;cursor:pointer;position:relative;z-index:1;transition:background .12s}
+.pm-ck{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;height:40px;padding:0 12px;cursor:pointer;position:relative;z-index:1;transition:background .12s}
 .pm-ck:hover{background:var(--laranjaSv)}
-.pm-ck .bx{width:18px;height:18px;border-radius:6px;border:2px solid var(--laranja);display:grid;place-items:center}
+.pm-ck .lb{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--azul);background:var(--azulSv);border:1px solid var(--azul);border-radius:5px;padding:2px 7px}
 .pm-ck .tx{min-width:0;display:flex;align-items:baseline;gap:8px;font-size:12.5px;color:var(--grafite);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pm-ck .tx b{flex:none;font-size:11px;font-weight:800;letter-spacing:.03em;color:#fff;background:var(--grad);border-radius:5px;padding:1px 6px}
 .pm-ck .tx em{font-style:normal;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
@@ -2705,7 +2705,7 @@ let pmCaixa=null,pmCaixaCanal=null;
 const PM_FASE_COR={a_fazer:['--apagado','--superf2'],em_andamento:['--azul','--azulSv'],retrabalho:['--vermelho','--vermelhoSv'],aguardando_retorno_ceo:['--roxo','--laranjaSv'],aguardando_retorno_cliente:['--ambar','--ambarSv'],aguardando_aprovacao:['--laranjaTx','--laranjaSv'],aguardando_envio:['--azul','--azulSv'],aguardando_aviso:['--azul','--azulSv'],concluido:['--verde','--verdeSv'],cancelado:['--vermelho','--vermelhoSv']};
 function dataHora(v){if(!v)return '';const d=new Date(v);if(isNaN(d))return '';const z=n=>String(n).padStart(2,'0');return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()} - ${z(d.getHours())}:${z(d.getMinutes())}h`;}
 function pmChecklistOs(){if(!pmCaixa)return '';const gestor=tem('painel_gestor');
- return pmCaixa.filter(o=>o.responsavel_id===eu.id||(gestor&&!o.responsavel_id)).map(o=>`<div class="pm-ck" onclick="pmIrOs('${escH(o.id)}')"><span class="bx"></span><span class="tx"><b>O.S</b><em>${escH(String(o.codigo).padStart(4,'0'))}</em><span>${escH(o.operacao||'')} · ${escH(o.fase_nome||'')}</span></span><span class="qm">${o.responsavel_id?'Comigo':'Fila geral'}</span></div>`).join('');}
+ return pmCaixa.filter(o=>o.responsavel_id===eu.id||(gestor&&!o.responsavel_id)).map(o=>`<div class="pm-ck" onclick="pmIrOs('${escH(o.id)}')"><span class="lb">Lembrete</span><span class="tx"><b>O.S</b><em>${escH(String(o.codigo).padStart(4,'0'))}</em><span>${escH(o.operacao||'')} · ${escH(o.fase_nome||'')}</span></span><span class="qm">${o.responsavel_id?'Comigo':'Fila geral'}</span></div>`).join('');}
 function pmIrOs(id){const l=document.querySelector('.pm-cx-lin[data-os="'+id+'"]');if(!l)return;l.scrollIntoView({block:'center',behavior:'smooth'});l.style.background='var(--laranjaSv)';setTimeout(()=>{l.style.background='';},1600);}
 function pmCaixaLinhas(){if(!pmCaixa){pmCaixaCarregar();return '';}
  return pmCaixa.map(o=>{const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];return `<div class="pm-cx-lin" data-os="${escH(o.id)}"><span class="cod">${escH(String(o.codigo).padStart(4,'0'))}</span><span class="tp">${escH(o.tipo||'')}</span><span class="dt">${escH(dataHora(o.em))}</span><span class="sol">${escH(o.solicitante||'')}</span><span class="op">${escH(o.operacao||'')}</span><span><span class="pm-cx-st" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span></span></div>`;}).join('');}
