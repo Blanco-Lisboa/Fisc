@@ -1419,8 +1419,8 @@ function setApuAba(a){apuAba=a;renderApuracao();}
 const el=id=>document.getElementById(id);
 let APP_VERSAO=null;
 async function appVersaoIniciar(){try{const j=await (await fetch('/sistema/versao')).json();if(!j.atualizavel)return;APP_VERSAO=j.versao;
- const {data}=await sb.from('fiscal_app_versao').select('versao').eq('aplicativo','fiscal').maybeSingle();if(data)appVersaoVer(data.versao);
- sb.channel('fiscal-app').on('postgres_changes',{event:'*',schema:'public',table:'fiscal_app_versao',filter:'aplicativo=eq.fiscal'},p=>appVersaoVer((p.new||{}).versao)).subscribe();}catch(e){}}
+ const {data}=await sb.from('fiscal_app_versao').select('versao').eq('aplicativo',DEPTO.id).maybeSingle();if(data)appVersaoVer(data.versao);
+ sb.channel('fiscal-app').on('postgres_changes',{event:'*',schema:'public',table:'fiscal_app_versao',filter:'aplicativo=eq.'+DEPTO.id},p=>appVersaoVer((p.new||{}).versao)).subscribe();}catch(e){}}
 function appVersaoVer(v){if(!v||!APP_VERSAO||v===APP_VERSAO||el('appAtualizar'))return;const d=document.createElement('div');d.className='toast fixo';d.id='appAtualizar';
  d.innerHTML='<span>Nova versão do Fiscal</span><button>Atualizar agora</button><button class="sec">Depois</button>';
  const [b1,b2]=d.querySelectorAll('button');
