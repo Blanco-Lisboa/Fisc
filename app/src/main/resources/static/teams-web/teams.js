@@ -206,9 +206,10 @@ function tmxQuando(d){if(!d)return '';const x=new Date(d),h=new Date(),o=new Dat
 function tmxStatusPessoa(id){if(tmxOnlineAgora(id)){const st=TMX_ST[tmxPres[id]||'online']||TMX_ST.online;return {t:st[0],cor:st[1],on:true};}
  return {t:tmxVisto[id]?'Visto por último '+tmxQuando(tmxVisto[id]):'Offline',cor:'var(--nevoa)',on:false};}
 let tmxDireto=null;
+function tmxDirFoto(d){const p=(tmxEquipe&&tmxEquipe.pessoas||[]).find(x=>d.usuario?x.id===d.usuario:x.nome===d.nome);return (p&&p.foto_url)||d.foto||'';}
 function tmxDirsHtml(){const ds=(tmxCfg.diretos&&tmxCfg.diretos())||[];if(!ds.length)return '';
  return `<div class="tm-dirs">${['esquerda','direita'].map(l=>{const d=ds.find(x=>x.lado===l);if(!d)return '<span></span>';const on=tmxDireto===d.chave&&tmxAba==='conversas';const n=d.nao_lidas||0;
-  return `<button class="tm-dep tm-dir${on?' on':''}${n?' nl':''}" data-k="${tmxEsc(d.chave)}" onclick="tmxAbrirDireto(this.dataset.k)"><span class="tm-depic" style="background:${tmxCor(d.nome)}">${d.foto?`<img src="${tmxEsc(d.foto)}" alt="">`:tmxEsc(tmxIni(d.nome))}</span><span class="tm-depc"><b>${tmxEsc(d.nome)}</b></span>${n?`<i>${n>99?'99+':n}</i>`:''}</button>`;}).join('')}</div>`;}
+  return `<button class="tm-dep tm-dir${on?' on':''}${n?' nl':''}" data-k="${tmxEsc(d.chave)}" onclick="tmxAbrirDireto(this.dataset.k)"><span class="tm-depic" style="background:${tmxCor(d.nome)}">${tmxDirFoto(d)?`<img src="${tmxEsc(tmxDirFoto(d))}" alt="">`:tmxEsc(tmxIni(d.nome))}</span><span class="tm-depc"><b>${tmxEsc(d.nome)}</b></span>${n?`<i>${n>99?'99+':n}</i>`:''}</button>`;}).join('')}</div>`;}
 function tmxDiretoFechar(){if(!tmxDireto)return;tmxDireto=null;if(tmxCfg.abrirDireto)tmxCfg.abrirDireto(null);}
 function tmxAbrirDireto(k){if(!k)return;tmxAba='conversas';tmxSel=null;tmxResp=null;tmxDireto=k;tmxDesenharLista();tmxDesenharConversa();}
 function tmxDepsHtml(){

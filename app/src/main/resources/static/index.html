@@ -1868,7 +1868,7 @@ async function teamsDirCarregar(){const r=await sb.rpc('wa_canais_diretoria');if
 function teamsDirDe(id){return teamsDir.find(d=>d.conversa_id===id)||null;}
 function teamsDirConv(k){const d=teamsDir.find(x=>x.numero_chave===k);return d&&d.conversa_id?waConv(d.conversa_id):null;}
 function teamsDirFoto(c){return c&&c.foto&&waFoto[c.foto]&&waFoto[c.foto].u||'';}
-function teamsDiretos(){return teamsDir.map(d=>{const c=d.conversa_id?waConv(d.conversa_id):null;return {chave:d.numero_chave,nome:d.nome,cargo:d.cargo,lado:d.lado,nao_lidas:c?waNaoLidas(c):0,foto:teamsDirFoto(c)};});}
+function teamsDiretos(){return teamsDir.map(d=>{const c=d.conversa_id?waConv(d.conversa_id):null;return {chave:d.numero_chave,nome:d.nome,cargo:d.cargo,lado:d.lado,usuario:d.usuario_bl_id||null,nao_lidas:c?waNaoLidas(c):0,foto:teamsDirFoto(c)};});}
 function teamsDirAtualizar(){if(window.TeamsIT&&TeamsIT.atualizarDiretos)TeamsIT.atualizarDiretos();}
 function teamsDirAbrir(k,host){let s=el('tmDirSlot');
  if(!k){if(teamsDirAberto){const ii=el('wwin');if(ii&&selWhats)waRasc[selWhats]=ii.value;}teamsDirAberto=null;if(s)s.remove();return;}
