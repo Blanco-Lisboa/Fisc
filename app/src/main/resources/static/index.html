@@ -90,7 +90,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-card.destaque .seta{border-color:rgba(255,255,255,.45);color:#fff}
 .pm-card.destaque:hover .seta{background:#fff;color:var(--laranja);border-color:#fff}
 .pm-card.destaque .num,.pm-card.destaque .rot{color:#fff}
-.pm-hoje{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;height:calc(100vh - 248px);min-height:320px}
+.pm-hoje{display:grid;grid-template-columns:minmax(0,35fr) minmax(0,65fr);gap:14px;height:calc(100vh - 248px);min-height:320px}
 .pm-col{display:flex;flex-direction:column;min-height:0;background:var(--pagina);border:1px solid var(--borda);border-radius:14px;overflow:hidden;box-shadow:var(--sm)}
 .pm-col-cab{position:relative;display:flex;align-items:center;justify-content:center;height:44px;flex:none;background:var(--superf);border-bottom:1px solid var(--borda)}
 .pm-col-cab b{font-family:var(--disp);font-size:14px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
@@ -100,6 +100,13 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-col-mais svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .pm-col-mais:hover{background:var(--laranja);border-color:var(--laranja);color:#fff}
 .pm-col-corpo{flex:1;min-height:0;overflow:auto;background:repeating-linear-gradient(to bottom,transparent 0 39px,var(--superf2) 39px 40px)}
+.pm-cx{--cx:84px 120px 104px minmax(0,1.3fr) minmax(0,1.6fr) 118px}
+.pm-cx-sub{display:grid;grid-template-columns:var(--cx);flex:none;height:32px;background:var(--pagina);border-bottom:1px solid var(--borda)}
+.pm-cx-sub span{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--apagado);border-right:1px solid var(--borda)}
+.pm-cx-sub span:last-child,.pm-cx-grade i:last-child{border-right:0}
+.pm-cx .pm-col-corpo{position:relative}
+.pm-cx-grade{position:absolute;inset:0;display:grid;grid-template-columns:var(--cx);pointer-events:none}
+.pm-cx-grade i{border-right:1px solid var(--superf2)}
 .mp{height:calc(100vh - 44px);overflow:auto;padding:16px 22px 28px;display:flex;flex-direction:column;gap:16px}
 .mp-capa{position:relative;height:190px;flex:none;border-radius:18px;overflow:hidden;background:radial-gradient(60% 120% at 88% 0%,rgba(254,73,1,.55),transparent 60%),radial-gradient(45% 90% at 8% 110%,rgba(255,146,0,.35),transparent 60%),linear-gradient(135deg,#111114,#1d1d22);box-shadow:var(--sm)}
 .mp-capa::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,#000,transparent 85%)}
@@ -2664,7 +2671,7 @@ function pesMesaHtml(){
  const cards=[['destaque','volta','voltou pra você'],['azul','hoje','pra hoje'],['vermelho','atraso','atrasados seus'],['ambar','parado','parados 7+ dias'],['verde','andando','demandas andando']];
  return `<div class="pm"><div class="pm-top"><h2 class="pm-tit"><span class="ar">Área de Operação</span><span class="nome">${escH(String(eu.nome||'').trim().split(/\s+/)[0])}</span></h2>
   <div class="pm-grade">${cards.map(([c,i,t])=>`<div class="pm-card ${c}"><span class="ic"><svg viewBox="0 0 24 24">${ic[i]}</svg></span><div class="tx"><div class="num">—</div><div class="rot">${t}</div></div><span class="seta"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span></div>`).join('')}</div></div>
-  <div class="aputabs pm-abas"><div class="aputabs-l">${[['hoje','Hoje'],['retornos','Retornos'],['enviados','Enviados'],['geral','Geral']].map(([k,t])=>`<button class="${pmAba===k?'on':''}" onclick="pmIr('${k}')">${t}</button>`).join('')}</div></div>${pmAba==='hoje'?`<div class="pm-hoje"><div class="pm-col"><div class="pm-col-cab"><b>Checklist</b><button class="pm-col-mais" title="Adicionar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pm-col-corpo"></div></div><div class="pm-col"><div class="pm-col-cab"><b>Caixa de Entrada</b></div><div class="pm-col-corpo"></div></div></div>`:''}</div>`;}
+  <div class="aputabs pm-abas"><div class="aputabs-l">${[['hoje','Hoje'],['retornos','Retornos'],['enviados','Enviados'],['geral','Geral']].map(([k,t])=>`<button class="${pmAba===k?'on':''}" onclick="pmIr('${k}')">${t}</button>`).join('')}</div></div>${pmAba==='hoje'?`<div class="pm-hoje"><div class="pm-col"><div class="pm-col-cab"><b>Checklist</b><button class="pm-col-mais" title="Adicionar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pm-col-corpo"></div></div><div class="pm-col pm-cx"><div class="pm-col-cab"><b>Caixa de Entrada</b></div><div class="pm-cx-sub">${['Cód','Tipo','Data','Solicitante','Operação','Status'].map(t=>`<span>${t}</span>`).join('')}</div><div class="pm-col-corpo"><div class="pm-cx-grade"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div></div>`:''}</div>`;}
 let pmAba='hoje';
 function pmIr(a){pmAba=a;const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();}
 /* radar xml */
