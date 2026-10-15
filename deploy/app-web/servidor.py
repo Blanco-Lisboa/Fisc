@@ -113,7 +113,7 @@ class Pedido(BaseHTTPRequestHandler):
             corpo = manifestos.get(canal)
             if not corpo:
                 return self.responder(404, b'nao encontrado')
-            return self.responder(200, corpo, 'application/json', {'Cache-Control': 'no-cache'})
+            return self.responder(200, corpo, 'application/json', {'Cache-Control': 'no-cache, no-transform'})
         raiz = pasta(canal)
         alvo = os.path.realpath(os.path.join(raiz, resto))
         rel = os.path.relpath(alvo, raiz).replace(os.sep, '/')
@@ -121,7 +121,7 @@ class Pedido(BaseHTTPRequestHandler):
             return self.responder(404, b'nao encontrado')
         corpo = open(alvo, 'rb').read()
         tipo = TIPOS.get(os.path.splitext(alvo)[1]) or mimetypes.guess_type(alvo)[0] or 'application/octet-stream'
-        self.responder(200, corpo, tipo, {'Cache-Control': 'no-cache', 'ETag': '"' + hashlib.sha256(corpo).hexdigest()[:32] + '"'})
+        self.responder(200, corpo, tipo, {'Cache-Control': 'no-cache, no-transform', 'ETag': '"' + hashlib.sha256(corpo).hexdigest()[:32] + '"'})
 
     do_HEAD = do_GET
 
