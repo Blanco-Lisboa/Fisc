@@ -151,6 +151,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .osj-lista>span:first-child,.osj-lista>span:first-child+b{border-top:0}
 .osj-lista>span{color:var(--apoio);padding-right:12px}
 .osj-lista>b{font-weight:600;min-width:0;overflow-wrap:anywhere;white-space:pre-wrap;font-variant-numeric:tabular-nums}
+.osj-nc{display:inline-flex;margin-left:6px;font-size:10.5px;font-weight:700;color:var(--ambar);background:var(--ambarSv);border:1px dashed #E7B377;border-radius:999px;padding:0 7px;vertical-align:1px;white-space:nowrap}
 .osj-pend{display:inline-flex;font-size:11px;font-weight:700;color:var(--ambar);background:var(--ambarSv);border:1px dashed #E7B377;border-radius:999px;padding:1px 9px;white-space:nowrap}
 .osj-anx{display:inline-flex;align-items:center;gap:6px}
 .osj-anx i{flex:none;font-style:normal;font-size:9px;font-weight:700;color:#fff;background:var(--vermelho);border-radius:4px;padding:1px 4px}
@@ -2754,24 +2755,32 @@ function osjValor(c){if(!c)return '';if(c.tipo==='anexo')return c.midia_nome||c.
  if(c.tipo==='data')return escH(osjData(c.data||c.texto));
  if(c.numero!=null&&c.numero!==''){const n=Number(c.numero);return /valor/i.test(c.rotulo)?n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):escH(n.toLocaleString('pt-BR'));}
  const t=String(c.texto||'');return escH(/cnpj|cpf/i.test(c.rotulo)&&/^\d{14}$/.test(t.replace(/\D/g,''))?fmtCnpj(t):t);}
+function osjCpf(c){const d=String(c||'').replace(/\D/g,'');return d.length===11?d.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/,'$1.$2.$3-$4'):d;}
+function osjDestino(o){const t={cliente:'Cliente',proprio_solicitante:'O próprio solicitante',outro:'Outra pessoa'}[o.destinatario_tipo]||'';return t?escH(t)+(o.destinatario_outro?' · '+escH(o.destinatario_outro):''):null;}
+function osjAprovacao(o){if(!o.requer_aprovacao)return 'Não';const st=o.aprovado_em||o.aprovacao_status==='aprovado'?'Aprovada':o.aprovacao_status==='recusado'?'Recusada':'Aguardando aprovação';return 'Sim · '+st;}
 function osjHtml(o){const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];const cps=o.campos||[];
  const cp=k=>cps.find(x=>x.rotulo===k);const v=k=>osjValor(cp(k));const pend='<span class="osj-pend">Pendente de confirmação</span>';
- const val=k=>{const x=cp(k);if(!x)return null;return v(k)||(x.faltante?pend:'');};
+ const nc='<span class="osj-nc" title="Veio só do anexo de referência">não confirmado</span>';
+ const val=k=>{const x=cp(k);if(!x)return null;const y=v(k);return y?(x.origem==='referencia'?y+nc:y):(x.faltante?pend:'');};
  const junta=(a,b,sep)=>{const x=val(a),y=val(b);if(x==null&&y==null)return null;if(x===pend&&y===pend)return pend;return [x,y].filter(z=>z!=null&&z!=='').join(sep);};
  const linhas=[['Tipo de nota',val('Tipo de nota')],['Ação',val('Ação')],['Descrição',val('Descrição')],
   ['Emitente',junta('Nome do emitente','CPF/CNPJ do emitente','<br>')],['Período',junta('Período (início)','Período (fim)',' a ')],
-  ['Endereço do tomador',val('Endereço do tomador')],['E-mail de destino',val('E-mail de destino')],
+  ['Endereço do tomador',val('Endereço do tomador')],['E-mail de destino',val('E-mail de destino')],['Vai para',osjDestino(o)],['Aprovação antes de enviar',osjAprovacao(o)],
   ['Contato do cliente final',val('Contato do cliente final')],['Nota modelo',val('Nota modelo')]].filter(l=>l[1]!=null&&l[1]!=='');
- const cli=o.empresa?{n:escH(o.empresa.nome||''),d:escH(fmtCnpj(o.empresa.cnpj||''))}:{n:v('Razão social'),d:v('CNPJ do cliente')};
- const valor=v('Valor');const abertas=(o.perguntas||[]).filter(q=>q.status!=='respondida').length;
+ const cli=o.empresa?{n:escH(o.empresa.nome||''),d:escH(o.empresa.cpf?osjCpf(o.empresa.cpf):fmtCnpj(o.empresa.cnpj||''))}:{n:v('Razão social'),d:v('CNPJ do cliente')};
+ const valor=v('Valor')?v('Valor')+(cp('Valor')&&cp('Valor').origem==='referencia'?nc:''):'';const abertas=(o.perguntas||[]).filter(q=>q.status!=='respondida').length;
  return `<div class="osj" role="dialog"><header class="osj-cab"><div class="osj-id"><span class="osj-ic"><svg viewBox="0 0 24 24">${OSJ_IC}</svg></span><div style="min-width:0"><div class="osj-num">O.S - ${escH(String(o.codigo).padStart(4,'0'))}</div><h1 class="osj-tit">${escH(o.operacao||'')}</h1></div></div>
  <div class="osj-acoes"><button class="osj-btn pri">Abrir</button><button class="osj-btn x" title="Fechar" onclick="osjFechar()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></header>
- <div class="osj-corpo"><div class="osj-st"><small>Status</small><span class="osj-selo" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span>${abertas?`<span class="osj-pts">${abertas} ${abertas===1?'ponto':'pontos'} a verificar</span>`:''}</div>
+ <div class="osj-corpo"><div class="osj-st"><small>Status</small><span class="osj-selo" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span><span class="osj-pts">${abertas} ${abertas===1?'ponto':'pontos'} a verificar</span></div>
  <div class="osj-hero"><div style="min-width:0"><span class="osj-rot">Cliente</span><b>${cli.n||'—'}</b><small>${cli.d||''}</small></div>${valor?`<div class="vl"><span class="osj-rot">Valor</span><b>${valor}</b></div>`:''}</div>
  <div class="osj-lista">${linhas.map(l=>`<span>${l[0]}</span><b>${l[1]}</b>`).join('')}</div></div>
  <footer class="osj-pe"><div><span class="osj-rot">Solicitante</span><b>${escH(o.solicitante||'')}</b></div><div><span class="osj-rot">Responsável</span><b>${escH(o.responsavel||'Fila geral')}</b></div><div><span class="osj-rot">Aberto em</span><b>${escH(dataHora(o.em))}</b></div></footer></div>`;}
 let osjAberta=null;
-async function osAbrir(id){osjAberta=id;const r=await sb.rpc('fiscal_os_detalhe',{p_id:id});if(osjAberta!==id)return;if(r.error||!r.data){toast('Não foi possível abrir a O.S.');return;}
+const osjCache={};
+function osjBuscar(id,novo){if(novo||!osjCache[id])osjCache[id]=sb.rpc('fiscal_os_detalhe',{p_id:id}).then(r=>r.error?{error:r.error}:r,e=>({error:e}));return osjCache[id];}
+function osjAntecipar(){const ids=new Set((pmCaixa||[]).map(o=>o.id));for(const k in osjCache)if(!ids.has(k))delete osjCache[k];ids.forEach(id=>osjBuscar(id));}
+function osjMudou(p){const id=(p&&p.new&&(p.new.o_s_id||p.new.id))||(p&&p.old&&(p.old.o_s_id||p.old.id));if(!id||!osjCache[id])return;osjBuscar(id,true).then(r=>{if(osjAberta===id&&r&&r.data){const f=document.getElementById('osjFundo');if(f)f.innerHTML=osjHtml(r.data);}});}
+async function osAbrir(id){osjAberta=id;let r=await osjBuscar(id);if(r.error||!r.data)r=await osjBuscar(id,true);if(osjAberta!==id)return;if(r.error||!r.data){toast('Não foi possível abrir a O.S.');return;}
  osjFechar(true);const f=document.createElement('div');f.className='osj-fundo';f.id='osjFundo';f.innerHTML=osjHtml(r.data);f.onclick=e=>{if(e.target===f)osjFechar();};document.body.appendChild(f);}
 function osjFechar(manter){const f=document.getElementById('osjFundo');if(f)f.remove();if(!manter)osjAberta=null;}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('osjFundo'))osjFechar();});
@@ -2784,7 +2793,10 @@ function pmCaixaLinhas(){if(!pmCaixa){pmCaixaCarregar();return '';}
  return pmCaixa.map(o=>{const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];return `<div class="pm-cx-lin" data-os="${escH(o.id)}" onclick="osAbrir('${escH(o.id)}')"><span class="cod">${escH(String(o.codigo).padStart(4,'0'))}</span><span class="tp">${escH(o.tipo||'')}</span><span class="dt">${escH(dataHora(o.em))}</span><span class="sol">${escH(o.solicitante||'')}</span>${pmVePara()?`<span class="sol${o.responsavel_id===eu.id?' eu':''}">${o.responsavel_id===eu.id?'Você':escH(o.responsavel||'Fila geral')}</span>`:''}<span class="op">${escH(o.operacao||'')}</span><span><span class="pm-cx-st" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span></span></div>`;}).join('');}
 async function pmCaixaCarregar(){if(pmCaixaCarregar.ocupado)return;pmCaixaCarregar.ocupado=true;
  try{const r=await sb.rpc('fiscal_caixa_entrada');if(r.error)return;pmCaixa=Array.isArray(r.data)?r.data:[];
-  if(!pmCaixaCanal)pmCaixaCanal=sb.channel('fiscal-os').on('postgres_changes',{event:'*',schema:'public',table:'o_s_interna_recebidas'},()=>{pmCaixa=null;pmCaixaCarregar();}).subscribe();
+  if(!pmCaixaCanal)pmCaixaCanal=sb.channel('fiscal-os').on('postgres_changes',{event:'*',schema:'public',table:'o_s_interna_recebidas'},p=>{osjMudou(p);pmCaixa=null;pmCaixaCarregar();})
+   .on('postgres_changes',{event:'*',schema:'public',table:'o_s_interna_valores'},osjMudou).on('postgres_changes',{event:'*',schema:'public',table:'o_s_interna_perguntas_pendentes'},osjMudou)
+   .on('postgres_changes',{event:'*',schema:'public',table:'o_s_interna_etapas'},osjMudou).on('postgres_changes',{event:'*',schema:'public',table:'o_s_interna_campos_faltantes'},osjMudou).subscribe();
+  osjAntecipar();
   const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();if(window.TeamsIT&&TeamsIT.atualizarDiretos)TeamsIT.atualizarDiretos();}finally{pmCaixaCarregar.ocupado=false;}}
 function pmIr(a){pmAba=a;const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();}
 /* radar xml */
