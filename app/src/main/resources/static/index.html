@@ -118,84 +118,42 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-cx-lin .dt{font-variant-numeric:tabular-nums}
 .pm-cx-st{display:inline-flex;align-items:center;gap:5px;max-width:100%;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;background:var(--cs);color:var(--c);overflow:hidden;text-overflow:ellipsis}
 .pm-cx-st i{flex:none;width:6px;height:6px;border-radius:999px;background:var(--c)}
-.osj-fundo{position:fixed;inset:0;z-index:900;background:rgba(17,17,20,.55);display:flex;align-items:flex-start;justify-content:center;padding:28px 24px;overflow-y:auto}
-.osj{width:min(1280px,100%);background:var(--superf);border-radius:20px;box-shadow:0 30px 80px -20px rgba(20,20,22,.45);overflow:hidden;font-size:13.5px;line-height:1.45}
-.osj-cab{position:relative;background:var(--pagina);border-bottom:1px solid var(--borda);padding:20px 24px 18px}
+.osj-fundo{position:fixed;inset:0;z-index:900;background:rgba(17,17,20,.55);display:flex;align-items:center;justify-content:center;padding:24px}
+.osj{width:min(680px,100%);max-height:calc(100vh - 48px);display:flex;flex-direction:column;background:var(--pagina);border-radius:18px;box-shadow:0 30px 80px -20px rgba(20,20,22,.45);overflow:hidden;font-size:13.5px;line-height:1.45}
+.osj-cab{position:relative;flex:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px 22px 16px}
 .osj-cab::before{content:'';position:absolute;inset:0 0 auto 0;height:4px;background:var(--grad)}
-.osj-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.osj-id{display:flex;align-items:center;gap:14px;min-width:0}
-.osj-ic{flex:none;width:48px;height:48px;border-radius:14px;background:var(--laranjaSv);color:var(--laranja);display:grid;place-items:center}
-.osj-ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.osj-id{display:flex;align-items:center;gap:12px;min-width:0}
+.osj-ic{flex:none;width:44px;height:44px;border-radius:13px;background:var(--laranjaSv);color:var(--laranja);display:grid;place-items:center}
+.osj-ic svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .osj-num{font-family:ui-monospace,Consolas,monospace;font-size:12px;color:var(--laranjaTx);letter-spacing:.04em}
-.osj-tit{margin:2px 0 0;font-family:var(--disp);font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
-.osj-acoes{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.osj-st{display:inline-flex;flex-direction:column;align-items:flex-end;gap:3px;margin-right:4px}
-.osj-st small{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--apagado)}
-.osj-selo{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--c);background:var(--cs);color:var(--c);border-radius:999px;padding:5px 12px 5px 10px;font-weight:600;font-size:13px}
-.osj-selo i{width:8px;height:8px;border-radius:999px;background:var(--c)}
-.osj-btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--bordaF);background:var(--pagina);color:var(--grafite);border-radius:10px;padding:8px 14px;font-weight:600;font-size:13px}
+.osj-tit{margin:1px 0 0;font-family:var(--disp);font-size:21px;font-weight:700;letter-spacing:-.02em;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.osj-acoes{flex:none;display:flex;gap:8px;align-items:center}
+.osj-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:34px;border:1px solid var(--bordaF);background:var(--pagina);color:var(--grafite);border-radius:10px;padding:0 16px;font-weight:600;font-size:13px}
 .osj-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .osj-btn.pri{background:var(--grad);border-color:transparent;color:#fff}
-.osj-btn.x{width:36px;height:36px;padding:0;justify-content:center}
+.osj-btn.x{width:34px;padding:0}
 .osj-btn.x:hover{border-color:var(--laranja);color:var(--laranjaTx)}
-.osj-meta{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
-.osj-meta>div{background:var(--superf);border:1px solid var(--borda);border-radius:12px;padding:10px 12px;min-width:0}
-.osj-rot{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--apagado)}
-.osj-meta b{display:block;margin-top:3px;font-weight:600;font-size:13.5px;overflow-wrap:anywhere}
-.osj-meta small{display:block;color:var(--apagado);font-size:11.5px;margin-top:1px}
-.osj-fila{display:inline-flex;font-size:11px;font-weight:700;color:var(--ambar);background:var(--ambarSv);border-radius:999px;padding:1px 8px;margin-top:4px}
-.osj-corpo{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;padding:18px 24px 24px;align-items:start}
-.osj-col{display:flex;flex-direction:column;gap:16px;min-width:0}
-.osj-sec{background:var(--pagina);border:1px solid var(--borda);border-radius:16px;box-shadow:var(--sm);overflow:hidden;min-width:0}
-.osj-sc{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--superf2)}
-.osj-sc h2{margin:0;display:flex;align-items:center;gap:9px;font-family:var(--disp);font-size:15px;font-weight:600}
-.osj-sc h2 span{width:28px;height:28px;border-radius:9px;background:var(--laranjaSv);color:var(--laranja);display:grid;place-items:center}
-.osj-sc h2 svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.osj-sc em{font-style:normal;font-size:12px;color:var(--apagado)}
-.osj-in{padding:14px 16px}
-.osj-cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.osj-cat{border:1px solid var(--borda);border-radius:12px;padding:10px 12px 4px;min-width:0}
-.osj-cat h3{margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--laranjaTx)}
-.osj-cp{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--superf2);font-size:13px}
-.osj-cp:first-of-type{border-top:0}
-.osj-cp>span{color:var(--apoio);flex:none;max-width:48%}
-.osj-cp b{flex:1;min-width:0;font-weight:600;text-align:right;overflow-wrap:anywhere;white-space:pre-wrap;font-variant-numeric:tabular-nums}
-.osj-pend{display:inline-flex;flex:none;align-self:flex-start;white-space:nowrap;font-size:11px;font-weight:700;color:var(--ambar);background:var(--ambarSv);border:1px dashed #E7B377;border-radius:999px;padding:1px 8px}
-.osj-anx{display:inline-flex;align-items:center;text-align:left;gap:6px;font-weight:600;color:var(--grafite)}
-.osj-anx i{flex:none;white-space:nowrap;font-style:normal;font-size:9px;font-weight:700;color:#fff;background:var(--vermelho);border-radius:4px;padding:1px 4px}
-.osj-itens{margin-top:12px;overflow-x:auto;border:1px solid var(--borda);border-radius:12px}
-.osj-itens table{width:100%;border-collapse:collapse;font-size:13px}
-.osj-itens th{text-align:left;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--apagado);background:var(--superf);padding:9px 12px;border-bottom:1px solid var(--borda)}
-.osj-itens td{padding:9px 12px;border-bottom:1px solid var(--superf2);font-variant-numeric:tabular-nums}
-.osj-itens .n{text-align:right}
-.osj-ent>div{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid var(--superf2)}
-.osj-ent>div:first-child{border-top:0;padding-top:0}
-.osj-ent .v{text-align:right;font-weight:600;font-size:13px}
-.osj-ent .v small{display:block;font-weight:400;margin-top:3px}
-.osj-chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;background:var(--cs);color:var(--c)}
-.osj-chip i{width:6px;height:6px;border-radius:999px;background:var(--c)}
-.osj-et{list-style:none;margin:0;padding:0}
-.osj-et li{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:0 0 14px;position:relative}
-.osj-et li::before{content:'';position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--borda)}
-.osj-et li:last-child{padding-bottom:0}
-.osj-et li:last-child::before{display:none}
-.osj-et li.feito::before{background:var(--laranjaCl)}
-.osj-mk{width:28px;height:28px;border-radius:999px;border:2px solid var(--bordaF);background:var(--pagina);display:grid;place-items:center;color:#fff}
-.osj-mk svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0}
-.feito .osj-mk{background:var(--grad);border-color:transparent}
-.feito .osj-mk svg{opacity:1}
-.atual .osj-mk{border-color:var(--laranja);box-shadow:0 0 0 4px var(--laranjaSv)}
-.osj-et b{display:block;font-size:13.5px}
-.osj-et small{display:block;color:var(--apagado);font-size:12px}
-.osj-pg{border:1px solid var(--borda);border-radius:12px;padding:11px 12px;display:flex;flex-direction:column;gap:7px}
-.osj-pg+.osj-pg{margin-top:10px}
-.osj-pg-t{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.osj-as{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--laranjaTx)}
-.osj-pg p{margin:0;font-size:13.5px}
-.osj-pg .q{font-size:12px;color:var(--apagado)}
-.osj-resp{background:var(--verdeSv);border-radius:10px;padding:8px 10px;font-size:13px}
-.osj-resp small{display:block;color:var(--verde);font-weight:600;font-size:11.5px;margin-bottom:2px}
-@media (max-width:1060px){.osj-corpo{grid-template-columns:minmax(0,1fr)}.osj-meta{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.osj-corpo{flex:1;min-height:0;overflow-y:auto;padding:0 22px 18px}
+.osj-st{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.osj-st small,.osj-rot{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--apagado)}
+.osj-selo{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--c);background:var(--cs);color:var(--c);border-radius:999px;padding:3px 11px 3px 9px;font-weight:600;font-size:12.5px}
+.osj-selo i{width:7px;height:7px;border-radius:999px;background:var(--c)}
+.osj-pts{display:inline-flex;align-items:center;gap:5px;margin-left:auto;font-size:12px;font-weight:600;color:var(--ambar);background:var(--ambarSv);border-radius:999px;padding:3px 10px}
+.osj-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center;background:var(--laranjaSv);border:1px solid var(--laranjaCl);border-radius:14px;padding:14px 16px}
+.osj-hero b{display:block;margin-top:2px;font-size:15px;font-weight:700;overflow-wrap:anywhere}
+.osj-hero small{display:block;color:var(--apoio);font-size:12px;font-variant-numeric:tabular-nums}
+.osj-hero .vl{text-align:right}
+.osj-hero .vl b{font-family:var(--disp);font-size:22px;color:var(--laranjaTx);white-space:nowrap}
+.osj-lista{display:grid;grid-template-columns:170px minmax(0,1fr);margin-top:8px}
+.osj-lista>span,.osj-lista>b{padding:9px 0;border-top:1px solid var(--superf2)}
+.osj-lista>span:first-child,.osj-lista>span:first-child+b{border-top:0}
+.osj-lista>span{color:var(--apoio);padding-right:12px}
+.osj-lista>b{font-weight:600;min-width:0;overflow-wrap:anywhere;white-space:pre-wrap;font-variant-numeric:tabular-nums}
+.osj-pend{display:inline-flex;font-size:11px;font-weight:700;color:var(--ambar);background:var(--ambarSv);border:1px dashed #E7B377;border-radius:999px;padding:1px 9px;white-space:nowrap}
+.osj-anx{display:inline-flex;align-items:center;gap:6px}
+.osj-anx i{flex:none;font-style:normal;font-size:9px;font-weight:700;color:#fff;background:var(--vermelho);border-radius:4px;padding:1px 4px}
+.osj-pe{flex:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:12px 22px;border-top:1px solid var(--borda);background:var(--superf)}
+.osj-pe b{display:block;font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pm-ck{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;height:40px;padding:0 12px;cursor:pointer;position:relative;z-index:1;transition:background .12s}
 .pm-ck:hover{background:var(--laranjaSv)}
 .pm-ck .lb{position:relative;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--azul);padding:3px 9px 3px 16px;border-radius:0 5px 5px 0;clip-path:polygon(9px 0,100% 0,100% 100%,9px 100%,0 50%)}
@@ -2786,41 +2744,28 @@ let pmAba='hoje';
 let pmCaixa=null,pmCaixaCanal=null;
 const PM_FASE_COR={a_fazer:['--apagado','--superf2'],em_andamento:['--azul','--azulSv'],retrabalho:['--vermelho','--vermelhoSv'],aguardando_retorno_ceo:['--roxo','--laranjaSv'],aguardando_retorno_cliente:['--ambar','--ambarSv'],aguardando_aprovacao:['--laranjaTx','--laranjaSv'],aguardando_envio:['--azul','--azulSv'],aguardando_aviso:['--azul','--azulSv'],concluido:['--verde','--verdeSv'],cancelado:['--vermelho','--vermelhoSv']};
 function dataHora(v){if(!v)return '';const d=new Date(v);if(isNaN(d))return '';const z=n=>String(n).padStart(2,'0');return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()} - ${z(d.getHours())}:${z(d.getMinutes())}h`;}
-const OSJ_ETAPA={analisar:'Analisar',emitir:'Emitir',aguardando_aprovacao:'Aguardando aprovação',enviar:'Enviar',avisar:'Avisar',concluir:'Concluído'};
-const OSJ_PERG={aberta:['Em aberto','--ambar','--ambarSv'],enviada:['Mandada pro CEO','--roxo','--roxoSv'],respondida:['Respondida','--verde','--verdeSv']};
-const OSJ_IC={doc:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',dados:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',ent:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>',et:'<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',pg:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/>',aj:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'};
-function osjSvg(k){return '<svg viewBox="0 0 24 24">'+OSJ_IC[k]+'</svg>';}
-function osjSec(ic,tit,cont,corpo){return `<section class="osj-sec"><div class="osj-sc"><h2><span>${osjSvg(ic)}</span>${tit}</h2>${cont?`<em>${cont}</em>`:''}</div><div class="osj-in">${corpo}</div></section>`;}
+const OSJ_IC='<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>';
 function osjData(v){if(!v)return '';const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(v);}
-function osjValor(c){if(c.tipo==='anexo')return c.midia_nome||c.texto?`<span class="osj-anx"><i>ARQ</i>${escH(c.midia_nome||c.texto)}</span>`:'';
+function osjValor(c){if(!c)return '';if(c.tipo==='anexo')return c.midia_nome||c.texto?`<span class="osj-anx"><i>ARQ</i>${escH(c.midia_nome||c.texto)}</span>`:'';
  if(c.tipo==='data')return escH(osjData(c.data||c.texto));
  if(c.numero!=null&&c.numero!==''){const n=Number(c.numero);return /valor/i.test(c.rotulo)?n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):escH(n.toLocaleString('pt-BR'));}
  const t=String(c.texto||'');return escH(/cnpj|cpf/i.test(c.rotulo)&&/^\d{14}$/.test(t.replace(/\D/g,''))?fmtCnpj(t):t);}
-function osjCampos(l){const cats=[];const itens=l.filter(c=>c.categoria==='Itens'&&c.item!=null);
- l.filter(c=>!(c.categoria==='Itens'&&c.item!=null)).forEach(c=>{let g=cats.find(x=>x.n===c.categoria);if(!g){g={n:c.categoria||'Outros',l:[]};cats.push(g);}g.l.push(c);});
- let h='<div class="osj-cats">'+cats.map((g,i)=>`<div class="osj-cat"${cats.length%2&&i===cats.length-1?' style="grid-column:1/-1"':''}><h3>${escH(g.n)}</h3>${g.l.map(c=>{const v=osjValor(c);return `<div class="osj-cp"><span>${escH(c.rotulo)}</span>${c.faltante&&!v?'<span class="osj-pend">Pendente de confirmação</span>':`<b>${v||'—'}</b>`}</div>`;}).join('')}</div>`).join('')+'</div>';
- if(itens.length){const gs=[...new Set(itens.map(c=>c.item))];const v=(g,k)=>{const c=itens.find(x=>x.item===g&&x.rotulo===k);return c?osjValor(c):'';};
-  h+=`<div class="osj-itens"><table><thead><tr><th class="n">Qtd.</th><th>Descrição</th><th class="n">Valor unitário</th></tr></thead><tbody>${gs.map(g=>`<tr><td class="n">${v(g,'Quantidade do item')}</td><td>${v(g,'Descrição do item')}</td><td class="n">${v(g,'Valor unitário do item')}</td></tr>`).join('')}</tbody></table></div>`;}
- return h;}
-function osjEtapas(l){l=l.filter(e=>e.status!=='nao_aplicavel');const feito=e=>/^conclu/.test(e.status||'');const atual=l.findIndex(e=>!feito(e));
- return `<ol class="osj-et">${l.map((e,i)=>`<li class="${feito(e)?'feito':''}${i===atual?' atual':''}"><span class="osj-mk"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg></span><div><b>${escH(OSJ_ETAPA[e.tipo]||e.tipo)}</b><small>${feito(e)?escH([e.concluido_por,dataHora(e.concluido_em)].filter(Boolean).join(' · ')):i===atual?'Próxima etapa':'Ainda não feito'}</small></div></li>`).join('')}</ol>`;}
-function osjPerguntas(l){return l.map(q=>{const [n,c,cs]=OSJ_PERG[q.status]||[q.status,'--apagado','--superf2'];return `<div class="osj-pg"><div class="osj-pg-t"><span class="osj-as">${escH(q.assunto||'')}</span><span class="osj-chip" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(n)}</span></div><p>${escH(q.texto||'')}</p>${q.enviada_em?`<span class="q">Mandada em ${escH(dataHora(q.enviada_em))}</span>`:''}${q.resposta?`<div class="osj-resp"><small>Resposta${q.canal_resposta?' por '+escH(q.canal_resposta):''}${q.respondida_em?' · '+escH(dataHora(q.respondida_em)):''}</small>${escH(q.resposta)}</div>`:''}</div>`;}).join('');}
-function osjEntrega(o){const sim=(b,t)=>b?'Sim'+(t?', '+escH(t):''):'Não';
- const ap=o.requer_aprovacao?(o.aprovado_em?['Aprovado','--verde','--verdeSv']:['Aguardando','--ambar','--ambarSv']):null;
- const av=o.avisar?(o.avisado_em?['Avisado','--verde','--verdeSv']:['Ainda não avisado','--apagado','--superf2']):null;
- const chip=x=>x?`<small><span class="osj-chip" style="--c:var(${x[1]});--cs:var(${x[2]})"><i></i>${x[0]}</span></small>`:'';
- const dest={cliente:'Cliente',ceo:'CEO',outro:'Outro'}[o.destinatario_tipo]||o.destinatario_tipo||'';
- return `<div class="osj-ent"><div><span class="osj-rot">Destinatário final</span><div class="v">${escH(dest)}${o.destinatario_outro?`<small>${escH(o.destinatario_outro)}</small>`:''}</div></div><div><span class="osj-rot">Aprovação antes de enviar</span><div class="v">${sim(o.requer_aprovacao)}${chip(ap)}</div></div><div><span class="osj-rot">Avisar depois de enviar</span><div class="v">${sim(o.avisar,o.avisar_quem)}${chip(av)}</div></div></div>`;}
-function osjHtml(o){const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];
- const cmp=k=>{const x=(o.campos||[]).find(c=>c.rotulo===k);return x?osjValor(x):'';};
- const emp=o.empresa?`<b>${escH(o.empresa.nome||'')}</b><small>${escH(fmtCnpj(o.empresa.cnpj||''))}</small>`:`<b>${cmp('Razão social')||'—'}</b><small>${cmp('CNPJ do cliente')}</small>`;
- const pend=(o.campos||[]).filter(c=>c.faltante).length;const cats=new Set((o.campos||[]).map(c=>c.categoria)).size;
- const abertas=(o.perguntas||[]).filter(q=>q.status!=='respondida').length;const ets=(o.etapas||[]).filter(e=>e.status!=='nao_aplicavel');
- return `<div class="osj" role="dialog"><header class="osj-cab"><div class="osj-top"><div class="osj-id"><span class="osj-ic">${osjSvg('doc')}</span><div><div class="osj-num">O.S - ${escH(String(o.codigo).padStart(4,'0'))}</div><h1 class="osj-tit">${escH(o.operacao||'')}</h1></div></div>
- <div class="osj-acoes"><span class="osj-st"><small>Status</small><span class="osj-selo" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span></span><button class="osj-btn pri">Abrir</button><button class="osj-btn x" title="Fechar" onclick="osjFechar()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></div>
- <div class="osj-meta"><div><span class="osj-rot">Solicitante</span><b>${escH(o.solicitante||'')}</b><small>${escH((o.solicitante_nivel||'').toUpperCase())}</small></div><div><span class="osj-rot">Responsável</span>${o.responsavel?`<b>${escH(o.responsavel)}</b><small>pela carteira</small>`:'<b>Fila geral</b><span class="osj-fila">Sem responsável</span>'}</div><div><span class="osj-rot">Cliente / Empresa</span>${emp}</div><div><span class="osj-rot">Aberto em</span><b>${escH(dataHora(o.em))}</b></div></div></header>
- <div class="osj-corpo"><div class="osj-col">${osjSec('dados','Dados da nota',cats+(cats===1?' categoria':' categorias')+(pend?' · '+pend+(pend===1?' pendente':' pendentes'):''),osjCampos(o.campos||[]))}</div>
- <div class="osj-col">${osjSec('ent','Instruções de entrega','',osjEntrega(o))}${ets.length?osjSec('et','Etapas',ets.filter(e=>/^conclu/.test(e.status||'')).length+' de '+ets.length,osjEtapas(o.etapas)):''}${(o.perguntas||[]).length?osjSec('pg','Pontos a verificar',abertas+' sem resposta',osjPerguntas(o.perguntas)):''}${(o.ajustes||[]).length?osjSec('aj','Ajustes','',(o.ajustes).map(a=>`<div class="osj-pg"><div class="osj-pg-t"><span class="osj-as">Ajuste</span><span class="q">${escH(dataHora(a.em))}</span></div><p>${escH(a.descricao||'')}</p></div>`).join('')):''}</div></div></div>`;}
+function osjHtml(o){const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];const cps=o.campos||[];
+ const cp=k=>cps.find(x=>x.rotulo===k);const v=k=>osjValor(cp(k));const pend='<span class="osj-pend">Pendente de confirmação</span>';
+ const val=k=>{const x=cp(k);if(!x)return null;return v(k)||(x.faltante?pend:'');};
+ const junta=(a,b,sep)=>{const x=val(a),y=val(b);if(x==null&&y==null)return null;if(x===pend&&y===pend)return pend;return [x,y].filter(z=>z!=null&&z!=='').join(sep);};
+ const linhas=[['Tipo de nota',val('Tipo de nota')],['Ação',val('Ação')],['Descrição',val('Descrição')],
+  ['Emitente',junta('Nome do emitente','CPF/CNPJ do emitente','<br>')],['Período',junta('Período (início)','Período (fim)',' a ')],
+  ['Endereço do tomador',val('Endereço do tomador')],['E-mail de destino',val('E-mail de destino')],
+  ['Contato do cliente final',val('Contato do cliente final')],['Nota modelo',val('Nota modelo')]].filter(l=>l[1]!=null&&l[1]!=='');
+ const cli=o.empresa?{n:escH(o.empresa.nome||''),d:escH(fmtCnpj(o.empresa.cnpj||''))}:{n:v('Razão social'),d:v('CNPJ do cliente')};
+ const valor=v('Valor');const abertas=(o.perguntas||[]).filter(q=>q.status!=='respondida').length;
+ return `<div class="osj" role="dialog"><header class="osj-cab"><div class="osj-id"><span class="osj-ic"><svg viewBox="0 0 24 24">${OSJ_IC}</svg></span><div style="min-width:0"><div class="osj-num">O.S - ${escH(String(o.codigo).padStart(4,'0'))}</div><h1 class="osj-tit">${escH(o.operacao||'')}</h1></div></div>
+ <div class="osj-acoes"><button class="osj-btn pri">Abrir</button><button class="osj-btn x" title="Fechar" onclick="osjFechar()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></header>
+ <div class="osj-corpo"><div class="osj-st"><small>Status</small><span class="osj-selo" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span>${abertas?`<span class="osj-pts">${abertas} ${abertas===1?'ponto':'pontos'} a verificar</span>`:''}</div>
+ <div class="osj-hero"><div style="min-width:0"><span class="osj-rot">Cliente</span><b>${cli.n||'—'}</b><small>${cli.d||''}</small></div>${valor?`<div class="vl"><span class="osj-rot">Valor</span><b>${valor}</b></div>`:''}</div>
+ <div class="osj-lista">${linhas.map(l=>`<span>${l[0]}</span><b>${l[1]}</b>`).join('')}</div></div>
+ <footer class="osj-pe"><div><span class="osj-rot">Solicitante</span><b>${escH(o.solicitante||'')}</b></div><div><span class="osj-rot">Responsável</span><b>${escH(o.responsavel||'Fila geral')}</b></div><div><span class="osj-rot">Aberto em</span><b>${escH(dataHora(o.em))}</b></div></footer></div>`;}
 let osjAberta=null;
 async function osAbrir(id){osjAberta=id;const r=await sb.rpc('fiscal_os_detalhe',{p_id:id});if(osjAberta!==id)return;if(r.error||!r.data){toast('Não foi possível abrir a O.S.');return;}
  osjFechar(true);const f=document.createElement('div');f.className='osj-fundo';f.id='osjFundo';f.innerHTML=osjHtml(r.data);f.onclick=e=>{if(e.target===f)osjFechar();};document.body.appendChild(f);}
