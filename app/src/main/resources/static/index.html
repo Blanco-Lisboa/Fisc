@@ -1737,8 +1737,8 @@ function mpCampo(t,v){return `<div class="mp-campo"><span>${t}</span><b>${escH(v
 function renderMeuPerfil(){
  const nivel=String(eu.nivel||'');const nv=nivel?nivel.charAt(0).toUpperCase()+nivel.slice(1):'';
  const ab=[['perfil','Meu Perfil'],['ident','Identificação']];
- const cab=`<div class="mp-capa"><button class="mp-foto-bt" title="Alterar capa">${mpIco('camera')}</button></div>
-  <div class="mp-cab"><div class="mp-av">${escH(iniciais(eu.nome)||'')}<button class="mp-foto-bt" title="Alterar foto">${mpIco('camera')}</button></div>
+ const cab=`<div class="mp-capa"></div>
+  <div class="mp-cab"><div class="mp-av">${escH(iniciais(eu.nome)||'')}</div>
    <div class="mp-quem"><h2 class="mp-nome">${escH(eu.nome||'')}${nv?`<span class="mp-nivel">${escH(nv)}</span>`:''}</h2><div class="mp-emp">YOU Contabilidade<i></i>${escH(DEPTO.nome)}</div></div>
    <div class="mp-kpis"><div class="mp-kpi">${mpAnel(null)}<div><b>—<small>/100</small></b><span>Desempenho</span></div></div>
     <div class="mp-kpi azul"><span class="ic">${mpIco('agenda')}</span><div><b>—</b><span>Ausências no mês</span></div></div>
