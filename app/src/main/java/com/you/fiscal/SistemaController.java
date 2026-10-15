@@ -96,7 +96,13 @@ public class SistemaController {
         String exe = System.getProperty("fiscal.lancador");
         if (exe == null) return ResponseEntity.ok(Map.of("ok", false));
         try {
-            new ProcessBuilder(exe, "--esperar=" + ProcessHandle.current().pid()).start();
+            String esperar = "--esperar=" + ProcessHandle.current().pid();
+            java.io.File dir = new java.io.File(exe).getParentFile();
+            java.io.File jw = new java.io.File(dir, "runtime\\bin\\javaw.exe"), jar = new java.io.File(dir, "app\\fiscal-lancador.jar");
+            java.util.List<String> cmd = jw.isFile() && jar.isFile()
+                    ? java.util.List.of(jw.getPath(), "-Djpackage.app-path=" + exe, "-cp", jar.getPath(), "com.you.fiscal.lancador.Lancador", esperar)
+                    : java.util.List.of(exe, esperar);
+            new ProcessBuilder(cmd).directory(dir).start();
         } catch (Exception e) {
             return ResponseEntity.ok(Map.of("ok", false));
         }
