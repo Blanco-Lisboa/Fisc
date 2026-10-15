@@ -103,9 +103,15 @@
   [hidden]{display:none !important}
 
   @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+.carga{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(244,244,245,.78);cursor:progress}
+.carga[hidden]{display:none}
+.carga svg{width:64px;height:64px;animation:cargaGira .9s linear infinite}
+@keyframes cargaGira{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+<div class="carga" id="carga"><svg viewBox="0 0 100 100"><path fill="#FE4F00" d="M94.50 32.02A48 48 0 1 1 47.49 2.07L48.59 23.04A27 27 0 1 0 75.03 39.89Z"/><path fill="#FFFFFF" d="M47.49 2.07A48 48 0 0 1 94.50 32.02L75.03 39.89A27 27 0 0 0 48.59 23.04Z"/></svg></div>
+<script>try{if(!localStorage.getItem('fiscal-sessao')&&!sessionStorage.getItem('fiscal-sessao'))document.getElementById('carga').hidden=true;}catch(e){}</script>
 
 <div class="card">
 
@@ -158,17 +164,17 @@
     const email=document.getElementById('email').value.trim(),senha=document.getElementById('senha').value;
     const erro=document.getElementById('erroEntrar'),b=document.getElementById('btnEntrar');
     if(!email||!senha)return;
-    erro.textContent='';b.disabled=true;
+    erro.textContent='';b.disabled=true;document.getElementById('carga').hidden=false;
     const salvar=document.getElementById('manter').checked;
     try{await fiscalEntrar(email,senha,salvar);
       try{if(salvar)localStorage.setItem(CHAVE_SALVO,JSON.stringify({cpf:email,senha:senha}));else localStorage.removeItem(CHAVE_SALVO);localStorage.removeItem('fiscal-ultimo-login');}catch(e){}
       await telaSincronizar();location.href='index.html';}
-    catch(e){erro.textContent=e.message;b.disabled=false;try{const v=salvoLer();if(v&&v.cpf===email&&v.senha===senha)localStorage.removeItem(CHAVE_SALVO);}catch(x){}}
+    catch(e){document.getElementById('carga').hidden=true;erro.textContent=e.message;b.disabled=false;try{const v=salvoLer();if(v&&v.cpf===email&&v.senha===senha)localStorage.removeItem(CHAVE_SALVO);}catch(x){}}
   }
   (function(){const v=salvoLer();let u=null;try{u=localStorage.getItem('fiscal-ultimo-login');}catch(e){}
     if(v&&v.cpf){document.getElementById('email').value=v.cpf;document.getElementById('senha').value=v.senha||'';document.getElementById('manter').checked=true;document.getElementById('btnEntrar').focus();}
     else if(u){document.getElementById('email').value=u;document.getElementById('senha').focus();}})();
-  fiscalSessaoAtual().then(async s=>{if(s){await telaSincronizar();location.href='index.html';}});
+  fiscalSessaoAtual().then(async s=>{if(s){await telaSincronizar();location.href='index.html';}else document.getElementById('carga').hidden=true;},()=>{document.getElementById('carga').hidden=true;});
 </script>
 
 </body>

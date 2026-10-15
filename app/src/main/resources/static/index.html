@@ -25,7 +25,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .disp{font-family:var(--disp)}
 .tnum{font-variant-numeric:tabular-nums}
 .carga{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(244,244,245,.78);cursor:progress}
-.carga i{width:38px;height:38px;border-radius:999px;border:3px solid var(--laranjaCl);border-top-color:var(--laranja);animation:cargaGira .8s linear infinite}
+.carga svg{width:64px;height:64px;animation:cargaGira .9s linear infinite}
 @keyframes cargaGira{to{transform:rotate(360deg)}}
 /* ===== MENU LATERAL (padrão dos módulos) ===== */
 .side{width:246px;flex:none;background:#0b0b0d;color:#c9c9cf;height:100vh;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:2px}
@@ -1091,7 +1091,7 @@ tr.rnovo:hover{background:#ffe6d6}
 <link rel="stylesheet" href="email/email.css">
 </head>
 <body>
-<div class="carga" id="carga"><i></i></div>
+<div class="carga" id="carga"><svg viewBox="0 0 100 100"><path fill="#FE4F00" d="M94.50 32.02A48 48 0 1 1 47.49 2.07L48.59 23.04A27 27 0 1 0 75.03 39.89Z"/><path fill="#FFFFFF" d="M47.49 2.07A48 48 0 0 1 94.50 32.02L75.03 39.89A27 27 0 0 0 48.59 23.04Z"/></svg></div>
 <nav class="side">
   <div class="brand2"><img class="lg" src="img/you-icone.png" alt=""><div><b id="depNome">Fiscal</b><span class="rl">YOU Contabilidade</span></div></div>
   <div class="lab">OPERAÇÃO</div>
@@ -3482,22 +3482,25 @@ function convWA(c){const ant=waConv(c.id);const ct=Array.isArray(c.wa_contato)?c
  arquivada:!!c.arquivada,fixada:c.fixada_em,silenciada:!!c.silenciada,marcadaNL:!!c.marcada_nao_lida,grupo:!!(c.e_grupo||c.grupo_meta_id),grupoAntigo:!!c.e_grupo&&!c.grupo_meta_id,grupoLink:c.grupo_link,grupoDesc:c.grupo_descricao,
  bloqueado:!!(ct&&ct.bloqueado),foto:(ct&&ct.foto_url)||null};
  if(ant&&ant._lendo)x._lendo=true;return x;}
+function waConvConsulta(){return sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,estado,ultima_em,ultima_previa,nao_lidas,janela_ate,arquivada,fixada_em,silenciada,marcada_nao_lida,e_grupo,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado,foto_url),wa_numero!inner(provedor)').eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada');}
+function waMontarListas(nv){
+ nv.forEach(c=>{const p=waPainel[c.id];c.dono=(p&&p.dono_id)||null;c.arquivada=!!(p&&p.arquivada);if(p&&p.nome_provisorio)c.nome=p.nome_provisorio;});
+ waEntrada=nv.filter(c=>!c.dono&&!teamsDirDe(c.id));
+ waMeus=nv.filter(c=>c.dono===eu.id&&!teamsDirDe(c.id));waTudo=nv;
+ waAplicarPainel();
+ waEntrada.concat(waMeus).concat(nv.filter(c=>teamsDirDe(c.id))).forEach(c=>janelaWA(c));waAgendarJanela();}
+function waFotosDepois(l){waAssinarFotos(l).then(m=>{if(!m||view!=='whatsweb')return;const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'||a.id==='wwbusca'))return;render();});}
 async function carregarConversas(){
  const todas=[];await waAcertarRelogio();
  for(let de=0;;de+=1000){
-  const r=await sb.from('wa_conversa').select('id,contato_id,contato_nome,contato_telefone,estado,ultima_em,ultima_previa,nao_lidas,janela_ate,arquivada,fixada_em,silenciada,marcada_nao_lida,e_grupo,grupo_meta_id,grupo_link,grupo_descricao,wa_contato(bloqueado,foto_url),wa_numero!inner(provedor)')
-   .eq('wa_numero.provedor','meta_cloud').neq('estado','arquivada').order('ultima_em',{ascending:false,nullsFirst:false}).order('id').range(de,de+999);
+  const r=await waConvConsulta().order('ultima_em',{ascending:false,nullsFirst:false}).order('id').range(de,de+999);
   if(r.error){toast('Não foi possível carregar as conversas.');return;}
   todas.push(...r.data);if(r.data.length<1000)break;
  }
  const nv=todas.map(convWA);
  await waCarregarPainel(true);
- nv.forEach(c=>{const p=waPainel[c.id];c.dono=(p&&p.dono_id)||null;c.arquivada=!!(p&&p.arquivada);if(p&&p.nome_provisorio)c.nome=p.nome_provisorio;});
- waEntrada=nv.filter(c=>!c.dono&&!teamsDirDe(c.id));
- waMeus=nv.filter(c=>c.dono===eu.id&&!teamsDirDe(c.id));waTudo=nv;
- waAplicarPainel();
- waEntrada.concat(waMeus).concat(nv.filter(c=>teamsDirDe(c.id))).forEach(c=>janelaWA(c));waAgendarJanela();
- waAssinarFotos(nv).then(m=>{if(!m||view!=='whatsweb')return;const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'||a.id==='wwbusca'))return;render();});
+ waMontarListas(nv);
+ waFotosDepois(nv);
 }
 const WA_COLUNAS_MSG='id,id_local,id_whatsapp,direcao,tipo,texto,legenda,status,ocorrido_em,autor_id,autor_grupo,responder_a,reacao,reacao_nossa,encaminhada,favorita,editada_em,dados,wa_midia(nome,caminho,estado,mimetype,transcricao,tamanho,duracao_s)';
 const WA_PAGINA=300;let waRolar=null;const waAntigasIndo={};
@@ -3532,7 +3535,19 @@ function aoMudarMensagem(p){const m=p.new;if(!m||!m.conversa_id)return;if(p.even
    const c=waConv(m.conversa_id);if(c)janelaWA(c);
    if((!ant&&['imagem','audio','video','documento','figurinha'].includes(m.tipo))||(m.dados&&m.dados.modelo&&!nova.caminho&&p.eventType==='INSERT'))setTimeout(()=>carregarMensagens(m.conversa_id),1500);}}
  if(waChatAberto()&&selWhats===m.conversa_id)waDesenharMsgs();}
-async function aoMudarConversa(){await carregarConversas();teamsDirAtualizar();if(view==='whatsweb'){const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'))return;render();}else{const b=el('waBadge');if(b)b.textContent=waPendentes();}}
+const waConvMudou=new Set();let waConvMudouT=null;
+function aoMudarConversa(p){const id=(p&&p.new&&p.new.id)||(p&&p.old&&p.old.id);if(!id)return;waConvMudou.add(id);if(!waConvMudouT)waConvMudouT=setTimeout(waConvAtualizar,250);}
+function waConvOrdem(a,b){if(a.ultima===b.ultima)return a.id<b.id?-1:1;if(!a.ultima)return 1;if(!b.ultima)return -1;return a.ultima<b.ultima?1:-1;}
+async function waConvAtualizar(){waConvMudouT=null;const ids=[...waConvMudou];waConvMudou.clear();if(!ids.length)return;
+ const [r,pn]=await Promise.all([waConvConsulta().in('id',ids),sb.rpc('wa_painel_conversas_de',{p_ids:ids})]);
+ if(r.error||pn.error){ids.forEach(i=>waConvMudou.add(i));return;}
+ (pn.data||[]).forEach(x=>waPainel[x.conversa_id]=x);
+ const veio=new Map(r.data.map(c=>[c.id,convWA(c)]));ids.forEach(i=>{if(!veio.has(i))delete waPainel[i];});
+ const nv=waTudo.filter(c=>!ids.includes(c.id)||veio.has(c.id)).map(c=>veio.get(c.id)||c);
+ veio.forEach(c=>{if(!waTudo.some(x=>x.id===c.id))nv.push(c);});nv.sort(waConvOrdem);
+ waMontarListas(nv);waFotosDepois([...veio.values()]);
+ const em=[];(pn.data||[]).forEach(x=>(x.empresas||[]).forEach(e=>em.push(e)));waCarregarEmpresas(em).then(waRedesenhar);
+ teamsDirAtualizar();if(view==='whatsweb'){const a=document.activeElement;if(a&&(a.id==='wwin'||a.id==='wwbmsg'))return;render();}else{const b=el('waBadge');if(b)b.textContent=waPendentes();}}
 /* ---------- avisos ---------- */
 const avisoMidia={},avisoFeitos=new Set();
 function avisoPost(rota,d){return fetch('/sistema/'+rota,{method:'POST',headers:{'Content-Type':'application/json','X-Fiscal':'1'},body:JSON.stringify(d)}).catch(()=>{});}
