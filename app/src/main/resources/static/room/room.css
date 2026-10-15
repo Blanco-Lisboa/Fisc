@@ -592,7 +592,7 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .row .ed:hover{background:rgba(254,73,1,.05)}
 .row.editando .ed{background:rgba(254,73,1,.07);box-shadow:0 0 0 2px rgba(254,73,1,.22);padding:0 2px}
 .row.nova .ed{display:inline-block;min-width:60%;min-height:calc(var(--lh) - 6px)}
-.ed-ok{position:absolute;right:-30px;top:4px;width:24px;height:24px;border-radius:7px;border:0;background:var(--laranja);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;box-shadow:0 2px 6px rgba(254,73,1,.35)}
+.ed-ok{position:absolute;right:0;top:4px;width:24px;height:24px;border-radius:7px;border:0;background:var(--laranja);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;box-shadow:0 2px 6px rgba(254,73,1,.35)}
 .ed-ok svg{width:14px;height:14px;stroke:#fff}
 .rolo{cursor:text}
 .row .sug{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-family:var(--corpo);font-size:11px;font-weight:600;color:var(--laranjaTx);background:var(--laranjaSv);border:1px dashed #F3B08F;border-radius:999px;padding:0 8px;line-height:20px;vertical-align:middle;cursor:pointer}
@@ -604,3 +604,6 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .menu-sel button svg{width:17px;height:17px;stroke:#ff9a6a}
 .menu-sel button:hover{background:rgba(255,255,255,.08);color:#fff}
 @media (prefers-reduced-motion:reduce){.menu-sel{animation:none}}
+
+.row.editando{padding-right:34px}
+.row .ed{overflow-wrap:anywhere;word-break:break-word}

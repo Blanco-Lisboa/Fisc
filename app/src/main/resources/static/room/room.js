@@ -204,7 +204,7 @@ function acertarLinha(){const pg=$('pg');if(!pg)return;const r=document.createEl
  r.innerHTML='<span class="tx">Hg<span class="bl" style="display:inline-block;width:1px;height:0;vertical-align:baseline"></span></span>';pg.appendChild(r);
  const y=r.querySelector('.bl').getBoundingClientRect().top-r.getBoundingClientRect().top;r.remove();if(y>4)pg.style.setProperty('--linhaY',Math.round(y+3)+'px');}
 function paginaDesenhar(manter){const pg=$('pg');if(!pg)return;if(!diaPg)diaPg=D.hoje;
- acertarLinha();pg.style.setProperty('--livre',(pg.clientWidth>980?360:24)+'px');
+ acertarLinha();pg.style.setProperty('--livre',(pg.clientWidth>980?392:24)+'px');
  const rolo=$('rolo'),top=rolo.scrollTop;$('rows').innerHTML=htmlPagina(diaPg);rolo.scrollTop=manter?top:0;pagerDesenhar();}
 function pagerDesenhar(){const ds=diasPaginas(),k=ds.indexOf(iso(diaPg));
  $('pgAnt').disabled=k<=0;$('pgProx').disabled=k>=ds.length-1;
@@ -378,7 +378,7 @@ function modalNomeCat(c){modal(`<h2>${c?'Renomear categoria':'Nova categoria'}</
 /* eventos */
 function ligar(){
  raiz.addEventListener('mousedown',e=>{const t=e.target;if(e.button!==0)return;menuFechar();const sp=t.closest('.ed[data-ed]');if(sp){editarComecar(sp);return;}
-  if(editando&&!t.closest('.row.editando'))editarFim(true);
+  if(editando&&!t.closest('.row.editando')){e.preventDefault();editarFim(true);return;}
   const rolo=t.closest('#rolo');if(rolo&&!t.closest('.row:not(.rdia)')&&!t.closest('.ac')&&!t.closest('.arq2')){const r=$('rows').getBoundingClientRect();if(e.clientY>r.bottom-4||t===rolo||t.id==='rows'){e.preventDefault();linhaNova();}}});
  raiz.addEventListener('contextmenu',e=>{const t=e.target;const row=t.closest('.row[data-nr]');if(!row)return;const sel=raiz.getSelection?raiz.getSelection():document.getSelection();
   let texto='',rect=null;if(sel&&sel.rangeCount&&!sel.isCollapsed&&row.contains(sel.anchorNode)){texto=sel.toString().trim();rect=sel.getRangeAt(0).getBoundingClientRect();}
