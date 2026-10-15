@@ -24,6 +24,9 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 :focus-visible{outline:2px solid var(--laranjaTx);outline-offset:2px}
 .disp{font-family:var(--disp)}
 .tnum{font-variant-numeric:tabular-nums}
+.carga{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:rgba(244,244,245,.78);cursor:progress}
+.carga i{width:38px;height:38px;border-radius:999px;border:3px solid var(--laranjaCl);border-top-color:var(--laranja);animation:cargaGira .8s linear infinite}
+@keyframes cargaGira{to{transform:rotate(360deg)}}
 /* ===== MENU LATERAL (padrão dos módulos) ===== */
 .side{width:246px;flex:none;background:#0b0b0d;color:#c9c9cf;height:100vh;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:2px}
 .brand2{display:flex;align-items:center;gap:10px;padding:6px 8px 12px}
@@ -1213,6 +1216,7 @@ tr.rnovo:hover{background:#ffe6d6}
 <link rel="stylesheet" href="email/email.css">
 </head>
 <body>
+<div class="carga" id="carga"><i></i></div>
 <nav class="side">
   <div class="brand2"><img class="lg" src="img/you-icone.png" alt=""><div><b id="depNome">Fiscal</b><span class="rl">YOU Contabilidade</span></div></div>
   <div class="lab">OPERAÇÃO</div>
@@ -2214,7 +2218,7 @@ let waMsgAncora=null;
 function waMenuMsg(ev,mid){{const b=(ev.currentTarget||ev.target).closest?(ev.currentTarget||ev.target).closest('.wz-b'):null;waMsgAncora=(b||ev.currentTarget||ev.target).getBoundingClientRect();}
  const c=waConv(selWhats);const m=c&&c.wpp.find(x=>x.id===mid);if(!m)return;const pode=waPodeAgir(c)&&!m.id.startsWith('tmp-');
  waMenu(ev,[
-  m.caminho?['Baixar',()=>waBaixarArq(m.caminho,m.nomeArq||({imagem:'foto.jpg',video:'video.mp4',audio:'audio.ogg'}[m.tipo])||'arquivo')]:null,
+  m.caminho||['documento','imagem','video','audio'].includes(m.tipo)?['Baixar',()=>waBaixarMsg(m.id)]:null,
   pode&&m.idWa&&!c.bloqueado?['Responder',()=>{waResp=m.id;render();setTimeout(()=>{const i=el('wwin');if(i)i.focus();},0);}]:null,
   pode&&m.idWa&&!String(m.idWa).startsWith('imp:')&&m.d==='ent'&&m.tipo!=='sistema'&&m.tipo!=='reacao'&&Date.now()-new Date(m.em).getTime()<30*864e5?['Reagir',()=>waEscolherReacao(ev,m)]:null,
   pode&&c.prov==='whatsgw'&&m.d==='sai'&&m.tipo==='texto'&&m.idWa&&!String(m.idWa).startsWith('imp:')&&Date.now()-new Date(m.em).getTime()<15*6e4?['Editar',()=>waGwEditar(m)]:null,
@@ -3410,10 +3414,15 @@ async function waEmpresasContato(id){const c=waConv(id);fecharModal();modal=docu
  const l=Array.isArray(r.data)?r.data:[];
  b.innerHTML=l.map(e=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--borda)"><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12.5px">${escH(e.razao_social||e.nome_fantasia||'')}</div>${e.nome_fantasia&&e.razao_social&&e.nome_fantasia!==e.razao_social?`<div style="font-size:11px;color:var(--apagado)">${escH(e.nome_fantasia)}</div>`:''}</div><span style="font-size:12px;color:var(--apoio);white-space:nowrap">${escH(fmtCnpj(e.cnpj||''))}</span></div>`).join('')||'<div style="text-align:center;color:var(--apagado);padding:20px">—</div>';}
 function waDocHtml(m,u){const [k,r]=waExt(m.nomeArq,m.tipo);const nome=m.nomeArq||({imagem:'Foto',video:'Vídeo',audio:'Áudio'}[m.tipo]||'Documento');
- return `<div class="wz-doc"><span class="wz-ext ico">${icone(waIco(m.nomeArq,m.tipo))}</span><div class="dn"><b>${escH(nome)}</b><span>${escH([r,waTam(m.tam)].filter(Boolean).join(' · '))}${u?'':m.midiaEstado&&m.midiaEstado!=='guardado'?' · baixando':''}</span></div><button class="wz-baixar" title="Baixar" ${m.caminho?`data-p="${escH(m.caminho)}" data-n="${escH(nome)}" onclick="waBaixarArq(this.dataset.p,this.dataset.n)"`:'disabled'}>${WZ.baixar}</button></div>`;}
+ return `<div class="wz-doc"><span class="wz-ext ico">${icone(waIco(m.nomeArq,m.tipo))}</span><div class="dn"><b>${escH(nome)}</b><span>${escH([r,waTam(m.tam)].filter(Boolean).join(' · '))}${u?'':m.midiaEstado&&m.midiaEstado!=='guardado'?' · baixando':''}</span></div><button class="wz-baixar" title="Baixar" ${m.caminho?`data-p="${escH(m.caminho)}" data-n="${escH(nome)}" onclick="waBaixarArq(this.dataset.p,this.dataset.n)"`:m.id?`data-id="${escH(m.id)}" onclick="waBaixarMsg(this.dataset.id)"`:'disabled'}>${WZ.baixar}</button></div>`;}
 function waVerImagem(u,n,p){waModal('Foto',`<img src="${escH(u)}" alt="" style="display:block;max-width:100%;max-height:68vh;margin:0 auto;border-radius:10px"><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px"><button class="apubtn" onclick="fecharModal()">Fechar</button><button class="bt-assumir" data-p="${escH(p||u)}" data-n="${escH(n||'foto.jpg')}" onclick="waBaixarArq(this.dataset.p,this.dataset.n)">Baixar</button></div>`,760);}
 async function fiscalBaixar(u,n){toast('Baixando '+(n||'arquivo')+'…');const r=await fetch('/sistema/baixar',{method:'POST',headers:{'Content-Type':'application/json','X-Fiscal':'1'},body:JSON.stringify({url:u,nome:n||'arquivo'})}).then(x=>x.json()).catch(()=>null);
  toast(r&&r.ok?'Salvo em Downloads: '+r.arquivo:'Não foi possível baixar o arquivo.');}
+async function waBaixarMsg(mid){let m=null;for(const k in waMsgs){m=waMsgs[k].find(x=>x.id===mid);if(m)break;}if(!m)return;
+ if(!m.caminho){const r=await sb.from('wa_midia').select('nome,caminho,estado').eq('mensagem_id',mid).limit(1);const md=r.data&&r.data[0];
+  if(!md||md.estado!=='guardado'||!md.caminho){toast('O arquivo ainda está chegando. Tente de novo em instantes.');return;}
+  m.caminho=md.caminho;m.midiaEstado='guardado';if(md.nome)m.nomeArq=md.nome;waDesenharMsgs();}
+ await waBaixarArq(m.caminho,m.nomeArq||({imagem:'foto.jpg',video:'video.mp4',audio:'audio.ogg'}[m.tipo])||'arquivo');}
 async function waBaixarArq(p,n){if(!p)return;let u=p;if(!/^https?:/i.test(p)){const r=await sb.storage.from('wa-midia').createSignedUrl(p,600);if(r.error||!r.data){toast('Não foi possível baixar o arquivo.');return;}u=r.data.signedUrl;}
  await fiscalBaixar(u,n);}
 function waDesenharMsgs(){
@@ -3470,13 +3479,16 @@ async function waCarregarFicha(id){if(waFichaIndo[id])return waFichaIndo[id];waF
  const ids=[];(r.data.vinculos||[]).forEach(v=>(v.alcance||[]).forEach(a=>{if(a.empresa_id&&!waEmp[a.empresa_id])ids.push(a.empresa_id);}));
  if(ids.length)await waCarregarEmpresas(ids);waRedesenharFicha(id);})();try{await waFichaIndo[id];}finally{waFichaIndo[id]=null;}}
 async function waCarregarEmpresas(ids){ids=[...new Set(ids)].filter(x=>x&&!waEmp[x]);if(!ids.length)return;const r=await sb.rpc('fiscal_empresas',{p_ids:ids});if(!r.error)(r.data||[]).forEach(e=>waEmp[e.empresa_id]=e);}
-async function waCarregarPainel(){
- const [p,eq,nm,md]=await Promise.all([sb.rpc('wa_painel_conversas'),Object.keys(waEquipe).length?null:sb.rpc('fiscal_equipe'),waNumOf?null:sb.from('wa_numero').select('telefone,ativo').eq('provedor','meta_cloud').eq('ativo',true).limit(1),waModTodos?null:sb.from('wa_modelo').select('nome,componentes')]);
+function waRedesenhar(){const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.isContentEditable))return;render();}
+async function waCarregarPainel(inicial){
+ const eqP=Object.keys(waEquipe).length?null:sb.rpc('fiscal_equipe');
+ const [p,eq,nm,md]=await Promise.all([sb.rpc('wa_painel_conversas'),inicial?null:eqP,waNumOf?null:sb.from('wa_numero').select('telefone,ativo').eq('provedor','meta_cloud').eq('ativo',true).limit(1),waModTodos?null:sb.from('wa_modelo').select('nome,componentes')]);
  if(p&&!p.error){waPainel={};(p.data||[]).forEach(x=>waPainel[x.conversa_id]=x);}
  if(eq&&!eq.error&&eq.data)((eq.data.pessoas)||[]).forEach(x=>waEquipe[x.id]=x.nome);
+ if(inicial&&eqP)eqP.then(e=>{if(e&&!e.error&&e.data){((e.data.pessoas)||[]).forEach(x=>waEquipe[x.id]=x.nome);waRedesenhar();}});
  if(nm&&!nm.error&&nm.data&&nm.data[0])waNumOf=nm.data[0];
  if(md&&!md.error)waModTodos=md.data||[];
- const ids=[];Object.values(waPainel).forEach(x=>(x.empresas||[]).forEach(e=>ids.push(e)));await waCarregarEmpresas(ids);}
+ const ids=[];Object.values(waPainel).forEach(x=>(x.empresas||[]).forEach(e=>ids.push(e)));if(inicial){waCarregarEmpresas(ids).then(waRedesenhar);return;}await waCarregarEmpresas(ids);}
 async function waEtiqueta(id){const c=waConv(id);if(!c)return;
  if(!waTags){const r=await sb.from('wa_vinculo_tag').select('chave,rotulo,natureza,ancora,exige_empresa,aceita_varias_empresas').eq('ativa',true).order('ordem');waTags=r.data||[];}
  waEt={id,empresas:[],pessoas:[],busca:[]};waEtDesenhar();}
@@ -3903,7 +3915,7 @@ async function carregarConversas(){
   todas.push(...r.data);if(r.data.length<1000)break;
  }
  const nv=todas.map(convWA);
- await waCarregarPainel();
+ await waCarregarPainel(true);
  nv.forEach(c=>{const p=waPainel[c.id];c.dono=(p&&p.dono_id)||null;c.arquivada=!!(p&&p.arquivada);if(p&&p.nome_provisorio)c.nome=p.nome_provisorio;});
  waEntrada=nv.filter(c=>!c.dono&&!teamsDirDe(c.id));
  waMeus=nv.filter(c=>c.dono===eu.id&&!teamsDirDe(c.id));waTudo=nv;
@@ -4006,11 +4018,13 @@ async function iniciarDados(){
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_chamada'},aoMudarChamada)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_midia'},aoMudarMidia)
-  .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo'},()=>{modLista=null;}).subscribe();
+  .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo'},()=>{modLista=null;}).subscribe(st=>{if(st==='SUBSCRIBED'){if(waCaiu){waCaiu=false;waRetomar();}}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED')waCaiu=true;});
  carregarVisual();sb.channel('fiscal-visual').on('postgres_changes',{event:'*',schema:'public',table:'fiscal_visual_sinal'},aoMudarVisual).subscribe();
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).on('postgres_changes',{event:'*',schema:'public',table:'fiscal_nivel_permissao'},()=>aoMudarEu({new:{ativo:true,nivel:eu.nivel}})).subscribe();
  appVersaoIniciar();
  view=telaInicial();render();}
+let waCaiu=false;
+async function waRetomar(){for(const k in waMsgs)if(k!==selWhats)delete waMsgs[k];await carregarConversas();if(selWhats&&waConv(selWhats))await carregarMensagens(selWhats);}
 async function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}const era=tem('painel_gestor');eu.nivel=n.nivel;await carregarAcesso();el('euInfo').textContent=eu.nivel+' · '+DEPTO.nome;aplicarMenu();if(!era)preCarregarGestor();if(!podeVer(view))view=telaInicial();render();}
 (async()=>{const s=await fiscalSessaoAtual();if(!s){location.href='login.html';return;}
  const sbl=await blSessao();if(!sbl||sbl.user.id!==s.user.id){fiscalSair();return;}
@@ -4019,7 +4033,7 @@ async function aoMudarEu(p){const n=p.new||{};if(!n.ativo){fiscalSair();return;}
  sb.auth.onAuthStateChange(ev=>{if(ev==='SIGNED_OUT')location.href='login.html';});
  const u=await sb.from('fiscal_usuario').select('nivel,ativo').eq('id',eu.id).maybeSingle();if(!u.data||!u.data.ativo){fiscalSair();return;}eu.nivel=u.data.nivel;
  await carregarAcesso();
- await iniciarDados();})();
+ try{await iniciarDados();}finally{const c=el('carga');if(c)c.remove();}})();
 </script>
 </body>
 </html>
