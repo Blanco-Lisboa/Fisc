@@ -236,12 +236,12 @@ async function anexar(files){
   if(u.error){toast('Não foi possível enviar '+f.name);continue;}lista.push({caminho:cam,nome:f.name,tamanho:f.size,tipo:f.type||''});}
  if(lista.length)await guardar({arquivos:lista,texto:$('txt').value.trim()});}
 async function baixarArq(nid,ai){const n=D.notas.find(x=>x.id===nid);const a=n&&(n.arquivos||[])[+ai];if(!a)return;
- const s=await sb.storage.from('room').createSignedUrl(a.caminho,300);if(s.error||!s.data){toast('Não foi possível baixar.');return;}
+ const s=await sb.storage.from(a.bucket||'room').createSignedUrl(a.caminho,300);if(s.error||!s.data){toast('Não foi possível baixar.');return;}
  if(cfg.baixar)cfg.baixar(s.data.signedUrl,a.nome);else window.open(s.data.signedUrl,'_blank');}
 let audioTocando=null;
 async function tocar(nid){const n=D.notas.find(x=>x.id===nid);if(!n||!n.audio)return;
  if(audioTocando){audioTocando.pause();audioTocando=null;return;}
- const s=await sb.storage.from('room').createSignedUrl(n.audio.caminho,300);if(s.error||!s.data){toast('Não foi possível tocar o áudio.');return;}
+ const s=await sb.storage.from(n.audio.bucket||'room').createSignedUrl(n.audio.caminho,300);if(s.error||!s.data){toast('Não foi possível tocar o áudio.');return;}
  const a=new Audio(s.data.signedUrl);audioTocando=a;a.onended=()=>{audioTocando=null;};a.play().catch(()=>{audioTocando=null;toast('Não foi possível tocar o áudio.');});}
 async function gravIniciar(){
  let st;try{st=await navigator.mediaDevices.getUserMedia({audio:true});}catch(e){toast('O microfone não está liberado neste computador.');return;}
