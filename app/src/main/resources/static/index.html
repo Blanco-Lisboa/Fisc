@@ -100,6 +100,60 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-col-mais svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .pm-col-mais:hover{background:var(--laranja);border-color:var(--laranja);color:#fff}
 .pm-col-corpo{flex:1;min-height:0;overflow:auto;background:repeating-linear-gradient(to bottom,transparent 0 39px,var(--superf2) 39px 40px)}
+.mp{height:calc(100vh - 44px);overflow:auto;padding:16px 22px 28px;display:flex;flex-direction:column;gap:16px}
+.mp-capa{position:relative;height:190px;flex:none;border-radius:18px;overflow:hidden;background:radial-gradient(60% 120% at 88% 0%,rgba(254,73,1,.55),transparent 60%),radial-gradient(45% 90% at 8% 110%,rgba(255,146,0,.35),transparent 60%),linear-gradient(135deg,#111114,#1d1d22);box-shadow:var(--sm)}
+.mp-capa::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,#000,transparent 85%)}
+.mp-foto-bt{position:absolute;display:grid;place-items:center;border:0;cursor:pointer;transition:all .15s ease}
+.mp-foto-bt svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mp-capa .mp-foto-bt{right:14px;top:14px;width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.12);color:#fff;backdrop-filter:blur(6px)}
+.mp-capa .mp-foto-bt:hover{background:rgba(255,255,255,.24)}
+.mp-cab{display:flex;align-items:flex-end;gap:20px;margin-top:-56px;padding:0 22px;position:relative;z-index:1;flex-wrap:wrap}
+.mp-av{position:relative;flex:none;width:124px;height:124px;border-radius:999px;border:5px solid var(--pagina);background:var(--grad);color:#fff;display:grid;place-items:center;font-family:var(--disp);font-size:40px;font-weight:700;letter-spacing:-.02em;box-shadow:var(--md)}
+.mp-av .mp-foto-bt{right:2px;bottom:4px;width:30px;height:30px;border-radius:999px;background:var(--pagina);color:var(--grafite);box-shadow:var(--sm);border:1px solid var(--borda)}
+.mp-av .mp-foto-bt:hover{color:var(--laranja);border-color:var(--laranja)}
+.mp-quem{flex:1;min-width:240px;padding-bottom:8px}
+.mp-nome{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;font-family:var(--disp);font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--ink);line-height:1.1}
+.mp-nivel{font-family:var(--corpo);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--laranjaTx);background:var(--laranjaSv);border:1px solid var(--laranjaCl);border-radius:999px;padding:3px 10px}
+.mp-emp{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13.5px;color:var(--apoio)}
+.mp-emp i{width:4px;height:4px;border-radius:999px;background:var(--nevoa)}
+.mp-kpis{display:grid;grid-template-columns:repeat(3,minmax(170px,1fr));gap:12px}
+.mp-kpi{display:flex;align-items:center;gap:12px;background:var(--pagina);border:1px solid var(--borda);border-radius:16px;padding:10px 14px;box-shadow:var(--sm)}
+.mp-kpi .ic{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--cs,var(--laranjaSv));color:var(--c,var(--laranja))}
+.mp-kpi .ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mp-kpi b{display:block;font-family:var(--disp);font-size:22px;font-weight:700;letter-spacing:-.02em;color:var(--ink);line-height:1;font-variant-numeric:tabular-nums}
+.mp-kpi b small{font-size:12px;font-weight:600;color:var(--apagado);margin-left:2px}
+.mp-kpi span{display:block;margin-top:5px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--apoio)}
+.mp-anel{flex:none;width:44px;height:44px}
+.mp-anel circle{fill:none;stroke-width:4.5}
+.mp-anel .f{stroke:var(--superf2)}
+.mp-anel .v{stroke:var(--laranja);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%}
+.mp-kpi.azul{--c:var(--azul);--cs:var(--azulSv)}
+.mp-kpi.ambar{--c:var(--ambar);--cs:var(--ambarSv)}
+.mp-grade{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:1180px){.mp-grade{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.mp-box{position:relative;background:var(--pagina);border:1px solid var(--borda);border-radius:18px;padding:18px 20px 8px;box-shadow:var(--sm);overflow:hidden}
+.mp-box::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--c,var(--grad))}
+.mp-box.azul{--c:var(--azul);--cs:var(--azulSv)}
+.mp-box.ambar{--c:var(--ambar);--cs:var(--ambarSv)}
+.mp-box-cab{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.mp-box-cab .ic{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--cs,var(--laranjaSv));color:var(--c,var(--laranja))}
+.mp-box-cab .ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mp-box-cab h3{margin:0;font-family:var(--disp);font-size:16px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.mp-box-cab p{margin:2px 0 0;font-size:12px;color:var(--apagado)}
+.mp-nota{display:flex;align-items:center;gap:16px;padding:12px 14px;margin-bottom:6px;border-radius:14px;background:var(--superf)}
+.mp-nota .mp-anel{width:64px;height:64px}
+.mp-nota .mp-anel circle{stroke-width:5.5}
+.mp-nota b{font-family:var(--disp);font-size:30px;font-weight:700;letter-spacing:-.03em;color:var(--ink);line-height:1}
+.mp-nota b small{font-size:14px;font-weight:600;color:var(--apagado);margin-left:3px}
+.mp-nota span{display:block;margin-top:4px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--apoio)}
+.mp-lin{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 2px;border-top:1px solid var(--superf2);font-size:13px;color:var(--grafite)}
+.mp-lin:first-of-type{border-top:0}
+.mp-lin b{font-family:var(--disp);font-size:15px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.mp-campos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px;padding-bottom:10px}
+.mp-campos.um{grid-template-columns:minmax(0,1fr)}
+.mp-campo{padding:10px 0;border-bottom:1px solid var(--superf2)}
+.mp-campo span{display:block;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--apagado)}
+.mp-campo b{display:block;margin-top:4px;font-size:14px;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
 .aputabs.pm-abas{padding:0;background:transparent;margin-top:4px}
 .aputabs.pm-abas .aputabs-l{flex:1;gap:6px}
 .aputabs.pm-abas .aputabs-l button{flex:1;justify-content:center;padding:12px 18px;font-size:13.5px}
@@ -1674,7 +1728,37 @@ function render(){
   teamsTela();
 }
 
-function renderMeuPerfil(){el('conteudo').innerHTML=`<div class="aputabs"><div class="aputabs-l"><button class="on">Meu Perfil</button></div></div>`;}
+let mpAba='perfil';
+const MP_IC={camera:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',estrela:'<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',agenda:'<rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/>',lista:'<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/>',folha:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',chave:'<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3"/>',fone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',pessoa:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'};
+function mpIco(k){return `<svg viewBox="0 0 24 24">${MP_IC[k]}</svg>`;}
+function mpAnel(v){const c=2*Math.PI*19;const x=v==null?0:Math.max(0,Math.min(100,v));return `<svg class="mp-anel" viewBox="0 0 44 44"><circle class="f" cx="22" cy="22" r="19"/><circle class="v" cx="22" cy="22" r="19" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-x/100)}"/></svg>`;}
+function mpLin(t,v){return `<div class="mp-lin"><span>${t}</span><b>${v}</b></div>`;}
+function mpCampo(t,v){return `<div class="mp-campo"><span>${t}</span><b>${escH(v||'—')}</b></div>`;}
+function renderMeuPerfil(){
+ const nivel=String(eu.nivel||'');const nv=nivel?nivel.charAt(0).toUpperCase()+nivel.slice(1):'';
+ const ab=[['perfil','Meu Perfil'],['ident','Identificação']];
+ const cab=`<div class="mp-capa"><button class="mp-foto-bt" title="Alterar capa">${mpIco('camera')}</button></div>
+  <div class="mp-cab"><div class="mp-av">${escH(iniciais(eu.nome)||'')}<button class="mp-foto-bt" title="Alterar foto">${mpIco('camera')}</button></div>
+   <div class="mp-quem"><h2 class="mp-nome">${escH(eu.nome||'')}${nv?`<span class="mp-nivel">${escH(nv)}</span>`:''}</h2><div class="mp-emp">YOU Contabilidade<i></i>${escH(DEPTO.nome)}</div></div>
+   <div class="mp-kpis"><div class="mp-kpi">${mpAnel(null)}<div><b>—<small>/100</small></b><span>Desempenho</span></div></div>
+    <div class="mp-kpi azul"><span class="ic">${mpIco('agenda')}</span><div><b>—</b><span>Ausências no mês</span></div></div>
+    <div class="mp-kpi ambar"><span class="ic">${mpIco('lista')}</span><div><b>—</b><span>Pendências</span></div></div></div></div>`;
+ const perfil=`<div class="mp-grade">
+   <div class="mp-box"><div class="mp-box-cab"><span class="ic">${mpIco('estrela')}</span><div><h3>Desempenho do período</h3><p>Tarefas e atendimentos, com atenção aos prazos</p></div></div>
+    <div class="mp-nota">${mpAnel(null)}<div><b>—<small>/100</small></b><span>Índice do período</span></div></div>
+    ${mpLin('Tarefas concluídas','— de —')}${mpLin('Em aberto após o prazo','—')}${mpLin('Concluídas após o prazo','—')}${mpLin('Atendimentos concluídos','— de —')}${mpLin('Atendimentos em aberto','—')}</div>
+   <div class="mp-box azul"><div class="mp-box-cab"><span class="ic">${mpIco('agenda')}</span><div><h3>Frequência</h3><p>Registro de ausências do período</p></div></div>
+    ${mpLin('Ausências justificadas','—')}${mpLin('Ausências sem justificativa','—')}${mpLin('Total no mês','—')}</div>
+   <div class="mp-box ambar"><div class="mp-box-cab"><span class="ic">${mpIco('folha')}</span><div><h3>Acompanhamento profissional</h3><p>Orientações e registros formais</p></div></div>
+    ${mpLin('Orientações registradas','—')}${mpLin('Último registro','—')}</div></div>`;
+ const ident=`<div class="mp-grade">
+   <div class="mp-box"><div class="mp-box-cab"><span class="ic">${mpIco('chave')}</span><div><h3>Acesso e vínculo</h3><p>Dados de acesso e lotação</p></div></div>
+    <div class="mp-campos um">${mpCampo('Identificação (login)','')}${mpCampo('Departamento',DEPTO.nome)}${mpCampo('Empresas vinculadas','')}${mpCampo('Admissão','')}</div></div>
+   <div class="mp-box azul"><div class="mp-box-cab"><span class="ic">${mpIco('fone')}</span><div><h3>Contato</h3><p>Canais e endereço</p></div></div>
+    <div class="mp-campos um">${mpCampo('Telefone','')}${mpCampo('E-mail','')}${mpCampo('Endereço','')}${mpCampo('Contato de emergência','')}</div></div>
+   <div class="mp-box ambar"><div class="mp-box-cab"><span class="ic">${mpIco('pessoa')}</span><div><h3>Dados pessoais</h3><p>Documentos e datas</p></div></div>
+    <div class="mp-campos um">${mpCampo('CPF','')}${mpCampo('Nascimento','')}</div></div></div>`;
+ el('conteudo').innerHTML=`<div class="aputabs"><div class="aputabs-l">${ab.map(([k,t])=>`<button class="${mpAba===k?'on':''}" onclick="mpAba='${k}';renderMeuPerfil()">${t}</button>`).join('')}</div></div><div class="mp">${cab}${mpAba==='ident'?ident:perfil}</div>`;}
 
 /* ---------- CONFIGURAÇÕES ---------- */
 let cfgAba='info',cfgInfo=null,cfgFiltro='tudo',cfgCarregando=false;
