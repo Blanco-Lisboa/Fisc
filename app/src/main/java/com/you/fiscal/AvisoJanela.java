@@ -40,7 +40,12 @@ final class AvisoJanela extends JFrame {
     static final Tema DIRETORIA = new Tema(new Color(0xD9480F), new Color(0xFE6A1F), new Color(0xFFD2B8), Color.WHITE,
             new Color(0xFFE6D6), Color.WHITE, new Color(0xC2410C), "Team's · Diretoria", "Abrir no Team's", "Windows Message Nudge.wav");
 
-    static final int LARG = 376, RAIO = 16, PAD = 14, MAX = 3, ESPACO = 10;
+    static final Tema LEMBRETE = new Tema(new Color(0x3d1606), new Color(0x55200a), new Color(0xa8380a), new Color(0xffe7da),
+            new Color(0xffb99a), new Color(0xFE4901), Color.WHITE, "Lembrete · ROOM", "Concluir", "Windows Notify Calendar.wav");
+    static final Tema ALARME = new Tema(new Color(0x4a0f0b), new Color(0x641610), new Color(0xc0392b), new Color(0xffe2de),
+            new Color(0xf3a59c), new Color(0xC0392B), Color.WHITE, "Alarme · ROOM", "Concluir", "Alarm01.wav");
+
+    static final int LARG = 376, RAIO = 16, PAD = 14, MAX = 4, ESPACO = 10;
     static final Color[] CORES = {new Color(0xC2410C), new Color(0x2F5DA8), new Color(0x6D4AA0), new Color(0x0E7490),
             new Color(0xB45309), new Color(0x475569), new Color(0x18794A), new Color(0xBE185D)};
     static final List<AvisoJanela> abertos = new ArrayList<>();
@@ -60,7 +65,7 @@ final class AvisoJanela extends JFrame {
     float opacidade;
     int alvoX, alvoY, arrasto, pressX;
     boolean arrastou, sobre;
-    javax.swing.Timer anim, sumir, relogio;
+    javax.swing.Timer anim, sumir, relogio, repetirSom;
 
     final JPanel painel;
     final JTextField campo = new JTextField();
@@ -69,7 +74,8 @@ final class AvisoJanela extends JFrame {
     // entrada
     static void mostrar(Map<String, Object> d) {
         SwingUtilities.invokeLater(() -> {
-            String canal = "teams".equals(d.get("canal")) ? "teams" : "wa";
+            Object cv = d.get("canal");
+            String canal = "teams".equals(cv) ? "teams" : "lembrete".equals(cv) ? "lembrete" : "alarme".equals(cv) ? "alarme" : "wa";
             String id = String.valueOf(d.get("id"));
             String chave = canal + ":" + id;
             for (AvisoJanela a : abertos) {
@@ -79,7 +85,7 @@ final class AvisoJanela extends JFrame {
             abertos.add(0, a);
             while (abertos.stream().filter(x -> !x.saindo).count() > MAX) {
                 AvisoJanela velho = null;
-                for (int i = abertos.size() - 1; i >= 0; i--) if (!abertos.get(i).saindo && !abertos.get(i).respondendo) { velho = abertos.get(i); break; }
+                for (int i = abertos.size() - 1; i >= 0; i--) if (!abertos.get(i).saindo && !abertos.get(i).respondendo && !abertos.get(i).alarme()) { velho = abertos.get(i); break; }
                 if (velho == null) break;
                 velho.sair(false);
             }
@@ -115,7 +121,7 @@ final class AvisoJanela extends JFrame {
         this.canal = canal;
         this.id = id;
         this.chave = canal + ":" + id;
-        this.tema = "teams".equals(canal) ? TEAMS : Boolean.TRUE.equals(d.get("diretoria")) ? DIRETORIA : WA;
+        this.tema = "teams".equals(canal) ? TEAMS : "lembrete".equals(canal) ? LEMBRETE : "alarme".equals(canal) ? ALARME : Boolean.TRUE.equals(d.get("diretoria")) ? DIRETORIA : WA;
         ler(d);
         setUndecorated(true);
         setType(Window.Type.UTILITY);
@@ -177,6 +183,10 @@ final class AvisoJanela extends JFrame {
         repaint();
     }
 
+    boolean room() { return "lembrete".equals(canal) || "alarme".equals(canal); }
+
+    boolean alarme() { return "alarme".equals(canal); }
+
     static String txt(Object o, String padrao) { return o == null || String.valueOf(o).isBlank() || "null".equals(String.valueOf(o)) ? padrao : String.valueOf(o); }
 
     static Instant instante(Object o) {
@@ -212,7 +222,7 @@ final class AvisoJanela extends JFrame {
         if (estadoErro != null || estado != null) yBot -= 18;
         rFechar = new Rectangle(LARG - PAD - 20, PAD - 2, 22, 22);
         int larguraBtn = (LARG - PAD * 2 - 8) / 2;
-        boolean responde = podeResponder && janelaAberta();
+        boolean responde = room() || podeResponder && janelaAberta();
         if (responde) {
             rResponder = new Rectangle(PAD, yBot, larguraBtn, 32);
             rAbrir = new Rectangle(PAD + larguraBtn + 8, yBot, larguraBtn, 32);
@@ -319,7 +329,7 @@ final class AvisoJanela extends JFrame {
         if (respondendo) {
             desenharEnviar(g, rEnviar);
         } else {
-            if (rResponder != null) desenharBotao(g, rResponder, "Responder", false);
+            if (rResponder != null) desenharBotao(g, rResponder, room() ? (alarme() ? "Adiar 5 min" : "Adiar 15 min") : "Responder", false);
             desenharBotao(g, rAbrir, tema.abrir, true);
         }
         if (estado != null || estadoErro != null) {
@@ -349,6 +359,19 @@ final class AvisoJanela extends JFrame {
 
     void desenharAvatar(Graphics2D g, int x, int y, int s) {
         Shape c = new Ellipse2D.Float(x, y, s, s);
+        if (room()) {
+            g.setColor(tema.destaque);
+            g.fill(c);
+            g.setColor(Color.WHITE);
+            g.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            int cx = x + s / 2, cy = y + s / 2 + 1, r = s / 2 - 12;
+            g.drawOval(cx - r, cy - r, r * 2, r * 2);
+            g.drawLine(cx, cy, cx, cy - r + 4);
+            g.drawLine(cx, cy, cx + r - 5, cy + 2);
+            if (alarme()) { g.drawLine(x + 9, y + 12, x + 15, y + 7); g.drawLine(x + s - 9, y + 12, x + s - 15, y + 7); }
+            g.setStroke(new BasicStroke(1f));
+            return;
+        }
         if (foto != null) {
             Shape antes = g.getClip();
             g.setClip(c);
@@ -510,6 +533,10 @@ final class AvisoJanela extends JFrame {
 
     void entrar() {
         Rectangle a = area();
+        if (alarme()) {
+            repetirSom = new javax.swing.Timer(7000, e -> { if (!saindo) tocar(tema); });
+            repetirSom.start();
+        }
         posicionarTodos(true);
         opacidade = 0f;
         setOpacity(0f);
@@ -554,6 +581,7 @@ final class AvisoJanela extends JFrame {
         saindo = true;
         if (sumir != null) sumir.stop();
         if (relogio != null) relogio.stop();
+        if (repetirSom != null) repetirSom.stop();
         Rectangle a = area();
         deslizarPara(a.x + a.width + 20, getY(), pelaDireita ? 180 : 240, () -> {
             setVisible(false);
@@ -566,6 +594,8 @@ final class AvisoJanela extends JFrame {
 
     void reiniciarSumir(int ms) {
         if (sumir != null) sumir.stop();
+        if (alarme()) return;
+        if ("lembrete".equals(canal)) ms = Math.max(ms, 14000);
         sumir = new javax.swing.Timer(ms, e -> { if (!sobre && !respondendo) sair(false); });
         sumir.setRepeats(false);
         sumir.start();
@@ -608,7 +638,7 @@ final class AvisoJanela extends JFrame {
             @Override public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) return;
                 if (arrastou) {
-                    if (arrasto > LARG * 0.28) sair(true);
+                    if (arrasto > LARG * 0.28) { if (alarme()) acao("adiar5", null); sair(true); }
                     else { arrasto = 0; opacidade = Math.max(opacidade, 0.3f); deslizarPara(alvoX, alvoY, 200, null); }
                     arrastou = false;
                     return;
@@ -621,6 +651,13 @@ final class AvisoJanela extends JFrame {
     }
 
     void clicar(Point p) {
+        if (room()) {
+            if (rFechar.contains(p)) { if (alarme()) acao("adiar5", null); sair(false); return; }
+            if (rResponder != null && rResponder.contains(p)) { acao("adiar", null); sair(false); return; }
+            if (rAbrir.contains(p)) { acao("concluir", null); sair(false); return; }
+            if (rCorpo.contains(p)) { acao("abrir", null); FiscalApplication.mostrar(); }
+            return;
+        }
         if (rFechar.contains(p)) { sair(false); return; }
         if (respondendo) {
             if (rEnviar.contains(p)) enviar();
@@ -632,6 +669,13 @@ final class AvisoJanela extends JFrame {
 
     void menu(MouseEvent e) {
         JPopupMenu pm = new JPopupMenu();
+        if (room()) {
+            JMenuItem ab = new JMenuItem("Abrir o ROOM");
+            ab.addActionListener(x -> { acao("abrir", null); FiscalApplication.mostrar(); });
+            pm.add(ab);
+            pm.show(painel, e.getX(), e.getY());
+            return;
+        }
         JMenuItem lida = new JMenuItem("Marcar como lida");
         lida.addActionListener(x -> { acao("lida", null); sair(false); });
         pm.add(lida);
