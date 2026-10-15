@@ -4,7 +4,7 @@ $raiz = Resolve-Path (Join-Path $PSScriptRoot '..\..')
 $saida = Join-Path $raiz 'build\app'
 
 $alvos = @{
-    fiscal      = @{ url = 'https://vvohwixeokxydmbhqklu.supabase.co'; chave = 'sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM'; jvm = @('-Dfile.encoding=UTF-8') }
+    fiscal      = @{ url = 'https://vvohwixeokxydmbhqklu.supabase.co'; chave = 'sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM'; jvm = @('-Dfile.encoding=UTF-8', '-Dfiscal.front=estavel') }
     legalizacao = @{ url = 'https://ynqcmzukahkmqbvirlkb.supabase.co'; chave = 'sb_publishable_YWo2MLN_-IBgo9cIMmOezw_tCD5cWz6'; jvm = @('-Dfile.encoding=UTF-8', '-Dfiscal.front=estavel') }
 }
 $alvo = $alvos[$Departamento]
