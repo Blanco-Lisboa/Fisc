@@ -57,6 +57,17 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .stm .bd{background:#2f6fed;color:#fff}
 .it.stm.on{background:#13386a;color:#fff;box-shadow:inset 2px 0 0 #4f8ef5}
 .it.stm.on .ic svg{stroke:#dfe9f8}
+.side .scal{margin-top:auto;margin-bottom:10px;padding:12px 10px 10px;border:1px solid #1c1c22;border-radius:12px;background:#111114;user-select:none}
+.scal-c{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.scal-c b{font-size:12.5px;font-weight:700;color:#fff;text-transform:capitalize}
+.scal-c button{width:24px;height:24px;border-radius:7px;border:1px solid #2a2a31;background:transparent;color:#9a9aa2;display:grid;place-items:center;cursor:pointer;padding:0}
+.scal-c button:hover{border-color:var(--laranja);color:#fff}.scal-c button svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.scal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.scal-g i{font-style:normal;font-size:10px;font-weight:700;color:#5c5c64;padding-bottom:4px}
+.scal-g span{font-size:11.5px;color:#c9c9cf;height:26px;display:grid;place-items:center;border-radius:7px;font-variant-numeric:tabular-nums}
+.scal-g span.fora{color:#45454c}.scal-g span.fds{color:#8a8a92}.scal-g span.fds.fora{color:#3a3a40}
+.scal-g span.hoje{background:var(--laranja);color:#fff;font-weight:700}
+.side .scal+.foot{margin-top:0}
 .side .foot{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 6px 4px;border-top:1px solid #1c1c22}
 .side .foot .av{width:32px;height:32px;border-radius:999px;background:var(--grad);display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex:none}
 .side .foot .sair{margin-left:auto;width:30px;height:30px;border-radius:8px;border:1px solid #2a2a31;background:transparent;color:#7a7a82;display:grid;place-items:center;cursor:pointer;flex:none;padding:0}.side .foot .sair:hover{color:#fff;border-color:#4a4a52}.side .foot .sair svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -151,6 +162,11 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .osj-lista>span:first-child,.osj-lista>span:first-child+b{border-top:0}
 .osj-lista>span{color:var(--apoio);padding-right:12px}
 .osj-lista>b{font-weight:600;min-width:0;overflow-wrap:anywhere;white-space:pre-wrap;font-variant-numeric:tabular-nums}
+.wanc-i{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 10px;border-bottom:1px solid var(--borda);cursor:pointer;border-radius:8px}
+.wanc-i:hover{background:var(--superf2)}
+.wanc-i div{min-width:0}.wanc-i b{display:block;font-size:13px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wanc-i span{display:block;font-size:11.5px;color:var(--apagado)}
+.wanc-i em{flex:none;font-style:normal;font-size:11.5px;font-weight:700;color:var(--laranjaTx)}
 .osj-nc{display:inline-flex;margin-left:6px;font-size:10.5px;font-weight:700;color:var(--ambar);background:var(--ambarSv);border:1px dashed #E7B377;border-radius:999px;padding:0 7px;vertical-align:1px;white-space:nowrap}
 .osj-pend{display:inline-flex;font-size:11px;font-weight:700;color:var(--ambar);background:var(--ambarSv);border:1px dashed #E7B377;border-radius:999px;padding:1px 9px;white-space:nowrap}
 .osj-anx{display:inline-flex;align-items:center;gap:6px}
@@ -832,14 +848,16 @@ tr.rnovo:hover{background:#ffe6d6}
 .wz svg.i{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .wz button{font-family:inherit;cursor:pointer;color:inherit}
 .wz-fila{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--borda);background:var(--superf)}
-.wz-ftop{padding:16px 16px 12px;display:flex;flex-direction:column;gap:12px;background:var(--pagina);border-bottom:1px solid var(--borda)}
-.wz-l1{display:flex;align-items:center;gap:10px}
-.wz-l1 h2{font-family:var(--disp);font-size:17px;margin:0;flex:1}
-.wz-num{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--apoio);background:var(--verdeSv);border:1px solid #CBE9D7;border-radius:999px;padding:4px 10px 4px 8px;white-space:nowrap}
+.wz-ftop{padding:16px 12px 12px;display:flex;flex-direction:column;gap:12px;background:var(--pagina);border-bottom:1px solid var(--borda)}
+.wz-l1{display:flex;align-items:center;gap:6px}
+.wz-l1 .wz-ibtn{width:30px;height:30px}
+.wz-l1 h2{font-family:var(--disp);font-size:17px;margin:0;flex:1;min-width:0}
+.wz-num{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--apoio);background:var(--verdeSv);border:1px solid #CBE9D7;border-radius:999px;padding:3px 8px 3px 7px;gap:5px;white-space:nowrap}
 .wz-num i{width:7px;height:7px;border-radius:50%;background:var(--verde);box-shadow:0 0 0 3px rgba(24,121,74,.18)}
 .wz-num b{color:var(--verde);font-weight:700}
 .wz-ibtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--borda);background:var(--pagina);display:grid;place-items:center;color:var(--grafite);flex:none}
 .wz-ibtn:hover{border-color:var(--bordaF);background:var(--superf)}
+.wz-ibtn-nc,.wz-ibtn-nc:hover{background:var(--laranja);border-color:var(--laranja);color:#fff}.wz-ibtn-nc:hover{filter:brightness(1.06)}
 .wz-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .wz-kpi{border:1px solid var(--borda);border-radius:11px;padding:8px 10px;background:var(--superf);text-align:center}
 .wz-kpi:hover{border-color:var(--bordaF)}
@@ -1275,7 +1293,8 @@ tr.rnovo:hover{background:#ffe6d6}
   <div class="it" data-view="ia" id="navIA" style="display:none" onclick="irView('ia')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z"/></svg></span> IA &amp; Meta</div>
   <div class="it" data-view="meuperfil" onclick="irView('meuperfil')"><span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span> Meu Perfil</div>
   <div class="it" data-view="config" onclick="irView('config')"><span class="ic"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span> Configurações</div>
-  <div class="foot"><span class="av" id="euAv"></span><div><b id="euNome"></b><span id="euInfo"></span></div><button class="sair" title="Sair" onclick="waConfirmar('Sair da sua conta neste computador?','Sair',fiscalSair)"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
+  <div class="scal" id="sCal"></div>
+<div class="foot"><span class="av" id="euAv"></span><div><b id="euNome"></b><span id="euInfo"></span></div><button class="sair" title="Sair" onclick="waConfirmar('Sair da sua conta neste computador?','Sair',fiscalSair)"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div>
 </nav>
 
 <div class="main">
@@ -2272,6 +2291,7 @@ async function waGwEditarSalvar(mid){const t=el('wagwe').value;if(!t.trim()){toa
  const j=await waEdge('wa-meta-acao',{acao:'editar',conversa_id:selWhats,mensagem_id:mid,texto:t});if(!j.ok){toast(j.erro||'Não foi possível editar.');return;}
  const c=waConv(selWhats);const m=c&&c.wpp.find(x=>x.id===mid);if(m){m.t=t;m.editadaEm=new Date().toISOString();}fecharModal();toast('Mensagem editada.');waDesenharMsgs();}
 async function waGwApagar(m){const j=await waEdge('wa-meta-acao',{acao:'apagar',conversa_id:selWhats,mensagem_id:m.id});if(!j.ok){toast(j.erro||'Não foi possível apagar.');return;}
+ 
  const c=waConv(selWhats);if(c){c.wpp=c.wpp.filter(x=>x.id!==m.id);waMsgs[c.id]=c.wpp;}toast('Mensagem apagada.');waDesenharMsgs();}
 function waEscolherReacao(ev,m){
  waFecharMenus();const bar=document.createElement('div');bar.className='wa-menu wa-emojis';
@@ -2392,6 +2412,23 @@ function waGrupoEditar(id){
 async function waGrupoSalvar(id){const n=el('wagn').value.trim(),d=el('wagd').value;if(!n){toast('Escreva o nome do grupo.');return;}
  const j=await waEdge('wa-meta-acao',{acao:'grupo_editar',conversa_id:id,nome:n,descricao:d});if(!j.ok){toast(j.erro||'Não foi possível salvar.');return;}
  const c=waConv(id);if(c){c.nome=n;c.grupoDesc=d;}fecharModal();toast('Grupo atualizado.');render();}
+let waNcLista=null,waNcEmp={};
+async function waNovaConversa(){waModal('Nova conversa',`<input class="fi" id="wancB" placeholder="Buscar por nome ou número" oninput="waNcDesenhar()"><div id="wancL" style="margin-top:10px;max-height:56vh;overflow:auto"></div>`,560);
+ setTimeout(()=>{const i=el('wancB');if(i)i.focus();},0);const r=await sb.rpc('wa_contatos_meus');waNcLista=r.error?[]:(r.data||[]);waNcDesenhar();
+ sb.rpc('wa_contatos_meus_empresas').then(e=>{if(!e.error&&e.data){waNcEmp=e.data;waNcDesenhar();}});}
+function waNcDesenhar(){const b=el('wancL'),i=el('wancB');if(!b||!i)return;const q=i.value.trim().toLowerCase(),qd=q.replace(/\D/g,'');const todos=tem('wa_conversa_qualquer');
+ const l=(waNcLista||[]).filter(x=>!q||String(x.nome||'').toLowerCase().includes(q)||String(waNcEmp[x.chave]||'').toLowerCase().includes(q)||(qd.length>=3&&(String(x.chave).includes(qd)||String(waNcEmp[x.chave]||'').replace(/D/g,'').includes(qd)))).slice(0,150);
+ b.innerHTML=l.map(x=>`<div class="wanc-i" data-k="${escH(x.chave)}" onclick="waNcEscolher(this.dataset.k)"><div><b>${escH(x.nome||fmtTel(x.chave))}</b><span>${escH(fmtTel(x.chave))}${todos&&x.dono?' · '+escH(x.dono):''}</span></div><em>${x.conversa_id?'Abrir conversa':'Enviar modelo'}</em></div>`).join('');}
+async function waNcAbrir(id){if(!waConv(id))await carregarConversas();irView('whatsweb');waAbrir(id);}
+async function waNcEscolher(chave){const x=(waNcLista||[]).find(y=>y.chave===chave);if(!x)return;fecharModal();
+ if(x.conversa_id){await waNcAbrir(x.conversa_id);return;}
+ const e=await sb.rpc('wa_empresas_do_numero',{p_chave:chave});const emp=(!e.error&&Array.isArray(e.data))?e.data:[];
+ const ctx={nome:x.nome||fmtTel(chave),empresa:'',cnpj:'',empresas:emp,enviar:async(m,v,d,pv)=>{const r=await sb.rpc('wa_conversa_iniciar',{p_chave:chave});
+  if(r.error||!r.data){toast('Não foi possível iniciar a conversa.');return false;}
+  let c=waConv(r.data);if(!c){await carregarConversas();c=waConv(r.data);}if(!c){toast('Não foi possível iniciar a conversa.');return false;}
+  const ok=await waEnviarModelo(c,m,v,d,pv);if(ok){x.conversa_id=c.id;irView('whatsweb');waAbrir(c.id);}else sb.rpc('wa_conversa_descartar_vazia',{p_conversa:c.id}).then(()=>carregarConversas());return ok;}};
+ if(emp.length===1){ctx.empresa=emp[0].razao_social||emp[0].nome_fantasia||'';ctx.cnpj=emp[0].cnpj||'';ctx.empresaId=emp[0].empresa_id;}
+ modAbrir(ctx);}
 function waNovoGrupo(){
  waModal('Novo grupo',`<span class="fl">Nome do grupo</span><input class="fi" id="wagn" maxlength="100"><span class="fl">Descrição</span><textarea class="fi" id="wagd" rows="3" maxlength="2048"></textarea><label style="display:flex;gap:8px;align-items:center;font-size:12.5px;margin-top:10px"><input type="checkbox" id="waga" checked> Aprovar cada pessoa antes de entrar</label><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" id="wagc" onclick="waGrupoCriar()">Criar grupo</button></div>`);
 }
@@ -3127,7 +3164,7 @@ function renderWhatsWeb(){
  el('conteudo').innerHTML=`<div class="wz">
   <aside class="wz-fila">
    <div class="wz-ftop">
-    <div class="wz-l1"><h2>WhatsApp</h2>${waNumOf?`<span class="wz-num"><i></i><b>Oficial</b> ${escH(fmtTel(waNumOf.telefone))}</span>`:''}${tem('wa_grupo_criar')?`<button class="wz-ibtn" title="Novo grupo" onclick="waNovoGrupo()">${WZ.grupo}</button>`:''}</div>
+    <div class="wz-l1"><h2>WhatsApp</h2>${waNumOf?`<span class="wz-num"><i></i><b>Oficial</b> ${escH(fmtTel(waNumOf.telefone))}</span>`:''}<button class="wz-ibtn wz-ibtn-nc" title="Nova conversa" onclick="waNovaConversa()"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>${tem('wa_grupo_criar')?`<button class="wz-ibtn" title="Novo grupo" onclick="waNovoGrupo()">${WZ.grupo}</button>`:''}</div>
     <div class="wz-kpis"><button class="wz-kpi al${waFiltro==='naolidas'?' on':''}" onclick="waFiltrar('naolidas')"><span>Não lidas</span><b>${k.nl}</b></button><button class="wz-kpi${waFiltro==='abertas'?' on':''}" onclick="waFiltrar('abertas')"><span>Abertas</span><b>${k.ab}</b></button><button class="wz-kpi av${waFiltro==='acabando'?' on':''}" onclick="waFiltrar('acabando')"><span>Janela acaba</span><b>${k.fim}</b></button></div>
     <div class="wz-seg"><button class="${waAba==='entrada'?'on':''}" onclick="waAba='entrada';selWhats=null;render()">Entrada <em>${waEntrada.filter(x=>!x.arquivada).length}</em></button><button class="${waAba==='meus'?'on':''}" onclick="waAba='meus';selWhats=null;render()">Minhas <em>${waMeus.filter(x=>!x.arquivada).length}</em></button></div>
     <div class="wz-abas"><label class="wz-busca">${WZ.busca}<input id="wwbusca" placeholder="Buscar por nome, telefone, empresa ou CNPJ" value="${escH(waBusca)}" oninput="waBusca=this.value;render()"></label>${abI('fixadas','Fixadas',WZ.fixar)}${abI('arquivadas','Arquivadas',WZ.arquivo)}${abI('ligacoes','Ligações',WZ.fone)}</div>
@@ -3869,6 +3906,13 @@ function euFotoHtml(){const f=euVisual.foto_url;if(!f)return '';const o=visPos(e
 function capaEstilo(){const f=euVisual.capa_url;if(!f)return '';const o=visPos(euVisual.capa_pos)||{};const z=+o.z||1;return `background-image:url('${String(f).replace(/'/g,'%27')}');background-position:${+o.px||50}% ${+o.py||50}%;background-size:${z>1?(z*100)+'%':'cover'};background-repeat:no-repeat`;}
 function aplicarVisual(){const a=el('euAv');if(a){const h=euFotoHtml();if(h){a.innerHTML=h;a.style.overflow='hidden';a.style.padding='0';}else a.textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();}
  if(view==='meuperfil'||view==='config')render();}
+let sCalMes=null;
+function sCalDesenhar(){const b=el('sCal');if(!b)return;const h=new Date();if(!sCalMes)sCalMes=new Date(h.getFullYear(),h.getMonth(),1);const a=sCalMes.getFullYear(),m=sCalMes.getMonth();
+ const ini=new Date(a,m,1-new Date(a,m,1).getDay());let d='';for(let k=0;k<42;k++){const x=new Date(ini.getFullYear(),ini.getMonth(),ini.getDate()+k);const c=[x.getMonth()!==m?'fora':'',x.getDay()%6===0?'fds':'',x.toDateString()===h.toDateString()?'hoje':''].filter(Boolean).join(' ');d+=`<span${c?` class="${c}"`:''}>${x.getDate()}</span>`;}
+ const tit=sCalMes.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(' de ',' ');
+ b.innerHTML=`<div class="scal-c"><button title="Mês anterior" onclick="sCalIr(-1)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button><b ondblclick="sCalMes=null;sCalDesenhar()">${tit}</b><button title="Próximo mês" onclick="sCalIr(1)"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button></div><div class="scal-g">${['D','S','T','Q','Q','S','S'].map(x=>`<i>${x}</i>`).join('')}${d}</div>`;}
+function sCalIr(n){sCalMes=new Date(sCalMes.getFullYear(),sCalMes.getMonth()+n,1);sCalDesenhar();}
+function sCalVirada(){const h=new Date(),f=new Date(h.getFullYear(),h.getMonth(),h.getDate()+1,0,0,5);setTimeout(()=>{sCalMes=null;sCalDesenhar();sCalVirada();},f-h);}
 async function carregarVisual(){const r=await sb.rpc('fiscal_visual');if(r.error)return;euVisual=r.data||{};aplicarVisual();}
 function aoMudarVisual(p){const id=(p.new||{}).id||'';if(id==='usuario:'+eu.id||(euVisual.setor_id&&id==='setor:'+euVisual.setor_id))carregarVisual();
  if(id.startsWith('usuario:')&&view==='gestor'&&gestorAba==='mapa'&&typeof carregarMapa==='function')carregarMapa();}
@@ -3885,7 +3929,7 @@ async function iniciarDados(){
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_midia'},aoMudarMidia)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo'},()=>{modLista=null;}).subscribe(st=>{if(st==='SUBSCRIBED'){if(waCaiu){waCaiu=false;waRetomar();}}else if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'||st==='CLOSED')waCaiu=true;});
- carregarVisual();sb.channel('fiscal-visual').on('postgres_changes',{event:'*',schema:'public',table:'fiscal_visual_sinal'},aoMudarVisual).subscribe();
+ sCalDesenhar();sCalVirada();carregarVisual();sb.channel('fiscal-visual').on('postgres_changes',{event:'*',schema:'public',table:'fiscal_visual_sinal'},aoMudarVisual).subscribe();
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).on('postgres_changes',{event:'*',schema:'public',table:'fiscal_nivel_permissao'},()=>aoMudarEu({new:{ativo:true,nivel:eu.nivel}})).subscribe();
  appVersaoIniciar();
  view=telaInicial();render();}
