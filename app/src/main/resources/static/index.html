@@ -116,6 +116,14 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-cx-lin .sol,.pm-cx-lin .op{text-align:left}
 .pm-cx-st{display:inline-flex;align-items:center;gap:5px;max-width:100%;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;background:var(--cs);color:var(--c);overflow:hidden;text-overflow:ellipsis}
 .pm-cx-st i{flex:none;width:6px;height:6px;border-radius:999px;background:var(--c)}
+.pm-ck{display:grid;grid-template-columns:22px minmax(0,1fr) auto;align-items:center;gap:10px;height:40px;padding:0 12px;cursor:pointer;position:relative;z-index:1;transition:background .12s}
+.pm-ck:hover{background:var(--laranjaSv)}
+.pm-ck .bx{width:18px;height:18px;border-radius:6px;border:2px solid var(--laranja);display:grid;place-items:center}
+.pm-ck .tx{min-width:0;display:flex;align-items:baseline;gap:8px;font-size:12.5px;color:var(--grafite);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm-ck .tx b{flex:none;font-size:11px;font-weight:800;letter-spacing:.03em;color:#fff;background:var(--grad);border-radius:5px;padding:1px 6px}
+.pm-ck .tx em{font-style:normal;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.pm-ck .tx span{overflow:hidden;text-overflow:ellipsis}
+.pm-ck .qm{font-size:11px;color:var(--apagado);white-space:nowrap}
 .mp{height:calc(100vh - 44px);overflow:auto;padding:16px 22px 28px;display:flex;flex-direction:column;gap:16px}
 .mp-capa{position:relative;height:190px;flex:none;border-radius:18px;overflow:hidden;background:radial-gradient(60% 120% at 88% 0%,rgba(254,73,1,.55),transparent 60%),radial-gradient(45% 90% at 8% 110%,rgba(255,146,0,.35),transparent 60%),linear-gradient(135deg,#111114,#1d1d22);box-shadow:var(--sm)}
 .mp-capa.tem::before{display:none}
@@ -1865,6 +1873,8 @@ function teamsIniciar(){return teamsCarregar().then(ok=>ok&&TeamsIT.iniciar({ori
  buscarPessoas:t=>sb.rpc('fiscal_buscar_pessoas',{p_texto:t}),
  pessoasContato:ids=>sb.rpc('fiscal_pessoas_contato',{p_ids:ids}),
  diretos:()=>teamsDiretos(),
+ osItens:()=>(pmCaixa||[]).map(o=>({id:o.id,codigo:String(o.codigo).padStart(4,'0'),fase:o.fase_nome,em:o.em,operacao:o.operacao,solicitante:o.solicitante,para:'Departamento '+DEPTO.nome,com_id:o.responsavel_id||null})),
+ abrirOs:id=>{pmAba='hoje';gestorAba='eu';irView(tem('painel_gestor')?'gestor':'pessoal');setTimeout(()=>pmIrOs(id),300);},
  aoLigacao:()=>avisoPost('frente',{}),
  abrirDireto:(k,h)=>teamsDirAbrir(k,h),
  abrirModulo:()=>irView('teams'),
@@ -2689,17 +2699,20 @@ function pesMesaHtml(){
  const cards=[['destaque','volta','voltou pra você'],['azul','hoje','pra hoje'],['vermelho','atraso','atrasados seus'],['ambar','parado','parados 7+ dias'],['verde','andando','demandas andando']];
  return `<div class="pm"><div class="pm-top"><h2 class="pm-tit"><span class="ar">Área de Operação</span><span class="nome">${escH(String(eu.nome||'').trim().split(/\s+/)[0])}</span></h2>
   <div class="pm-grade">${cards.map(([c,i,t])=>`<div class="pm-card ${c}"><span class="ic"><svg viewBox="0 0 24 24">${ic[i]}</svg></span><div class="tx"><div class="num">—</div><div class="rot">${t}</div></div><span class="seta"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span></div>`).join('')}</div></div>
-  <div class="aputabs pm-abas"><div class="aputabs-l">${[['hoje','Hoje'],['retornos','Retornos'],['enviados','Enviados'],['geral','Geral']].map(([k,t])=>`<button class="${pmAba===k?'on':''}" onclick="pmIr('${k}')">${t}</button>`).join('')}</div></div>${pmAba==='hoje'?`<div class="pm-hoje"><div class="pm-col"><div class="pm-col-cab"><b>Checklist</b><button class="pm-col-mais" title="Adicionar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pm-col-corpo"></div></div><div class="pm-col pm-cx"><div class="pm-col-cab"><b>Caixa de Entrada</b></div><div class="pm-cx-sub">${['Cód','Tipo','Data e hora','Solicitante','Operação','Status'].map(t=>`<span>${t}</span>`).join('')}</div><div class="pm-col-corpo"><div class="pm-cx-grade"><i></i><i></i><i></i><i></i><i></i><i></i></div>${pmCaixaLinhas()}</div></div></div>`:''}</div>`;}
+  <div class="aputabs pm-abas"><div class="aputabs-l">${[['hoje','Hoje'],['retornos','Retornos'],['enviados','Enviados'],['geral','Geral']].map(([k,t])=>`<button class="${pmAba===k?'on':''}" onclick="pmIr('${k}')">${t}</button>`).join('')}</div></div>${pmAba==='hoje'?`<div class="pm-hoje"><div class="pm-col"><div class="pm-col-cab"><b>Checklist</b><button class="pm-col-mais" title="Adicionar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pm-col-corpo">${pmChecklistOs()}</div></div><div class="pm-col pm-cx"><div class="pm-col-cab"><b>Caixa de Entrada</b></div><div class="pm-cx-sub">${['Cód','Tipo','Data e hora','Solicitante','Operação','Status'].map(t=>`<span>${t}</span>`).join('')}</div><div class="pm-col-corpo"><div class="pm-cx-grade"><i></i><i></i><i></i><i></i><i></i><i></i></div>${pmCaixaLinhas()}</div></div></div>`:''}</div>`;}
 let pmAba='hoje';
 let pmCaixa=null,pmCaixaCanal=null;
 const PM_FASE_COR={a_fazer:['--apagado','--superf2'],em_andamento:['--azul','--azulSv'],retrabalho:['--vermelho','--vermelhoSv'],aguardando_retorno_ceo:['--roxo','--laranjaSv'],aguardando_retorno_cliente:['--ambar','--ambarSv'],aguardando_aprovacao:['--laranjaTx','--laranjaSv'],aguardando_envio:['--azul','--azulSv'],aguardando_aviso:['--azul','--azulSv'],concluido:['--verde','--verdeSv'],cancelado:['--vermelho','--vermelhoSv']};
 function dataHora(v){if(!v)return '';const d=new Date(v);if(isNaN(d))return '';const z=n=>String(n).padStart(2,'0');return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()} - ${z(d.getHours())}:${z(d.getMinutes())}h`;}
+function pmChecklistOs(){if(!pmCaixa)return '';const gestor=tem('painel_gestor');
+ return pmCaixa.filter(o=>o.responsavel_id===eu.id||(gestor&&!o.responsavel_id)).map(o=>`<div class="pm-ck" onclick="pmIrOs('${escH(o.id)}')"><span class="bx"></span><span class="tx"><b>O.S</b><em>${escH(String(o.codigo).padStart(4,'0'))}</em><span>${escH(o.operacao||'')} · ${escH(o.fase_nome||'')}</span></span><span class="qm">${o.responsavel_id?'Comigo':'Fila geral'}</span></div>`).join('');}
+function pmIrOs(id){const l=document.querySelector('.pm-cx-lin[data-os="'+id+'"]');if(!l)return;l.scrollIntoView({block:'center',behavior:'smooth'});l.style.background='var(--laranjaSv)';setTimeout(()=>{l.style.background='';},1600);}
 function pmCaixaLinhas(){if(!pmCaixa){pmCaixaCarregar();return '';}
  return pmCaixa.map(o=>{const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];return `<div class="pm-cx-lin" data-os="${escH(o.id)}"><span class="cod">${escH(String(o.codigo).padStart(4,'0'))}</span><span class="tp">${escH(o.tipo||'')}</span><span class="dt">${escH(dataHora(o.em))}</span><span class="sol">${escH(o.solicitante||'')}</span><span class="op">${escH(o.operacao||'')}</span><span><span class="pm-cx-st" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span></span></div>`;}).join('');}
 async function pmCaixaCarregar(){if(pmCaixaCarregar.ocupado)return;pmCaixaCarregar.ocupado=true;
  try{const r=await sb.rpc('fiscal_caixa_entrada');if(r.error)return;pmCaixa=Array.isArray(r.data)?r.data:[];
   if(!pmCaixaCanal)pmCaixaCanal=sb.channel('fiscal-os').on('postgres_changes',{event:'*',schema:'public',table:'o_s_interna_recebidas'},()=>{pmCaixa=null;pmCaixaCarregar();}).subscribe();
-  const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();}finally{pmCaixaCarregar.ocupado=false;}}
+  const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();if(window.TeamsIT&&TeamsIT.atualizarDiretos)TeamsIT.atualizarDiretos();}finally{pmCaixaCarregar.ocupado=false;}}
 function pmIr(a){pmAba=a;const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();}
 /* radar xml */
 function renderXml(){const linhas=[];
@@ -3987,7 +4000,7 @@ async function iniciarDados(){
  el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('navPessoal').textContent=eu.nome;TITULOS.pessoal=eu.nome;if(DEPTO.id!=='fiscal'){el('depNome').textContent=DEPTO.nome;document.title=document.title.replace('Fiscal',DEPTO.nome);}el('euInfo').textContent=eu.nivel+' · '+DEPTO.nome;aplicarMenu();view=telaInicial();
  preCarregarGestor();
  estCarregar();if(tem('wa_lote_gerir'))envCarregar();teamsDirCarregar();
- teamsIniciar();
+ teamsIniciar();pmCaixaCarregar();
  await carregarConversas();
  sb.channel('fiscal-wa').on('postgres_changes',{event:'*',schema:'public',table:'wa_mensagem'},aoMudarMensagem)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_chamada'},aoMudarChamada)
