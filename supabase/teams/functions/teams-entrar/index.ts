@@ -109,6 +109,11 @@ Deno.serve(async (req) => {
     if (cr.error) { console.error("criar", cr.error.message); return json({ ok: false, erro: "falha no login" }, 500); }
   }
 
+  if (corpo.fiscal_token && quem.setores.length) {
+    const sinc = await admin.rpc("chat_membro_sincronizar", { p_usuario: quem.id, p_setores: quem.setores });
+    if (sinc.error) console.error("sincronizar", sinc.error.message);
+  }
+
   const link = await admin.auth.admin.generateLink({ type: "magiclink", email: quem.email });
   const hash = link.data?.properties?.hashed_token;
   if (link.error || !hash) { console.error("link", link.error?.message); return json({ ok: false, erro: "falha no login" }, 500); }
