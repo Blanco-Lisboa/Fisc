@@ -8,6 +8,8 @@ const BL_URL = "https://wfqcoocfastgsfgegpcm.supabase.co";
 const BL_CHAVE = "sb_publishable_88ukR4t1KNTc73DxbF6-Pw_0CKW16Fe";
 const FISCAL_URL = "https://vvohwixeokxydmbhqklu.supabase.co";
 const FISCAL_CHAVE = "sb_publishable_jQVklnYdEmsbVYzsp7_0Nw_ZLht78GM";
+const LEGAL_URL = "https://ynqcmzukahkmqbvirlkb.supabase.co";
+const LEGAL_CHAVE = "sb_publishable_YWo2MLN_-IBgo9cIMmOezw_tCD5cWz6";
 const LEGADO_URL = "https://uvmcfnghdsmpzhijqlos.supabase.co";
 const LEGADO_CHAVE = "sb_publishable_p91YPpnGsvmy4ccIncwoaw_dFszF86t";
 
@@ -43,16 +45,29 @@ async function pelaBl(token: string): Promise<Quem | null> {
   return { id: u.id, email: u.email, nome: ui.nome ?? u.email, setores };
 }
 
-async function peloFiscal(token: string): Promise<Quem | null> {
-  const r = await fetch(`${FISCAL_URL}/auth/v1/user`, { headers: { apikey: FISCAL_CHAVE, Authorization: `Bearer ${token}` } });
+const DEPARTAMENTOS = [
+  { url: FISCAL_URL, chave: FISCAL_CHAVE },
+  { url: LEGAL_URL, chave: LEGAL_CHAVE },
+];
+
+async function peloDepartamento(url: string, chave: string, token: string): Promise<Quem | null> {
+  const r = await fetch(`${url}/auth/v1/user`, { headers: { apikey: chave, Authorization: `Bearer ${token}` } });
   if (!r.ok) return null;
   const u = await r.json();
   const nivel = u?.app_metadata?.fiscal_nivel;
   if (!u?.id || !u?.email || !["colaborador", "assistente", "gerente"].includes(nivel)) return null;
-  const setores = await lerSetores(`${FISCAL_URL}/rest/v1/rpc/fiscal_meus_setores`,
-    { method: "POST", headers: { apikey: FISCAL_CHAVE, Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: "{}" },
+  const setores = await lerSetores(`${url}/rest/v1/rpc/fiscal_meus_setores`,
+    { method: "POST", headers: { apikey: chave, Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: "{}" },
     (d) => Array.isArray(d) ? d.map(String) : []);
   return { id: u.id, email: u.email, nome: u.app_metadata?.nome ?? u.email, setores };
+}
+
+async function peloFiscal(token: string): Promise<Quem | null> {
+  for (const d of DEPARTAMENTOS) {
+    const q = await peloDepartamento(d.url, d.chave, token).catch(() => null);
+    if (q) return q;
+  }
+  return null;
 }
 
 async function peloLegado(token: string): Promise<Quem | null> {
