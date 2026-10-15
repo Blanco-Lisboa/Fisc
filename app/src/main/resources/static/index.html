@@ -100,13 +100,22 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-col-mais svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .pm-col-mais:hover{background:var(--laranja);border-color:var(--laranja);color:#fff}
 .pm-col-corpo{flex:1;min-height:0;overflow:auto;background:repeating-linear-gradient(to bottom,transparent 0 39px,var(--superf2) 39px 40px)}
-.pm-cx{--cx:84px 120px 104px minmax(0,1.3fr) minmax(0,1.6fr) 118px}
+.pm-cx{--cx:84px 90px 150px minmax(0,1.2fr) minmax(0,1.5fr) minmax(130px,1fr)}
 .pm-cx-sub{display:grid;grid-template-columns:var(--cx);flex:none;height:32px;background:var(--pagina);border-bottom:1px solid var(--borda)}
 .pm-cx-sub span{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--apagado);border-right:1px solid var(--borda)}
 .pm-cx-sub span:last-child,.pm-cx-grade i:last-child{border-right:0}
 .pm-cx .pm-col-corpo{position:relative}
 .pm-cx-grade{position:absolute;inset:0;display:grid;grid-template-columns:var(--cx);pointer-events:none}
 .pm-cx-grade i{border-right:1px solid var(--superf2)}
+.pm-cx-lin{position:relative;z-index:1;display:grid;grid-template-columns:var(--cx);height:40px;align-items:center;cursor:pointer;font-size:12.5px;color:var(--grafite);transition:background .12s}
+.pm-cx-lin:hover{background:var(--laranjaSv)}
+.pm-cx-lin>span{padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.pm-cx-lin .cod{font-family:var(--mono,ui-monospace),monospace;font-weight:600;color:var(--ink)}
+.pm-cx-lin .tp{font-weight:700;color:var(--laranjaTx)}
+.pm-cx-lin .dt{font-variant-numeric:tabular-nums}
+.pm-cx-lin .sol,.pm-cx-lin .op{text-align:left}
+.pm-cx-st{display:inline-flex;align-items:center;gap:5px;max-width:100%;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;background:var(--cs);color:var(--c);overflow:hidden;text-overflow:ellipsis}
+.pm-cx-st i{flex:none;width:6px;height:6px;border-radius:999px;background:var(--c)}
 .mp{height:calc(100vh - 44px);overflow:auto;padding:16px 22px 28px;display:flex;flex-direction:column;gap:16px}
 .mp-capa{position:relative;height:190px;flex:none;border-radius:18px;overflow:hidden;background:radial-gradient(60% 120% at 88% 0%,rgba(254,73,1,.55),transparent 60%),radial-gradient(45% 90% at 8% 110%,rgba(255,146,0,.35),transparent 60%),linear-gradient(135deg,#111114,#1d1d22);box-shadow:var(--sm)}
 .mp-capa.tem::before{display:none}
@@ -2680,8 +2689,17 @@ function pesMesaHtml(){
  const cards=[['destaque','volta','voltou pra você'],['azul','hoje','pra hoje'],['vermelho','atraso','atrasados seus'],['ambar','parado','parados 7+ dias'],['verde','andando','demandas andando']];
  return `<div class="pm"><div class="pm-top"><h2 class="pm-tit"><span class="ar">Área de Operação</span><span class="nome">${escH(String(eu.nome||'').trim().split(/\s+/)[0])}</span></h2>
   <div class="pm-grade">${cards.map(([c,i,t])=>`<div class="pm-card ${c}"><span class="ic"><svg viewBox="0 0 24 24">${ic[i]}</svg></span><div class="tx"><div class="num">—</div><div class="rot">${t}</div></div><span class="seta"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span></div>`).join('')}</div></div>
-  <div class="aputabs pm-abas"><div class="aputabs-l">${[['hoje','Hoje'],['retornos','Retornos'],['enviados','Enviados'],['geral','Geral']].map(([k,t])=>`<button class="${pmAba===k?'on':''}" onclick="pmIr('${k}')">${t}</button>`).join('')}</div></div>${pmAba==='hoje'?`<div class="pm-hoje"><div class="pm-col"><div class="pm-col-cab"><b>Checklist</b><button class="pm-col-mais" title="Adicionar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pm-col-corpo"></div></div><div class="pm-col pm-cx"><div class="pm-col-cab"><b>Caixa de Entrada</b></div><div class="pm-cx-sub">${['Cód','Tipo','Data','Solicitante','Operação','Status'].map(t=>`<span>${t}</span>`).join('')}</div><div class="pm-col-corpo"><div class="pm-cx-grade"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div></div>`:''}</div>`;}
+  <div class="aputabs pm-abas"><div class="aputabs-l">${[['hoje','Hoje'],['retornos','Retornos'],['enviados','Enviados'],['geral','Geral']].map(([k,t])=>`<button class="${pmAba===k?'on':''}" onclick="pmIr('${k}')">${t}</button>`).join('')}</div></div>${pmAba==='hoje'?`<div class="pm-hoje"><div class="pm-col"><div class="pm-col-cab"><b>Checklist</b><button class="pm-col-mais" title="Adicionar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div><div class="pm-col-corpo"></div></div><div class="pm-col pm-cx"><div class="pm-col-cab"><b>Caixa de Entrada</b></div><div class="pm-cx-sub">${['Cód','Tipo','Data e hora','Solicitante','Operação','Status'].map(t=>`<span>${t}</span>`).join('')}</div><div class="pm-col-corpo"><div class="pm-cx-grade"><i></i><i></i><i></i><i></i><i></i><i></i></div>${pmCaixaLinhas()}</div></div></div>`:''}</div>`;}
 let pmAba='hoje';
+let pmCaixa=null,pmCaixaCanal=null;
+const PM_FASE_COR={a_fazer:['--apagado','--superf2'],em_andamento:['--azul','--azulSv'],retrabalho:['--vermelho','--vermelhoSv'],aguardando_retorno_ceo:['--roxo','--laranjaSv'],aguardando_retorno_cliente:['--ambar','--ambarSv'],aguardando_aprovacao:['--laranjaTx','--laranjaSv'],aguardando_envio:['--azul','--azulSv'],aguardando_aviso:['--azul','--azulSv'],concluido:['--verde','--verdeSv'],cancelado:['--vermelho','--vermelhoSv']};
+function dataHora(v){if(!v)return '';const d=new Date(v);if(isNaN(d))return '';const z=n=>String(n).padStart(2,'0');return `${z(d.getDate())}/${z(d.getMonth()+1)}/${d.getFullYear()} - ${z(d.getHours())}:${z(d.getMinutes())}h`;}
+function pmCaixaLinhas(){if(!pmCaixa){pmCaixaCarregar();return '';}
+ return pmCaixa.map(o=>{const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];return `<div class="pm-cx-lin" data-os="${escH(o.id)}"><span class="cod">${escH(String(o.codigo).padStart(4,'0'))}</span><span class="tp">${escH(o.tipo||'')}</span><span class="dt">${escH(dataHora(o.em))}</span><span class="sol">${escH(o.solicitante||'')}</span><span class="op">${escH(o.operacao||'')}</span><span><span class="pm-cx-st" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span></span></div>`;}).join('');}
+async function pmCaixaCarregar(){if(pmCaixaCarregar.ocupado)return;pmCaixaCarregar.ocupado=true;
+ try{const r=await sb.rpc('fiscal_caixa_entrada');if(r.error)return;pmCaixa=Array.isArray(r.data)?r.data:[];
+  if(!pmCaixaCanal)pmCaixaCanal=sb.channel('fiscal-os').on('postgres_changes',{event:'*',schema:'public',table:'o_s_interna_recebidas'},()=>{pmCaixa=null;pmCaixaCarregar();}).subscribe();
+  const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();}finally{pmCaixaCarregar.ocupado=false;}}
 function pmIr(a){pmAba=a;const m=document.querySelector('.pm');if(m)m.outerHTML=pesMesaHtml();}
 /* radar xml */
 function renderXml(){const linhas=[];
