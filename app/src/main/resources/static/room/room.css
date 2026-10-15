@@ -607,3 +607,4 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 
 .row.editando{padding-right:34px}
 .row .ed{overflow-wrap:anywhere;word-break:break-word}
+.row.gap{height:var(--lh);min-height:var(--lh)}
