@@ -57,8 +57,7 @@ async function carregar(de,ate){
  if(r.error){toast('Não foi possível carregar o ROOM.');return false;}
  const x=r.data||{};D.hoje=x.hoje?deIso(x.hoje):hojeD();D.categorias=x.categorias||[];D.notas=x.notas||[];D.itens=x.itens||[];
  D.dias=new Set((x.dias_com_nota||[]).map(String));faixa={de,ate};
- const ids=[...new Set(D.notas.map(n=>n.empresa_id).filter(i=>i&&!empresas[i]))];
- if(ids.length){const e=await sb.rpc('room_empresas_nomes',{p_ids:ids});if(!e.error&&Array.isArray(e.data))e.data.forEach(c=>{empresas[c.empresa_id]=c.nome_fantasia||c.razao_social||'';});}
+ if(D.notas.some(n=>n.empresa_id&&!empresas[n.empresa_id])&&cfg.clientes){const l=await Promise.resolve(cfg.clientes()).catch(()=>[]);(l||[]).forEach(c=>{empresas[c.id]=c.nome;});}
  return true;
 }
 function garantir(d){

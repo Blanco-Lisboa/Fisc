@@ -81,12 +81,13 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .room-pop .tipo.al{background:#FDE3E0;color:var(--vermelho)}.room-pop .tipo.le{background:var(--laranjaSv);color:var(--laranjaTx)}.room-pop .tipo.ta{background:#E7F0FA;color:var(--azul)}
 .room-pop-abrir{margin-top:10px;width:100%;border:1px solid var(--borda);background:var(--superf);border-radius:8px;padding:6px;font-size:12px;font-weight:600;cursor:pointer}
 .room-pop-abrir:hover{border-color:var(--laranja);color:var(--laranjaTx)}
-.pm-ck.room{cursor:default;align-items:center}
+.pm-ck.room{cursor:default;align-items:center;grid-template-columns:auto auto minmax(0,1fr) auto}
+.pm-ck.room .lb.al{background:var(--vermelho)}.pm-ck.room .lb.le{background:var(--laranja)}.pm-ck.room .lb.ta{background:var(--azul)}
+.pm-ck.room .tx i{flex:none;width:8px;height:8px;border-radius:50%;align-self:center}
 .pm-ck.room input{appearance:none;width:16px;height:16px;border:1.6px solid var(--bordaF);border-radius:4px;margin:0;flex:none;cursor:pointer;display:grid;place-items:center;background:#fff}
 .pm-ck.room input:checked{background:var(--verde);border-color:var(--verde)}
 .pm-ck.room input:checked::after{content:"";width:7px;height:4px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
 .pm-ck.room.feito .tx span,.pm-ck.room.feito .tx b{text-decoration:line-through;color:var(--nevoa)}
-.pm-ck.room .lb i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:1px}
 .side .scal{margin-top:auto;margin-bottom:10px;padding:12px 10px 10px;border:1px solid #1c1c22;border-radius:12px;background:#111114;user-select:none}
 .scal-c{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .scal-c b{font-size:12.5px;font-weight:700;color:#fff;text-transform:capitalize}
@@ -2855,7 +2856,7 @@ async function osAbrir(id){osjAberta=id;let r=await osjBuscar(id);if(r.error||!r
 function osjFechar(manter){const f=document.getElementById('osjFundo');if(f)f.remove();if(!manter)osjAberta=null;}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('osjFundo'))osjFechar();});
 function pmVePara(){return ['assistente','gerente','diretor'].includes(eu.nivel);}
-function pmChecklistRoom(){if(!window.RoomIT)return '';return RoomIT.checklist().map(i=>`<div class="pm-ck room${i.feito?' feito':''}"><input type="checkbox" ${i.feito?'checked':''} onclick="event.stopPropagation()" onchange="RoomIT.concluir('${escH(i.id)}',this.checked)"><span class="lb"><i style="background:${escH(i.cor)}"></i>${escH({alarme:'Alarme',lembrete:'Lembrete',tarefa:'Tarefa'}[i.tipo]||'')}</span><span class="tx"><span>${escH(i.titulo)}</span></span><span class="qm">${i.atrasado&&!i.feito?'desde '+escH(i.dia.slice(8,10)+'/'+i.dia.slice(5,7)):escH(i.hora||'hoje')}</span></div>`).join('');}
+function pmChecklistRoom(){if(!window.RoomIT)return '';return RoomIT.checklist().map(i=>`<div class="pm-ck room${i.feito?' feito':''}"><input type="checkbox" ${i.feito?'checked':''} onclick="event.stopPropagation()" onchange="RoomIT.concluir('${escH(i.id)}',this.checked)"><span class="lb ${{alarme:'al',lembrete:'le',tarefa:'ta'}[i.tipo]||''}">${escH({alarme:'Alarme',lembrete:'Lembrete',tarefa:'Tarefa'}[i.tipo]||'')}</span><span class="tx">${i.categoria?`<i style="background:${escH(i.cor)}" title="${escH(i.categoria)}"></i>`:''}<span>${escH(i.titulo)}</span></span><span class="qm">${i.atrasado&&!i.feito?'desde '+escH(i.dia.slice(8,10)+'/'+i.dia.slice(5,7)):escH(i.hora||'hoje')}</span></div>`).join('');}
 function pmChecklistOs(){const room=pmChecklistRoom();if(!pmCaixa)return room;const gestor=pmVePara();
  return room+pmCaixa.filter(o=>gestor||o.responsavel_id===eu.id).map(o=>`<div class="pm-ck" onclick="pmIrOs('${escH(o.id)}')"><span class="lb">Lembrete</span><span class="tx"><b>O.S</b><em>${escH(String(o.codigo).padStart(4,'0'))}</em><span>${escH(o.operacao||'')} · ${escH(o.fase_nome||'')}</span></span><span class="qm">${o.responsavel_id===eu.id?'Comigo':escH(o.responsavel||'Fila geral')}${pmDesde(o.em)}</span></div>`).join('');}
 function pmDesde(v){if(!v)return '';const d=new Date(v),h=new Date();if(d.toDateString()===h.toDateString())return '';const z=n=>String(n).padStart(2,'0');return ' · desde '+z(d.getDate())+'/'+z(d.getMonth()+1);}

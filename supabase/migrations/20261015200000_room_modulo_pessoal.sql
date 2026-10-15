@@ -207,19 +207,9 @@ begin
   return to_jsonb(r);
 end $f$;
 
-create or replace function public.room_empresas_nomes(p_ids uuid[])
-returns jsonb language plpgsql security definer set search_path to 'public','pg_temp' as $f$
-declare u uuid := _room_quem(); v_ids uuid[];
-begin
-  select array_agg(distinct x) into v_ids from unnest(p_ids) x
-   where x is not null and exists (select 1 from room_nota n where n.usuario_id = u and n.empresa_id = x);
-  if coalesce(array_length(v_ids,1),0) = 0 then return '[]'::jsonb; end if;
-  return fiscal_bl('you_clientes_para_fiscal?select=empresa_id,razao_social,nome_fantasia,cnpj&empresa_id=in.(' || array_to_string(v_ids[1:150], ',') || ')');
-end $f$;
-
 do $$ declare f text; begin
   foreach f in array array['room_dados(date,date)','room_nota_salvar(jsonb)','room_nota_apagar(uuid)','room_item_salvar(jsonb)','room_item_concluir(uuid,boolean)',
-    'room_item_adiar(uuid,integer)','room_item_disparado(uuid)','room_item_apagar(uuid)','room_categoria_salvar(jsonb)','room_empresas_nomes(uuid[])'] loop
+    'room_item_adiar(uuid,integer)','room_item_disparado(uuid)','room_item_apagar(uuid)','room_categoria_salvar(jsonb)'] loop
     execute format('revoke all on function public.%s from public, anon', f);
     execute format('grant execute on function public.%s to authenticated', f);
   end loop;
