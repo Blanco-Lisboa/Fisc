@@ -587,3 +587,20 @@ svg.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .ev .bt .mini svg{width:13px;height:13px}
 .campo input[type=date],.campo input[type=time],.campo input[type=month]{font-family:var(--corpo)}
 .niv label{min-width:0}
+
+.row .ed{cursor:text;border-radius:3px;outline:none;white-space:pre-wrap}
+.row .ed:hover{background:rgba(254,73,1,.05)}
+.row.editando .ed{background:rgba(254,73,1,.07);box-shadow:0 0 0 2px rgba(254,73,1,.22);padding:0 2px}
+.row.nova .ed{display:inline-block;min-width:60%;min-height:calc(var(--lh) - 6px)}
+.ed-ok{position:absolute;right:-30px;top:4px;width:24px;height:24px;border-radius:7px;border:0;background:var(--laranja);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;box-shadow:0 2px 6px rgba(254,73,1,.35)}
+.ed-ok svg{width:14px;height:14px;stroke:#fff}
+.rolo{cursor:text}
+.row .sug{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-family:var(--corpo);font-size:11px;font-weight:600;color:var(--laranjaTx);background:var(--laranjaSv);border:1px dashed #F3B08F;border-radius:999px;padding:0 8px;line-height:20px;vertical-align:middle;cursor:pointer}
+.row .sug svg{width:12px;height:12px}
+.row .sug:hover{border-style:solid;border-color:var(--laranja)}
+.menu-sel{position:fixed;z-index:60;display:flex;gap:2px;background:#141418;border:1px solid #2a2a31;border-radius:12px;padding:4px;box-shadow:0 12px 28px rgba(17,17,20,.35);animation:mcEntra2 .14s ease-out}
+@keyframes mcEntra2{from{opacity:0;transform:translateY(4px)}}
+.menu-sel button{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;color:#e4e4e8;border-radius:8px;padding:6px 8px;font-family:var(--corpo);font-size:10.5px;font-weight:600;cursor:pointer;min-width:58px}
+.menu-sel button svg{width:17px;height:17px;stroke:#ff9a6a}
+.menu-sel button:hover{background:rgba(255,255,255,.08);color:#fff}
+@media (prefers-reduced-motion:reduce){.menu-sel{animation:none}}
