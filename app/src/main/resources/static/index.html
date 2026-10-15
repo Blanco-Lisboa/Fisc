@@ -109,6 +109,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-cx-grade i{border-right:1px solid var(--superf2)}
 .mp{height:calc(100vh - 44px);overflow:auto;padding:16px 22px 28px;display:flex;flex-direction:column;gap:16px}
 .mp-capa{position:relative;height:190px;flex:none;border-radius:18px;overflow:hidden;background:radial-gradient(60% 120% at 88% 0%,rgba(254,73,1,.55),transparent 60%),radial-gradient(45% 90% at 8% 110%,rgba(255,146,0,.35),transparent 60%),linear-gradient(135deg,#111114,#1d1d22);box-shadow:var(--sm)}
+.mp-capa.tem::before{display:none}
 .mp-capa::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,#000,transparent 85%)}
 .mp-foto-bt{position:absolute;display:grid;place-items:center;border:0;cursor:pointer;transition:all .15s ease}
 .mp-foto-bt svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -1744,8 +1745,8 @@ function mpCampo(t,v){return `<div class="mp-campo"><span>${t}</span><b>${escH(v
 function renderMeuPerfil(){
  const nivel=String(eu.nivel||'');const nv=nivel?nivel.charAt(0).toUpperCase()+nivel.slice(1):'';
  const ab=[['perfil','Meu Perfil'],['ident','Identificação']];
- const cab=`<div class="mp-capa"></div>
-  <div class="mp-cab"><div class="mp-av">${escH(iniciais(eu.nome)||'')}</div>
+ const cab=`<div class="mp-capa${euVisual.capa_url?' tem':''}" style="${capaEstilo()}"></div>
+  <div class="mp-cab"><div class="mp-av"${euVisual.foto_url?' style="overflow:hidden"':''}>${euFotoHtml()||escH(iniciais(eu.nome)||'')}</div>
    <div class="mp-quem"><h2 class="mp-nome">${escH(eu.nome||'')}${nv?`<span class="mp-nivel">${escH(nv)}</span>`:''}</h2><div class="mp-emp">YOU Contabilidade<i></i>${escH(DEPTO.nome)}</div></div>
    <div class="mp-kpis"><div class="mp-kpi">${mpAnel(null)}<div><b>—<small>/100</small></b><span>Desempenho</span></div></div>
     <div class="mp-kpi azul"><span class="ic">${mpIco('agenda')}</span><div><b>—</b><span>Ausências no mês</span></div></div>
@@ -1829,7 +1830,7 @@ function renderCfgInfo(){const b=el('cfgBody');if(!b)return;
  const nivelTxt={assistente:'Assistente',gerente:'Gerente',colaborador:'Colaborador'}[eu.nivel]||'';
  b.innerHTML=`<div class="cf"><div class="cf-in">
   <div class="cf-hero">
-   <div class="cf-eu"><div class="cf-av">${escH(iniciais(eu.nome||'')||'?')}</div>
+   <div class="cf-eu"><div class="cf-av"${euVisual.foto_url?' style="overflow:hidden;padding:0"':''}>${euFotoHtml()||escH(iniciais(eu.nome||'')||'?')}</div>
     <div><span class="cf-k">Você entra como</span><h2>${gestor?'Gestor':'Colaborador'}${gestor&&nivelTxt?` <em>${escH(nivelTxt)}</em>`:''}</h2><p>${escH((perfis.find(p=>p.acesso===lado)||{})[lado]||'')}</p></div></div>
    <div class="cf-kpis"><div class="cf-kpi"><span>Módulos que você usa</span><b>${meus}</b></div><div class="cf-kpi"><span>Iguais para todos</span><b>${iguais}</b></div><div class="cf-kpi al"><span>Pontos que mudam</span><b>${muda}</b></div></div>
   </div>
@@ -2197,10 +2198,18 @@ function waMenuMsg(ev,mid){{const b=(ev.currentTarget||ev.target).closest?(ev.cu
   m.caminho?['Baixar',()=>waBaixarArq(m.caminho,m.nomeArq||({imagem:'foto.jpg',video:'video.mp4',audio:'audio.ogg'}[m.tipo])||'arquivo')]:null,
   pode&&m.idWa&&!c.bloqueado?['Responder',()=>{waResp=m.id;render();setTimeout(()=>{const i=el('wwin');if(i)i.focus();},0);}]:null,
   pode&&m.idWa&&!String(m.idWa).startsWith('imp:')&&m.d==='ent'&&m.tipo!=='sistema'&&m.tipo!=='reacao'&&Date.now()-new Date(m.em).getTime()<30*864e5?['Reagir',()=>waEscolherReacao(ev,m)]:null,
+  pode&&c.prov==='whatsgw'&&m.d==='sai'&&m.tipo==='texto'&&m.idWa&&!String(m.idWa).startsWith('imp:')&&Date.now()-new Date(m.em).getTime()<15*6e4?['Editar',()=>waGwEditar(m)]:null,
+  pode&&c.prov==='whatsgw'&&m.d==='sai'&&m.idWa&&!String(m.idWa).startsWith('imp:')?['Apagar',()=>waConfirmar('Apagar esta mensagem para todos no WhatsApp?','Apagar',()=>waGwApagar(m)),true]:null,
   m.t&&!['imagem','video','audio','figurinha'].includes(m.tipo)?['Copiar',()=>{navigator.clipboard.writeText(m.tipo==='contato'&&m.dados?m.t+' '+fmtTel(m.dados.telefone):m.t).then(()=>toast('Copiado.'),()=>toast('Não foi possível copiar.'));}]:null,
   !m.id.startsWith('tmp-')&&m.tipo!=='figurinha'&&m.tipo!=='sistema'?['Encaminhar',()=>waEncaminhar(m.id)]:null,
   pode?[m.favorita?'Desfavoritar':'Favoritar',()=>waMarcarMsg(m,'favorita',!m.favorita)]:null]);
 }
+function waGwEditar(m){waModal('Editar mensagem',`<textarea class="fi" id="wagwe" rows="4" maxlength="4096">${escH(m.t||'')}</textarea><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px"><button class="apubtn" onclick="fecharModal()">Cancelar</button><button class="bt-assumir" onclick="waGwEditarSalvar('${m.id}')">Salvar</button></div>`);}
+async function waGwEditarSalvar(mid){const t=el('wagwe').value;if(!t.trim()){toast('Escreva a mensagem.');return;}
+ const j=await waEdge('wa-meta-acao',{acao:'editar',conversa_id:selWhats,mensagem_id:mid,texto:t});if(!j.ok){toast(j.erro||'Não foi possível editar.');return;}
+ const c=waConv(selWhats);const m=c&&c.wpp.find(x=>x.id===mid);if(m){m.t=t;m.editadaEm=new Date().toISOString();}fecharModal();toast('Mensagem editada.');waDesenharMsgs();}
+async function waGwApagar(m){const j=await waEdge('wa-meta-acao',{acao:'apagar',conversa_id:selWhats,mensagem_id:m.id});if(!j.ok){toast(j.erro||'Não foi possível apagar.');return;}
+ const c=waConv(selWhats);if(c){c.wpp=c.wpp.filter(x=>x.id!==m.id);waMsgs[c.id]=c.wpp;}toast('Mensagem apagada.');waDesenharMsgs();}
 function waEscolherReacao(ev,m){
  waFecharMenus();const bar=document.createElement('div');bar.className='wa-menu wa-emojis';
  WA_EMOJIS.forEach(e=>{const b=document.createElement('button');b.textContent=e;if(m.reacaoNossa===e)b.className='on';b.onclick=x=>{x.stopPropagation();waFecharMenus();waReagir(m,m.reacaoNossa===e?'':e);};bar.appendChild(b);});
@@ -2233,7 +2242,7 @@ async function waAquecer(){if(Date.now()-waAquecidoEm<120000)return;waAquecidoEm
  try{const se=(await sb.auth.getSession()).data.session;fetch(SB_URL+'/functions/v1/wa-meta-enviar',{method:'GET',headers:{apikey:SB_KEY,Authorization:'Bearer '+(se?se.access_token:'')}}).catch(()=>{});}catch(e){}}
 async function waEdge(nome,corpo){
  const cv=corpo&&corpo.conversa_id?waConv(corpo.conversa_id):null;
- if(cv&&cv.prov==='whatsgw'){if(nome==='wa-meta-enviar')nome='wa-gw-enviar';else if(nome==='wa-meta-acao')return ['lida','digitando'].includes(corpo.acao)?{ok:true}:{ok:false,erro:'Não disponível neste WhatsApp.'};}
+ if(cv&&cv.prov==='whatsgw'){if(nome==='wa-meta-enviar')nome='wa-gw-enviar';else if(nome==='wa-meta-acao'){if(corpo.acao==='digitando')return {ok:true};if(!['lida','reagir','apagar','editar'].includes(corpo.acao))return {ok:false,erro:'Não disponível neste WhatsApp.'};nome='wa-gw-acao';}}
  const s=(await sb.auth.getSession()).data.session;
  const r=await fetch(SB_URL+'/functions/v1/'+nome,{method:'POST',headers:{'Content-Type':'application/json',apikey:SB_KEY,Authorization:'Bearer '+(s?s.access_token:'')},body:JSON.stringify(corpo)});
  return await r.json().catch(()=>({ok:false}));
@@ -3944,6 +3953,17 @@ async function enviarTextoWA(c,t){const id_local=crypto.randomUUID();const resp=
  if(!j.ok){const m=c.wpp.find(x=>x.id_local===id_local);if(m)m.st=j.incerto?'incerto':'falhou';toast(j.erro||'Não foi possível enviar.');render();}
  return j;}
 
+/* ---------- visual (BL) ---------- */
+let euVisual={};
+function visPos(t){try{const o=JSON.parse(t||'null');return o&&typeof o==='object'?o:null;}catch(e){return null;}}
+function euFotoHtml(){const f=euVisual.foto_url;if(!f)return '';const o=visPos(euVisual.foto_pos);return `<img src="${escH(f)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit${o?`;object-position:${+o.px||50}% ${+o.py||50}%;transform:scale(${+o.z||1})`:''}">`;}
+function capaEstilo(){const f=euVisual.capa_url;if(!f)return '';const o=visPos(euVisual.capa_pos)||{};const z=+o.z||1;return `background-image:url('${String(f).replace(/'/g,'%27')}');background-position:${+o.px||50}% ${+o.py||50}%;background-size:${z>1?(z*100)+'%':'cover'};background-repeat:no-repeat`;}
+function aplicarVisual(){const a=el('euAv');if(a){const h=euFotoHtml();if(h){a.innerHTML=h;a.style.overflow='hidden';a.style.padding='0';}else a.textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();}
+ if(view==='meuperfil'||view==='config')render();}
+async function carregarVisual(){const r=await sb.rpc('fiscal_visual');if(r.error)return;euVisual=r.data||{};aplicarVisual();}
+function aoMudarVisual(p){const id=(p.new||{}).id||'';if(id==='usuario:'+eu.id||(euVisual.setor_id&&id==='setor:'+euVisual.setor_id))carregarVisual();
+ if(id.startsWith('usuario:')&&view==='gestor'&&gestorAba==='mapa'&&typeof carregarMapa==='function')carregarMapa();}
+
 /* ---------- entrada ---------- */
 async function iniciarDados(){
  el('euAv').textContent=iniciais(eu.nome)||eu.nome.slice(0,2).toUpperCase();el('euNome').textContent=eu.nome;el('navPessoal').textContent=eu.nome;TITULOS.pessoal=eu.nome;if(DEPTO.id!=='fiscal'){el('depNome').textContent=DEPTO.nome;document.title=document.title.replace('Fiscal',DEPTO.nome);}el('euInfo').textContent=eu.nivel+' · '+DEPTO.nome;aplicarMenu();view=telaInicial();
@@ -3956,6 +3976,7 @@ async function iniciarDados(){
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_conversa'},aoMudarConversa)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_midia'},aoMudarMidia)
   .on('postgres_changes',{event:'*',schema:'public',table:'wa_modelo'},()=>{modLista=null;}).subscribe();
+ carregarVisual();sb.channel('fiscal-visual').on('postgres_changes',{event:'*',schema:'public',table:'fiscal_visual_sinal'},aoMudarVisual).subscribe();
  sb.channel('fiscal-eu').on('postgres_changes',{event:'UPDATE',schema:'public',table:'fiscal_usuario',filter:'id=eq.'+eu.id},aoMudarEu).on('postgres_changes',{event:'*',schema:'public',table:'fiscal_nivel_permissao'},()=>aoMudarEu({new:{ativo:true,nivel:eu.nivel}})).subscribe();
  appVersaoIniciar();
  view=telaInicial();render();}
