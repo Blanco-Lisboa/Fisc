@@ -1,0 +1,3 @@
+-- fiscal_caixa_entrada e fiscal_os_detalhe passam a devolver 'sigla' (o_s_interna_recebidas.tipo_sigla)
+-- e 'numero' ja formatado: 'O.S-' || coalesce(tipo_sigla,'OS') || '-' || lpad(numero_sequencial::text,4,'0')
+-- aplicado no Fiscal (vvohwixeokxydmbhqklu) em 15/10/2026 por troca de trecho nas duas funcoes.

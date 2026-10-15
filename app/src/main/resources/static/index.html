@@ -145,8 +145,8 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .pm-col-mais svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 .pm-col-mais:hover{background:var(--laranja);border-color:var(--laranja);color:#fff}
 .pm-col-corpo{flex:1;min-height:0;overflow:auto;background:repeating-linear-gradient(to bottom,transparent 0 39px,var(--superf2) 39px 40px)}
-.pm-cx{--cx:84px 90px 150px minmax(0,1.2fr) minmax(0,1.5fr) minmax(130px,1fr)}
-.pm-cx.para{--cx:72px 64px 146px minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(130px,1fr)}
+.pm-cx{--cx:112px 70px 150px minmax(0,1.2fr) minmax(0,1.5fr) minmax(130px,1fr)}
+.pm-cx.para{--cx:106px 52px 146px minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) minmax(130px,1fr)}
 .pm-cx-lin .eu{font-weight:700;color:var(--laranjaTx)}
 .pm-cx-sub{display:grid;grid-template-columns:var(--cx);flex:none;height:32px;background:var(--pagina);border-bottom:1px solid var(--borda)}
 .pm-cx-sub span{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--apagado);border-right:1px solid var(--borda)}
@@ -1969,7 +1969,7 @@ function teamsIniciar(){return teamsCarregar().then(ok=>ok&&TeamsIT.iniciar({ori
  buscarPessoas:t=>sb.rpc('fiscal_buscar_pessoas',{p_texto:t}),
  pessoasContato:ids=>sb.rpc('fiscal_pessoas_contato',{p_ids:ids}),
  diretos:()=>teamsDiretos(),
- osItens:()=>(pmCaixa||[]).map(o=>({id:o.id,codigo:String(o.codigo).padStart(4,'0'),fase:o.fase_nome,em:o.em,operacao:o.operacao,solicitante:o.solicitante,para:'Departamento '+DEPTO.nome,com_id:o.responsavel_id||null})),
+ osItens:()=>(pmCaixa||[]).map(o=>({id:o.id,codigo:osNum(o).replace(/^O\.S-/,''),fase:o.fase_nome,em:o.em,operacao:o.operacao,solicitante:o.solicitante,para:'Departamento '+DEPTO.nome,com_id:o.responsavel_id||null})),
  abrirOs:id=>{pmAba='hoje';gestorAba='eu';irView(tem('painel_gestor')?'gestor':'pessoal');setTimeout(()=>pmIrOs(id),300);},
  aoLigacao:()=>avisoPost('frente',{}),
  abrirDireto:(k,h)=>teamsDirAbrir(k,h),
@@ -2839,7 +2839,7 @@ function osjHtml(o){const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];
   ['Contato do cliente final',val('Contato do cliente final')],['Nota modelo',val('Nota modelo')]].filter(l=>l[1]!=null&&l[1]!=='');
  const cli=o.empresa?{n:escH(o.empresa.nome||''),d:escH(o.empresa.cpf?osjCpf(o.empresa.cpf):fmtCnpj(o.empresa.cnpj||''))}:{n:v('Razão social'),d:v('CNPJ do cliente')};
  const valor=v('Valor')?v('Valor')+(cp('Valor')&&cp('Valor').origem==='referencia'?nc:''):'';const abertas=(o.perguntas||[]).filter(q=>q.status!=='respondida').length;
- return `<div class="osj" role="dialog"><header class="osj-cab"><div class="osj-id"><span class="osj-ic"><svg viewBox="0 0 24 24">${OSJ_IC}</svg></span><div style="min-width:0"><div class="osj-num">O.S - ${escH(String(o.codigo).padStart(4,'0'))}</div><h1 class="osj-tit">${escH(o.operacao||'')}</h1></div></div>
+ return `<div class="osj" role="dialog"><header class="osj-cab"><div class="osj-id"><span class="osj-ic"><svg viewBox="0 0 24 24">${OSJ_IC}</svg></span><div style="min-width:0"><div class="osj-num">${escH(osNum(o))}</div><h1 class="osj-tit">${escH(o.operacao||'')}</h1></div></div>
  <div class="osj-acoes"><button class="osj-btn pri">Abrir</button><button class="osj-btn x" title="Fechar" onclick="osjFechar()"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div></header>
  <div class="osj-corpo"><div class="osj-st"><small>Status</small><span class="osj-selo" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span><span class="osj-pts">${abertas} ${abertas===1?'ponto':'pontos'} a verificar</span></div>
  <div class="osj-hero"><div style="min-width:0"><span class="osj-rot">Cliente</span><b>${cli.n||'—'}</b><small>${cli.d||''}</small></div>${valor?`<div class="vl"><span class="osj-rot">Valor</span><b>${valor}</b></div>`:''}</div>
@@ -2854,14 +2854,15 @@ async function osAbrir(id){osjAberta=id;let r=await osjBuscar(id);if(r.error||!r
  osjFechar(true);const f=document.createElement('div');f.className='osj-fundo';f.id='osjFundo';f.innerHTML=osjHtml(r.data);f.onclick=e=>{if(e.target===f)osjFechar();};document.body.appendChild(f);}
 function osjFechar(manter){const f=document.getElementById('osjFundo');if(f)f.remove();if(!manter)osjAberta=null;}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('osjFundo'))osjFechar();});
+function osNum(o){return o.numero||('O.S-'+(o.sigla||'OS')+'-'+String(o.codigo).padStart(4,'0'));}
 function pmVePara(){return ['assistente','gerente','diretor'].includes(eu.nivel);}
 function pmChecklistRoom(){if(!window.RoomIT)return '';return RoomIT.checklist().map(i=>`<div class="pm-ck room${i.feito?' feito':''}"><input type="checkbox" ${i.feito?'checked':''} onclick="event.stopPropagation()" onchange="RoomIT.concluir('${escH(i.id)}',this.checked)"><span class="lb ${{alarme:'al',lembrete:'le',tarefa:'ta'}[i.tipo]||''}">${escH({alarme:'Alarme',lembrete:'Lembrete',tarefa:'Tarefa'}[i.tipo]||'')}</span><span class="tx">${i.categoria?`<i style="background:${escH(i.cor)}" title="${escH(i.categoria)}"></i>`:''}<span>${escH(i.titulo)}</span></span><span class="qm">${i.atrasado&&!i.feito?'desde '+escH(i.dia.slice(8,10)+'/'+i.dia.slice(5,7)):escH(i.hora||'hoje')}</span></div>`).join('');}
 function pmChecklistOs(){const room=pmChecklistRoom();if(!pmCaixa)return room;const gestor=pmVePara();
- return room+pmCaixa.filter(o=>gestor||o.responsavel_id===eu.id).map(o=>`<div class="pm-ck" onclick="pmIrOs('${escH(o.id)}')"><span class="lb">Lembrete</span><span class="tx"><b>O.S</b><em>${escH(String(o.codigo).padStart(4,'0'))}</em><span>${escH(o.operacao||'')} · ${escH(o.fase_nome||'')}</span></span><span class="qm">${o.responsavel_id===eu.id?'Comigo':escH(o.responsavel||'Fila geral')}${pmDesde(o.em)}</span></div>`).join('');}
+ return room+pmCaixa.filter(o=>gestor||o.responsavel_id===eu.id).map(o=>`<div class="pm-ck" onclick="pmIrOs('${escH(o.id)}')"><span class="lb">Lembrete</span><span class="tx"><b>O.S</b><em>${escH(osNum(o).replace(/^O\.S-/,''))}</em><span>${escH(o.operacao||'')} · ${escH(o.fase_nome||'')}</span></span><span class="qm">${o.responsavel_id===eu.id?'Comigo':escH(o.responsavel||'Fila geral')}${pmDesde(o.em)}</span></div>`).join('');}
 function pmDesde(v){if(!v)return '';const d=new Date(v),h=new Date();if(d.toDateString()===h.toDateString())return '';const z=n=>String(n).padStart(2,'0');return ' · desde '+z(d.getDate())+'/'+z(d.getMonth()+1);}
 function pmIrOs(id){osAbrir(id);const l=document.querySelector('.pm-cx-lin[data-os="'+id+'"]');if(!l)return;l.scrollIntoView({block:'center',behavior:'smooth'});l.style.background='var(--laranjaSv)';setTimeout(()=>{l.style.background='';},1600);}
 function pmCaixaLinhas(){if(!pmCaixa){pmCaixaCarregar();return '';}
- return pmCaixa.map(o=>{const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];return `<div class="pm-cx-lin" data-os="${escH(o.id)}" onclick="osAbrir('${escH(o.id)}')"><span class="cod">${escH(String(o.codigo).padStart(4,'0'))}</span><span class="tp">${escH(o.tipo||'')}</span><span class="dt">${escH(dataHora(o.em))}</span><span class="sol">${escH(o.solicitante||'')}</span>${pmVePara()?`<span class="sol${o.responsavel_id===eu.id?' eu':''}">${o.responsavel_id===eu.id?'Você':escH(o.responsavel||'Fila geral')}</span>`:''}<span class="op">${escH(o.operacao||'')}</span><span><span class="pm-cx-st" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span></span></div>`;}).join('');}
+ return pmCaixa.map(o=>{const [c,cs]=PM_FASE_COR[o.fase]||['--apagado','--superf2'];return `<div class="pm-cx-lin" data-os="${escH(o.id)}" onclick="osAbrir('${escH(o.id)}')"><span class="cod">${escH(osNum(o))}</span><span class="tp">${escH(o.tipo||'')}</span><span class="dt">${escH(dataHora(o.em))}</span><span class="sol">${escH(o.solicitante||'')}</span>${pmVePara()?`<span class="sol${o.responsavel_id===eu.id?' eu':''}">${o.responsavel_id===eu.id?'Você':escH(o.responsavel||'Fila geral')}</span>`:''}<span class="op">${escH(o.operacao||'')}</span><span><span class="pm-cx-st" style="--c:var(${c});--cs:var(${cs})"><i></i>${escH(o.fase_nome||'')}</span></span></div>`;}).join('');}
 async function pmCaixaCarregar(){if(pmCaixaCarregar.ocupado)return;pmCaixaCarregar.ocupado=true;
  try{const r=await sb.rpc('fiscal_caixa_entrada');if(r.error)return;pmCaixa=Array.isArray(r.data)?r.data:[];
   if(!pmCaixaCanal)pmCaixaCanal=sb.channel('fiscal-os').on('postgres_changes',{event:'*',schema:'public',table:'o_s_interna_recebidas'},p=>{osjMudou(p);pmCaixa=null;pmCaixaCarregar();})
