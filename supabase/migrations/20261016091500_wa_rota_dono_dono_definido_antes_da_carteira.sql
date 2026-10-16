@@ -1,0 +1,4 @@
+-- 16/10/2026: em wa_rota_dono, o dono definido (zz_rota_provisoria_wa) passa a valer ANTES da regra "carteira multipla".
+-- Antes: numero ligado a empresas de carteiras diferentes aparecia em "Minhas" de todos esses usuarios (53 numeros, 62 aparicoes a mais).
+-- Agora: com dono definido, so o dono ve; a regra da carteira multipla fica para numero sem dono definido.
+-- Aplicado por troca de trecho: (select id from multi),(select usuario_id from prov) -> (select usuario_id from prov),(select id from multi).
