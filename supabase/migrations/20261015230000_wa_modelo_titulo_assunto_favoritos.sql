@@ -1,0 +1,4 @@
+-- Fiscal (vvohwixeokxydmbhqklu), 15/10/2026: wa_modelo_assunto (catalogo), wa_modelo.titulo/assunto (+ gatilho de titulo padrao),
+-- wa_modelo_favorito (por usuario, leitura so do dono, escrita so pela funcao, maximo 4),
+-- wa_modelos_meus() = modelos aprovados em uso ordenados pelo uso do proprio usuario (contado das mensagens ja gravadas, sem tabela de contagem),
+-- wa_modelo_favoritar(modelo, on). Indice wa_mensagem_modelo_autor. Nao se aplica ao Legal (WhatsGW, sem modelos da Meta).
